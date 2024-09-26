@@ -5,7 +5,11 @@
   "license": "proprietary",
   "require": {
     "php": ">=7.4",
-    "unzerdev/php-sdk": "^3.9"
+    "unzerdev/php-sdk": "^3.9",
+    "ext-json": "*",
+    "ext-http": "*",
+    "ext-curl": "*",
+    "ext-mbstring": "*"
   },
   "autoload": {
     "psr-4": {
