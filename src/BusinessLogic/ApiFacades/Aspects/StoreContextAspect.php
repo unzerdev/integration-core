@@ -7,11 +7,11 @@ use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspect;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 
 /**
- * Class AppContextAspect.
+ * Class StoreContextAspect.
  *
  * @package Unzer\Core\BusinessLogic\ApiFacades\Aspects
  */
-class AppContextAspect implements Aspect
+class StoreContextAspect implements Aspect
 {
     /**
      * @var string

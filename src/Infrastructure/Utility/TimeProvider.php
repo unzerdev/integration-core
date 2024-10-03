@@ -19,9 +19,9 @@ class TimeProvider
     /**
      * Singleton instance.
      *
-     * @var TimeProvider
+     * @var ?TimeProvider
      */
-    protected static TimeProvider $instance;
+    protected static ?TimeProvider $instance = null;
 
     /**
      * TimeProvider constructor

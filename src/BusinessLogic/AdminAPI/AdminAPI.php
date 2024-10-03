@@ -2,7 +2,10 @@
 
 namespace Unzer\Core\BusinessLogic\AdminAPI;
 
+use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController;
+use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
+use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
 
 /**
@@ -22,5 +25,31 @@ class AdminAPI
     public static function get(): object
     {
         return Aspects::run(new ErrorHandlingAspect())->beforeEachMethodOfInstance(new AdminAPI());
+    }
+
+    /**
+     * @param string $storeId
+     *
+     * @return ConnectionController
+     */
+    public function connection(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(ConnectionController::class);
+    }
+
+    /**
+     * @param string $storeId
+     *
+     * @return DisconnectController
+     */
+    public function disconnect(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(DisconnectController::class);
     }
 }

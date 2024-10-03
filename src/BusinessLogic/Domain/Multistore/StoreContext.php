@@ -12,9 +12,9 @@ use Exception;
 class StoreContext
 {
     /**
-     * @var self
+     * @var ?StoreContext
      */
-    private static StoreContext $instance;
+    private static ?StoreContext $instance = null;
 
     /**
      * @var string

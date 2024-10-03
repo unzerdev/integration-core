@@ -20,7 +20,7 @@ class CompositeAspect implements Aspect
     /**
      * @var Aspect|null
      */
-    private ?Aspect $next;
+    private ?Aspect $next = null;
 
     /**
      * @param Aspect $aspect
