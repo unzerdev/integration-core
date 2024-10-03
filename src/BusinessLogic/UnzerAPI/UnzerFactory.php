@@ -56,6 +56,16 @@ class UnzerFactory extends Singleton
     }
 
     /**
+     * @return void
+     */
+    public static function resetInstance(): void
+    {
+        parent::resetInstance();
+
+        self::$unzer = null;
+    }
+
+    /**
      * @return ConnectionService
      */
     protected static function getConnectionService(): ConnectionService

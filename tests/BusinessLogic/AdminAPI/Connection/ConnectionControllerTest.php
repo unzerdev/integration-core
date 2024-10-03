@@ -362,6 +362,3 @@ class ConnectionControllerTest extends BaseTestCase
         self::assertEquals('October 03, 2024 14:30', $response->toArray()['webhookData']['registrationDate']);
     }
 }
-//                'webhookID' => implode(', ', $this->webhookData->getIds()),
-//                'events' => implode(', ', $this->webhookData->getEvents()),
-//                'webhookUrl' => $this->webhookData->getUrl(),
