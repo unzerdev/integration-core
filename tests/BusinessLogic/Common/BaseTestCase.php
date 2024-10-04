@@ -4,15 +4,23 @@ namespace Unzer\Core\Tests\BusinessLogic\Common;
 
 use PHPUnit\Framework\TestCase;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController;
+use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
+use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
+use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\Http\HttpClient;
 use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
@@ -35,6 +43,7 @@ use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Utility\TestTimeProvid
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 
 /**
  * Class BaseTestCase.
@@ -101,6 +110,31 @@ class BaseTestCase extends TestCase
             DisconnectController::class => function () {
                 return new DisconnectController(
                     TestServiceRegister::getService(DisconnectService::class)
+                );
+            },
+            StoreService::class => function () {
+                return new StoreService(
+                    TestServiceRegister::getService(IntegrationStoreService::class)
+                );
+            },
+            StoresController::class => function () {
+                return new StoresController(
+                    TestServiceRegister::getService(StoreService::class)
+                );
+            },
+            CountryController::class => function () {
+                return new CountryController(
+                    TestServiceRegister::getService(CountryService::class)
+                );
+            },
+            LanguageController::class => function () {
+                return new LanguageController(
+                    TestServiceRegister::getService(LanguageService::class)
+                );
+            },
+            VersionController::class => function () {
+                return new VersionController(
+                    TestServiceRegister::getService(VersionService::class)
                 );
             },
         ]);

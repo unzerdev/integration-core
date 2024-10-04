@@ -3,7 +3,11 @@
 namespace Unzer\Core\BusinessLogic;
 
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController;
+use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
+use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
+use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData;
@@ -11,9 +15,14 @@ use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataReposito
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
@@ -71,6 +80,15 @@ class BootstrapComponent extends BaseBootstrapComponent
                 );
             })
         );
+
+        ServiceRegister::registerService(
+            StoreService::class,
+            new SingleInstance(static function () {
+                return new StoreService(
+                    ServiceRegister::getService(IntegrationStoreService::class)
+                );
+            })
+        );
     }
 
     /**
@@ -120,6 +138,42 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new DisconnectController(
                     ServiceRegister::getService(DisconnectService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            StoresController::class,
+            new SingleInstance(static function () {
+                return new StoresController(
+                    ServiceRegister::getService(StoreService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            CountryController::class,
+            new SingleInstance(static function () {
+                return new CountryController(
+                    ServiceRegister::getService(CountryService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            LanguageController::class,
+            new SingleInstance(static function () {
+                return new LanguageController(
+                    ServiceRegister::getService(LanguageService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            VersionController::class,
+            new SingleInstance(static function () {
+                return new VersionController(
+                    ServiceRegister::getService(VersionService::class)
                 );
             })
         );
