@@ -2,6 +2,8 @@
 
 namespace Unzer\Core\Infrastructure\Logger\Interfaces;
 
+use Unzer\Core\Infrastructure\Logger\LogData;
+
 /**
  * Interface LoggerAdapter.
  *

@@ -7,7 +7,7 @@ namespace Unzer\Core\Infrastructure\Logger\Interfaces;
  *
  * @package Unzer\Core\Infrastructure\Logger\Interfaces
  */
-interface ShopLoggerAdapter
+interface ShopLoggerAdapter extends LoggerAdapter
 {
     /**
      * Fully qualified name of this interface.
