@@ -1,6 +1,6 @@
 <?php
 
-namespace Unzer\Core\Tests\BusinessLogic\Domain\Connection\Services;
+namespace BusinessLogic\Domain\Connection\Services;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
@@ -517,6 +517,124 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         self::assertNotNull($webhookData);
         self::assertCount(1, $webhookDataEntity);
         self::assertEquals('https://test.com', $webhookDataEntity[0]->getWebhookData()->getUrl());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testIsLoggedInNoConnectionSettings(): void
+    {
+        // act
+        $isLoggedInd = StoreContext::doWithStore('1', [$this->service, 'isLoggedIn'], [Mode::live()]);
+
+        // assert
+        self::assertFalse($isLoggedInd);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testIsLoggedInWithLiveData(): void
+    {
+        //arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            null
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        // act
+        $isLoggedInd = StoreContext::doWithStore('1', [$this->service, 'isLoggedIn'], [Mode::live()]);
+
+        // assert
+        self::assertTrue($isLoggedInd);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testIsLoggedInWithSandboxData(): void
+    {
+        //arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            null,
+            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        // act
+        $isLoggedInd = StoreContext::doWithStore('1', [$this->service, 'isLoggedIn'], [Mode::sandbox()]);
+
+        // assert
+        self::assertTrue($isLoggedInd);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testIsLoggedInWithSandboxDataLiveMode(): void
+    {
+        //arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            null,
+            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        // act
+        $isLoggedInd = StoreContext::doWithStore('1', [$this->service, 'isLoggedIn'], [Mode::live()]);
+
+        // assert
+        self::assertFalse($isLoggedInd);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testIsLoggedInWithLiveDataSandboxMode(): void
+    {
+        //arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            null,
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        // act
+        $isLoggedInd = StoreContext::doWithStore('1', [$this->service, 'isLoggedIn'], [Mode::sandbox()]);
+
+        // assert
+        self::assertFalse($isLoggedInd);
     }
 
     /**

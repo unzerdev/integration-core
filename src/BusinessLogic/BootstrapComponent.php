@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
@@ -174,6 +175,15 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new VersionController(
                     ServiceRegister::getService(VersionService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            StateController::class,
+            new SingleInstance(static function () {
+                return new StateController(
+                    ServiceRegister::getService(ConnectionService::class)
                 );
             })
         );
