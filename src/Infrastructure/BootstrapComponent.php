@@ -2,6 +2,13 @@
 
 namespace Unzer\Core\Infrastructure;
 
+use Unzer\Core\Infrastructure\Configuration\ConfigurationManager;
+use Unzer\Core\Infrastructure\Http\CurlHttpClient;
+use Unzer\Core\Infrastructure\Http\HttpClient;
+use Unzer\Core\Infrastructure\Utility\Events\EventBus;
+use Unzer\Core\Infrastructure\Utility\GuidProvider;
+use Unzer\Core\Infrastructure\Utility\TimeProvider;
+
 /**
  * Class BootstrapComponent.
  *
