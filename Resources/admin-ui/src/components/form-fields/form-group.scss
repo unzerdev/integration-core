@@ -1,0 +1,15 @@
+@mixin adl-form-group {
+  border: 1px solid $adl-color--grey-20;
+
+  .unzer-title {
+    background-color: $adl-color--white;
+    padding: 10px 15px;
+    @include font-weight--semi-bold();
+    font-size: 14px;
+  }
+
+  .adl-form-fields {
+    background-color: $adl-color--grey-10;
+    padding: 0 15px;
+  }
+}

@@ -1,0 +1,37 @@
+.adl-hint {
+  position: relative;
+
+  &:hover {
+    .unzer-tooltip {
+      display: block;
+    }
+  }
+}
+
+.unzer-tooltip {
+  position: absolute;
+  bottom: calc(100% + 3px);
+  white-space: nowrap;
+  background-color: $adl-color--grey-70;
+  color: $adl-color--white;
+  @include font-weight--semi-bold();
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: none;
+
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: $adl-color--unzer-black;
+    transform: rotate(45deg);
+    border-radius: 2px;
+    bottom: -5px;
+    left: calc(50% - 5px);
+  }
+}

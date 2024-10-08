@@ -1,0 +1,30 @@
+.unzer-search-box {
+  display: flex;
+  align-items: center;
+  position: relative;
+  max-width: 267px;
+  padding-top: 37px;
+  padding-bottom: 34px;
+
+  .unzer-search-input {
+    width: 100%;
+    padding: 10px 40px 10px 10px;
+    font-size: 16px;
+    border: 1px solid #dce0e5;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .unzer-search-icon {
+    position: absolute;
+    right: 11px;
+    top: 53%;
+    transform: translateY(-50%);
+    cursor: pointer;
+
+    img {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}

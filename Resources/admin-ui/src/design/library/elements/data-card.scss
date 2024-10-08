@@ -1,0 +1,136 @@
+@mixin adl-data-cards {
+  display: none;
+  width: 100%;
+  margin: 24px 0;
+
+  @include adl-screen--narrow-medium {
+    display: flex;
+    flex-direction: column;
+    row-gap: 24px;
+  }
+
+  .unzer-data-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 0 14px 16px;
+    border: 1px solid $adl-color--grey-20;
+    border-radius: 4px;
+
+    @include adl-screen--narrow {
+      padding: 40px 6px 16px;
+    }
+
+    .unzer-payment-method-name {
+      max-width: calc(100% - 220px);
+      padding: 27px 0;
+      display: flex;
+      align-items: center;
+      font-size: $adl-font-size--payment-method;
+      line-height: 1.45;
+      color: $adl-color--black;
+
+      @include adl-screen--narrow {
+        padding: 0 10px 27px;
+        max-width: 100%;
+      }
+    }
+
+    .unzer-payment-info-item {
+      flex: 1;
+    }
+
+    .unzer-payment-actions {
+      position: absolute;
+      right: 14px;
+      top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      column-gap: 9px;
+
+      @include adl-screen--narrow {
+        right: unset;
+        top: unset;
+        padding: 0 10px;
+        position: relative;
+        justify-content: center;
+        column-gap: 16px;
+        flex-direction: row-reverse;
+      }
+
+      .adl-button {
+        font-size: inherit;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        column-gap: 8px;
+        padding: 10px 16px;
+        border: 1px solid $adl-color--grey-20;
+
+        &:not(.adlm--destructive) {
+          color: $adl-color--blue-40;
+        }
+
+        @include adl-screen--narrow-medium {
+          width: 100%;
+
+          span {
+            justify-content: center;
+          }
+        }
+      }
+
+      .adlt--add-button {
+        span:before {
+          @include adl-font-icon--content(plus);
+        }
+      }
+
+      .adlt--edit-button {
+        span:before {
+          @include adl-font-icon--content(edit);
+        }
+      }
+
+      .adlt--delete-button {
+        span:before {
+          @include adl-font-icon--content(trash);
+        }
+      }
+    }
+
+    .unzer-payment-info-list {
+      display: flex;
+      column-gap: 32px;
+      row-gap: 32px;
+      padding-top: 16px;
+      border-top: 1px solid $adl-color--grey-20;
+
+      @include adl-screen--narrow {
+        display: grid;
+        padding: 26px 20px 0;
+        margin-bottom: 32px;
+        grid-template-areas: 'info-status info-currencies'
+                           'info-countries info-type';
+      }
+    }
+
+    .unzer-info-label {
+      @include font-weight--semi-bold;
+      display: block;
+      margin-bottom: 15px;
+      font-size: $adl-font-size--main;
+      line-height: 21px;
+      color: $adl-color--unzer-black;
+      text-transform: uppercase;
+    }
+
+    .unzer-info-data {
+      @include font-weight--light;
+      font-size: $adl-font-size--payment-status;
+      line-height: 1.17;
+      color: $adl-color--unzer-black;
+    }
+  }
+}

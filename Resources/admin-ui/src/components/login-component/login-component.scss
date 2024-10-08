@@ -1,0 +1,63 @@
+.unzer-login {
+  display: flex;
+  height: 100%;
+
+  .unzer-login-left-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .unzer-login-left {
+      width: 100%;
+      padding: 50px 0 0 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .unzer-footer-support-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      padding-right: 49px;
+      padding-bottom: 15px;
+
+      .unzer-footer-support {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 138px;
+        height: 40px;
+        border-radius: 20px;
+        background-color: $unzer-color-red;
+        color: #ffffff;
+        gap: 10px;
+        cursor: pointer;
+      }
+    }
+
+  }
+
+  .unzer-login-right {
+    padding: 55px 40px 0 65px;
+    max-width: 583px;
+    background-color: #F1F7FB;
+    height: 100%;
+    width: 45%;
+  }
+
+  @media (max-width: 1000px) {
+    .unzer-login-right {
+      display: none;
+    }
+
+    .unzer-login-left-wrapper {
+      .unzer-login-left {
+        padding: 10px;
+      }
+      .unzer-footer-support-wrapper {
+        display: none;
+      }
+    }
+  }
+}

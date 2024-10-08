@@ -1,0 +1,190 @@
+//noinspection SassScssResolvedByNameOnly
+@mixin adl-multiselect-filter {
+  position: relative;
+  width: fit-content;
+
+  .unzer-filter-button {
+    padding: 0 16px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    @include font-weight--regular();
+
+    .unzer-delete-text-button {
+      display: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+
+      &:after {
+        @include adl-font-icon(close, 9px);
+        @include font-weight--semi-bold();
+        color: $adl-color--white;
+      }
+
+      &:hover {
+        background: $adl-color--white;
+
+        &:after {
+          color: $adl-color--grey-70;
+        }
+      }
+    }
+
+    .unzer-tooltip,
+    &:hover .unzer-tooltip {
+      bottom: calc(100% + 7px);
+      display: none;
+    }
+
+    &.adls--selected {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px 0 16px;
+      gap: 8px;
+      background-color: $adl-color--grey-70;
+      color: $adl-color--white;
+      border-color: transparent;
+      @include font-weight--semi-bold;
+
+      &:hover .unzer-tooltip {
+        display: block;
+      }
+
+      .unzer-delete-text-button {
+        display: inline-block;
+      }
+    }
+  }
+
+  .adl-single-select-dropdown .unzer-dropdown-list-item.adls--selected:after {
+    display: none
+  }
+
+  .unzer-dropdown-container {
+    display: none;
+    position: absolute;
+    top: 48px;
+    z-index: 11;
+
+    .unzer-content {
+      width: 350px;
+      border-radius: 6px;
+      border: 1px solid $adl-color--grey-20;
+      box-shadow: 0 8px 16px rgba(0, 17, 44, 0.1);
+      background-color: $adl-color--white;
+    }
+
+    &.adls--open {
+      display: block;
+
+      @include adl-screen--narrow {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $adl-color--background-popup;
+
+        .unzer-content {
+          margin-top: -100px;
+        }
+      }
+    }
+  }
+
+  .unzer-filter-header {
+    position: relative;
+    display: none;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+
+    @include adl-screen--narrow {
+      display: flex;
+    }
+
+    span {
+      font-size: 20px;
+      @include font-weight--semi-bold();
+    }
+
+    .unzer-close-button {
+      width: 24px;
+      height: 24px;
+      color: $adl-color--grey-60;
+
+      &:before {
+        @include adl-font-icon(close)
+      }
+    }
+  }
+
+  .unzer-dropdown-data {
+    position: relative;
+    padding: 16px;
+    border-radius: 6px 6px 0 0;
+    background-color: $adl-color--white;
+  }
+
+  .unzer-selected-data {
+    display: block;
+  }
+
+  .unzer-selected-data-item {
+    font-size: $adl-font-size--main;
+    color: $adl-color--unzer-black;
+    @include font-weight--light();
+
+    &:first-child {
+      margin-top: 16px;
+    }
+
+    .adlt--remove-item {
+      margin: 4px 8px 4px 0;
+
+      &:before {
+        @include adl-font-icon(minus, 9px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: 1px solid $adl-color--grey-20;
+        color: $adl-color--grey-60;
+      }
+    }
+  }
+
+  .unzer-data-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: $adl-color--unzer-black;
+  }
+
+  .unzer-buttons {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+    background: $adl-color--grey-10;
+    border-top: 1px solid $adl-color--grey-20;
+    border-radius: 0 0 6px 6px;
+
+    .adl-button {
+      font-size: 13px;
+    }
+  }
+}
+
+.adl-multiselect-filter {
+  @include adl-multiselect-filter;
+}

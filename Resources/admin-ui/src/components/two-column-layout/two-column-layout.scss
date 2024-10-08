@@ -1,0 +1,19 @@
+.adl-two-layout-container {
+  padding-top: 16px;
+  display: flex;
+  position: relative;
+  gap: 28px;
+
+  .adl-two-layout-column {
+    flex: 1;
+  }
+
+  @media (max-width: 1000px) {
+    flex-direction: column;
+
+    .column {
+      flex: none;
+      width: 100%;
+    }
+  }
+}

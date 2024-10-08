@@ -1,0 +1,64 @@
+//noinspection SassScssResolvedByNameOnly
+@mixin adl-loader() {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  .unzer-spinner {
+    border: 3px solid rgba($unzer-color-red, 0.1);
+    border-top-color: $unzer-color-red;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: loader-spin 0.8s linear infinite;
+  }
+
+  &.adlt--small {
+    .unzer-spinner {
+      border-width: 2px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &.adlt--large {
+    .unzer-spinner {
+      border-width: 4px;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  &.adlm--dark {
+    .unzer-spinner {
+      border-color: rgba($adl-color--white, 0.1);
+      border-top-color: $adl-color--white;
+    }
+  }
+
+  &.adlt--full-page {
+    position: fixed;
+    z-index: 500;
+    background-color: $adl-color--background-popup;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  @keyframes loader-spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

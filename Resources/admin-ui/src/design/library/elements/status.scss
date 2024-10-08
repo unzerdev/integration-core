@@ -1,0 +1,45 @@
+.unzer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    display: block;
+    border-radius: 50%;
+  }
+
+  &.adlt--open:before,
+  &.adlt--completed:before,
+  &.adlt--active:before,
+  &.adlt--invited:before {
+    background: $adl-color--green-40;
+  }
+
+  &.adlt--expired:before {
+    background: $adl-color--red-40;
+  }
+
+  // webhook notification statuses
+  &.adlt--queued:before {
+    background: $adl-color--point-queued;
+  }
+
+  &.adlt--in_progress:before {
+    background: $adl-color--point-in-progress;
+  }
+
+  &.adlt--processed:before {
+    background: $adl-color--point-processed;
+  }
+
+  &.adlt--skipped:before {
+    background: $adl-color--point-skipped;
+  }
+
+  &.adlt--failed:before {
+    background: $adl-color--point-failed;
+  }
+}

@@ -1,0 +1,12 @@
+node_modules
+
+*.log
+*.zip
+
+.env
+.idea
+
+/dist
+/build
+/public
+/static

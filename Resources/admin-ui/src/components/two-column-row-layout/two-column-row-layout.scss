@@ -1,0 +1,19 @@
+.unzer-two-row-layout-container {
+  display: flex;
+  gap: 40px;
+  padding-top: 15px;
+
+  .unzer-two-row-layout-column {
+    width: 50vw;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 720px) {
+    flex-direction: column;
+
+    .column {
+      flex: none;
+      width: 100%;
+    }
+  }
+}

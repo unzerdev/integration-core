@@ -1,0 +1,76 @@
+@function adl-get-config-icon-fonts() {
+  @return (
+      base: (
+          font-family: 'adl-icons',
+          line-height: 1,
+          font-weight: 500
+      )
+  );
+}
+
+@mixin adl-config-icon-font-faces() {
+  $assets: adl-get-assets-root();
+  @include adl-config-icon-font-face--adl-icons($assets, '/fonts/adl-icons');
+}
+
+@mixin adl-config-icon-font-face--adl-icons($assets, $path) {
+  @if ($path == null) {
+    $path: '/fonts/adl-icons';
+  }
+
+  $src: $assets+$path;
+
+  /**
+   * Font face declaration for icons
+   */
+
+  @font-face {
+    font-family: 'adl-icons';
+    src: url('#{$src}/adl-icons.eot');
+    src: url('#{$src}/adl-icons.eot') format('embedded-opentype'),
+    url('#{$src}/adl-icons.ttf') format('truetype'),
+    url('#{$src}/adl-icons.woff') format('woff'),
+    url('#{$src}/adl-icons.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+  }
+}
+
+@function adl-get-icon-font-content-map($font: base) {
+  $map: (
+      'base': (
+          'more': '\e900',
+          'document': '\e901',
+          'arrow-link': '\e902',
+          'menu': '\e903',
+          'minus': '\e904',
+          'edit': '\e905',
+          'support': '\e906',
+          'copy': '\e917',
+          'arrow-right-ios': '\e907',
+          'arrow-right': '\e908',
+          'triangle': '\e909',
+          'drop': '\e90a',
+          'close': '\e90b',
+          'times': '\e90c',
+          'trash': '\e90d',
+          'arrow-ios-down': '\e90e',
+          'refresh': '\e90f',
+          'plus': '\e910',
+          'info': '\e911',
+          'eye': '\e912',
+          'filter': '\e913',
+          'merchant': '\e914',
+          'download': '\e915',
+          'store': '\e916',
+          'calendar': '\e918',
+          'notification': '\e91a',
+          'checkmark': '\e91b',
+          'cog': '\e994',
+          'export': '\e91c',
+      ),
+  );
+
+  $font-map: adl-get-map-value($map, $font);
+  @return $font-map;
+}

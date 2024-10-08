@@ -1,0 +1,62 @@
+@mixin adl-toaster-base($icon: checkmark, $icon-bg-color: $adl-color--background-check-icon) {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  z-index: 10;
+  width: fit-content;
+  max-width: 420px;
+  padding: 12px 9px 12px 16px;
+  border-radius: 8px;
+  background-color: $adl-color--unzer-black;
+  transform: translateX(-50%);
+
+  &.adls--closed {
+    display: none;
+  }
+
+  .unzer-toaster-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    @include font-weight--semi-bold;
+    font-size: $adl-font-size--main;
+    color: $adl-color--white;
+    line-height: 21px;
+
+    &:before {
+      @include adl-font-icon($icon, 9px);
+      width: 18px;
+      height: 18px;
+      background-color: $icon-bg-color;
+      border-radius: 50%;
+
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+  }
+
+  .adl-button {
+    padding: 7px;
+
+    span {
+      &:before {
+        @include adl-font-icon(times, 7px);
+        color: $adl-color--grey-60;
+      }
+    }
+  }
+}
+
+@mixin adl-toaster {
+  @include adl-toaster-base();
+}
+
+@mixin adl-toaster-error {
+  @include adl-toaster-base(close, $unzer-color--danger);
+}

@@ -1,0 +1,28 @@
+.adl-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.adl-button.adlt--primary {
+  &.adl-buttons--reconnect {
+    margin-top: 15px;
+    background: #0abf53;
+  }
+}
+
+.unzer-max-width {
+  max-width: 100px;
+}
+
+.adlt--settings {
+  span:after {
+    @include adl-font-icon--content(cog);
+  }
+}
+
+.adlt--export {
+  span:after {
+    @include adl-font-icon--content(export);
+  }
+}

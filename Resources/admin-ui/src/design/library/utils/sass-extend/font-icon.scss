@@ -1,0 +1,67 @@
+@use "sass:math";
+
+//noinspection SassScssResolvedByNameOnly
+@function adl-get-icon-font-property($key, $font: base) {
+  @if ($font == null) {
+    $font: base;
+  }
+  $icon-fonts: adl-get-config-icon-fonts();
+  $font-properties: adl-get-map-value($icon-fonts, $font);
+  @return adl-get-map-value($font-properties, $key);
+}
+
+//noinspection SassScssResolvedByNameOnly
+@function adl-get-font-icon-content($key, $font: base) {
+  $map: adl-get-icon-font-content-map($font);
+  $content: adl-get-map-value($map, $key);
+  @return $content;
+}
+
+@mixin adl-font-icon($key: empty, $adl-font-size: null, $font: base) {
+  @if ($adl-font-size == null or $adl-font-size == default) {
+    $adl-font-size: 16px;
+  }
+
+  //--font properties --
+  $font-family: adl-get-icon-font-property(font-family, $font);
+  $line-height: adl-get-icon-font-property(line-height, $font);
+  $font-weight: adl-get-icon-font-property(font-weight, $font);
+
+  font-family: $font-family;
+  @if ($key != empty) {
+    content: adl-get-font-icon-content($key, $font);
+  }
+
+  line-height: $line-height;
+  @if ($font-weight) {
+    font-weight: $font-weight;
+  }
+  font-size: $adl-font-size;
+}
+
+@mixin adl-font-icon--content($key: empty, $font: base) {
+  $content: ' ';
+  @if ($key != empty) {
+    $content: adl-get-font-icon-content($key, $font);
+  }
+
+  @if ($content != null and $content != '') {
+    content: $content;
+  }
+}
+
+@mixin adl-font-icon--centered($width: null, $height: null, $adl-font-size: null) {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  @if ($width) {
+    width: $width;
+  }
+  @if ($height) {
+    height: $height;
+  }
+  @if ($adl-font-size) {
+    font-size: $adl-font-size;
+  }
+}

@@ -1,0 +1,88 @@
+//noinspection SassScssResolvedByNameOnly
+@mixin adl-alert {
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+  padding: 24px 19px 24px 24px;
+  border-radius: 4px;
+
+  &.adls--closed {
+    display: none;
+  }
+
+  .unzer-alert-title {
+    display: flex;
+    align-items: flex-start;
+
+    font-size: $adl-font-size--main;
+    line-height: 21px;
+
+    &:before {
+      position: relative;
+      top: 3px;
+    }
+  }
+
+  .unzer-message {
+    display: flex;
+    flex-direction: column;
+
+    .unzer-message-title {
+      @include font-weight--semi-bold();
+    }
+  }
+
+  .adl-button {
+    padding: 7px;
+    border: none;
+
+    span {
+      &:before {
+        display: flex;
+        @include adl-font-icon(times, 7px);
+        color: inherit;
+      }
+    }
+  }
+
+  &.adlt--success {
+    background-color: $adl-color--green-20;
+    color: $adl-color--green-60;
+
+    .unzer-alert-title {
+      gap: 18px;
+
+      &:before {
+        @include adl-font-icon(checkmark, 11px);
+        top: 5px;
+      }
+    }
+  }
+
+  &.adlt--warning {
+    background-color: $adl-color--background-warning;
+    color: $adl-color--orange-60;
+
+    .unzer-alert-title {
+      gap: 17px;
+
+      &:before {
+        @include adl-font-icon(notification, 13px);
+      }
+    }
+  }
+
+  &.adlt--error {
+    background-color: $adl-color--background-error-box;
+    color: $adl-color--error-text;
+
+    .unzer-alert-title {
+      gap: 16px;
+
+      &:before {
+        @include adl-font-icon(triangle, 15px);
+      }
+    }
+  }
+}

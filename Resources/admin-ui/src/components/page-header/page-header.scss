@@ -1,0 +1,143 @@
+//noinspection SassScssResolvedByNameOnly
+@mixin adl-page-header {
+  .adl-page-header {
+    width: 100%;
+
+    .unzer-header-sandbox {
+      text-align: center;
+      color: #4D4D4D;
+      background-color: #F895004D;
+
+      a {
+        font-weight: normal;
+        color: inherit;
+        text-decoration: underline;
+        margin: 0;
+      }
+    }
+
+    .unzer-header-sandbox-none{
+      display: none;
+    }
+
+    .unzer-header-wrapper {
+      min-height: 61px;
+      background-color: $unzer-color-red;
+      display: flex;
+      justify-content: space-between;
+
+      .unzer-logo-wrapper {
+        display: flex;
+        height: 61px;
+        align-items: center;
+        gap: 32px;
+        padding-left: 25px;
+
+        .unzer-vertical-line {
+          background-color: white;
+          width: 1px;
+          height: 39px;
+          display: inline-block;
+        }
+
+        .unzer-logo {
+          padding-top: 3px;
+        }
+
+        .dropdown {
+          position: relative;
+          width: 112px;
+          height: 34px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 10px;
+          background-color: #fff;
+          cursor: pointer;
+        }
+
+        .dropdown::after {
+          content: '';
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 6px solid #333;
+          border-radius: 3px;
+          margin-left: 10px;
+        }
+
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          border-radius: 8px;
+          margin-top: 2px;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+          background-color: #fff;
+          z-index: 1;
+        }
+
+        .dropdown.show .dropdown-content {
+          display: block;
+        }
+
+        .dropdown-content div {
+          border-radius: 8px;
+          padding: 8px 10px;
+          cursor: pointer;
+          color: #333;
+          background-color: #fff;
+        }
+
+        .dropdown-content div:last-child {
+          border-bottom: none;
+        }
+
+        .dropdown-content div:hover {
+          background-color: #f1f1f1;
+        }
+      }
+
+      .unzer-header-connection {
+        display: flex;
+        align-items: center;
+        padding-right: 28px;
+        gap: 9.1px;
+        cursor: pointer;
+
+        .unzer-header-icon {
+          padding-top: 6px;
+        }
+
+        .unzer-header-connection-info {
+          color: white;
+        }
+      }
+    }
+
+    @include adl-screen--narrow {
+      max-width: unset;
+    }
+  }
+  @media (max-width: 600px) {
+    .adl-page-header {
+      width: 100%;
+
+      .unzer-header-wrapper {
+
+        .unzer-header-connection {
+          padding-right: 10px;
+          .unzer-header-connection-info {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}
+

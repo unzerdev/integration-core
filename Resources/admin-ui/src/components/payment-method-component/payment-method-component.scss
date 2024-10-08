@@ -1,0 +1,79 @@
+﻿.unzer-payment-method-container {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #dce0e5;
+  border-radius: 5px;
+  padding: 12px 35px 10px 14px;
+  max-height: 85px;
+  margin-bottom: 25px;
+  
+  .unzer-payment-method-info {
+    display: flex;
+    gap: 18px;
+
+    .unzer-payment-method-headline {
+      display: flex;
+      flex-direction: column;
+
+      .unzer-payment-method-title {
+        font-size: 22px;
+      }
+
+      .unzer-payment-method-description {
+        font-size: 14px;
+        color: $unzer-color-grey;
+      }
+    }
+
+    .unzer-payment-method-logo {
+      width: 92px;
+      height: 57px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  .unzer-payment-method-operations {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .unzer-payment-method-settings {
+      color: $unzer-color-black;
+      text-decoration: underline;
+      white-space: nowrap;
+      margin: 0;
+    }
+  }
+
+}
+
+@media (max-width: 700px) {
+  .unzer-payment-method-container {
+    max-height: 100px;
+    .unzer-payment-method-info {
+
+      .unzer-payment-method-headline {
+        .unzer-payment-method-title {
+          font-size: 14px;
+        }
+
+        .unzer-payment-method-description {
+          font-size: 14px;
+          color: $unzer-color-grey;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          width: 70px;
+        }
+      }
+
+      .unzer-payment-method-logo {
+        width: 62px;
+        height: 37px;
+      }
+    }
+
+  }
+}

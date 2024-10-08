@@ -12,3 +12,5 @@ vendor
 
 # PHPUnit result cache
 .phpunit.result.cache
+
+src/Resources/admin-ui/node_modules

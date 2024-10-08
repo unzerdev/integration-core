@@ -1,0 +1,60 @@
+﻿.unzer-color-picker-container {
+  padding-bottom: 20px;
+  .unzer-color-description {
+    padding-top: 10px;
+    font-size: 12px;
+    color: $unzer-color-grey;
+  }
+
+  .unzer-color-picker {
+    box-sizing: border-box;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #dce0e5;
+    border-radius: 8px;
+    width: 100%;
+    padding: 5px 15px 5px;
+
+    .unzer-color-input {
+      border: none;
+      flex: 1;
+      outline: none;
+      width: 100px;
+      padding-top: 20px;
+    }
+
+
+    .unzer-color-picker-circle {
+      appearance: none;
+      border: none;
+      margin-left: 10px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .unzer-label-input-label {
+      position: absolute;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: $unzer-color-grey;
+      transition: 0.3s ease all;
+      pointer-events: none;
+      background-color: transparent;
+    }
+
+    .unzer-color-picker-circle::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .unzer-color-picker-circle::-webkit-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+  }
+}
+
+
+

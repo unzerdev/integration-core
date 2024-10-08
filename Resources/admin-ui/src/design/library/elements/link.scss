@@ -1,0 +1,35 @@
+//noinspection SassScssResolvedByNameOnly
+@mixin adl-link() {
+  position: relative;
+  margin-right: 8px;
+  color: $adl-color--blue-40;
+  @include font-weight--light;
+  font-size: 15px;
+  text-decoration: none;
+  transition: color .2s;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 8px;
+
+  &:hover {
+    span {
+      text-decoration: underline;
+    }
+  }
+
+  &[target="_blank"] {
+    &:after {
+      @include adl-font-icon(arrow-link, 8px);
+      position: relative;
+      top: 1px;
+    }
+  }
+
+  &.adlt--underlined span {
+    text-decoration: underline;
+  }
+}
+
+a {
+  @include adl-link();
+}

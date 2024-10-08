@@ -1,0 +1,12 @@
+//noinspection SassScssResolvedByNameOnly
+body {
+  color: $adl-color--black;
+  background-color: $adl-color--grey-10;
+
+  > * {
+    //noinspection CssNoGenericFontName
+    font-family: get-font-family(base);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}

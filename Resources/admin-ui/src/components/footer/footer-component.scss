@@ -1,0 +1,41 @@
+﻿.unzer-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px 20px;
+  font-size: 14px;
+
+  .unzer-footer-support {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 138px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: $unzer-color-red;
+    color: #ffffff;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .unzer-footer-version-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+    .unzer-footer-version-version {
+      text-align: right;
+    }
+
+    .unzer-footer-version-new {
+      color: $unzer-color-yellow;
+
+      a {
+        color: $unzer-color-yellow;
+        text-decoration: underline;
+        padding: 0;
+        margin: 0;
+      }
+    }
+  }
+}

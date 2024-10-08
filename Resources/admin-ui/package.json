@@ -1,0 +1,28 @@
+{
+  "name": "unzer-fe",
+  "version": "0.0.1",
+  "scripts": {
+    "start-design": "webpack serve --mode development --config webpack.design.config.js --open",
+    "build": "webpack --mode production --config webpack.config.js --env environment=production",
+    "start": "webpack serve --mode development --config webpack.config.js --open",
+    "build-static": "webpack --mode production --config webpack.static.config.js",
+    "start-static": "webpack serve --mode development --config webpack.static.config.js --open"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.3",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.39.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.1",
+    "mini-css-extract-plugin": "^2.7.5",
+    "prettier": "^2.8.8",
+    "resolve-url-loader": "^5.0.0",
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2",
+    "style-loader": "^3.3.2",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2",
+    "webpack-dev-server": "^4.13.3"
+  }
+}

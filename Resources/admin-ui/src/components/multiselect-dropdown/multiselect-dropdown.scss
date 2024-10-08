@@ -1,0 +1,44 @@
+@mixin adl-multiselect-dropdown {
+  @include adl-dropdown;
+
+  .unzer-dropdown-list-item {
+    &:before {
+      content: '';
+      -webkit-appearance: none;
+      background: $adl-color--white;
+      border: 1px solid $adl-color--grey-30;
+      border-radius: 4px;
+      padding: 7px;
+      display: inline-block;
+      position: relative;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    &.adls--selected {
+      &:before {
+        background-color: $adl-color--blue-40;
+        border: 1px solid $adl-color--blue-40;
+      }
+
+      &:after {
+        right: unset;
+        left: 19px;
+        color: $adl-color--white;
+      }
+    }
+
+    &.adls--disabled {
+      pointer-events: none;
+      color: $adl-color--grey-40;
+
+      &:before {
+        background: $adl-color--grey-20;
+      }
+    }
+  }
+
+  .unzer-checkbox {
+    display: none;
+  }
+}

@@ -1,0 +1,66 @@
+$unzer-color-red: #ED1856;
+$unzer-color-yellow: #C37500;
+$unzer-color-black: #0C1332;
+$unzer-color-white: #fff;
+$unzer-color-grey: #606060;
+$unzer-color-disabled-grey: #F4F4F4;
+$unzer-color-dropdown-grey: #F3F3F3;
+$unzer-color--danger: #ff1b1b;
+
+
+$adl-color--white: #fff;
+$adl-color--black: #000;
+
+$adl-color--unzer-black: #00112c;
+$adl-color--blue-40: #0066ff;
+$adl-color--primary: $adl-color--blue-40;
+$adl-color--blue-400: #0075ff;
+$adl-color--blue-focused: #599bff;
+$adl-color--blue-outline: #cce0ff;
+
+$adl-color--grey-10: #f3f6f9;
+$adl-color--grey-20: #dce0e5;
+$adl-color--grey-30: #a5afbd;
+$adl-color--grey-40: #8390a3;
+$adl-color--grey-50: #69778c;
+$adl-color--grey-60: #394962;
+$adl-color--grey-70: #20304c;
+$adl-color--grey-loader: #c4c4c4;
+$adl-color--grey-select-bottom-border: #e3e6eb;
+
+$adl-color--orange-20: #FFEACC;
+$adl-color--orange-60: #7F4A00;
+
+$adl-color--point-failed: #ff3d00;
+$adl-color--point-in-progress: #00a3ff;
+$adl-color--point-queued: #b5b5b5;
+$adl-color--point-processed: #0a7001;
+$adl-color--point-skipped: #ff9900;
+
+$adl-color--background-popup: rgba(0, 17, 44, 0.4);
+$adl-color--background-version: rgba(10, 191, 83, 0.12);
+
+$adl-color--red: #eb5757;
+$adl-color--red-20: #facccc;
+$adl-color--red-30: #ee5959;
+$adl-color--red-40: #e50000;
+$adl-color--red-60: #720000;
+$adl-color--error-text: $adl-color--red-60;
+$adl-color--error-icon: #dadada;
+$adl-color--sign-up-box: #e1f7ea;
+$adl-color--background-mode: #e6f8ed;
+$adl-color--background-warning: #ffeacc;
+$adl-color--background-check-icon: #60d58f;
+$adl-color--mode-text: #07863a;
+$adl-color--green-10: #E6F8ED;
+$adl-color--green-20: #cef2dd;
+$adl-color--green-40: #0ABF53;
+$adl-color--green-50: #08A648;
+$adl-color--green-60: #055f29;
+$adl-color--payment-type: #62728c;
+$adl-color--background-error-box: $adl-color--red-20;
+$adl-color--background-read-only-input: #f7f8e6;
+
+// box shadows
+$adl-shadow-20: 0 8px 8px rgba(0, 17, 44, 0.04), 0 2px 4px rgba(0, 17, 44, 0.08);
+$adl-state-focus: 0 0 0 3px $adl-color--blue-outline;

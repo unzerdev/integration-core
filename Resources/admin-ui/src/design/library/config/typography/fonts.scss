@@ -1,0 +1,77 @@
+@function get-config-fonts() {
+  $base-font-family: "FaktPro", sans-serif;
+
+  @return (
+      base: (
+          font-family: $base-font-family,
+          size: 18px,
+          line-height: 1.5,
+          light-weight: 300,
+          regular-weight: 400,
+          semi-bold-weight: 600,
+      )
+  );
+}
+
+@mixin config-font-faces() {
+  $assets: adl-get-assets-root();
+  @include config-font-face--FaktPro($assets, '/fonts/FaktPro');
+}
+
+@mixin config-font-face--FaktPro($assets, $path) {
+  @if ($path == null) {
+    $path: '/fonts/FaktPro';
+  }
+
+  $src: $assets+$path;
+
+  // Light 300
+  @font-face {
+    font-family: 'FaktPro';
+    font-style: normal;
+    font-weight: 300;
+    src: local('Fakt Blond'),
+      // url(#{$src}/FaktPro-Blond.woff2) format('woff2'),
+    url(#{$src}/FaktPro-Blond.woff) format('woff');
+  }
+
+  // Light Italic 300
+  @font-face {
+    font-family: 'FaktPro';
+    font-style: italic;
+    font-weight: 300;
+    src: local('FaktPro Blond Italic'),
+      // url(#{$src}/FaktPro-BlondItalic.woff2) format('woff2'),
+    url(#{$src}/FaktPro-BlondItalic.woff) format('woff');
+  }
+
+  // Normal 400
+  @font-face {
+    font-family: 'FaktPro';
+    font-style: normal;
+    font-weight: 400;
+    src: local('FaktPro Normal'),
+      // url(#{$src}/FaktPro-Normal.woff2) format('woff2'),
+    url(#{$src}/FaktPro-Normal.woff) format('woff');
+  }
+
+  // Normal Italic 400
+  @font-face {
+    font-family: 'FaktPro';
+    font-style: italic;
+    font-weight: 400;
+    src: local('FaktPro Normal Italic'),
+      // url(#{$src}/FaktPro-NormalItalic.woff2) format('woff2'),
+    url(#{$src}/FaktPro-NormalItalic.woff) format('woff');
+  }
+
+  // SemiBold 600
+  @font-face {
+    font-family: 'FaktPro';
+    font-style: normal;
+    font-weight: 600;
+    src: local('FaktPro SemiBold'),
+      // url(#{$src}/FaktPro-SemiBold.woff2) format('woff2'),
+    url(#{$src}/FaktPro-SemiBold.woff) format('woff');
+  }
+}

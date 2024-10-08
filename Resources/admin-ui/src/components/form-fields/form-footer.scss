@@ -1,0 +1,38 @@
+@mixin adl-page-footer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: calc(100% - 326px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  padding: 16px 48px 16px 0;
+  background: $adl-color--white;
+  box-shadow: 0px -5px 0px rgba(105, 119, 140, 0.1), inset 0px 1px 0px #DCE0E5;
+
+  .unzer-changes-count {
+    opacity: 0;
+
+    &.adls--active {
+      opacity: 1;
+    }
+  }
+
+  .unzer-actions {
+    display: flex;
+    gap: 8px;
+
+    .adl-button {
+      @include font-weight--regular;
+    }
+  }
+
+  @include adl-screen--narrow-medium {
+    width: 100%;
+  }
+
+  @include adl-screen--narrow {
+    padding: 14px;
+  }
+}

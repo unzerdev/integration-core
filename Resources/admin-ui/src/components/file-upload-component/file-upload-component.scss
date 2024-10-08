@@ -1,0 +1,71 @@
+﻿.unzer-file-upload-box {
+  padding-bottom: 20px;
+
+  .unzer-dropdown-description {
+    padding-top: 10px;
+    font-size: 12px;
+    color: $unzer-color-grey;
+  }
+  
+  .unzer-file-upload-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    .unzer-file-upload-input{
+      width: 100%;
+      padding: 20px 10px 4px;
+      font-size: 16px;
+      border: 1px solid #dce0e5;
+      border-radius: 8px;
+      outline: none;
+      box-sizing: border-box;
+      height: 48px;
+    }
+    
+    .unzer-file-input-field {
+      display: none;
+    }
+
+    .unzer-label-input-label {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: $unzer-color-grey;
+      transition: 0.3s ease all;
+      pointer-events: none;
+      background-color: transparent;
+    }
+
+    .unzer-file-upload-input:focus + .unzer-label-input-label,
+    .unzer-file-upload-input:not(:placeholder-shown) + .unzer-label-input-label {
+      top: 12px;
+      font-size: 14px;
+      color: $unzer-color-grey;
+    }
+    
+    
+    .unzer-file-upload-icon {
+      position: absolute;
+      right: 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .unzer-file-upload-icon:hover {
+      color: #000;
+    }
+
+    .unzer-file-upload-icon i {
+      pointer-events: none;
+    }
+  }
+
+}

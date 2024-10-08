@@ -1,0 +1,22 @@
+$adl-font-size--main: 15px;
+
+$adl-font-size--heading: 24px;
+$adl-font-size--payment-method: 22px;
+$adl-font-size--subheading: 20px;
+$adl-font-size--payment-status: 18px;
+$adl-font-size--heading-small: 14px;
+$adl-font-size--input-error: 13px;
+$adl-font-size--small: 12px;
+$adl-font-size--extra-small: 8px;
+$adl-font-size--dropdown-actions: 11px;
+
+$adl-font-size--paragraph: 16px;
+
+//noinspection SassScssResolvedByNameOnly
+h2 {
+  @include font-weight--semi-bold;
+
+  font-size: $adl-font-size--heading;
+  line-height: 1.33;
+  margin: 12px 0;
+}

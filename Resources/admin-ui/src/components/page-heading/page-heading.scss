@@ -1,0 +1,52 @@
+@mixin adl-page-heading {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 10px;
+
+  .unzer-title {
+    margin: 0 0 10px;
+  }
+
+  .unzer-description {
+    font-size: $adl-font-size--paragraph;
+    line-height: 1.5;
+    color: $unzer-color-grey;
+    max-width: 860px;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .adl-button {
+    height: fit-content;
+  }
+}
+
+.adl-page-heading.unzer-page-heading-bigger {
+  .unzer-title {
+    font-size: 32px;
+    padding-right: 100px;
+  }
+
+  .unzer-description {
+    color: $unzer-color-black;
+    font-size: 20px;
+    padding-right: 30px;
+  }
+}
+
+.unzer-page-heading-padding-top {
+  padding-top: 30px;
+}
+
+@media (max-width: 800px) {
+  .adl-page-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+}

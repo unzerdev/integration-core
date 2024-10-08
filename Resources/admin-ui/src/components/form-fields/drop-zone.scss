@@ -1,0 +1,34 @@
+@mixin adl-file-drop-zone {
+  border: 1px dashed $adl-color--grey-30;
+  border-radius: 4px;
+  padding: 24px 36px;
+  color: $adl-color--grey-50;
+
+  &.adls--active {
+    border-color: $adl-color--green-20;
+  }
+
+  input {
+    display: none;
+  }
+
+  .unzer-file-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 12px;
+    cursor: pointer;
+
+    img {
+      max-width: 50px;
+      max-height: 25px;
+      object-fit: contain;
+    }
+
+    &.adls--empty {
+      &:before {
+        @include adl-font-icon(drop, 24px)
+      }
+    }
+  }
+}

@@ -1,0 +1,183 @@
+@mixin adl-field-wrapper() {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &.adlt--horizontal {
+    flex-direction: row;
+    column-gap: 20px;
+
+    > * {
+      width: calc(50% - 10px);
+    }
+
+    @include adl-screen--narrow {
+      flex-direction: column;
+      > * {
+        width: 100%;
+      }
+    }
+
+    .unzer-text-container {
+      flex-direction: column;
+
+      > * {
+        width: 100%;
+      }
+    }
+  }
+
+  .unzer-input-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    > * {
+      width: 100%;
+    }
+  }
+
+
+
+  .unzer-text-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .unzer-label-input-container {
+    position: relative;
+    width: 100%;
+    max-height: 50px;
+  }
+
+  .unzer-label-input-container-max-width {
+    max-width: 587px;
+  }
+
+  .unzer-label-input-field {
+    width: 100%;
+    padding: 20px 10px 4px;
+    font-size: 16px;
+    border: 1px solid #dce0e5;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .unzer-label-input-field-error{
+    border-color: red;
+  }
+  .unzer-label-input-field-margin-bottom{
+    margin-bottom: 15px;
+  }
+
+  .unzer-label-input-field-no-radius {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+  }
+
+  .unzer-label-input-label {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: $unzer-color-grey;
+    transition: 0.3s ease all;
+    pointer-events: none;
+    background-color: transparent;
+  }
+
+  .unzer-label-input-field:focus + .unzer-label-input-label,
+  .unzer-label-input-field:not(:placeholder-shown) + .unzer-label-input-label {
+    top: 12px;
+    font-size: 14px;
+    color: $unzer-color-grey;
+  }
+
+  .unzer-field-title,
+  .unzer-field-subtitle {
+    font-size: $adl-font-size--input-error;
+  }
+
+  .unzer-field-title {
+    @include font-weight--semi-bold;
+    margin-bottom: 0;
+    color: $adl-color--unzer-black;
+  }
+
+  .unzer-field-subtitle {
+    display: block;
+    margin-bottom: 10px;
+    color: $adl-color--grey-70;
+  }
+
+  .unzer-field-component:invalid {
+    border: 1px solid $adl-color--red-40;
+    color: $adl-color--red-40;
+
+    + .unzer-input-error {
+      display: block;
+    }
+  }
+
+  .unzer-input-error {
+    display: none;
+    margin-top: 4px;
+    font-size: $adl-font-size--input-error;
+    color: $adl-color--red-40;
+  }
+
+  &.adlt--toggle-input {
+    .unzer-field-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      column-gap: 10px;
+      font-size: 14px;
+    }
+
+    .unzer-field-subtitle {
+      padding-right: 40px;
+      color: $unzer-color-grey;
+      font-size: 12px;
+    }
+  }
+
+  &.adls--error {
+    .unzer-field-component {
+      border: 1px solid $adl-color--red-40;
+      color: $adl-color--red-40;
+    }
+
+
+    .unzer-input-error {
+      display: block;
+    }
+  }
+
+  &.adlm--turned {
+    .adls--active {
+      .unzer-dropdown-button {
+        border-radius: 0 0 6px 6px;
+        border: 1px solid $adl-color--blue-focused;
+        box-shadow: 0 0 0 3px $adl-color--blue-outline;
+        clip-path: inset(-10px -10px -10px -10px);
+
+        &:after {
+          transform: rotate(180deg);
+        }
+      }
+
+      .unzer-dropdown-list {
+        bottom: 40px;
+        border-radius: 6px 6px 0 0;
+        border-color: $adl-color--blue-focused $adl-color--blue-focused $adl-color--grey-select-bottom-border;
+        box-shadow: 0 0 0 3px $adl-color--blue-outline;
+        clip-path: inset(-10px -10px 0 -10px);
+      }
+    }
+  }
+}
+.unzer-input-wrapper-padding {
+  padding-bottom: 15px;
+}

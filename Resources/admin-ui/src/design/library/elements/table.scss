@@ -1,0 +1,33 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr th {
+    border-bottom: 1px solid $adl-color--grey-20;
+  }
+
+  tr {
+    &:not(:last-of-type) {
+      td {
+        border-bottom: 1px solid $adl-color--grey-20;
+      }
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px;
+
+      &.adlm--left-aligned {
+        text-align: left;
+      }
+
+      &.adlm--blue-text {
+        color: $adl-color--blue-40;
+      }
+    }
+
+    th {
+      @include font-weight--semi-bold()
+    }
+  }
+}
