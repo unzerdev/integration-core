@@ -6,12 +6,14 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 
 /**
  * Class AdminAPI. Integrations should use this class for communicating with Admin API.
@@ -119,5 +121,18 @@ class AdminAPI
             ::run(new ErrorHandlingAspect())
             ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(StateController::class);
+    }
+
+    /**
+     * @param string $storeId
+     *
+     * @return PaymentPageSettingsController
+     */
+    public function paymentPageSettings(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(PaymentPageSettingsController::class);
     }
 }

@@ -16,7 +16,12 @@ use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 
-class StateApiTest extends BaseTestCase
+/**
+ * Class StateApiTest.
+ *
+ * @package BusinessLogic\AdminAPI\State
+ */
+class StateControllerTest extends BaseTestCase
 {
     /**
      * @var ConnectionServiceMock

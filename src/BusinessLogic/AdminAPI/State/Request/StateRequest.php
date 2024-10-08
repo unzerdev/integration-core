@@ -4,6 +4,11 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\State\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
 
+/**
+ * Class StateRequest.
+ *
+ * @package Unzer\Core\BusinessLogic\AdminAPI\State\Request
+ */
 class StateRequest extends Request
 {
     /**

@@ -4,6 +4,11 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\State\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 
+/**
+ * Class StateResponse.
+ *
+ * @package Unzer\Core\BusinessLogic\AdminAPI\State\Response
+ */
 class StateResponse extends Response
 {
     /**

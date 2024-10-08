@@ -7,10 +7,14 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -21,6 +25,8 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\Http\HttpClient;
@@ -90,9 +96,20 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(WebhookUrlServiceInterface::class)
                 );
             },
+            PaymentPageSettingsService::class => static function () {
+                return new PaymentPageSettingsService(
+                    TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                );
+            },
             WebhookDataRepositoryInterface::class => function () {
                 return new WebhookDataRepository(
                     TestRepositoryRegistry::getRepository(WebhookDataEntity::getClassName()),
+                    StoreContext::getInstance()
+                );
+            },
+            PaymentPageSettingsRepositoryInterface::class => function () {
+                return new PaymentPageSettingsRepository(
+                    TestRepositoryRegistry::getRepository(PaymentPageSettingsEntity::getClassName()),
                     StoreContext::getInstance()
                 );
             },
@@ -138,12 +155,16 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(VersionService::class)
                 );
             },
-            //
             StateController::class => function () {
                 return new StateController(
                     TestServiceRegister::getService(ConnectionService::class)
                 );
             },
+            PaymentPageSettingsController::class => function () {
+                return new PaymentPageSettingsController(
+                    TestServiceRegister::getService(PaymentPageSettingsService::class)
+                );
+            }
         ]);
 
         TestServiceRegister::registerService(
@@ -167,6 +188,11 @@ class BaseTestCase extends TestCase
 
         TestRepositoryRegistry::registerRepository(
             WebhookDataEntity::getClassName(),
+            MemoryRepositoryWithConditionalDelete::getClassName()
+        );
+
+        TestRepositoryRegistry::registerRepository(
+            PaymentPageSettingsEntity::getClassName(),
             MemoryRepositoryWithConditionalDelete::getClassName()
         );
 

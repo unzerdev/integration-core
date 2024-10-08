@@ -8,6 +8,11 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 
+/**
+ * Class StateController.
+ *
+ * @package Unzer\Core\BusinessLogic\AdminAPI\State\Controller
+ */
 class StateController
 {
     /**
