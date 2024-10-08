@@ -130,7 +130,7 @@
                     : data
                 : undefined;
 
-            fetch(url, { method, headers, body }).then((response) => {
+            fetch(url, { method, headers, body , credentials: 'include'}).then((response) => {
                 if (!fallthrough && callState !== callValidationState) {
                     // Obsolete request. Some call cancelled all other requests.
                     console.debug('cancelling an obsolete request', url);
