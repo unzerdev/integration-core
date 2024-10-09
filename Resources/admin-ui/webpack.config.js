@@ -5,6 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
 
+
+const OUTPUT_PATH = process.env.OUTPUT_PATH || 'dist';
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
     const envFile = env && env.environment ? `.env.${env.environment}` : '.env';
@@ -29,7 +31,7 @@ module.exports = (env, argv) => {
             index: ['./src/index.js', './src/design/design.scss']
         },
         output: {
-            path: path.resolve(__dirname, 'dist'),
+            path: path.resolve(__dirname, OUTPUT_PATH),
             filename: 'js/[name].js'
         },
         module: {
