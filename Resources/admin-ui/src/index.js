@@ -12,7 +12,6 @@ window.Unzer = {
         }
     }
 };
-
 require('./services/AjaxService');
 require('./services/ResponseService');
 require('./services/PageService');

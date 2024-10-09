@@ -4,6 +4,7 @@
   "scripts": {
     "start-design": "webpack serve --mode development --config webpack.design.config.js --open",
     "build": "webpack --mode production --config webpack.config.js --env environment=production",
+    "watch": "webpack   --watch --progress --mode development --config webpack.config.js --env environment=development",
     "start": "webpack serve --mode development --config webpack.config.js --open",
     "build-static": "webpack --mode production --config webpack.static.config.js",
     "start-static": "webpack serve --mode development --config webpack.static.config.js --open"
