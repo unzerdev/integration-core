@@ -137,7 +137,8 @@ class BaseTestCase extends TestCase
             },
             StoresController::class => function () {
                 return new StoresController(
-                    TestServiceRegister::getService(StoreService::class)
+                    TestServiceRegister::getService(StoreService::class),
+                    TestServiceRegister::getService(ConnectionService::class)
                 );
             },
             CountryController::class => function () {

@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\Stores\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
 
 /**
@@ -18,11 +20,18 @@ class StoreResponse extends Response
     private Store $store;
 
     /**
-     * @param Store $store
+     * @var ConnectionSettings
      */
-    public function __construct(Store $store)
+    private ?ConnectionSettings $connectionSettings;
+
+    /**
+     * @param Store $store
+     * @param ConnectionSettings|null $connectionSettings
+     */
+    public function __construct(Store $store, ?ConnectionSettings $connectionSettings = null)
     {
         $this->store = $store;
+        $this->connectionSettings = $connectionSettings;
     }
 
     /**
@@ -32,9 +41,20 @@ class StoreResponse extends Response
      */
     public function toArray(): array
     {
-        return [
+        $returnArray = [
             'storeId' => $this->store->getStoreId(),
-            'storeName' => $this->store->getStoreName()
+            'storeName' => $this->store->getStoreName(),
+            'isLoggedIn' => false,
+            'mode' => Mode::live()->getMode(),
+            'publicKey' => ''
         ];
+
+        if($this->connectionSettings !== null) {
+            $returnArray['mode'] = $this->connectionSettings->getMode()->getMode();
+            $returnArray['publicKey'] = $this->connectionSettings->getActiveConnectionData()->getPublicKey();
+            $returnArray['isLoggedIn'] = true;
+        }
+
+        return $returnArray;
     }
 }

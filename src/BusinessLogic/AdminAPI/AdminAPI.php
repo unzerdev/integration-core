@@ -61,15 +61,12 @@ class AdminAPI
     }
 
     /**
-     * @param string $storeId
-     *
      * @return StoresController
      */
-    public function stores(string $storeId): object
+    public function stores(): object
     {
         return Aspects
             ::run(new ErrorHandlingAspect())
-            ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(StoresController::class);
     }
 
@@ -100,15 +97,12 @@ class AdminAPI
     }
 
     /**
-     * @param string $storeId
-     *
      * @return VersionController
      */
-    public function version(string $storeId): object
+    public function version(): object
     {
         return Aspects
             ::run(new ErrorHandlingAspect())
-            ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(VersionController::class);
     }
 

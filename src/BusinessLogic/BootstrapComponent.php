@@ -171,7 +171,8 @@ class BootstrapComponent extends BaseBootstrapComponent
             StoresController::class,
             new SingleInstance(static function () {
                 return new StoresController(
-                    ServiceRegister::getService(StoreService::class)
+                    ServiceRegister::getService(StoreService::class),
+                    ServiceRegister::getService(ConnectionService::class)
                 );
             })
         );

@@ -2,8 +2,11 @@
 
 namespace Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller;
 
+use Exception;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoresResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 
@@ -20,11 +23,18 @@ class StoresController
     private StoreService $storeService;
 
     /**
-     * @param StoreService $storeService
+     * @var ConnectionService
      */
-    public function __construct(StoreService $storeService)
+    private ConnectionService $connectionService;
+
+    /**
+     * @param StoreService $storeService
+     * @param ConnectionService $connectionService
+     */
+    public function __construct(StoreService $storeService, ConnectionService $connectionService)
     {
         $this->storeService = $storeService;
+        $this->connectionService = $connectionService;
     }
 
     /**
@@ -37,12 +47,25 @@ class StoresController
 
     /**
      * @return StoreResponse
+     *
+     * @throws Exception
      */
     public function getCurrentStore(): StoreResponse
     {
         $currentStore = $this->storeService->getCurrentStore();
+        $connectionSettings = null;
 
-        return $currentStore ? new StoreResponse($currentStore) : new StoreResponse($this->failBackStore());
+        if ($currentStore !== null) {
+            $connectionSettings = StoreContext::doWithStore(
+                $currentStore->getStoreId(),
+                [$this->connectionService, 'getConnectionSettings']
+            );
+        }
+
+        $this->connectionService->getConnectionSettings();
+
+        return $currentStore ?
+            new StoreResponse($currentStore, $connectionSettings) : new StoreResponse($this->failBackStore());
     }
 
     /**

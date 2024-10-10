@@ -2,13 +2,23 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Stores;
 
+use Exception;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoresResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
+use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\StoreServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\StoreServiceMock as IntegrationMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -26,6 +36,11 @@ class StoresApiTest extends BaseTestCase
     private StoreServiceMock $storeService;
 
     /**
+     * @var ConnectionServiceMock
+     */
+    private ConnectionServiceMock $connectionService;
+
+    /**
      * @return void
      *
      * @throws RepositoryClassException
@@ -37,6 +52,18 @@ class StoresApiTest extends BaseTestCase
         $this->storeService = new StoreServiceMock(
             new IntegrationMock(),
         );
+
+        $this->connectionService = new ConnectionServiceMock(
+            TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
+            TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+            TestServiceRegister::getService(EncryptorInterface::class),
+            TestServiceRegister::getService(WebhookUrlServiceInterface::class)
+        );
+
+        TestServiceRegister::registerService(
+            ConnectionService::class, function () {
+            return $this->connectionService;
+        });
 
         TestServiceRegister::registerService(
             StoreService::class, function () {
@@ -52,7 +79,7 @@ class StoresApiTest extends BaseTestCase
         // Arrange
 
         // Act
-        $response = AdminAPI::get()->stores('1')->getStores();
+        $response = AdminAPI::get()->stores()->getStores();
 
         // Assert
         self::assertTrue($response->isSuccessful());
@@ -73,7 +100,7 @@ class StoresApiTest extends BaseTestCase
         );
 
         // Act
-        $response = AdminAPI::get()->stores('1')->getStores();
+        $response = AdminAPI::get()->stores()->getStores();
 
         // Assert
         self::assertEquals($response, $this->expectedStoresResponse());
@@ -94,7 +121,7 @@ class StoresApiTest extends BaseTestCase
         );
 
         // Act
-        $response = AdminAPI::get()->stores('1')->getStores();
+        $response = AdminAPI::get()->stores()->getStores();
 
         // Assert
         self::assertEquals($response->toArray(), $this->expectedStoresResponse()->toArray());
@@ -102,6 +129,8 @@ class StoresApiTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws Exception
      */
     public function testGetCurrentStore(): void
     {
@@ -110,17 +139,22 @@ class StoresApiTest extends BaseTestCase
         $this->storeService->setMockCurrentStore(new Store('storeId', 'store1'));
 
         // Act
-        $response = AdminAPI::get()->stores('1')->getCurrentStore();
+        $response = AdminAPI::get()->stores()->getCurrentStore();
 
         // Assert
         self::assertEquals([
             'storeId' => 'storeId',
             'storeName' => 'store1',
+            'isLoggedIn' => false,
+            'mode' => 'live',
+            'publicKey' => ''
         ], $response->toArray());
     }
 
     /**
      * @return void
+     *
+     * @throws Exception
      */
     public function testGetCurrentStoreFailBack(): void
     {
@@ -129,10 +163,35 @@ class StoresApiTest extends BaseTestCase
         $this->storeService->setMockCurrentStore(null);
 
         // Act
-        $response = AdminAPI::get()->stores('1')->getCurrentStore();
+        $response = AdminAPI::get()->stores()->getCurrentStore();
 
         // Assert
         self::assertEquals($response, $this->expectedFailBackResponse());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetCurrentStoreLiveConnectionData(): void
+    {
+        // Arrange
+        $settings = new ConnectionSettings(Mode::live(), new ConnectionData('publicKey' , 'private'));
+        $this->connectionService->setConnectionSettings($settings);
+        $this->storeService->setMockCurrentStore(new Store('storeId', 'store1'));
+
+        // Act
+        $response = AdminAPI::get()->stores()->getCurrentStore();
+
+        // Assert
+        self::assertEquals([
+            'storeId' => 'storeId',
+            'storeName' => 'store1',
+            'isLoggedIn' => true,
+            'mode' => 'live',
+            'publicKey' => 'publicKey',
+        ], $response->toArray());
     }
 
     /**

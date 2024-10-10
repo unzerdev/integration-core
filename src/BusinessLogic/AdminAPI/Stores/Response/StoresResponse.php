@@ -32,8 +32,15 @@ class StoresResponse extends Response
      */
     public function toArray(): array
     {
-        return array_map(static function (Store $store): array {
-            return (new StoreResponse($store))->toArray();
-        }, $this->stores);
+        $returnArray = [];
+
+        foreach ($this->stores as $store) {
+            $returnArray[] = [
+                'storeId' => $store->getStoreId(),
+                'storeName' => $store->getStoreName()
+            ];
+        }
+
+        return $returnArray;
     }
 }
