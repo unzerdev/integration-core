@@ -135,7 +135,7 @@ class ConnectionService
      */
     public function reRegisterWebhooks(): void
     {
-        $connectionSettings = $this->connectionSettingsRepository->getConnectionSettings();
+        $connectionSettings = $this->getConnectionSettings();
 
         if (!$connectionSettings) {
             throw new ConnectionSettingsNotFoundException(
