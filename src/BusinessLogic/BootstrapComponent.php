@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
@@ -219,6 +220,13 @@ class BootstrapComponent extends BaseBootstrapComponent
                 return new PaymentPageSettingsController(
                     ServiceRegister::getService(PaymentPageSettingsService::class)
                 );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentMethodsController::class,
+            new SingleInstance(static function () {
+                return new PaymentMethodsController();
             })
         );
     }

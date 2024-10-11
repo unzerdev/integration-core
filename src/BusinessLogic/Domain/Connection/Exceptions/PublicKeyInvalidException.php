@@ -2,7 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Connection\Exceptions;
 
+use Throwable;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
  * Class PublicKeyInvalidException.
@@ -11,4 +13,14 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException
  */
 class PublicKeyInvalidException extends BaseTranslatableException
 {
+    /**
+     * @param TranslatableLabel $translatableLabel
+     * @param Throwable|null $previous
+     */
+    public function __construct(TranslatableLabel $translatableLabel, Throwable $previous = null)
+    {
+        $this->code = 401;
+
+        parent::__construct($translatableLabel, $previous);
+    }
 }
