@@ -10,7 +10,7 @@
      * @returns {Promise<*>}
      */
     const login = (data) => {
-        return Unzer.ajaxService.post(`${baseUrl}/auth/login?storeId=${Unzer.config.store.id}`, data, null, (exception) => {
+        return Unzer.ajaxService.post(`${Unzer.config.connectionUrl}?storeId=${Unzer.config.store.storeId}`, data, null, (exception) => {
             return Promise.reject(exception);
         });
     };

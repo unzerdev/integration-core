@@ -10,7 +10,7 @@
      * @param {StateParamsModel} params
      */
     this.display = (params) => {
-        if (!Unzer.config.store.isConnected) {
+        if (!Unzer.config.store.isLoggedIn) {
             Unzer.stateController.navigate('login');
 
             return;

@@ -10,9 +10,9 @@
      * @param {StateParamsModel} params
      */
     this.display = () => {
-        if (Unzer.config.store.isConnected) {
+        if (Unzer.config.store.isLoggedIn) {
             Unzer.pageService.addPaddings();
-            Unzer.stateController.navigate("/checkout");
+            Unzer.stateController.navigate("checkout");
 
             return;
         }
@@ -36,13 +36,11 @@
 
         Unzer.LoginService.login(loginData)
             .then(() => {
-                Unzer.config.store.isConnected = true;
-                Unzer.stateController.navigate('/checkout');
-                Unzer.pageService.addPaddings();
+                Unzer.stateController.navigate('login');
                 Unzer.components.PageHeader.updateCredentials();
             })
             .catch((ex) => {
-                Unzer.utilities.createToasterMessage(ex.message, true);
+                Unzer.utilities.createToasterMessage(ex.errorMessage, true);
             })
             .finally(Unzer.utilities.hideLoader);
     }

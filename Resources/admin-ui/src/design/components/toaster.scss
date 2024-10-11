@@ -1,6 +1,6 @@
 @mixin adl-toaster-base($icon: checkmark, $icon-bg-color: $adl-color--background-check-icon) {
   position: fixed;
-  bottom: 10px;
+  bottom: 40px;
   left: 50%;
   display: flex;
   justify-content: space-between;

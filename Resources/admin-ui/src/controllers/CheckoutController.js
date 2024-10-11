@@ -27,7 +27,7 @@
      * @param {StateParamsModel} params
      */
     this.display = (params) => {
-        if (!Unzer.config.store.isConnected) {
+        if (!Unzer.config.store.isLoggedIn) {
             Unzer.stateController.navigate('login');
 
             return;
@@ -71,7 +71,7 @@
                 type: 'primary',
                 label: 'Paymnent page settings',
                 className: 'adlt--settings',
-                onClick: () => Unzer.stateController.navigate('/design')
+                onClick: () => Unzer.stateController.navigate('design')
             }
         ]);
 
@@ -212,6 +212,7 @@
                 Unzer.components.MultiselectDropdownField.create({
                     title: 'checkout.modal.restrictCountries',
                     useAny: false,
+                    values: [],
                     options: [
                         { label: 'Capture', value: 'capture' },
                         { label: 'Authorize', value: 'authorize' }

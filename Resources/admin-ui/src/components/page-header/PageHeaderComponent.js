@@ -95,7 +95,7 @@ const createConnection = () => {
     );
 
     const connection = generator.createElement('div', 'unzer-header-connection', '', [], [icon, connectionInfo]);
-    connection.addEventListener('click', () => Unzer.stateController.navigate('/credentials'));
+    connection.addEventListener('click', () => Unzer.stateController.navigate('credentials'));
 
     return connection;
 };
@@ -123,7 +123,7 @@ const render = (stores, onStoreSelect) => {
 
     const wrapper = generator.createElement('div', 'unzer-header-wrapper', '', [], [logoWrapper]);
 
-    if (Unzer.config.store.isConnected) {
+    if (Unzer.config.store.isLoggedIn) {
         wrapper.append(createConnection());
     }
 
@@ -143,7 +143,7 @@ const updateCredentials = () => {
         Unzer.pageService.clearComponent(credentials);
     }
 
-    if (Unzer.config.store.isConnected) {
+    if (Unzer.config.store.isLoggedIn) {
         credentials?.append(createConnection());
     }
 };

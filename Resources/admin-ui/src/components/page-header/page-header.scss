@@ -46,7 +46,8 @@
 
         .dropdown {
           position: relative;
-          width: 112px;
+          width: 100%;
+          max-width: 200px;
           height: 34px;
           border: 1px solid #ccc;
           border-radius: 8px;
