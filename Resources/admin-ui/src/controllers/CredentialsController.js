@@ -86,7 +86,8 @@
             }),
             Unzer.components.Button.create({
                 type: 'primary',
-                label: 'credentials.reRegister'
+                label: 'credentials.reRegister',
+                onClick: reRegisterWebhooks
             })
         );
     };
@@ -111,11 +112,48 @@
                 {
                     type: 'secondary',
                     label: 'Disconnect',
-                    onClick: () => {}
+                    onClick: () => disconnect(modal)
                 }
             ]
         });
 
         modal.open();
     };
+
+
+  /**
+   * Disconnect store
+   *
+   * @param modal
+   */
+
+    function disconnect(modal) {
+      Unzer.utilities.showLoader();
+      Unzer.LoginService.disconnect()
+        .then(() => {
+          modal.close();
+          Unzer.stateController.navigate('login');
+        })
+        .catch((ex) => {
+          Unzer.utilities.createToasterMessage(ex.errorMessage, true);
+        })
+        .finally(Unzer.utilities.hideLoader);
+    }
+
+
+  /**
+   * ReRegister webhooks
+   * @param loginData
+   */
+
+  function reRegisterWebhooks() {
+    Unzer.utilities.showLoader();
+    Unzer.LoginService.reRegisterWebhooks()
+        .then(() => {
+        })
+        .catch((ex) => {
+          Unzer.utilities.createToasterMessage(ex.errorMessage, true);
+        })
+        .finally(Unzer.utilities.hideLoader);
+  }
 };
