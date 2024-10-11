@@ -80,7 +80,7 @@
             Unzer.components.TwoColumnLayout.create([
                 Unzer.components.ColorPickerComponent.create({
                     label: "design.translations.headerColor",
-                    description: "design.translations.headerColorDescription"
+                    description: "design.translations.headerColorDescription",
                 }),
                 Unzer.components.ColorPickerComponent.create({
                     label: "design.translations.shopTaglineBackgroundColor",

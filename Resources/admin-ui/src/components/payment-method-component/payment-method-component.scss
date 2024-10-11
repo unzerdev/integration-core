@@ -6,7 +6,7 @@
   padding: 12px 35px 10px 14px;
   max-height: 85px;
   margin-bottom: 25px;
-  
+
   .unzer-payment-method-info {
     display: flex;
     gap: 18px;
@@ -31,6 +31,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      img{
+        width: 62px;
+        height: 37px;
+      }
     }
   }
 
@@ -72,6 +77,11 @@
       .unzer-payment-method-logo {
         width: 62px;
         height: 37px;
+
+        img{
+          width: 62px;
+          height: 37px;
+        }
       }
     }
 

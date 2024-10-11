@@ -77,7 +77,10 @@ const start = () => {
 
   const renderFooter = () => {
     if (Unzer.config.store?.isLoggedIn) {
-      Unzer.components.FooterComponent.render({ version: '1.0.0', hasNewVersion: false });
+      Unzer.components.FooterComponent.render({
+        version: Unzer.config.version.installed,
+        hasNewVersion: Unzer.config.version.latest !== '' && Unzer.config.version.latest != Unzer.config.version.installed
+      });
     } else {
       Unzer.components.FooterComponent.clear();
     }

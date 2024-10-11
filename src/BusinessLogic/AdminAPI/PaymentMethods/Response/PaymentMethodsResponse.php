@@ -22,13 +22,13 @@ class PaymentMethodsResponse extends Response
                 'type' => 'alipay',
                 'name' => 'Alipay',
                 'description' => 'Alipay description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'applepay',
                 'name' => 'Apple Pay',
                 'description' => 'Apple Pay description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'bancontact',
@@ -40,7 +40,7 @@ class PaymentMethodsResponse extends Response
                 'type' => 'card',
                 'name' => 'Card',
                 'description' => 'Card description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'eps',
@@ -52,19 +52,19 @@ class PaymentMethodsResponse extends Response
                 'type' => 'giropay',
                 'name' => 'Giropay',
                 'description' => 'Giropay description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'googlepay',
                 'name' => 'Google Pay',
                 'description' => 'Google Pay description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'ideal',
                 'name' => 'Ideal',
                 'description' => 'Ideal description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'klarna',
@@ -76,13 +76,13 @@ class PaymentMethodsResponse extends Response
                 'type' => 'paylater-direct-debit',
                 'name' => 'PaylaterDirectDebit',
                 'description' => 'PaylaterDirectDebit description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'paylater-installment',
                 'name' => 'PaylaterInstallment',
                 'description' => 'PaylaterInstallment description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'paylater-invoice',
@@ -94,31 +94,31 @@ class PaymentMethodsResponse extends Response
                 'type' => 'paypal',
                 'name' => 'Paypal',
                 'description' => 'paypal description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'payu',
                 'name' => 'Payu',
                 'description' => 'Payu description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'post-finance-card',
                 'name' => 'Post Finance Card',
                 'description' => 'Post Finance Card description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'post-finance-efinance',
                 'name' => 'Post Finance E-Finance',
                 'description' => 'Post Finance E-Finance description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'prepayment',
                 'name' => 'Unzer prepayment',
                 'description' => 'Unzer description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'przelewy24',
@@ -130,13 +130,13 @@ class PaymentMethodsResponse extends Response
                 'type' => 'sepa-direct-debit',
                 'name' => 'SepaDirectDebit',
                 'description' => 'SepaDirectDebit description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'sofort',
                 'name' => 'Sofort',
                 'description' => 'Sofort description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => 'twint',
@@ -148,13 +148,13 @@ class PaymentMethodsResponse extends Response
                 'type' => 'wechatpay',
                 'name' => 'Wechatpay',
                 'description' => 'Wechatpay description',
-                'enabled' => true
+                'enabled' => false
             ],
             [
                 'type' => '',
                 'name' => '',
                 'description' => '',
-                'enabled' => true
+                'enabled' => false
             ],
         ];
     }

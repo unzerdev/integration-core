@@ -89,7 +89,7 @@ const createConnection = () => {
     const connectionInfo = generator.createElement(
         'div',
         'unzer-header-connection-info',
-        `login.credentials.header|${Unzer.config.store.credentials}`,
+        `login.credentials.header|${Unzer.config.store.publicKey.substring(0, 9) + "***"}`,
         [],
         []
     );

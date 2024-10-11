@@ -37,10 +37,10 @@ class StateController
      *
      * @throws InvalidModeException
      */
-    public function isLoggedIn(StateRequest $request): StateResponse
+    public function isLoggedIn(): StateResponse
     {
-        $mode = Mode::parse($request->getMode());
+       // $mode = Mode::parse($request->getMode());
 
-        return new StateResponse($this->connectionService->isLoggedIn($mode));
+        return new StateResponse($this->connectionService->isLoggedIn());
     }
 }

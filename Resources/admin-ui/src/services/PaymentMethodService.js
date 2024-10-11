@@ -10,7 +10,7 @@
      * @returns {Promise<*>}
      */
     const getAll = () => {
-        return Unzer.ajaxService.get(`${baseUrl}/paymentMethods?storeId=${Unzer.config.store.id}`, (exception) => {
+        return Unzer.ajaxService.get(`${baseUrl}/paymentMethod?storeId=${Unzer.config.store.storeId}`, (exception) => {
             return Promise.reject(exception);
         });
     };

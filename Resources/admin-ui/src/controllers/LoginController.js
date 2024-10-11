@@ -36,7 +36,7 @@
 
         Unzer.LoginService.login(loginData)
             .then(() => {
-                Unzer.stateController.navigate('login');
+                Unzer.stateController.navigate('login', {}, true);
                 Unzer.components.PageHeader.updateCredentials();
             })
             .catch((ex) => {

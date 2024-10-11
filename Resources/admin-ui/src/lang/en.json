@@ -100,7 +100,7 @@
     "event": "Event",
     "reRegister": "Re-register webhook",
     "disconnectWarning": "Are you sure you want to disconnect store?"
-    
+
   },
   "footer": {
     "support": "Need help?",
@@ -119,7 +119,7 @@
       "sandbox": "Sandbox"
     },
     "credentials": {
-      "header": "Credentials(%s)",
+      "header": "Credentials (%s)",
       "title": "Credentials",
       "description": "You can find your API credentials in merchant portal.",
       "label": "Credentials",

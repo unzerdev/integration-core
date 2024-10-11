@@ -23,7 +23,7 @@ const LoginComponent = ({ onLogin }) => {
         label: 'login.environment.title',
         value: 'live',
         onChange: (value) => {
-            values.env = value;
+            values.environment = value;
             Unzer.components.PageHeader.updateEnvironment(value === 'sandbox');
         },
         options: [
