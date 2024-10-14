@@ -95,9 +95,9 @@
     "notifications": "Notifications",
     "notificationsDescription": "You can find the registered webhook for your store here.",
     "registrationDate": "Registration date",
-    "webhook": "Webhook ID",
-    "webhookUrl": "Webhook URL",
-    "event": "Event",
+    "webhook": "Webhook IDs",
+    "webhookUrl": "Webhook URLs",
+    "event": "Events",
     "reRegister": "Re-register webhook",
     "disconnectWarning": "Are you sure you want to disconnect store?"
 
