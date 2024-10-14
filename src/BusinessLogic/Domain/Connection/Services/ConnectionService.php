@@ -87,29 +87,6 @@ class ConnectionService
     }
 
     /**
-     * Check if user is loggedIn for specific store.
-     *
-     * @param Mode $mode
-     *
-     * @return bool
-     */
-    public function isLoggedIn(Mode $mode): bool
-    {
-        $connectionSettings = $this->getConnectionSettings();
-
-        if (!$connectionSettings) {
-            return false;
-        }
-
-        if($mode->equal(Mode::live())) {
-            return $connectionSettings->getLiveConnectionData() !== null;
-        }
-
-        return $connectionSettings->getSandboxConnectionData() !== null;
-    }
-
-
-    /**
      * @return ConnectionSettings|null
      */
     public function getConnectionSettings(): ?ConnectionSettings
