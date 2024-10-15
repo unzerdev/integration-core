@@ -3,7 +3,7 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Exceptions;
 
 use Throwable;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\BaseTranslatableException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**

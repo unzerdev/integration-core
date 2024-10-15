@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\ApiFacades\Response;
 
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\BaseTranslatableException;
 
 /**
  * Class TranslatableErrorResponse

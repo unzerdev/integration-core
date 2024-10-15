@@ -5,7 +5,7 @@ namespace Unzer\Core\BusinessLogic\ApiFacades\Aspects;
 use Exception;
 use Unzer\Core\BusinessLogic\ApiFacades\Response\TranslatableErrorResponse;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspect;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\BaseTranslatableException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableUnhandledException;
 use Throwable;
 use Unzer\Core\Infrastructure\Logger\Logger;
