@@ -1,9 +1,8 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Exceptions;
+namespace Unzer\Core\BusinessLogic\Domain\Translations\Exceptions;
 
 use Throwable;
-use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\BaseTranslatableException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**

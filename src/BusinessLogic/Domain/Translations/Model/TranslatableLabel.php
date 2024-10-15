@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Translations\Model;
 
-use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Exceptions\InvalidTranslatableArrayException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 
 /**
  * Class TranslatableLabel
@@ -73,7 +73,7 @@ class TranslatableLabel
     {
         self::validateTranslatableArray($input);
 
-       return array_map(fn($value) => new self($value['value'], $value['locale']), $input);
+        return array_map(fn($value) => new self($value['value'], $value['locale']), $input);
     }
 
     /**
