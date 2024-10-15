@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPage
 use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings;
@@ -219,6 +220,13 @@ class BootstrapComponent extends BaseBootstrapComponent
             PaymentMethodsController::class,
             new SingleInstance(static function () {
                 return new PaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            CheckoutPaymentMethodsController::class,
+            new SingleInstance(static function () {
+                return new CheckoutPaymentMethodsController();
             })
         );
     }

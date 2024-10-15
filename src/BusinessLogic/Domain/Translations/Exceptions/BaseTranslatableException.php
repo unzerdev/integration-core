@@ -1,9 +1,10 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\Translations\Model;
+namespace Unzer\Core\BusinessLogic\Domain\Translations\Exceptions;
 
 use Exception;
 use Throwable;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
  * Class BaseTranslatableException

@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions;
 
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\BaseTranslatableException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\BaseTranslatableException;
 
 /**
  * Class InvalidBookingMethodException.
