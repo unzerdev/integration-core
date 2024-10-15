@@ -71,9 +71,9 @@ class LanguageControllerTest extends BaseTestCase
 
         // Assert
         self::assertEquals([
-            ['code' => 'en'],
-            ['code' => 'fr'],
-            ['code' => 'es']
+            ['code' => 'en', 'flag' => ''],
+            ['code' => 'fr', 'flag' => ''],
+            ['code' => 'es', 'flag' => ''],
         ], $response->toArray());
     }
 }

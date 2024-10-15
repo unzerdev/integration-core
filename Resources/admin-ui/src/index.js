@@ -22,6 +22,7 @@ require('./services/LoginService');
 require('./services/StoresService');
 require('./services/CheckoutService');
 require('./services/PaymentMethodService');
+require('./services/DesignService');
 
 require('./components/ImagesProvider');
 require('./components/ElementGenerator');

@@ -15,11 +15,18 @@ class Language
     private string $code;
 
     /**
-     * @param string $code
+     * @var string
      */
-    public function __construct(string $code)
+    private string $flag;
+
+    /**
+     * @param string $code
+     * @param string $flag
+     */
+    public function __construct(string $code, string $flag = '')
     {
         $this->code = $code;
+        $this->flag = $flag;
     }
 
     /**
@@ -28,5 +35,13 @@ class Language
     public function getCode(): string
     {
         return $this->code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFlag(): string
+    {
+        return $this->flag;
     }
 }

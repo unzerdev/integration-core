@@ -34,7 +34,8 @@ class GetLanguagesResponse extends Response
 
         foreach ($this->languages as $language) {
             $array[] = [
-                'code' => $language->getCode()
+                'code' => $language->getCode(),
+                'flag' => $language->getFlag(),
             ];
         }
 

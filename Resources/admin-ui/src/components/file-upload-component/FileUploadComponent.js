@@ -14,7 +14,7 @@
  *
  * @constructor
  */
-const FileUploadComponent = ({ label = 'aaa', description = 'aa', className = '', onFileSelect }) => {
+const FileUploadComponent = ({ label = 'aaa', description = 'aa', className = '', onFileSelect, onChange}) => {
     const { elementGenerator: generator } = Unzer;
     const cssClass = ['unzer-file-upload-box'];
     className && cssClass.push(className);
@@ -35,6 +35,13 @@ const FileUploadComponent = ({ label = 'aaa', description = 'aa', className = ''
         if (file) {
             inputElement.value = file.name;
             onFileSelect(file);
+        }
+    });
+
+    onChange && inputElement.addEventListener('input', (event) => {
+        const url = event.target.value;
+        if (url) {
+          onChange(url);
         }
     });
 
