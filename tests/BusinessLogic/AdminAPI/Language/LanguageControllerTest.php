@@ -1,6 +1,6 @@
 <?php
 
-namespace BusinessLogic\AdminAPI\Language;
+namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Language;
 
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;

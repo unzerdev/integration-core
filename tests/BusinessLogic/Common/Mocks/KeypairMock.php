@@ -17,6 +17,11 @@ class KeypairMock extends Keypair
     public ?string $publicKey = null;
 
     /**
+     * @var array
+     */
+    public static array $types = [];
+
+    /**
      * @return string|null
      */
     public function getPublicKey(): ?string
@@ -32,5 +37,23 @@ class KeypairMock extends Keypair
     public function setPublicKey(string $publicKey): void
     {
         $this->publicKey = $publicKey;
+    }
+
+    /**
+     * @param array $types
+     *
+     * @return void
+     */
+    public function setAvailablePaymentTypes(array $types): void
+    {
+        self::$types = $types;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailablePaymentTypes(): array
+    {
+        return self::$types;
     }
 }

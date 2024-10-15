@@ -1,0 +1,94 @@
+<?php
+
+namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response;
+
+use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
+use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BasketRequired;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingChargeSupport;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+
+/**
+ * Class GetPaymentConfigResponse.
+ *
+ * @package Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response
+ */
+class GetPaymentConfigResponse extends Response
+{
+    /**
+     * @var PaymentMethodConfig
+     */
+    private PaymentMethodConfig $paymentMethodConfig;
+
+    /**
+     * @param PaymentMethodConfig $paymentMethodConfig
+     */
+    public function __construct(PaymentMethodConfig $paymentMethodConfig)
+    {
+        $this->paymentMethodConfig = $paymentMethodConfig;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toArray(): array
+    {
+        $array = [];
+
+        $array['type'] = $this->paymentMethodConfig->getType();
+        $array['typeName'] = PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->paymentMethodConfig->getType()];
+        $array['name'] = $this->translatableLabelsToArray($this->paymentMethodConfig->getName());
+        $array['description'] = $this->translatableLabelsToArray($this->paymentMethodConfig->getDescription());
+        $array['bookingAvailable'] =
+            in_array($this->paymentMethodConfig->getType(), BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
+            in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);
+        $array['bookingMethod'] = $this->paymentMethodConfig->getBookingMethod() ?
+            $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null;
+        $array['chargeAvailable'] =
+            in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);
+
+        $array['statusIdToCharge'] = $this->paymentMethodConfig->getStatusIdToCharge();
+        $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount();
+        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount();
+        $array['surcharge'] = $this->paymentMethodConfig->getSurcharge();
+        $array['restrictedCountries'] = $this->countriesToArray($this->paymentMethodConfig->getRestrictedCountries());
+        $array['displaySendBasketData'] =
+            !in_array($this->paymentMethodConfig->getType(), BasketRequired::BASKET_REQUIRED);
+        $array['sendBasketData'] = $this->paymentMethodConfig->isSendBasketData();
+
+        return $array;
+    }
+
+    /**
+     * @param TranslatableLabel[] $labels
+     *
+     * @return array
+     */
+    private function translatableLabelsToArray(array $labels): array
+    {
+        return array_map(function ($label) {
+            return [
+                'locale' => $label->getCode(),
+                'value' => $label->getMessage()
+            ];
+        }, $labels);
+    }
+
+    /**
+     * @param Country[] $countries
+     *
+     * @return array
+     */
+    private function countriesToArray(array $countries): array
+    {
+        return array_map(function ($country) {
+            return [
+                'code' => $country->getCode(),
+                'name' => $country->getName()
+            ];
+        }, $countries);
+    }
+}

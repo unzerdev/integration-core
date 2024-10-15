@@ -7,12 +7,13 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
-use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
-use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
@@ -25,6 +26,8 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -39,6 +42,7 @@ use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryStorage;
@@ -156,16 +160,28 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(VersionService::class)
                 );
             },
-            StateController::class => function () {
-                return new StateController(
-                    TestServiceRegister::getService(ConnectionService::class)
-                );
-            },
             PaymentPageSettingsController::class => function () {
                 return new PaymentPageSettingsController(
                     TestServiceRegister::getService(PaymentPageSettingsService::class)
                 );
-            }
+            },
+            PaymentMethodConfigRepositoryInterface::class => function () {
+                return new PaymentMethodConfigRepository(
+                    TestRepositoryRegistry::getRepository(PaymentMethodConfig::getClassName()),
+                    StoreContext::getInstance()
+                );
+            },
+            PaymentMethodService::class => static function () {
+                return new PaymentMethodService(
+                    UnzerFactoryMock::getInstance()->makeUnzerAPI(),
+                    TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+                );
+            },
+            PaymentMethodsController::class => function () {
+                return new PaymentMethodsController(
+                    TestServiceRegister::getService(PaymentMethodService::class)
+                );
+            },
         ]);
 
         TestServiceRegister::registerService(
@@ -194,6 +210,11 @@ class BaseTestCase extends TestCase
 
         TestRepositoryRegistry::registerRepository(
             PaymentPageSettingsEntity::getClassName(),
+            MemoryRepositoryWithConditionalDelete::getClassName()
+        );
+
+        TestRepositoryRegistry::registerRepository(
+            PaymentMethodConfig::getClassName(),
             MemoryRepositoryWithConditionalDelete::getClassName()
         );
 

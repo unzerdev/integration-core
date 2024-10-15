@@ -2,7 +2,15 @@
 
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller;
 
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\EnablePaymentMethodRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\GetPaymentMethodConfigRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\EnablePaymentMethodResponse;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\GetPaymentConfigResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\PaymentMethodsResponse;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
  * Class PaymentMethodsController.
@@ -12,10 +20,52 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\PaymentMethodsResp
 class PaymentMethodsController
 {
     /**
+     * @var PaymentMethodService
+     */
+    private PaymentMethodService $paymentMethodService;
+
+    /**
+     * @param PaymentMethodService $paymentMethodService
+     */
+    public function __construct(PaymentMethodService $paymentMethodService)
+    {
+        $this->paymentMethodService = $paymentMethodService;
+    }
+
+    /**
      * @return PaymentMethodsResponse
+     *
+     * @throws UnzerApiException
      */
     public function getPaymentMethods(): PaymentMethodsResponse
     {
-        return new PaymentMethodsResponse();
+        return new PaymentMethodsResponse($this->paymentMethodService->getAllPaymentMethods());
+    }
+
+    /**
+     * @param EnablePaymentMethodRequest $request
+     *
+     * @return EnablePaymentMethodResponse
+     *
+     * @throws InvalidPaymentTypeException
+     */
+    public function enablePaymentMethod(EnablePaymentMethodRequest $request): EnablePaymentMethodResponse
+    {
+        $this->paymentMethodService->enablePaymentMethodConfig($request->toDomainModel());
+
+        return new EnablePaymentMethodResponse();
+    }
+
+    /**
+     * @param GetPaymentMethodConfigRequest $request
+     *
+     * @return GetPaymentConfigResponse
+     *
+     * @throws InvalidPaymentTypeException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function getPaymentConfig(GetPaymentMethodConfigRequest $request): GetPaymentConfigResponse
+    {
+        return new GetPaymentConfigResponse($this->paymentMethodService->getPaymentMethodConfigByType($request->getType()));
     }
 }

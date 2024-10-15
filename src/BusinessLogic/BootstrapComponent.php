@@ -27,6 +27,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -206,15 +207,6 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
 
         ServiceRegister::registerService(
-            StateController::class,
-            new SingleInstance(static function () {
-                return new StateController(
-                    ServiceRegister::getService(ConnectionService::class)
-                );
-            })
-        );
-
-        ServiceRegister::registerService(
             PaymentPageSettingsController::class,
             new SingleInstance(static function () {
                 return new PaymentPageSettingsController(
@@ -226,7 +218,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             PaymentMethodsController::class,
             new SingleInstance(static function () {
-                return new PaymentMethodsController();
+                return new PaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
             })
         );
     }

@@ -2,6 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Country\Models;
 
+use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+
 /**
  * Class Country.
  *
@@ -43,5 +46,38 @@ class Country
     public function getName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * @param array $input
+     *
+     * @return self[]
+     *
+     * @throws InvalidCountryArrayException
+     */
+    public static function fromArrayToBatch(array $input): array
+    {
+        self::validateTranslatableArray($input);
+
+        return array_map(fn($value) => new self($value['value'], $value['locale']), $input);
+    }
+
+    /**
+     * @param array $input
+     *
+     * @return void
+     *
+     * @throws InvalidCountryArrayException
+     */
+    private static function validateTranslatableArray(array $input): void
+    {
+        foreach ($input as $element) {
+            if (!is_array($element) || !isset($element['code']) || !isset($element['name'])) {
+                throw new InvalidCountryArrayException(
+                    new TranslatableLabel('Country array is invalid',
+                        'country.invalidArray')
+                );
+            }
+        }
     }
 }
