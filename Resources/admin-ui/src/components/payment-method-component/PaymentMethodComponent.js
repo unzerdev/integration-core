@@ -36,7 +36,7 @@ const PaymentMethodComponent = ({ description = '', image = null, name = '', sta
         'unzer-payment-method-logo',
         '',
         [],
-        [generator.createElementFromHTML(`<img src=${imageUrl}>`)]
+        [generator.createElementFromHTML(`<img src=${imageUrl} alt="${Unzer.config.imagesUrl}/default.svg">`)]
     );
     const paymentInfo = generator.createElement('div', 'unzer-payment-method-info', '', [], [logo, headline]);
 

@@ -50,13 +50,13 @@ class PaymentMethodService
     public function getAllPaymentMethods(): array
     {
         $keypair = $this->unzer->fetchKeypair();
-        $availablePaymentTypes = $keypair->getAvailablePaymentTypes();
+        $availablePaymentTypes = array_unique($keypair->getAvailablePaymentTypes());
         $configuredPaymentMethods = $this->paymentMethodConfigRepository->getPaymentMethodConfigs();
 
         return array_map(function ($availablePaymentType) use ($configuredPaymentMethods) {
             return new PaymentMethod(
-                $availablePaymentType,
-                PaymentMethodNames::PAYMENT_METHOD_NAMES[$availablePaymentType] ?? PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME,
+                strtolower($availablePaymentType),
+                PaymentMethodNames::PAYMENT_METHOD_NAMES[strtolower($availablePaymentType)] ?? PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME,
                 $this->isPaymentTypeEnabled($availablePaymentType, $configuredPaymentMethods)
             );
         }, $availablePaymentTypes);
