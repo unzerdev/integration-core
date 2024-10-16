@@ -4,12 +4,17 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller;
 
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\EnablePaymentMethodRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\GetPaymentMethodConfigRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\SavePaymentMethodConfigRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\EnablePaymentMethodResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\GetPaymentConfigResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\PaymentMethodsResponse;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\SavePaymentMethodConfigResponse;
+use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
@@ -67,5 +72,21 @@ class PaymentMethodsController
     public function getPaymentConfig(GetPaymentMethodConfigRequest $request): GetPaymentConfigResponse
     {
         return new GetPaymentConfigResponse($this->paymentMethodService->getPaymentMethodConfigByType($request->getType()));
+    }
+
+    /**
+     * @param SavePaymentMethodConfigRequest $request
+     *
+     * @return SavePaymentMethodConfigResponse
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
+     */
+    public function savePaymentConfig(SavePaymentMethodConfigRequest $request): SavePaymentMethodConfigResponse
+    {
+        $this->paymentMethodService->savePaymentMethodConfig($request->toDomainModel());
+
+        return new SavePaymentMethodConfigResponse();
     }
 }

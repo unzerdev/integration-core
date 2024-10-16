@@ -1,14 +1,14 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response;
+namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request;
 
-use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -27,20 +27,20 @@ class SavePaymentMethodConfigRequest extends Request
     /** @var array */
     private array $description;
 
-    /** @var string */
-    private string $bookingMethod;
+    /** @var ?string */
+    private ?string $bookingMethod;
 
     /** @var ?string */
     private ?string $statusIdToCharge = null;
 
     /** @var ?float */
-    private float $minOrderAmount;
+    private ?float $minOrderAmount;
 
     /** @var ?float */
-    private float $maxOrderAmount;
+    private ?float $maxOrderAmount;
 
     /** @var ?float */
-    private float $surcharge;
+    private ?float $surcharge;
 
     /** @var array */
     private array $restrictedCountries;
@@ -52,7 +52,7 @@ class SavePaymentMethodConfigRequest extends Request
      * @param string $type
      * @param array $name
      * @param array $description
-     * @param string $bookingMethod
+     * @param ?string $bookingMethod
      * @param ?string $statusIdToCharge
      * @param ?float $minOrderAmount
      * @param ?float $maxOrderAmount
@@ -62,8 +62,8 @@ class SavePaymentMethodConfigRequest extends Request
      */
     public function __construct(
         string $type,
-        array $name,
-        array $description,
+        array $name = [],
+        array $description = [],
         ?string $bookingMethod = null,
         ?string $statusIdToCharge = null,
         ?float $minOrderAmount = null,
@@ -98,12 +98,13 @@ class SavePaymentMethodConfigRequest extends Request
             true,
             TranslatableLabel::fromArrayToBatch($this->name),
             TranslatableLabel::fromArrayToBatch($this->description),
-            $this->bookingMethod ?? BookingMethod::parse($this->bookingMethod),
+            $this->bookingMethod ? BookingMethod::parse($this->bookingMethod) : null,
             $this->statusIdToCharge,
             $this->minOrderAmount,
             $this->maxOrderAmount,
             $this->surcharge,
             Country::fromArrayToBatch($this->restrictedCountries),
+            $this->sendBasketData
         );
     }
 }

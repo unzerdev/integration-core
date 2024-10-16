@@ -59,7 +59,17 @@ class Country
     {
         self::validateTranslatableArray($input);
 
-        return array_map(fn($value) => new self($value['value'], $value['locale']), $input);
+        return array_map(fn($value) => new self($value['code'], $value['name']), $input);
+    }
+
+    /**
+     * @param self[] $batch
+     *
+     * @return array
+     */
+    public static function fromBatchToArray(array $batch): array
+    {
+        return array_map(fn($country) => ['code' => $country->getCode(), 'name' => $country->getName()], $batch);
     }
 
     /**

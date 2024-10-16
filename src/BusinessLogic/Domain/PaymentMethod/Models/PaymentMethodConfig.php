@@ -49,19 +49,19 @@ class PaymentMethodConfig
     private ?string $statusIdToCharge = null;
 
     /**
-     * @var float
+     * @var ?float
      */
-    private float $minOrderAmount = 0.0;
+    private ?float $minOrderAmount = 0.0;
 
     /**
-     * @var float
+     * @var ?float
      */
-    private float $maxOrderAmount = 0.0;
+    private ?float $maxOrderAmount = 0.0;
 
     /**
-     * @var float
+     * @var ?float
      */
-    private float $surcharge = 0.0;
+    private ?float $surcharge = 0.0;
 
     /**
      * @var Country[]
@@ -80,10 +80,11 @@ class PaymentMethodConfig
      * @param array $description
      * @param BookingMethod|null $bookingMethod
      * @param string|null $statusIdToCharge
-     * @param float $minOrderAmount
-     * @param float $maxOrderAmount
-     * @param float $surcharge
+     * @param float|null $minOrderAmount
+     * @param float|null $maxOrderAmount
+     * @param float|null $surcharge
      * @param array $restrictedCountries
+     * @param bool $sendBasketData
      */
     public function __construct(
         string $type,
@@ -92,10 +93,11 @@ class PaymentMethodConfig
         array $description = [],
         ?BookingMethod $bookingMethod = null,
         ?string $statusIdToCharge = null,
-        float $minOrderAmount = 0.0,
-        float $maxOrderAmount = 0.0,
-        float $surcharge = 0.0,
-        array $restrictedCountries = []
+        ?float $minOrderAmount = null,
+        ?float $maxOrderAmount = null,
+        ?float $surcharge = null,
+        array $restrictedCountries = [],
+        bool $sendBasketData = false
     ) {
         $this->type = $type;
         $this->enabled = $enabled;
@@ -107,7 +109,7 @@ class PaymentMethodConfig
         $this->maxOrderAmount = $maxOrderAmount;
         $this->surcharge = $surcharge;
         $this->restrictedCountries = $restrictedCountries;
-        $this->sendBasketData = false;
+        $this->sendBasketData = $sendBasketData;
     }
 
     /**
@@ -169,25 +171,25 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return float
+     * @return ?float
      */
-    public function getMinOrderAmount(): float
+    public function getMinOrderAmount(): ?float
     {
         return $this->minOrderAmount;
     }
 
     /**
-     * @return float
+     * @return ?float
      */
-    public function getMaxOrderAmount(): float
+    public function getMaxOrderAmount(): ?float
     {
         return $this->maxOrderAmount;
     }
 
     /**
-     * @return float
+     * @return ?float
      */
-    public function getSurcharge(): float
+    public function getSurcharge(): ?float
     {
         return $this->surcharge;
     }

@@ -14,7 +14,6 @@ use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 
 /**
  * Class AdminAPI. Integrations should use this class for communicating with Admin API.
@@ -105,17 +104,6 @@ class AdminAPI
         return Aspects
             ::run(new ErrorHandlingAspect())
             ->beforeEachMethodOfService(VersionController::class);
-    }
-
-    /**
-     * @return StateController
-     */
-    public function state(string $storeId): object
-    {
-        return Aspects
-            ::run(new ErrorHandlingAspect())
-            ->andRun(new StoreContextAspect($storeId))
-            ->beforeEachMethodOfService(StateController::class);
     }
 
     /**

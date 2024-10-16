@@ -5,9 +5,12 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\PaymentMethods;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\EnablePaymentMethodRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\GetPaymentMethodConfigRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\SavePaymentMethodConfigRequest;
+use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
@@ -15,6 +18,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -22,7 +26,6 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock as Inte
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Unzer;
 
 /**
  * Class PaymentMethodsApiTest.
@@ -189,7 +192,7 @@ class PaymentMethodsApiTest extends BaseTestCase
                 1.1,
                 2.2,
                 3.3,
-                [new Country('DE', 'Germany') , new Country('FR', 'France')]
+                [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
 
@@ -236,7 +239,7 @@ class PaymentMethodsApiTest extends BaseTestCase
                 1.1,
                 2.2,
                 3.3,
-                [new Country('DE', 'Germany') , new Country('FR', 'France')]
+                [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
 
@@ -283,7 +286,7 @@ class PaymentMethodsApiTest extends BaseTestCase
                 1.1,
                 2.2,
                 3.3,
-                [new Country('DE', 'Germany') , new Country('FR', 'France')]
+                [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
 
@@ -307,5 +310,90 @@ class PaymentMethodsApiTest extends BaseTestCase
             'sendBasketData' => false,
             'statusIdToCharge' => '2'
         ], $response->toArray());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
+     */
+    public function testSavePaymentMethodConfigSuccess(): void
+    {
+        // Arrange
+        $request = new SavePaymentMethodConfigRequest('eps', [], []);
+
+        // Act
+        $response = AdminAPI::get()->paymentMethods('1')->savePaymentConfig($request);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
+     */
+    public function testSavePaymentMethodConfigToArray(): void
+    {
+        // Arrange
+        $request = new SavePaymentMethodConfigRequest(
+            'eps',
+            [['locale' => 'en', 'value' => 'KLARNA eng'], ['locale' => 'de', 'value' => 'KLARNA De']],
+            [],
+            null,
+            null,
+            null,
+            null,
+            null,
+            [['code' => 'fr', 'name' => 'France'], ['code' => 'de', 'name' => 'Germany']]
+        );
+
+        // Act
+        $response = AdminAPI::get()->paymentMethods('1')->savePaymentConfig($request);
+
+        // Assert
+        self::assertEquals([], $response->toArray());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
+     */
+    public function testSavePaymentMethodConfigInvalidTranslatableLabel(): void
+    {
+        // Arrange
+        $request = new SavePaymentMethodConfigRequest('eps', ['test', ''], []);
+        $this->expectException(InvalidTranslatableArrayException::class);
+
+        // Act
+        $request->toDomainModel();
+
+        // Assert
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
+     */
+    public function testSavePaymentMethodConfigInvalidCountryArray(): void
+    {
+        // Arrange
+        $request = new SavePaymentMethodConfigRequest('eps', [], [], null, null, null, null, null, ['test', '']);
+        $this->expectException(InvalidCountryArrayException::class);
+
+        // Act
+        $request->toDomainModel();
+        // Assert
     }
 }

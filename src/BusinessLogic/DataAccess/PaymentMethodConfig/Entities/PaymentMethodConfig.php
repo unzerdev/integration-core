@@ -2,6 +2,12 @@
 
 namespace Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities;
 
+use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
+use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
 use Unzer\Core\Infrastructure\ORM\Entity;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
@@ -49,6 +55,10 @@ class PaymentMethodConfig extends Entity
 
     /**
      * @inheritDoc
+     *
+     * @throws InvalidTranslatableArrayException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidBookingMethodException
      */
     public function inflate(array $data): void
     {
@@ -60,7 +70,16 @@ class PaymentMethodConfig extends Entity
         $paymentMethodConfig = $data['paymentMethodConfig'] ?? [];
         $this->paymentMethodConfig = new DomainPaymentMethodConfig(
             $paymentMethodConfig['type'],
-            $paymentMethodConfig['enabled']
+            $paymentMethodConfig['enabled'],
+            TranslatableLabel::fromArrayToBatch($paymentMethodConfig['name']),
+            TranslatableLabel::fromArrayToBatch($paymentMethodConfig['description']),
+            $paymentMethodConfig['bookingMethod'] ? BookingMethod::parse($paymentMethodConfig['bookingMethod']) : null,
+            $paymentMethodConfig['statusIdToCharge'],
+            $paymentMethodConfig['minOrderAmount'],
+            $paymentMethodConfig['maxOrderAmount'],
+            $paymentMethodConfig['surcharge'],
+            Country::fromArrayToBatch($paymentMethodConfig['restrictedCountries']),
+            $paymentMethodConfig['sendBasketData'],
         );
     }
 
@@ -74,7 +93,17 @@ class PaymentMethodConfig extends Entity
         $data['type'] = $this->type;
         $data['paymentMethodConfig'] = [
             'type' => $this->paymentMethodConfig->getType(),
-            'enabled' => $this->paymentMethodConfig->isEnabled()
+            'enabled' => $this->paymentMethodConfig->isEnabled(),
+            'name' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getName()),
+            'bookingMethod' => $this->paymentMethodConfig->getBookingMethod() ?
+                $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null,
+            'description' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getDescription()),
+            'statusIdToCharge' => $this->paymentMethodConfig->getStatusIdToCharge(),
+            'minOrderAmount' => $this->paymentMethodConfig->getMinOrderAmount(),
+            'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount(),
+            'surcharge' => $this->paymentMethodConfig->getSurcharge(),
+            'restrictedCountries' => Country::fromBatchToArray($this->paymentMethodConfig->getRestrictedCountries()),
+            'sendBasketData' => $this->paymentMethodConfig->isSendBasketData()
         ];
 
         return $data;

@@ -21,6 +21,13 @@ interface PaymentMethodConfigRepositoryInterface
      *
      * @return void
      */
+    public function savePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void;
+
+    /**
+     * @param PaymentMethodConfig $paymentMethodConfig
+     *
+     * @return void
+     */
     public function enablePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void;
 
     /**

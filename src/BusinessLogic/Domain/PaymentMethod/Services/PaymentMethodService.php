@@ -80,7 +80,7 @@ class PaymentMethodService
             );
         }
 
-        $this->paymentMethodConfigRepository->enablePaymentMethodConfig($paymentMethodConfig);
+        $this->paymentMethodConfigRepository->savePaymentMethodConfig($paymentMethodConfig);
     }
 
     /**
@@ -114,6 +114,16 @@ class PaymentMethodService
         }
 
         return $config;
+    }
+
+    /**
+     * @param PaymentMethodConfig $paymentMethodConfig
+     *
+     * @return void
+     */
+    public function savePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void
+    {
+        $this->paymentMethodConfigRepository->savePaymentMethodConfig($paymentMethodConfig);
     }
 
     /**

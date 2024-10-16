@@ -77,6 +77,16 @@ class TranslatableLabel
     }
 
     /**
+     * @param self[] $batch
+     *
+     * @return array
+     */
+    public static function fromBatchToArray(array $batch): array
+    {
+        return array_map(fn($value) => ['value' => $value->getMessage(), 'locale' => $value->getCode()], $batch);
+    }
+
+    /**
      * @param array $input
      *
      * @return void

@@ -4,9 +4,13 @@ namespace Unzer\Core\Tests\BusinessLogic\PaymentMethodConfig\Repositories;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig as PaymentMethodConfigEntity;
+use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -70,8 +74,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         }
 
         // act
-        $result = StoreContext::doWithStore('1',
-            [$this->paymentMethodConfigRepository, 'getPaymentMethodConfigs']);
+        $result = StoreContext::doWithStore('1', [$this->paymentMethodConfigRepository, 'getPaymentMethodConfigs']);
 
         // assert
         self::assertCount(10, $result);
@@ -87,7 +90,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
 
         // act
         StoreContext::doWithStore('1',
-            [$this->paymentMethodConfigRepository, 'enablePaymentMethodConfig'],
+            [$this->paymentMethodConfigRepository, 'savePaymentMethodConfig'],
             [$config]
         );
 
@@ -239,5 +242,87 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
 
         // assert
         self::assertNull($fetchedConfig);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveConfigNoConfig(): void
+    {
+        // arrange
+        $config = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            BookingMethod::authorize(),
+            '1',
+            1.1,
+            2.2,
+            3.3,
+            [new Country('de', 'Germany'), new Country('fr', 'France')],
+            true
+        );
+
+        // act
+        StoreContext::doWithStore('1',
+            [$this->paymentMethodConfigRepository, 'savePaymentMethodConfig'],
+            [$config]
+        );
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertEquals($config, $savedEntity[0]->getPaymentMethodConfig());
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testSaveConfigUpdate(): void
+    {
+        // arrange
+        $config = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            BookingMethod::authorize(),
+            '1',
+            1.1,
+            2.2,
+            3.3,
+            [new Country('de', 'Germany'), new Country('fr', 'France')],
+            true
+        );
+
+        $configEntity = new PaymentMethodConfigEntity();
+        $configEntity->setPaymentMethodConfig($config);
+        $configEntity->setType('eps');
+        $configEntity->setStoreId('1');
+        $this->repository->save($configEntity);
+
+        $newConfig = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            BookingMethod::charge(),
+            '1',
+            1.1,
+            2.2,
+            3.3,
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')],
+            false
+        );
+
+        // act
+        StoreContext::doWithStore('1',
+            [$this->paymentMethodConfigRepository, 'savePaymentMethodConfig'],
+            [$newConfig]
+        );
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertEquals($newConfig, $savedEntity[0]->getPaymentMethodConfig());
     }
 }

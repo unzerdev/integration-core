@@ -8,12 +8,13 @@ use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
-use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData;
@@ -28,6 +29,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
@@ -107,6 +109,16 @@ class BootstrapComponent extends BaseBootstrapComponent
                 );
             })
         );
+
+        ServiceRegister::registerService(
+            PaymentMethodService::class,
+            new SingleInstance(static function () {
+                return new PaymentMethodService(
+                    UnzerFactory::getInstance()->makeUnzerAPI(),
+                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+                );
+            })
+        );
     }
 
     /**
@@ -141,6 +153,16 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new PaymentPageSettingsRepository(
                     RepositoryRegistry::getRepository(PaymentPageSettings::getClassName()),
+                    ServiceRegister::getService(StoreContext::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentMethodConfigRepositoryInterface::class,
+            new SingleInstance(static function () {
+                return new PaymentMethodConfigRepository(
+                    RepositoryRegistry::getRepository(PaymentMethodConfig::getClassName()),
                     ServiceRegister::getService(StoreContext::class)
                 );
             })

@@ -64,6 +64,33 @@ class PaymentMethodConfigRepository implements PaymentMethodConfigRepositoryInte
      *
      * @throws QueryFilterInvalidParamException
      */
+    public function savePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void
+    {
+        $existingConfig = $this->getPaymentConfigEntity($paymentMethodConfig->getType());
+
+        if ($existingConfig) {
+            $existingConfig->setPaymentMethodConfig($paymentMethodConfig);
+            $existingConfig->setStoreId($this->storeContext->getStoreId());
+            $existingConfig->setType($paymentMethodConfig->getType());
+            $this->repository->update($existingConfig);
+
+            return;
+        }
+
+        $entity = new PaymentMethodConfigEntity();
+        $entity->setPaymentMethodConfig($paymentMethodConfig);
+        $entity->setStoreId($this->storeContext->getStoreId());
+        $entity->setType($paymentMethodConfig->getType());
+        $this->repository->save($entity);
+    }
+
+    /**
+     * @param PaymentMethodConfig $paymentMethodConfig
+     *
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
     public function enablePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void
     {
         $existingConfig = $this->getPaymentConfigEntity($paymentMethodConfig->getType());
