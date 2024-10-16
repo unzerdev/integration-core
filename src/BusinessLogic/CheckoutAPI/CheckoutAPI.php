@@ -31,7 +31,7 @@ class CheckoutAPI
      *
      * @return CheckoutPaymentMethodsController
      */
-    public function connection(string $storeId): object
+    public function paymentMethods(string $storeId): object
     {
         return Aspects
             ::run(new ErrorHandlingAspect())
