@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPage
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -64,15 +65,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -93,15 +87,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -124,15 +111,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
         );
 
         // act
@@ -151,15 +131,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '#FFFFFFF',
-            '#666666',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -167,15 +140,12 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
-            '',
-            '',
-            ''
         );
 
         // act
@@ -194,15 +164,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -211,15 +174,12 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $this->repository->save($settingsEntity);
 
         $newSettings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
             '#666666',
             '#111111',
-            '#555555',
-            '',
-            '',
-            ''
+            '#555555'
         );
 
         // act
@@ -240,15 +200,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -285,15 +238,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();

@@ -2,6 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+
 /**
  * Class PaymentPageSettings
  *
@@ -10,74 +12,74 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 class PaymentPageSettings
 {
     /**
-     * @var string[] $shopNames
+     * @var TranslatableLabel[] $shopName
      */
-    private array $shopNames;
+    private array $shopName = [];
 
     /**
-     * @var string[] $shopTaglines
+     * @var TranslatableLabel[] $shopTagline
      */
-    private array $shopTaglines;
+    private array $shopTagline = [];
 
     /**
-     * @var string $logoImageUrl
+     * @var ?string $logoImageUrl
      */
-    private string $logoImageUrl;
+    private ?string $logoImageUrl;
 
     /**
-     * @var string $headerBackgroundColor
+     * @var ?string $headerBackgroundColor
      */
-    private string $headerBackgroundColor;
+    private ?string $headerBackgroundColor;
 
     /**
-     * @var string $headerFontColor
+     * @var ?string $headerFontColor
      */
-    private string $headerFontColor;
+    private ?string $headerFontColor;
 
     /**
-     * @var string $shopNameBackgroundColor
+     * @var ?string $shopNameBackgroundColor
      */
-    private string $shopNameBackgroundColor;
+    private ?string $shopNameBackgroundColor;
 
     /**
-     * @var string $shopNameFontColor
+     * @var ?string $shopNameFontColor
      */
-    private string $shopNameFontColor;
+    private ?string $shopNameFontColor;
 
     /**
-     * @var string $shopTaglineBackgroundColor
+     * @var ?string $shopTaglineBackgroundColor
      */
-    private string $shopTaglineBackgroundColor;
+    private ?string $shopTaglineBackgroundColor;
 
     /**
-     * @var string $shopTaglineFontColor
+     * @var ?string $shopTaglineFontColor
      */
-    private string $shopTaglineFontColor;
+    private ?string $shopTaglineFontColor;
 
     /**
-     * @param array $shopNames
-     * @param array $shopTaglines
-     * @param string $logoImageUrl
-     * @param string $headerBackgroundColor
-     * @param string $headerFontColor
-     * @param string $shopNameBackgroundColor
-     * @param string $shopNameFontColor
-     * @param string $shopTaglineBackgroundColor
-     * @param string $shopTaglineFontColor
+     * @param array $shopName
+     * @param array $shopTagline
+     * @param string|null $logoImageUrl
+     * @param string|null $headerBackgroundColor
+     * @param string|null $headerFontColor
+     * @param string|null $shopNameBackgroundColor
+     * @param string|null $shopNameFontColor
+     * @param string|null $shopTaglineBackgroundColor
+     * @param string|null $shopTaglineFontColor
      */
     public function __construct(
-        array $shopNames,
-        array $shopTaglines,
-        string $logoImageUrl,
-        string $headerBackgroundColor,
-        string $headerFontColor,
-        string $shopNameBackgroundColor,
-        string $shopNameFontColor,
-        string $shopTaglineBackgroundColor,
-        string $shopTaglineFontColor
+        array $shopName = [],
+        array $shopTagline = [],
+        ?string $logoImageUrl = null,
+        ?string $headerBackgroundColor = null,
+        ?string $headerFontColor = null,
+        ?string $shopNameBackgroundColor = null,
+        ?string $shopNameFontColor = null,
+        ?string $shopTaglineBackgroundColor = null,
+        ?string $shopTaglineFontColor = null
     ) {
-        $this->shopNames = $shopNames;
-        $this->shopTaglines = $shopTaglines;
+        $this->shopName = $shopName;
+        $this->shopTagline = $shopTagline;
         $this->logoImageUrl = $logoImageUrl;
         $this->headerBackgroundColor = $headerBackgroundColor;
         $this->headerFontColor = $headerFontColor;
@@ -88,75 +90,74 @@ class PaymentPageSettings
     }
 
     /**
-     * @return string[]
+     * @return TranslatableLabel[]
      */
-    public function getShopNames(): array
+    public function getShopName(): array
     {
-        return $this->shopNames;
+        return $this->shopName;
     }
 
     /**
-     * @return string[]
+     * @return TranslatableLabel[]
      */
-    public function getShopTaglines(): array
+    public function getShopTagline(): array
     {
-        return $this->shopTaglines;
+        return $this->shopTagline;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getLogoImageUrl(): string
+    public function getLogoImageUrl(): ?string
     {
         return $this->logoImageUrl;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getHeaderFontColor(): string
-    {
-        return $this->headerFontColor;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getHeaderBackgroundColor(): string
+    public function getHeaderBackgroundColor(): ?string
     {
         return $this->headerBackgroundColor;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getShopNameBackgroundColor(): string
+    public function getHeaderFontColor(): ?string
+    {
+        return $this->headerFontColor;
+    }
+
+    /**
+     * @return ?string
+     */
+    public function getShopNameBackgroundColor(): ?string
     {
         return $this->shopNameBackgroundColor;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getShopNameFontColor(): string
+    public function getShopNameFontColor(): ?string
     {
         return $this->shopNameFontColor;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getShopTaglineBackgroundColor(): string
+    public function getShopTaglineFontColor(): ?string
     {
-        return $this->shopTaglineBackgroundColor;
+        return $this->shopTaglineFontColor;
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getShopTaglineFontColor(): string
+    public function getShopTaglineBackgroundColor(): ?string
     {
-        return $this->shopTaglineFontColor;
+        return $this->shopTaglineBackgroundColor;
     }
 }

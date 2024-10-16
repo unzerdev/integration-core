@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
  * Class PaymentPageSettingsGetResponse
@@ -34,8 +35,8 @@ class PaymentPageSettingsGetResponse extends Response
     {
         return $this->paymentPageSettings ? $this->transformPaymentPageSettings() :
             [
-                'shopNames' => [],
-                'shopTaglines' => [],
+                'shopName' => [],
+                'shopTagline' => [],
                 'logoImageUrl' => '',
                 'headerBackgroundColor' => '',
                 'headerFontColor' => '',
@@ -53,8 +54,8 @@ class PaymentPageSettingsGetResponse extends Response
     private function transformPaymentPageSettings(): array
     {
         return [
-            'shopNames' => $this->paymentPageSettings->getShopNames(),
-            'shopTaglines' => $this->paymentPageSettings->getShopTaglines(),
+            'shopName' => $this->translatableLabelsToArray($this->paymentPageSettings->getShopName()),
+            'shopTagline' => $this->translatableLabelsToArray($this->paymentPageSettings->getShopTagline()),
             'logoImageUrl' => $this->paymentPageSettings->getLogoImageUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
@@ -63,5 +64,20 @@ class PaymentPageSettingsGetResponse extends Response
             'shopTaglineBackgroundColor' => $this->paymentPageSettings->getShopTaglineBackgroundColor(),
             'shopTaglineFontColor' => $this->paymentPageSettings->getShopTaglineFontColor(),
         ];
+    }
+
+    /**
+     * @param TranslatableLabel[] $labels
+     *
+     * @return array
+     */
+    private function translatableLabelsToArray(array $labels): array
+    {
+        return array_map(function ($label) {
+            return [
+                'locale' => $label->getCode(),
+                'value' => $label->getMessage()
+            ];
+        }, $labels);
     }
 }

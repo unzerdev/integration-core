@@ -2,6 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities;
 
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as DomainPaymentPageSettings;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
@@ -43,6 +45,7 @@ class PaymentPageSettings extends Entity
 
     /**
      * @inheritDoc
+     * @throws InvalidTranslatableArrayException
      */
     public function inflate(array $data): void
     {
@@ -53,16 +56,15 @@ class PaymentPageSettings extends Entity
         $paypageData = $data['paymentPageSettings'] ?? [];
 
         $this->paymentPageSettings = new DomainPaymentPageSettings(
-            $paypageData['shopNames'] ?? [],
-            $paypageData['shopTaglines'] ?? [],
-            $paypageData['logoImageUrl'] ?? '',
+            TranslatableLabel::fromArrayToBatch($paypageData['shopName']),
+            TranslatableLabel::fromArrayToBatch($paypageData['shopTagline']),
+            $paypageData['logoImageUrl'],
             $paypageData['headerBackgroundColor'],
             $paypageData['headerFontColor'],
             $paypageData['shopNameBackgroundColor'],
             $paypageData['shopNameFontColor'],
             $paypageData['shopTaglineBackgroundColor'],
-            $paypageData['shopTaglineFontColor'],
-        );
+            $paypageData['shopTaglineFontColor'],);
     }
 
     /**
@@ -73,8 +75,8 @@ class PaymentPageSettings extends Entity
         $data = parent::toArray();
         $data['storeId'] = $this->storeId;
         $data['paymentPageSettings'] = [
-            'shopNames' => $this->paymentPageSettings->getShopNames(),
-            'shopTaglines' => $this->paymentPageSettings->getShopTaglines(),
+            'shopName' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopName()),
+            'shopTagline' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopTagline()),
             'logoImageUrl' => $this->paymentPageSettings->getLogoImageUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),

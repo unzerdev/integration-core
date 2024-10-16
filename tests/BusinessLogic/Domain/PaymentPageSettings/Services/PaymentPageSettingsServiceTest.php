@@ -5,6 +5,7 @@ namespace BusinessLogic\Domain\PaymentPageSettings\Services;
 use Exception;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -62,15 +63,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -91,15 +85,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -122,15 +109,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
         );
 
         // act
@@ -148,15 +128,10 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
             '#FFFFFFF',
             '#666666',
-            '',
-            '',
-            '',
-            '',
-            ''
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -164,15 +139,12 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
-            '',
-            '',
-            ''
         );
 
         // act
@@ -190,15 +162,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -207,15 +172,12 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $this->repository->save($settingsEntity);
 
         $newSettings = new PaymentPageSettingsModel(
-            ['Store'],
-            ['Tag'],
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
-            '',
-            '',
-            ''
         );
 
         // act

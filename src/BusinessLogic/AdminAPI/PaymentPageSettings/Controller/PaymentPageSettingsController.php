@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSet
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsPutResponse;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 
 /**
  * Class PaymentPageController.
@@ -31,11 +32,12 @@ class PaymentPageSettingsController
      * @param PaymentPageSettingsRequest $paymentPageSettingsRequest
      *
      * @return PaymentPageSettingsPutResponse
+     *
+     * @throws InvalidTranslatableArrayException
      */
     public function savePaymentPageSettings(
         PaymentPageSettingsRequest $paymentPageSettingsRequest
     ): PaymentPageSettingsPutResponse {
-
         $this->paymentPageSettingsService->savePaymentPageSettings(
             $paymentPageSettingsRequest->transformToDomainModel()
         );

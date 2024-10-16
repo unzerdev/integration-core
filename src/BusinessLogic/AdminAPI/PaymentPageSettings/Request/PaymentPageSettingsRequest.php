@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
  * Class PaymentPageRequest.
@@ -12,14 +14,16 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 class PaymentPageSettingsRequest
 {
     /**
-     * @var string[] $shopNames
+     * @var array $shopName
+     *
+     * Example [['locale' => 'en', 'value' => 'Shop']]
      */
-    private array $shopNames;
+    private array $shopName;
 
     /**
-     * @var string[] $shopTaglines
+     * @var array $shopTagline
      */
-    private array $shopTaglines;
+    private array $shopTagline;
 
     /**
      * @var string $logoImageUrl
@@ -57,29 +61,29 @@ class PaymentPageSettingsRequest
     private string $shopTaglineFontColor;
 
     /**
-     * @param array $shopNames
-     * @param array $shopTaglines
-     * @param string $logoImageUrl
-     * @param string $headerBackgroundColor
-     * @param string $headerFontColor
-     * @param string $shopNameBackgroundColor
-     * @param string $shopNameFontColor
-     * @param string $shopTaglineBackgroundColor
-     * @param string $shopTaglineFontColor
+     * @param array $shopName
+     * @param array $shopTagline
+     * @param string|null $logoImageUrl
+     * @param string|null $headerBackgroundColor
+     * @param string|null $headerFontColor
+     * @param string|null $shopNameBackgroundColor
+     * @param string|null $shopNameFontColor
+     * @param string|null $shopTaglineBackgroundColor
+     * @param string|null $shopTaglineFontColor
      */
     public function __construct(
-        array $shopNames,
-        array $shopTaglines,
-        string $logoImageUrl,
-        string $headerBackgroundColor,
-        string $headerFontColor,
-        string $shopNameBackgroundColor,
-        string $shopNameFontColor,
-        string $shopTaglineBackgroundColor,
-        string $shopTaglineFontColor
+        array $shopName = [],
+        array $shopTagline = [],
+        ?string $logoImageUrl = null,
+        ?string $headerBackgroundColor = null,
+        ?string $headerFontColor = null,
+        ?string $shopNameBackgroundColor = null,
+        ?string $shopNameFontColor = null,
+        ?string $shopTaglineBackgroundColor = null,
+        ?string $shopTaglineFontColor = null
     ) {
-        $this->shopNames = $shopNames;
-        $this->shopTaglines = $shopTaglines;
+        $this->shopName = $shopName;
+        $this->shopTagline = $shopTagline;
         $this->logoImageUrl = $logoImageUrl;
         $this->headerBackgroundColor = $headerBackgroundColor;
         $this->headerFontColor = $headerFontColor;
@@ -93,13 +97,14 @@ class PaymentPageSettingsRequest
      * Transform to Domain model
      *
      * @return PaymentPageSettings
+     * @throws InvalidTranslatableArrayException
      */
 
     public function transformToDomainModel(): object
     {
         return new PaymentPageSettings(
-            $this->shopNames,
-            $this->shopTaglines,
+            TranslatableLabel::fromArrayToBatch($this->shopName),
+            TranslatableLabel::fromArrayToBatch($this->shopTagline),
             $this->logoImageUrl,
             $this->headerBackgroundColor,
             $this->headerFontColor,
