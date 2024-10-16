@@ -8,17 +8,6 @@
 
   const languages = Unzer.config.locales;
 
-  const dropdownOptions = languages.map(language => {
-    const imageUrl = language.flag !== "default"
-        ? `${Unzer.config.flagsUrl}/${language.flag}.svg`
-        : `${Unzer.config.flagsUrl}/country-xx.svg`;
-
-    return {
-      label: `<img src="${imageUrl}" alt="${language.code}" style="width: 30px; height: 15px; margin-right: 5px;"/>`,
-      value: language.code
-    };
-  });
-
   let selectedValues = {
     shopName: "",
     shopNameCode: "",
@@ -72,8 +61,13 @@
               Unzer.components.TextDropdownComponent.create({
                 isIcon: true,
                 value: "default",
-                options: [{ label: Unzer.imagesProvider.languageIcon, value: "default" },
-                  ...dropdownOptions
+                options: [
+                  { label: Unzer.imagesProvider.languageIcon, value: "default" },
+                  ...languages.map(x => {
+                    return {
+                      value: x.code, label: x.flag
+                    }
+                  })
                 ],
                 onChange: (value) => {
                   selectedValues.shopNameCode = value;
@@ -101,8 +95,13 @@
               Unzer.components.TextDropdownComponent.create({
                 isIcon: true,
                 value: "default",
-                options: [{ label: Unzer.imagesProvider.languageIcon, value: "default" },
-                    ...dropdownOptions
+                options: [
+                  { label: Unzer.imagesProvider.languageIcon, value: "default" },
+                  ...languages.map(x => {
+                    return {
+                      value: x.code, label: x.flag
+                    }
+                  })
                 ],
                 onChange: (value) => {
                   selectedValues.shopTaglineCode = value;
