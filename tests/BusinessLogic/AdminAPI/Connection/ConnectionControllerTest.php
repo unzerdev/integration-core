@@ -266,12 +266,22 @@ class ConnectionControllerTest extends BaseTestCase
     public function testReRegistringWebhooksToArray(): void
     {
         // Arrange
+        $date = new DateTime('2024-10-03 14:30:00');
+        $time = $date->format('F d, Y H:i');
+        $this->connectionService->setWebhookData(
+            new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time)
+        );
 
         // Act
         $response = AdminAPI::get()->connection('1')->reRegisterWebhooks();
 
         // Assert
-        self::assertEmpty($response->toArray());
+        self::assertArrayHasKey('webhookData', $response->toArray());
+        self::assertArrayNotHasKey('connectionData', $response->toArray());
+        self::assertEquals('1, 2', $response->toArray()['webhookData']['webhookID']);
+        self::assertEquals('test.com', $response->toArray()['webhookData']['webhookUrl']);
+        self::assertEquals('test, test2', $response->toArray()['webhookData']['events']);
+        self::assertEquals('October 03, 2024 14:30', $response->toArray()['webhookData']['registrationDate']);
     }
 
     /**

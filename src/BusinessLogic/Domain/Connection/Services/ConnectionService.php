@@ -105,12 +105,12 @@ class ConnectionService
     }
 
     /**
-     * @return void
+     * @return ?WebhookData
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function reRegisterWebhooks(): void
+    public function reRegisterWebhooks(): ?WebhookData
     {
         $connectionSettings = $this->getConnectionSettings();
 
@@ -125,6 +125,8 @@ class ConnectionService
         $unzer->deleteAllWebhooks();
         $this->webhookDataRepository->deleteWebhookData();
         $this->registerWebhooks($unzer, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
+
+        return $this->getWebhookData();
     }
 
     /**

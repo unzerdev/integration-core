@@ -425,7 +425,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2]);
 
         // act
-        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
+        $webhookDataSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
 
         // assert
         /** @var WebhookData $connectionSettings */
@@ -434,6 +434,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         self::assertNotNull($webhookData);
         self::assertEquals('https://test.com', $webhookData->getUrl());
         self::assertCount(2, $webhookData->getEvents());
+        self::assertEquals($webhookData,$webhookDataSaved);
     }
 
     /**

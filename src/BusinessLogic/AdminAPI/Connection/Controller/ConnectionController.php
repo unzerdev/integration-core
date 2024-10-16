@@ -82,9 +82,9 @@ class ConnectionController
      */
     public function reRegisterWebhooks(): ReRegisterWebhooksResponse
     {
-        $this->connectionService->reRegisterWebhooks();
+        $webhookData = $this->connectionService->reRegisterWebhooks();
 
-        return new ReRegisterWebhooksResponse();
+        return new ReRegisterWebhooksResponse($webhookData);
     }
 
     /**

@@ -59,8 +59,9 @@ class ConnectionServiceMock extends ConnectionService
     /**
      * @return void
      */
-    public function reRegisterWebhooks(): void
+    public function reRegisterWebhooks(): ?WebhookData
     {
+        return $this->webhookData;
     }
 
     /**
