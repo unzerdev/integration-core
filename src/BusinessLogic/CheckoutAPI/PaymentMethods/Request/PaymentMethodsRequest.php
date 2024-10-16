@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 
 /**
  * Class PaymentMethodsRequest.
@@ -14,25 +15,20 @@ class PaymentMethodsRequest extends Request
     /** @var string  */
     private string $billingCountry;
 
-    /** @var string  */
-    private string $currency;
-
-    /** @var float  */
-    private float $amount;
+    /** @var Amount  */
+    private Amount $amount;
 
     /** @var string  */
     private string $locale;
 
     /**
      * @param string $billingCountry
-     * @param string $currency
-     * @param float $amount
+     * @param Amount $amount
      * @param string $locale
      */
-    public function __construct(string $billingCountry, string $currency, float $amount, string $locale)
+    public function __construct(string $billingCountry, Amount $amount, string $locale)
     {
         $this->billingCountry = $billingCountry;
-        $this->currency = $currency;
         $this->amount = $amount;
         $this->locale = $locale;
     }

@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 
 /**
@@ -19,19 +21,27 @@ class PaymentMethodsResponse extends Response
     {
         return [
             [
-             'type' => PaymentMethodTypes::CARDS,
-             'name' => 'Unzer Cards',
-             'description' => 'A cards payment method',
+                'type' => PaymentMethodTypes::CARDS,
+                'name' => 'Unzer Cards',
+                'description' => 'A cards payment method',
+                'surcharge' => [
+                    'value' => Amount::fromInt(1, Currency::getDefault())->getValue(),
+                    'currency' => Currency::getDefault()->getIsoCode(),
+                ]
             ],
             [
                 'type' => PaymentMethodTypes::EPS,
                 'name' => 'Unzer EPS',
                 'description' => 'Eps payment method',
+                'surcharge' => [
+                    'value' => Amount::fromInt(1, Currency::getDefault())->getValue(),
+                    'currency' => Currency::getDefault()->getIsoCode(),
+                ]
             ],
             [
                 'type' => PaymentMethodTypes::KLARNA,
                 'name' => 'Unzer Klarna',
-                'description' => 'Klarna payment method',
+                'description' => 'Klarna payment method'
             ]
         ];
     }
