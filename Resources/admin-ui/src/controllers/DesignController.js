@@ -62,13 +62,9 @@
                 isIcon: true,
                 value: "default",
                 options: [
-                  { label: Unzer.imagesProvider.languageIcon, value: "default" },
-                  ...languages.map(x => {
-                    return {
-                      value: x.code, label: x.flag
-                    }
-                  })
+                  { label: Unzer.imagesProvider.languageIcon, value: "default" }
                 ],
+                languages: languages,
                 onChange: (value) => {
                   selectedValues.shopNameCode = value;
                 }
@@ -96,13 +92,9 @@
                 isIcon: true,
                 value: "default",
                 options: [
-                  { label: Unzer.imagesProvider.languageIcon, value: "default" },
-                  ...languages.map(x => {
-                    return {
-                      value: x.code, label: x.flag
-                    }
-                  })
+                  { label: Unzer.imagesProvider.languageIcon, value: "default" }
                 ],
+                languages: languages,
                 onChange: (value) => {
                   selectedValues.shopTaglineCode = value;
                 }
