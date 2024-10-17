@@ -4,6 +4,8 @@ namespace Unzer\Core\Tests\BusinessLogic\PaymentMethodConfig\Repositories;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig as PaymentMethodConfigEntity;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
@@ -257,9 +259,9 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
             [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
             BookingMethod::authorize(),
             '1',
-            1.1,
-            2.2,
-            3.3,
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
             [new Country('de', 'Germany'), new Country('fr', 'France')],
             true
         );
@@ -288,16 +290,16 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
             [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
             BookingMethod::authorize(),
             '1',
-            1.1,
-            2.2,
-            3.3,
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
             [new Country('de', 'Germany'), new Country('fr', 'France')],
             true
         );
 
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
-        $configEntity->setType('eps');
+        $configEntity->setType('EPS');
         $configEntity->setStoreId('1');
         $this->repository->save($configEntity);
 
@@ -308,9 +310,9 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
             [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
             BookingMethod::charge(),
             '1',
-            1.1,
-            2.2,
-            3.3,
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
             [new Country('gb', 'Great Britain'), new Country('fr', 'France')],
             false
         );

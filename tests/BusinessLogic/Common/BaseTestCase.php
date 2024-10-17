@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsCo
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
@@ -21,6 +22,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRe
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
@@ -42,6 +44,7 @@ use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
@@ -174,11 +177,18 @@ class BaseTestCase extends TestCase
             PaymentMethodService::class => static function () {
                 return new PaymentMethodService(
                     UnzerFactoryMock::getInstance()->makeUnzerAPI(),
-                    TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+                    TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                    TestServiceRegister::getService(CurrencyServiceInterface::class),
                 );
             },
             PaymentMethodsController::class => function () {
                 return new PaymentMethodsController(
+                    TestServiceRegister::getService(PaymentMethodService::class),
+                    TestServiceRegister::getService(CurrencyServiceInterface::class)
+                );
+            },
+            CheckoutPaymentMethodsController::class => function () {
+                return new CheckoutPaymentMethodsController(
                     TestServiceRegister::getService(PaymentMethodService::class)
                 );
             },
@@ -229,6 +239,13 @@ class BaseTestCase extends TestCase
             WebhookUrlServiceInterface::class,
             function () {
                 return new WebhookUrlServiceMock();
+            }
+        );
+
+        TestServiceRegister::registerService(
+            CurrencyServiceInterface::class,
+            function () {
+                return new CurrencyServiceMock();
             }
         );
     }

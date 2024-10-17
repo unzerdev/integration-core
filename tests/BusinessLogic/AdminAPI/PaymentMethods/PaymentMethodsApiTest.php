@@ -6,6 +6,8 @@ use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\EnablePaymentMethodRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\GetPaymentMethodConfigRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request\SavePaymentMethodConfigRequest;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
@@ -22,6 +24,7 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableA
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock as IntegrationMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -50,7 +53,8 @@ class PaymentMethodsApiTest extends BaseTestCase
 
         $this->paymentMethodServiceMock = new IntegrationMock(
             new UnzerMock('s-priv-test'),
-            TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+            TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+            new CurrencyServiceMock()
         );
 
         TestServiceRegister::registerService(
@@ -124,7 +128,7 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testEnablePaymentMethodSuccess(): void
     {
         // Arrange
-        $request = new EnablePaymentMethodRequest('eps', true);
+        $request = new EnablePaymentMethodRequest('EPS', true);
 
         // Act
         $response = AdminAPI::get()->paymentMethods('1')->enablePaymentMethod($request);
@@ -141,7 +145,7 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testEnablePaymentMethodToArray(): void
     {
         // Arrange
-        $request = new EnablePaymentMethodRequest('eps', true);
+        $request = new EnablePaymentMethodRequest('EPS', true);
 
         // Act
         $response = AdminAPI::get()->paymentMethods('1')->enablePaymentMethod($request);
@@ -189,9 +193,9 @@ class PaymentMethodsApiTest extends BaseTestCase
                 [],
                 BookingMethod::authorize(),
                 '2',
-                1.1,
-                2.2,
-                3.3,
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                Amount::fromFloat(2.2, Currency::getDefault()),
+                Amount::fromFloat(3.3, Currency::getDefault()),
                 [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
@@ -236,9 +240,9 @@ class PaymentMethodsApiTest extends BaseTestCase
                 [],
                 BookingMethod::charge(),
                 '2',
-                1.1,
-                2.2,
-                3.3,
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                Amount::fromFloat(2.2, Currency::getDefault()),
+                Amount::fromFloat(3.3, Currency::getDefault()),
                 [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
@@ -283,9 +287,9 @@ class PaymentMethodsApiTest extends BaseTestCase
                 [],
                 BookingMethod::authorize(),
                 '2',
-                1.1,
-                2.2,
-                3.3,
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                Amount::fromFloat(2.2, Currency::getDefault()),
+                Amount::fromFloat(3.3, Currency::getDefault()),
                 [new Country('DE', 'Germany'), new Country('FR', 'France')]
             )
         );
@@ -374,7 +378,7 @@ class PaymentMethodsApiTest extends BaseTestCase
         $this->expectException(InvalidTranslatableArrayException::class);
 
         // Act
-        $request->toDomainModel();
+        $request->toDomainModel(Currency::getDefault());
 
         // Assert
     }
@@ -393,7 +397,7 @@ class PaymentMethodsApiTest extends BaseTestCase
         $this->expectException(InvalidCountryArrayException::class);
 
         // Act
-        $request->toDomainModel();
+        $request->toDomainModel(Currency::getDefault());
         // Assert
     }
 }

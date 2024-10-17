@@ -2,7 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -46,22 +48,22 @@ class PaymentMethodConfig
      *
      * @var ?string
      */
-    private ?string $statusIdToCharge = null;
+    private ?string $statusIdToCharge;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $minOrderAmount = 0.0;
+    private ?Amount $minOrderAmount;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $maxOrderAmount = 0.0;
+    private ?Amount $maxOrderAmount;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $surcharge = 0.0;
+    private ?Amount $surcharge;
 
     /**
      * @var Country[]
@@ -80,9 +82,9 @@ class PaymentMethodConfig
      * @param array $description
      * @param BookingMethod|null $bookingMethod
      * @param string|null $statusIdToCharge
-     * @param float|null $minOrderAmount
-     * @param float|null $maxOrderAmount
-     * @param float|null $surcharge
+     * @param Amount|null $minOrderAmount
+     * @param Amount|null $maxOrderAmount
+     * @param Amount|null $surcharge
      * @param array $restrictedCountries
      * @param bool $sendBasketData
      */
@@ -93,9 +95,9 @@ class PaymentMethodConfig
         array $description = [],
         ?BookingMethod $bookingMethod = null,
         ?string $statusIdToCharge = null,
-        ?float $minOrderAmount = null,
-        ?float $maxOrderAmount = null,
-        ?float $surcharge = null,
+        ?Amount $minOrderAmount = null,
+        ?Amount $maxOrderAmount = null,
+        ?Amount $surcharge = null,
         array $restrictedCountries = [],
         bool $sendBasketData = false
     ) {
@@ -171,25 +173,25 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getMinOrderAmount(): ?float
+    public function getMinOrderAmount(): ?Amount
     {
         return $this->minOrderAmount;
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getMaxOrderAmount(): ?float
+    public function getMaxOrderAmount(): ?Amount
     {
         return $this->maxOrderAmount;
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getSurcharge(): ?float
+    public function getSurcharge(): ?Amount
     {
         return $this->surcharge;
     }
@@ -208,5 +210,69 @@ class PaymentMethodConfig
     public function isSendBasketData(): bool
     {
         return $this->sendBasketData;
+    }
+
+    /**
+     * @param BookingMethod|null $bookingMethod
+     *
+     * @return void
+     */
+    public function setBookingMethod(?BookingMethod $bookingMethod): void
+    {
+        $this->bookingMethod = $bookingMethod;
+    }
+
+    /**
+     * @param Amount|null $surcharge
+     *
+     * @return void
+     */
+    public function setSurcharge(?Amount $surcharge): void
+    {
+        $this->surcharge = $surcharge;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return string
+     */
+    public function getNameByLocale(string $locale): string
+    {
+        foreach ($this->name as $name) {
+            if ($name->getCode() === $locale) {
+                return $name->getMessage();
+            }
+        }
+
+        foreach ($this->name as $name) {
+            if ($name->getCode() === 'default') {
+                return $name->getMessage();
+            }
+        }
+
+        return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type];
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return ?string
+     */
+    public function getDescriptionByLocale(string $locale): ?string
+    {
+        foreach ($this->description as $name) {
+            if ($name->getCode() === $locale) {
+                return $name->getMessage();
+            }
+        }
+
+        foreach ($this->description as $name) {
+            if ($name->getCode() === 'default') {
+                return $name->getMessage();
+            }
+        }
+
+        return null;
     }
 }

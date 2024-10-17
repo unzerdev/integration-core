@@ -2,6 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
@@ -59,6 +62,7 @@ class PaymentMethodConfig extends Entity
      * @throws InvalidTranslatableArrayException
      * @throws InvalidCountryArrayException
      * @throws InvalidBookingMethodException
+     * @throws InvalidCurrencyCode
      */
     public function inflate(array $data): void
     {
@@ -75,9 +79,9 @@ class PaymentMethodConfig extends Entity
             TranslatableLabel::fromArrayToBatch($paymentMethodConfig['description']),
             $paymentMethodConfig['bookingMethod'] ? BookingMethod::parse($paymentMethodConfig['bookingMethod']) : null,
             $paymentMethodConfig['statusIdToCharge'],
-            $paymentMethodConfig['minOrderAmount'],
-            $paymentMethodConfig['maxOrderAmount'],
-            $paymentMethodConfig['surcharge'],
+            $this->amountFromArray($paymentMethodConfig['minOrderAmount']),
+            $this->amountFromArray($paymentMethodConfig['maxOrderAmount']),
+            $this->amountFromArray($paymentMethodConfig['surcharge']),
             Country::fromArrayToBatch($paymentMethodConfig['restrictedCountries']),
             $paymentMethodConfig['sendBasketData'],
         );
@@ -99,9 +103,9 @@ class PaymentMethodConfig extends Entity
                 $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null,
             'description' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getDescription()),
             'statusIdToCharge' => $this->paymentMethodConfig->getStatusIdToCharge(),
-            'minOrderAmount' => $this->paymentMethodConfig->getMinOrderAmount(),
-            'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount(),
-            'surcharge' => $this->paymentMethodConfig->getSurcharge(),
+            'minOrderAmount' => $this->amountToArray($this->paymentMethodConfig->getMinOrderAmount()),
+            'maxOrderAmount' => $this->amountToArray($this->paymentMethodConfig->getMaxOrderAmount()),
+            'surcharge' => $this->amountToArray($this->paymentMethodConfig->getSurcharge()),
             'restrictedCountries' => Country::fromBatchToArray($this->paymentMethodConfig->getRestrictedCountries()),
             'sendBasketData' => $this->paymentMethodConfig->isSendBasketData()
         ];
@@ -161,5 +165,30 @@ class PaymentMethodConfig extends Entity
     public function setType(string $type): void
     {
         $this->type = $type;
+    }
+
+    /**
+     * @param ?Amount $amount
+     *
+     * @return array
+     */
+    private function amountToArray(?Amount $amount): array
+    {
+        return $amount ? [
+            'value' => $amount->getValue(),
+            'currency' => $amount->getCurrency()->getIsoCode()
+        ] : [];
+    }
+
+    /**
+     * @param array $amount
+     *
+     * @return Amount
+     *
+     * @throws InvalidCurrencyCode
+     */
+    private function amountFromArray(array $amount): ?Amount
+    {
+        return !empty($amount) ? Amount::fromInt($amount['value'], Currency::fromIsoCode($amount['currency'])) : null;
     }
 }

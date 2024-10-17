@@ -10,6 +10,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\GetPaymentConfigRe
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\PaymentMethodsResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\SavePaymentMethodConfigResponse;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
@@ -30,11 +31,18 @@ class PaymentMethodsController
     private PaymentMethodService $paymentMethodService;
 
     /**
-     * @param PaymentMethodService $paymentMethodService
+     * @var CurrencyServiceInterface
      */
-    public function __construct(PaymentMethodService $paymentMethodService)
+    private CurrencyServiceInterface $currencyService;
+
+    /**
+     * @param PaymentMethodService $paymentMethodService
+     * @param CurrencyServiceInterface $currencyService
+     */
+    public function __construct(PaymentMethodService $paymentMethodService, CurrencyServiceInterface $currencyService)
     {
         $this->paymentMethodService = $paymentMethodService;
+        $this->currencyService = $currencyService;
     }
 
     /**
@@ -85,7 +93,7 @@ class PaymentMethodsController
      */
     public function savePaymentConfig(SavePaymentMethodConfigRequest $request): SavePaymentMethodConfigResponse
     {
-        $this->paymentMethodService->savePaymentMethodConfig($request->toDomainModel());
+        $this->paymentMethodService->savePaymentMethodConfig($request->toDomainModel($this->currencyService->getDefaultCurrency()));
 
         return new SavePaymentMethodConfigResponse();
     }

@@ -23,6 +23,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRe
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
@@ -115,7 +116,8 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new PaymentMethodService(
                     UnzerFactory::getInstance()->makeUnzerAPI(),
-                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                    ServiceRegister::getService(CurrencyServiceInterface::class)
                 );
             })
         );
@@ -241,14 +243,17 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             PaymentMethodsController::class,
             new SingleInstance(static function () {
-                return new PaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
+                return new PaymentMethodsController(
+                    ServiceRegister::getService(PaymentMethodService::class),
+                    ServiceRegister::getService(CurrencyServiceInterface::class)
+                );
             })
         );
 
         ServiceRegister::registerService(
             CheckoutPaymentMethodsController::class,
             new SingleInstance(static function () {
-                return new CheckoutPaymentMethodsController();
+                return new CheckoutPaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
             })
         );
     }

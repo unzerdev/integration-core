@@ -3,9 +3,7 @@
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 
 /**
  * Class PaymentMethodsResponse.
@@ -15,34 +13,48 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 class PaymentMethodsResponse extends Response
 {
     /**
+     * @var PaymentMethodConfig[]
+     */
+    private array $paymentMethods;
+
+    /**
+     * @var string
+     */
+    private string $locale;
+
+    /**
+     * @param PaymentMethodConfig[] $paymentMethods
+     * @param string $locale
+     */
+    public function __construct(array $paymentMethods, string $locale)
+    {
+        $this->paymentMethods = $paymentMethods;
+        $this->locale = $locale;
+    }
+
+    /**
      * @inheritDoc
      */
     public function toArray(): array
     {
-        return [
-            [
-                'type' => PaymentMethodTypes::CARDS,
-                'name' => 'Unzer Cards',
-                'description' => 'A cards payment method',
-                'surcharge' => [
-                    'value' => Amount::fromInt(1, Currency::getDefault())->getValue(),
-                    'currency' => Currency::getDefault()->getIsoCode(),
-                ]
-            ],
-            [
-                'type' => PaymentMethodTypes::EPS,
-                'name' => 'Unzer EPS',
-                'description' => 'Eps payment method',
-                'surcharge' => [
-                    'value' => Amount::fromInt(1, Currency::getDefault())->getValue(),
-                    'currency' => Currency::getDefault()->getIsoCode(),
-                ]
-            ],
-            [
-                'type' => PaymentMethodTypes::KLARNA,
-                'name' => 'Unzer Klarna',
-                'description' => 'Klarna payment method'
-            ]
-        ];
+        return array_map(function ($paymentMethod) {
+            $formattedMethod = [
+                'type' => $paymentMethod->getType(),
+                'name' => $paymentMethod->getNameByLocale($this->locale)
+            ];
+
+            if ($description = $paymentMethod->getDescriptionByLocale($this->locale)) {
+                $formattedMethod['description'] = $description;
+            }
+
+            if ($surcharge = $paymentMethod->getSurcharge()) {
+                $formattedMethod['surcharge'] = [
+                    'value' => $surcharge->getPriceInCurrencyUnits(),
+                    'currency' => $surcharge->getCurrency(),
+                ];
+            }
+
+            return $formattedMethod;
+        }, $this->paymentMethods);
     }
 }

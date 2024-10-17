@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
@@ -59,5 +60,16 @@ class PaymentMethodServiceMock extends PaymentMethodService
     public function setMockPaymentMethod(PaymentMethodConfig $paymentMethod): void
     {
         $this->paymentMethod = $paymentMethod;
+    }
+
+    /**
+     * @param Amount $orderAmount
+     * @param string $billingCountryIso
+     *
+     * @return PaymentMethod[]
+     */
+    public function getPaymentMethodsForCheckout(Amount $orderAmount, string $billingCountryIso): array
+    {
+        return $this->paymentMethods;
     }
 }

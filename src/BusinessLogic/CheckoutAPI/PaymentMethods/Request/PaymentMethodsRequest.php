@@ -26,10 +26,34 @@ class PaymentMethodsRequest extends Request
      * @param Amount $amount
      * @param string $locale
      */
-    public function __construct(string $billingCountry, Amount $amount, string $locale)
+    public function __construct(string $billingCountry, Amount $amount, string $locale = '')
     {
         $this->billingCountry = $billingCountry;
         $this->amount = $amount;
         $this->locale = $locale;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBillingCountry(): string
+    {
+        return $this->billingCountry;
+    }
+
+    /**
+     * @return Amount
+     */
+    public function getAmount(): Amount
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale(): string
+    {
+        return $this->locale;
     }
 }

@@ -51,9 +51,9 @@ class GetPaymentConfigResponse extends Response
             in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);
 
         $array['statusIdToCharge'] = $this->paymentMethodConfig->getStatusIdToCharge();
-        $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount();
-        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount();
-        $array['surcharge'] = $this->paymentMethodConfig->getSurcharge();
+        $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount()->getPriceInCurrencyUnits();
+        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount()->getPriceInCurrencyUnits();
+        $array['surcharge'] = $this->paymentMethodConfig->getSurcharge()->getPriceInCurrencyUnits();
         $array['restrictedCountries'] = $this->countriesToArray($this->paymentMethodConfig->getRestrictedCountries());
         $array['displaySendBasketData'] =
             !in_array($this->paymentMethodConfig->getType(), BasketRequired::BASKET_REQUIRED);

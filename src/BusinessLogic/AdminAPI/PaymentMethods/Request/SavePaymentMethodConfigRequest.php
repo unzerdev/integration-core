@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
@@ -85,13 +87,15 @@ class SavePaymentMethodConfigRequest extends Request
     }
 
     /**
+     * @param Currency $currency
+     *
      * @return PaymentMethodConfig
      *
      * @throws InvalidBookingMethodException
      * @throws InvalidCountryArrayException
      * @throws InvalidTranslatableArrayException
      */
-    public function toDomainModel(): PaymentMethodConfig
+    public function toDomainModel(Currency $currency): PaymentMethodConfig
     {
         return new PaymentMethodConfig(
             $this->type,
@@ -100,9 +104,9 @@ class SavePaymentMethodConfigRequest extends Request
             TranslatableLabel::fromArrayToBatch($this->description),
             $this->bookingMethod ? BookingMethod::parse($this->bookingMethod) : null,
             $this->statusIdToCharge,
-            $this->minOrderAmount,
-            $this->maxOrderAmount,
-            $this->surcharge,
+            $this->minOrderAmount ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
+            $this->maxOrderAmount ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,
+            $this->surcharge ? Amount::fromFloat($this->surcharge, $currency) : null,
             Country::fromArrayToBatch($this->restrictedCountries),
             $this->sendBasketData
         );
