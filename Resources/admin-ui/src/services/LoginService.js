@@ -36,7 +36,6 @@
   };
 
   /**
-   *
    * @returns {Promise<*>}
    */
   const reRegisterWebhooks = () => {
@@ -50,9 +49,24 @@
     );
   };
 
+
+  /**
+   * @returns {Promise<*>}
+   */
+
+  const getCredentialsData = () => {
+    return Unzer.ajaxService.get(
+        `${Unzer.config.credentialUrl}/getData?storeId=${Unzer.config.store.storeId}`,
+        (exception) => {
+          return Promise.reject(exception);
+        }
+    );
+  };
+
   Unzer.LoginService = {
     login,
     disconnect,
-    reRegisterWebhooks
+    reRegisterWebhooks,
+    getCredentialsData
   };
 })();
