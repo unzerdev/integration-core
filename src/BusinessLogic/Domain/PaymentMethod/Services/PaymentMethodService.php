@@ -237,6 +237,16 @@ class PaymentMethodService
                 return false;
             }
 
+            if ($paymentMethod->getSurcharge()) {
+                $paymentMethod->setSurcharge(
+                    $this->getAmountForCurrentContext($paymentMethod->getSurcharge(), $currentContextCurrency)
+                );
+            }
+
+            if (!$paymentMethod->getMinOrderAmount() || !$paymentMethod->getMaxOrderAmount()) {
+                return true;
+            }
+
             $minOrderAmount = $this->getAmountForCurrentContext(
                 $paymentMethod->getMinOrderAmount(),
                 $currentContextCurrency
@@ -244,10 +254,6 @@ class PaymentMethodService
             $maxOrderAmount = $this->getAmountForCurrentContext(
                 $paymentMethod->getMaxOrderAmount(),
                 $currentContextCurrency
-            );
-
-            $paymentMethod->setSurcharge(
-                $this->getAmountForCurrentContext($paymentMethod->getSurcharge(), $currentContextCurrency)
             );
 
             return $orderAmount->getValue() > $minOrderAmount->getValue() && $orderAmount->getValue() < $maxOrderAmount->getValue();

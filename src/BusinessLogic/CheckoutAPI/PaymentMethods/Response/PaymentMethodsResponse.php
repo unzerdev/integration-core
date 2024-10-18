@@ -40,7 +40,8 @@ class PaymentMethodsResponse extends Response
         return array_map(function ($paymentMethod) {
             $formattedMethod = [
                 'type' => $paymentMethod->getType(),
-                'name' => $paymentMethod->getNameByLocale($this->locale)
+                'name' => $paymentMethod->getNameByLocale($this->locale),
+                'description' => ''
             ];
 
             if ($description = $paymentMethod->getDescriptionByLocale($this->locale)) {

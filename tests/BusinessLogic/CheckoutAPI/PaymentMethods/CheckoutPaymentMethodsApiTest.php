@@ -234,6 +234,7 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
             [
                 'type' => 'EPS',
                 'name' => 'EPS',
+                'description' => '',
                 'surcharge' => [
                     'value' => 3.3,
                     'currency' => 'EUR'
