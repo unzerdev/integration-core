@@ -39,9 +39,14 @@ class PaymentMethodServiceMock extends PaymentMethodService
      */
     public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig
     {
-        return $this->paymentMethod ?: current(array_filter($this->paymentMethods, function (PaymentMethodConfig $paymentMethod) use ($type): bool {
+        if ($this->paymentMethod) {
+            return $this->paymentMethod;
+        }
+
+        $result = array_filter($this->paymentMethods, function (PaymentMethodConfig $paymentMethod) use ($type): bool {
             return $paymentMethod->getType() === $type;
-        }));
+        });
+        return !empty($result) ? current($result) : null;
     }
 
     /**

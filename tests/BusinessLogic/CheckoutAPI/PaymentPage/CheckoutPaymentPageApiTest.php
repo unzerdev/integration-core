@@ -120,9 +120,10 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                 new PaymentMethodConfig(
                     PaymentMethodTypes::EPS,
                     true,
+                    BookingMethod::authorize(),
+                    false,
                     [new TranslatableLabel('Eps eng', 'en'), new TranslatableLabel('Eps De', 'de')],
                     [new TranslatableLabel('Eps eng desc', 'en'), new TranslatableLabel('Eps De desc', 'de')],
-                    BookingMethod::authorize(),
                     '2',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -132,15 +133,15 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                 new PaymentMethodConfig(
                     PaymentMethodTypes::CARDS,
                     true,
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
                     BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
                     '1',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
                     Amount::fromFloat(3.3, Currency::getDefault()),
-                    [new Country('gb', 'Great Britain'), new Country('us', 'United States')],
-                    false
+                    [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
                 )
             ]
         );
