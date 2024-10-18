@@ -19,11 +19,6 @@ class UnzerFactory
 {
     private ?ConnectionSettings $connectionSettings = null;
 
-    public function create(string $sdkKey): Unzer
-    {
-        return new Unzer($sdkKey);
-    }
-
     /**
      * @param ConnectionSettings|null $connectionSettings
      *
@@ -49,6 +44,11 @@ class UnzerFactory
         }
 
         return $this->create($this->connectionSettings->getActiveConnectionData()->getPrivateKey());
+    }
+
+    protected function create(string $sdkKey): Unzer
+    {
+        return new Unzer($sdkKey);
     }
 
     /**

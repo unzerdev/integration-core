@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPage
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
@@ -30,6 +31,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterfa
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -193,6 +195,15 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(PaymentMethodService::class)
                 );
             },
+            PaymentPageService::class => static function () {
+                return new PaymentPageService(
+                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
+                    TestServiceRegister::getService(PaymentMethodService::class)
+                );
+            },
+            CheckoutPaymentPageController::class => static function () {
+                return new CheckoutPaymentPageController(TestServiceRegister::getService(PaymentPageService::class));
+            }
         ]);
 
         TestServiceRegister::registerService(

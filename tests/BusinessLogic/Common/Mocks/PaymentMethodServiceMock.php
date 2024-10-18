@@ -15,7 +15,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 class PaymentMethodServiceMock extends PaymentMethodService
 {
     /**
-     * @var PaymentMethod[]
+     * @var PaymentMethodConfig[]
      */
     private array $paymentMethods = [];
 
@@ -25,7 +25,7 @@ class PaymentMethodServiceMock extends PaymentMethodService
     private ?PaymentMethodConfig $paymentMethod = null;
 
     /**
-     * @return PaymentMethod[]
+     * @return PaymentMethodConfig[]
      */
     public function getAllPaymentMethods(): array
     {
@@ -39,7 +39,9 @@ class PaymentMethodServiceMock extends PaymentMethodService
      */
     public function getPaymentMethodConfigByType(string $type): PaymentMethodConfig
     {
-        return $this->paymentMethod;
+        return $this->paymentMethod ?: current(array_filter($this->paymentMethods, function (PaymentMethodConfig $paymentMethod) use ($type): bool {
+            return $paymentMethod->getType() === $type;
+        }));
     }
 
     /**
@@ -66,7 +68,7 @@ class PaymentMethodServiceMock extends PaymentMethodService
      * @param Amount $orderAmount
      * @param string $billingCountryIso
      *
-     * @return PaymentMethod[]
+     * @return PaymentMethodConfig[]
      */
     public function getPaymentMethodsForCheckout(Amount $orderAmount, string $billingCountryIso): array
     {

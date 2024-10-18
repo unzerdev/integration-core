@@ -42,4 +42,9 @@ class UnzerFactoryMock extends UnzerFactory
 
         return $this;
     }
+
+    public function getMockUnzer(): UnzerMock
+    {
+        return $this->unzerMock;
+    }
 }
