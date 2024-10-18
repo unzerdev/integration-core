@@ -13,6 +13,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
@@ -50,6 +51,7 @@ class PaymentMethodServiceTest extends BaseTestCase
      * @var MemoryRepository
      */
     public $paymentMethodConfigRepository;
+    private UnzerFactoryMock $unzerFactory;
 
     /**
      * @return void
@@ -61,10 +63,18 @@ class PaymentMethodServiceTest extends BaseTestCase
     {
         parent::setUp();
 
+        $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+        TestServiceRegister::registerService(PaymentMethodService::class, function () {
+            return new PaymentMethodService(
+                $this->unzerFactory,
+                TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                TestServiceRegister::getService(CurrencyServiceInterface::class),
+            );
+        });
+
         $this->paymentMethodConfigRepository = TestRepositoryRegistry::getRepository(PaymentMethodConfigEntity::getClassName());
         $this->service = TestServiceRegister::getService(PaymentMethodService::class);
         $this->currencyServiceMock = TestServiceRegister::getService(CurrencyServiceInterface::class);
-        UnzerFactoryMock::getInstance();
     }
 
     /**
@@ -627,20 +637,22 @@ class PaymentMethodServiceTest extends BaseTestCase
         );
 
         $this->setEntities([$method1]);
-        $this->mockData('s-pub-test', 's-priv-test',[], [ (object)[
-            "supports" => [
-                (object)[
-                    "brands" => ["PRZELEWY24"],
-                    "countries" => ['FR'],
-                    "channel" => "31HA07BC81AE5E9FBF7C1A4AE013EA94",
-                    "currency" => ["EUR"]
-                ]
-            ],
-            "type" => "EPS",
-            "allowCustomerTypes" => "B2C",
-            "allowCreditTransaction" => false,
-            "3ds" => false
-        ]]);
+        $this->mockData('s-pub-test', 's-priv-test', [], [
+            (object)[
+                "supports" => [
+                    (object)[
+                        "brands" => ["PRZELEWY24"],
+                        "countries" => ['FR'],
+                        "channel" => "31HA07BC81AE5E9FBF7C1A4AE013EA94",
+                        "currency" => ["EUR"]
+                    ]
+                ],
+                "type" => "EPS",
+                "allowCustomerTypes" => "B2C",
+                "allowCreditTransaction" => false,
+                "3ds" => false
+            ]
+        ]);
 
         // act
         $paymentMethods = StoreContext::doWithStore(
@@ -755,6 +767,6 @@ class PaymentMethodServiceTest extends BaseTestCase
         $keypair->setPaymentTypes($paymentTypes);
         $unzerMock = new UnzerMock($privateKey);
         $unzerMock->setKeypair($keypair);
-        UnzerFactoryMock::getInstance()->setMockUnzer($unzerMock);
+        $this->unzerFactory->setMockUnzer($unzerMock);
     }
 }

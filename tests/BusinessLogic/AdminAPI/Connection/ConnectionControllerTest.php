@@ -24,6 +24,7 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryIn
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -49,6 +50,7 @@ class ConnectionControllerTest extends BaseTestCase
         parent::setUp();
 
         $this->connectionService = new ConnectionServiceMock(
+            new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
             TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),

@@ -66,14 +66,16 @@ class BootstrapComponent extends BaseBootstrapComponent
     {
         parent::initServices();
 
+        $unzerFactory = new UnzerFactory();
         ServiceRegister::registerService(StoreContext::class, static function () {
             return StoreContext::getInstance();
         });
 
         ServiceRegister::registerService(
             ConnectionService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new ConnectionService(
+                    $unzerFactory,
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class),
                     ServiceRegister::getService(EncryptorInterface::class),
@@ -84,9 +86,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             DisconnectService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new DisconnectService(
-                    UnzerFactory::getInstance()->makeUnzerAPI(),
+                    $unzerFactory,
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class)
                 );
@@ -113,9 +115,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             PaymentMethodService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new PaymentMethodService(
-                    UnzerFactory::getInstance()->makeUnzerAPI(),
+                    $unzerFactory,
                     ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
                     ServiceRegister::getService(CurrencyServiceInterface::class)
                 );

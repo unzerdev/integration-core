@@ -4,6 +4,7 @@ namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use Unzer\Core\Infrastructure\Singleton;
 use UnzerSDK\Unzer;
 
 /**
@@ -13,6 +14,8 @@ use UnzerSDK\Unzer;
  */
 class UnzerFactoryMock extends UnzerFactory
 {
+    protected static ?Singleton $instance = null;
+
     /**
      * @var ?UnzerMock
      */
@@ -33,8 +36,10 @@ class UnzerFactoryMock extends UnzerFactory
      *
      * @return void
      */
-    public function setMockUnzer(UnzerMock $unzerMock): void
+    public function setMockUnzer(UnzerMock $unzerMock): self
     {
         $this->unzerMock = $unzerMock;
+
+        return $this;
     }
 }

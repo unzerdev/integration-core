@@ -17,6 +17,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock as IntegrationMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -43,7 +44,7 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
         parent::setUp();
 
         $this->paymentMethodServiceMock = new IntegrationMock(
-            new UnzerMock('s-priv-test'),
+            (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
             TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
             new CurrencyServiceMock()
         );

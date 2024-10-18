@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
@@ -15,6 +16,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Unzer;
 
@@ -26,9 +28,9 @@ use UnzerSDK\Unzer;
 class PaymentMethodService
 {
     /**
-     * @var Unzer
+     * @var UnzerFactory
      */
-    private Unzer $unzer;
+    private UnzerFactory $unzerFactory;
 
     /**
      * @var PaymentMethodConfigRepositoryInterface
@@ -41,16 +43,16 @@ class PaymentMethodService
     private CurrencyServiceInterface $currencyService;
 
     /**
-     * @param Unzer $unzer
+     * @param UnzerFactory $unzerFactory
      * @param PaymentMethodConfigRepositoryInterface $paymentMethodConfigRepository
      * @param CurrencyServiceInterface $currencyService
      */
     public function __construct(
-        Unzer $unzer,
+        UnzerFactory $unzerFactory,
         PaymentMethodConfigRepositoryInterface $paymentMethodConfigRepository,
         CurrencyServiceInterface $currencyService
     ) {
-        $this->unzer = $unzer;
+        $this->unzerFactory = $unzerFactory;
         $this->paymentMethodConfigRepository = $paymentMethodConfigRepository;
         $this->currencyService = $currencyService;
     }
@@ -61,10 +63,11 @@ class PaymentMethodService
      * @return PaymentMethod[]
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function getAllPaymentMethods(): array
     {
-        $keypair = $this->unzer->fetchKeypair();
+        $keypair = $this->unzerFactory->makeUnzerAPI()->fetchKeypair();
         $availablePaymentTypes = array_unique($keypair->getAvailablePaymentTypes());
         $configuredPaymentMethods = $this->paymentMethodConfigRepository->getPaymentMethodConfigs();
 
@@ -188,10 +191,11 @@ class PaymentMethodService
      * @return array
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     private function getPaymentMethodsForCheckoutFromAPI(Amount $orderAmount, string $billingCountryIso): array
     {
-        $keypair = $this->unzer->fetchKeypair(true);
+        $keypair = $this->unzerFactory->makeUnzerAPI()->fetchKeypair(true);
         $paymentTypes = $keypair->getPaymentTypes();
         $typesAvailable = [];
 

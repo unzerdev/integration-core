@@ -2,10 +2,11 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Disconnect\Services;
 
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Unzer;
 
 /**
  * Class DisconnectService.
@@ -15,9 +16,9 @@ use UnzerSDK\Unzer;
 class DisconnectService
 {
     /**
-     * @var Unzer
+     * @var UnzerFactory
      */
-    private Unzer $unzer;
+    private UnzerFactory $unzerFactory;
 
     /**
      * @var ConnectionSettingsRepositoryInterface
@@ -30,16 +31,16 @@ class DisconnectService
     private WebhookDataRepositoryInterface $webhookDataRepository;
 
     /**
-     * @param Unzer $unzer
+     * @param UnzerFactory $unzerFactory
      * @param ConnectionSettingsRepositoryInterface $connectionSettingsRepository
      * @param WebhookDataRepositoryInterface $webhookDataRepository
      */
     public function __construct(
-        Unzer $unzer,
+        UnzerFactory $unzerFactory,
         ConnectionSettingsRepositoryInterface $connectionSettingsRepository,
         WebhookDataRepositoryInterface $webhookDataRepository
     ) {
-        $this->unzer = $unzer;
+        $this->unzerFactory = $unzerFactory;
         $this->connectionSettingsRepository = $connectionSettingsRepository;
         $this->webhookDataRepository = $webhookDataRepository;
     }
@@ -48,10 +49,11 @@ class DisconnectService
      * @return void
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function disconnect(): void
     {
-        $this->unzer->deleteAllWebhooks();
+        $this->unzerFactory->makeUnzerAPI()->deleteAllWebhooks();
         $this->webhookDataRepository->deleteWebhookData();
         $this->connectionSettingsRepository->deleteConnectionSettings();
     }

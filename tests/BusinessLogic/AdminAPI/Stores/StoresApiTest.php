@@ -21,6 +21,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\StoreServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\StoreServiceMock as IntegrationMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 
 /**
@@ -54,6 +55,7 @@ class StoresApiTest extends BaseTestCase
         );
 
         $this->connectionService = new ConnectionServiceMock(
+            new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
             TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),

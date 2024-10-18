@@ -97,6 +97,7 @@ class BaseTestCase extends TestCase
             },
             ConnectionService::class => static function () {
                 return new ConnectionService(
+                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
                     TestServiceRegister::getService(EncryptorInterface::class),
@@ -122,7 +123,7 @@ class BaseTestCase extends TestCase
             },
             DisconnectService::class => static function () {
                 return new DisconnectService(
-                    new UnzerMock('s-priv-test'),
+                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
                 );
@@ -176,7 +177,7 @@ class BaseTestCase extends TestCase
             },
             PaymentMethodService::class => static function () {
                 return new PaymentMethodService(
-                    UnzerFactoryMock::getInstance()->makeUnzerAPI(),
+                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
                     TestServiceRegister::getService(CurrencyServiceInterface::class),
                 );
