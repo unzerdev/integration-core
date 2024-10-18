@@ -8,7 +8,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
-use Unzer\Core\BusinessLogic\AdminAPI\State\Controller\StateController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
@@ -130,5 +130,18 @@ class AdminAPI
             ::run(new ErrorHandlingAspect())
             ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(PaymentMethodsController::class);
+    }
+
+    /**
+     * @param string $storeId
+     *
+     * @return PaymentStatusMapController
+     */
+    public function paymentStatusMap(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(PaymentStatusMapController::class);
     }
 }

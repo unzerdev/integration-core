@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
@@ -18,6 +19,8 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMeth
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusMap;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
@@ -26,6 +29,7 @@ use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -36,6 +40,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -135,6 +141,16 @@ class BootstrapComponent extends BaseBootstrapComponent
                 );
             })
         );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapService::class,
+            new SingleInstance(static function () use ($unzerFactory) {
+                return new PaymentStatusMapService(
+                    ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+                    ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
+                );
+            })
+        );
     }
 
     /**
@@ -179,6 +195,16 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new PaymentMethodConfigRepository(
                     RepositoryRegistry::getRepository(PaymentMethodConfig::getClassName()),
+                    ServiceRegister::getService(StoreContext::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapRepositoryInterface::class,
+            new SingleInstance(static function () {
+                return new PaymentStatusMapRepository(
+                    RepositoryRegistry::getRepository(PaymentStatusMap::getClassName()),
                     ServiceRegister::getService(StoreContext::class)
                 );
             })
@@ -275,6 +301,13 @@ class BootstrapComponent extends BaseBootstrapComponent
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
                 return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapController::class,
+            new SingleInstance(static function () {
+                return new PaymentStatusMapController(ServiceRegister::getService(PaymentStatusMapService::class));
             })
         );
     }

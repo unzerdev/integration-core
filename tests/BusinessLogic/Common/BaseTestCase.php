@@ -9,6 +9,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
@@ -18,6 +19,8 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMeth
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Repositories\PaymentMethodConfigRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusMap;
+use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -34,6 +37,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\Http\HttpClient;
@@ -47,6 +52,7 @@ use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
@@ -203,6 +209,23 @@ class BaseTestCase extends TestCase
             },
             CheckoutPaymentPageController::class => static function () {
                 return new CheckoutPaymentPageController(TestServiceRegister::getService(PaymentPageService::class));
+            },
+            PaymentStatusMapRepositoryInterface::class => static function () {
+                return new PaymentStatusMapRepository(
+                    TestRepositoryRegistry::getRepository(PaymentStatusMap::getClassName()),
+                    StoreContext::getInstance()
+                );
+            },
+            PaymentStatusMapService::class => static function () {
+                return new PaymentStatusMapService(
+                    TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+                    new PaymentStatusMapServiceMock()
+                );
+            },
+            PaymentStatusMapController::class => static function () {
+                return new PaymentStatusMapController(
+                    TestServiceRegister::getService(PaymentStatusMapService::class)
+                );
             }
         ]);
 
@@ -237,6 +260,11 @@ class BaseTestCase extends TestCase
 
         TestRepositoryRegistry::registerRepository(
             PaymentMethodConfig::getClassName(),
+            MemoryRepositoryWithConditionalDelete::getClassName()
+        );
+
+        TestRepositoryRegistry::registerRepository(
+            PaymentStatusMap::getClassName(),
             MemoryRepositoryWithConditionalDelete::getClassName()
         );
 
