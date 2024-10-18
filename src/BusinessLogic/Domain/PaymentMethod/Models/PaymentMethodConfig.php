@@ -29,6 +29,16 @@ class PaymentMethodConfig
     private bool $enabled;
 
     /**
+     * @var BookingMethod
+     */
+    private BookingMethod $bookingMethod;
+
+    /**
+     * @var bool
+     */
+    private bool $sendBasketData = false;
+
+    /**
      * @var TranslatableLabel[]
      */
     private array $name = [];
@@ -37,11 +47,6 @@ class PaymentMethodConfig
      * @var TranslatableLabel[]
      */
     private array $description = [];
-
-    /**
-     * @var ?BookingMethod
-     */
-    private ?BookingMethod $bookingMethod = null;
 
     /**
      * Shop status ID. When order changes to this status, charge action is triggered.
@@ -71,16 +76,11 @@ class PaymentMethodConfig
     private array $restrictedCountries = [];
 
     /**
-     * @var bool
-     */
-    private bool $sendBasketData = false;
-
-    /**
      * @param string $type
      * @param bool $enabled
      * @param array $name
      * @param array $description
-     * @param BookingMethod|null $bookingMethod
+     * @param BookingMethod $bookingMethod
      * @param string|null $statusIdToCharge
      * @param Amount|null $minOrderAmount
      * @param Amount|null $maxOrderAmount
@@ -91,27 +91,27 @@ class PaymentMethodConfig
     public function __construct(
         string $type,
         bool $enabled,
+        BookingMethod $bookingMethod,
+        bool $sendBasketData = false,
         array $name = [],
         array $description = [],
-        ?BookingMethod $bookingMethod = null,
         ?string $statusIdToCharge = null,
         ?Amount $minOrderAmount = null,
         ?Amount $maxOrderAmount = null,
         ?Amount $surcharge = null,
-        array $restrictedCountries = [],
-        bool $sendBasketData = false
+        array $restrictedCountries = []
     ) {
         $this->type = $type;
         $this->enabled = $enabled;
+        $this->bookingMethod = $bookingMethod;
+        $this->sendBasketData = $sendBasketData;
         $this->name = $name;
         $this->description = $description;
-        $this->bookingMethod = $bookingMethod;
         $this->statusIdToCharge = $statusIdToCharge;
         $this->minOrderAmount = $minOrderAmount;
         $this->maxOrderAmount = $maxOrderAmount;
         $this->surcharge = $surcharge;
         $this->restrictedCountries = $restrictedCountries;
-        $this->sendBasketData = $sendBasketData;
     }
 
     /**
@@ -157,9 +157,9 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return ?BookingMethod
+     * @return BookingMethod
      */
-    public function getBookingMethod(): ?BookingMethod
+    public function getBookingMethod(): BookingMethod
     {
         return $this->bookingMethod;
     }
@@ -213,16 +213,6 @@ class PaymentMethodConfig
     }
 
     /**
-     * @param BookingMethod|null $bookingMethod
-     *
-     * @return void
-     */
-    public function setBookingMethod(?BookingMethod $bookingMethod): void
-    {
-        $this->bookingMethod = $bookingMethod;
-    }
-
-    /**
      * @param Amount|null $surcharge
      *
      * @return void
@@ -251,7 +241,8 @@ class PaymentMethodConfig
             }
         }
 
-        return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type];
+        return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type] ??
+            PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' ' . $this->type;
     }
 
     /**

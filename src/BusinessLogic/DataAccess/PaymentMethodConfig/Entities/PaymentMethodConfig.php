@@ -75,15 +75,15 @@ class PaymentMethodConfig extends Entity
         $this->paymentMethodConfig = new DomainPaymentMethodConfig(
             $paymentMethodConfig['type'],
             $paymentMethodConfig['enabled'],
+            BookingMethod::parse($paymentMethodConfig['bookingMethod']),
+            $paymentMethodConfig['sendBasketData'],
             TranslatableLabel::fromArrayToBatch($paymentMethodConfig['name']),
             TranslatableLabel::fromArrayToBatch($paymentMethodConfig['description']),
-            $paymentMethodConfig['bookingMethod'] ? BookingMethod::parse($paymentMethodConfig['bookingMethod']) : null,
             $paymentMethodConfig['statusIdToCharge'],
             $this->amountFromArray($paymentMethodConfig['minOrderAmount']),
             $this->amountFromArray($paymentMethodConfig['maxOrderAmount']),
             $this->amountFromArray($paymentMethodConfig['surcharge']),
             Country::fromArrayToBatch($paymentMethodConfig['restrictedCountries']),
-            $paymentMethodConfig['sendBasketData'],
         );
     }
 

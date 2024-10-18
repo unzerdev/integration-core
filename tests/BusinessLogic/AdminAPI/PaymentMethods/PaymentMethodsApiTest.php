@@ -13,8 +13,6 @@ use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
@@ -123,8 +121,6 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
      */
     public function testEnablePaymentMethodSuccess(): void
     {
@@ -140,8 +136,6 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
      */
     public function testEnablePaymentMethodToArray(): void
     {
@@ -157,16 +151,13 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
      */
     public function testGetPaymentMethodSuccess(): void
     {
         // Arrange
         $request = new GetPaymentMethodConfigRequest(PaymentMethodTypes::EPS);
         $this->paymentMethodServiceMock->setMockPaymentMethod(
-            new PaymentMethodConfig(PaymentMethodTypes::EPS, true)
+            new PaymentMethodConfig(PaymentMethodTypes::EPS, true, BookingMethod::authorize())
         );
 
         // Act
@@ -178,9 +169,6 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
      */
     public function testGetPaymentMethodEpsToArray(): void
     {
@@ -190,9 +178,10 @@ class PaymentMethodsApiTest extends BaseTestCase
             new PaymentMethodConfig(
                 PaymentMethodTypes::EPS,
                 true,
+                BookingMethod::authorize(),
+                false,
                 [new TranslatableLabel('Eps eng', 'en'), new TranslatableLabel('Eps De', 'de')],
                 [],
-                BookingMethod::authorize(),
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -225,9 +214,6 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
      */
     public function testGetPaymentMethodApplePayToArray(): void
     {
@@ -237,9 +223,10 @@ class PaymentMethodsApiTest extends BaseTestCase
             new PaymentMethodConfig(
                 PaymentMethodTypes::APPLE_PAY,
                 true,
+                BookingMethod::charge(),
+                false,
                 [new TranslatableLabel('Apple pay eng', 'en'), new TranslatableLabel('Apple pay De', 'de')],
                 [],
-                BookingMethod::charge(),
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -272,9 +259,6 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
      */
     public function testGetPaymentMethodKlarnaToArray(): void
     {
@@ -284,9 +268,10 @@ class PaymentMethodsApiTest extends BaseTestCase
             new PaymentMethodConfig(
                 PaymentMethodTypes::KLARNA,
                 true,
+                BookingMethod::authorize(),
+                false,
                 [new TranslatableLabel('KLARNA eng', 'en'), new TranslatableLabel('KLARNA De', 'de')],
                 [],
-                BookingMethod::authorize(),
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -327,7 +312,7 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testSavePaymentMethodConfigSuccess(): void
     {
         // Arrange
-        $request = new SavePaymentMethodConfigRequest('eps', [], []);
+        $request = new SavePaymentMethodConfigRequest('eps', BookingMethod::authorize()->getBookingMethod(), [], []);
 
         // Act
         $response = AdminAPI::get()->paymentMethods('1')->savePaymentConfig($request);
@@ -348,14 +333,15 @@ class PaymentMethodsApiTest extends BaseTestCase
         // Arrange
         $request = new SavePaymentMethodConfigRequest(
             'eps',
+            BookingMethod::authorize()->getBookingMethod(),
             [['locale' => 'en', 'value' => 'KLARNA eng'], ['locale' => 'de', 'value' => 'KLARNA De']],
             [],
             null,
             null,
             null,
             null,
-            null,
-            [['code' => 'fr', 'name' => 'France'], ['code' => 'de', 'name' => 'Germany']]
+            [['code' => 'fr', 'name' => 'France'], ['code' => 'de', 'name' => 'Germany']],
+            false,
         );
 
         // Act
@@ -375,7 +361,14 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testSavePaymentMethodConfigInvalidTranslatableLabel(): void
     {
         // Arrange
-        $request = new SavePaymentMethodConfigRequest('eps', ['test', ''], []);
+        $request = new SavePaymentMethodConfigRequest(
+            'eps',
+            BookingMethod::authorize()->getBookingMethod(),
+            [
+                'test',
+                ''
+            ], []
+        );
         $this->expectException(InvalidTranslatableArrayException::class);
 
         // Act
@@ -394,7 +387,18 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testSavePaymentMethodConfigInvalidCountryArray(): void
     {
         // Arrange
-        $request = new SavePaymentMethodConfigRequest('eps', [], [], null, null, null, null, null, ['test', '']);
+        $request = new SavePaymentMethodConfigRequest(
+            'eps',
+            BookingMethod::authorize()->getBookingMethod(),
+            [],
+            [],
+            null,
+            null,
+            null,
+            null,
+            ['test', ''],
+            false
+        );
         $this->expectException(InvalidCountryArrayException::class);
 
         // Act

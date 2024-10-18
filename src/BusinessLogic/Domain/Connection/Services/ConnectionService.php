@@ -44,6 +44,7 @@ class ConnectionService
     private WebhookUrlServiceInterface $webhookUrlService;
 
     /**
+     * @param UnzerFactory $unzerFactory
      * @param ConnectionSettingsRepositoryInterface $connectionSettingsRepository
      * @param WebhookDataRepositoryInterface $webhookDataRepository
      * @param EncryptorInterface $encryptor

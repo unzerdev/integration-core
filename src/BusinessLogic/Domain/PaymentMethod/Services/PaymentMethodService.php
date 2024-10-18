@@ -6,19 +6,16 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BasketRequired;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingChargeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Unzer;
 
 /**
  * Class PaymentMethodService.
@@ -74,28 +71,30 @@ class PaymentMethodService
         return array_map(function ($availablePaymentType) use ($configuredPaymentMethods) {
             return new PaymentMethod(
                 $availablePaymentType,
-                PaymentMethodNames::PAYMENT_METHOD_NAMES[$availablePaymentType] ?? PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME,
+                PaymentMethodNames::PAYMENT_METHOD_NAMES[$availablePaymentType] ??
+                PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' ' . $availablePaymentType,
                 $this->isPaymentTypeEnabled($availablePaymentType, $configuredPaymentMethods)
             );
         }, $availablePaymentTypes);
     }
 
     /**
-     * @param PaymentMethodConfig $paymentMethodConfig
+     * @param string $type
+     * @param bool $isEnabled
      *
      * @return void
-     *
-     * @throws InvalidPaymentTypeException
      */
-    public function enablePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void
+    public function enablePaymentMethodConfig(string $type, bool $isEnabled): void
     {
-        if (!in_array($paymentMethodConfig->getType(), PaymentMethodTypes::PAYMENT_TYPES)) {
-            throw new InvalidPaymentTypeException(
-                new TranslatableLabel(
-                    'Payment method type: ' . $paymentMethodConfig->getType() . ' is not supported',
-                    'paymentMethod.invalidType'
-                ),
-            );
+        $paymentMethodConfig = $this->getPaymentMethodConfigByType($type);
+        if (!$paymentMethodConfig) {
+            $paymentMethodConfig =
+                new PaymentMethodConfig(
+                    $type,
+                    $isEnabled,
+                    $this->getBookingMethodForType($type),
+                    in_array($type, BasketRequired::BASKET_REQUIRED)
+                );
         }
 
         $this->paymentMethodConfigRepository->savePaymentMethodConfig($paymentMethodConfig);
@@ -104,34 +103,13 @@ class PaymentMethodService
     /**
      * @param string $type
      *
-     * @return PaymentMethodConfig
+     * @return ?PaymentMethodConfig
      *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
+     * @throws
      */
-    public function getPaymentMethodConfigByType(string $type): PaymentMethodConfig
+    public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig
     {
-        if (!in_array($type, PaymentMethodTypes::PAYMENT_TYPES)) {
-            throw new InvalidPaymentTypeException(
-                new TranslatableLabel(
-                    'Payment method type: ' . $type . ' is not supported',
-                    'paymentMethod.invalidType'
-                ),
-            );
-        }
-
-        $config = $this->paymentMethodConfigRepository->getPaymentMethodConfigByType($type);
-
-        if (!$config) {
-            throw new PaymentConfigNotFoundException(
-                new TranslatableLabel(
-                    'Payment method config for type: ' . $type . ' not found',
-                    'paymentMethod.configNotFound'
-                ),
-            );
-        }
-
-        return $config;
+        return $this->paymentMethodConfigRepository->getPaymentMethodConfigByType($type);
     }
 
     /**
@@ -141,10 +119,6 @@ class PaymentMethodService
      */
     public function savePaymentMethodConfig(PaymentMethodConfig $paymentMethodConfig): void
     {
-        if (!$paymentMethodConfig->getBookingMethod()) {
-            $paymentMethodConfig->setBookingMethod($this->getBookingMethodForType($paymentMethodConfig->getType()));
-        }
-
         $this->paymentMethodConfigRepository->savePaymentMethodConfig($paymentMethodConfig);
     }
 
@@ -154,6 +128,7 @@ class PaymentMethodService
      *
      * @return PaymentMethodConfig[]
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function getPaymentMethodsForCheckout(Amount $orderAmount, string $billingCountryIso): array
     {
@@ -177,6 +152,11 @@ class PaymentMethodService
      */
     private function getBookingMethodForType(string $type): BookingMethod
     {
+        if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
+            in_array($type, BookingChargeSupport::SUPPORTS_CHARGE)) {
+            return BookingMethod::charge();
+        }
+
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE)) {
             return BookingMethod::authorize();
         }

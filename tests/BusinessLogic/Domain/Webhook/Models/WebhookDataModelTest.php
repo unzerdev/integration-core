@@ -1,6 +1,6 @@
 <?php
 
-namespace BusinessLogic\Domain\Webhook\Models;
+namespace Unzer\Core\Tests\BusinessLogic\Domain\Webhook\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
