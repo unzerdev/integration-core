@@ -80,9 +80,9 @@ class PaymentMethodConfig extends Entity
             TranslatableLabel::fromArrayToBatch($paymentMethodConfig['name']),
             TranslatableLabel::fromArrayToBatch($paymentMethodConfig['description']),
             $paymentMethodConfig['statusIdToCharge'],
-            $this->amountFromArray($paymentMethodConfig['minOrderAmount']),
-            $this->amountFromArray($paymentMethodConfig['maxOrderAmount']),
-            $this->amountFromArray($paymentMethodConfig['surcharge']),
+            !empty($paymentMethodConfig['minOrderAmount']) ? Amount::fromArray($paymentMethodConfig['minOrderAmount']) : null,
+            !empty($paymentMethodConfig['maxOrderAmount']) ? Amount::fromArray($paymentMethodConfig['maxOrderAmount']) : null,
+            !empty($paymentMethodConfig['surcharge']) ? Amount::fromArray($paymentMethodConfig['surcharge']) : null,
             Country::fromArrayToBatch($paymentMethodConfig['restrictedCountries']),
         );
     }
@@ -103,9 +103,9 @@ class PaymentMethodConfig extends Entity
                 $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null,
             'description' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getDescription()),
             'statusIdToCharge' => $this->paymentMethodConfig->getStatusIdToCharge(),
-            'minOrderAmount' => $this->amountToArray($this->paymentMethodConfig->getMinOrderAmount()),
-            'maxOrderAmount' => $this->amountToArray($this->paymentMethodConfig->getMaxOrderAmount()),
-            'surcharge' => $this->amountToArray($this->paymentMethodConfig->getSurcharge()),
+            'minOrderAmount' => $this->paymentMethodConfig->getMinOrderAmount() ? $this->paymentMethodConfig->getMinOrderAmount()->toArray() : [],
+            'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->toArray() : [],
+            'surcharge' => $this->paymentMethodConfig->getSurcharge() ? $this->paymentMethodConfig->getSurcharge()->toArray() : [],
             'restrictedCountries' => Country::fromBatchToArray($this->paymentMethodConfig->getRestrictedCountries()),
             'sendBasketData' => $this->paymentMethodConfig->isSendBasketData()
         ];

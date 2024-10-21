@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\Checkout\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -33,6 +34,7 @@ class Amount
      *
      * @param float $amount
      * @param Currency $currency
+     *
      * @return static
      */
     public static function fromFloat(float $amount, Currency $currency): Amount
@@ -48,6 +50,7 @@ class Amount
      *
      * @param int $amount
      * @param Currency $currency
+     *
      * @return static
      */
     public static function fromInt(int $amount, Currency $currency): Amount
@@ -87,7 +90,8 @@ class Amount
     public function minus(Amount $amount): Amount
     {
         if (!$this->getCurrency()->equal($amount->getCurrency())) {
-            throw new CurrencyMismatchException(new TranslatableLabel('Currency mismatch.','checkout.currencyMismatch'));
+            throw new CurrencyMismatchException(new TranslatableLabel('Currency mismatch.',
+                'checkout.currencyMismatch'));
         }
         return new self($this->getValue() - $amount->getValue(), $this->getCurrency());
     }
@@ -100,9 +104,33 @@ class Amount
     public function plus(Amount $amount): Amount
     {
         if (!$this->getCurrency()->equal($amount->getCurrency())) {
-            throw new CurrencyMismatchException(new TranslatableLabel('Currency mismatch.','checkout.currencyMismatch'));
+            throw new CurrencyMismatchException(new TranslatableLabel('Currency mismatch.',
+                'checkout.currencyMismatch'));
         }
 
         return new self($this->getValue() + $amount->getValue(), $this->getCurrency());
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'value' => $this->getValue(),
+            'currency' => $this->getCurrency()->getIsoCode()
+        ];
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return Amount
+     *
+     * @throws InvalidCurrencyCode
+     */
+    public static function fromArray(array $data): Amount
+    {
+        return self::fromInt($data['value'], Currency::fromIsoCode($data['currency']));
     }
 }

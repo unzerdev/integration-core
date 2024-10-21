@@ -35,6 +35,7 @@ class PaymentStatusMap extends Entity
     {
         parent::inflate($data);
 
+        $this->storeId = $data['storeId'];
         $this->paymentStatusMap = $data['paymentStatusMap'] ?? [];
     }
 

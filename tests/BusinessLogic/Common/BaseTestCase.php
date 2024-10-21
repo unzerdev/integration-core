@@ -21,6 +21,8 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPage
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusMap;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
+use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Entities\TransactionHistory;
+use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Repositories\TransactionHistoryRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -41,6 +43,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSett
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\Http\HttpClient;
 use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
@@ -228,7 +232,18 @@ class BaseTestCase extends TestCase
                 return new PaymentStatusMapController(
                     TestServiceRegister::getService(PaymentStatusMapService::class)
                 );
-            }
+            },
+            TransactionHistoryRepositoryInterface::class => function () {
+                return new TransactionHistoryRepository(
+                    TestRepositoryRegistry::getRepository(TransactionHistory::getClassName()),
+                    StoreContext::getInstance()
+                );
+            },
+            TransactionHistoryService::class => function () {
+                return new TransactionHistoryService(
+                    TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+                );
+            },
         ]);
 
         TestServiceRegister::registerService(
@@ -267,6 +282,11 @@ class BaseTestCase extends TestCase
 
         TestRepositoryRegistry::registerRepository(
             PaymentStatusMap::getClassName(),
+            MemoryRepositoryWithConditionalDelete::getClassName()
+        );
+
+        TestRepositoryRegistry::registerRepository(
+            TransactionHistory::getClassName(),
             MemoryRepositoryWithConditionalDelete::getClassName()
         );
 

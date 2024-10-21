@@ -21,6 +21,8 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPage
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Repositories\PaymentPageSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusMap;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
+use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Entities\TransactionHistory;
+use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Repositories\TransactionHistoryRepository;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
@@ -44,6 +46,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSett
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
@@ -117,7 +121,9 @@ class BootstrapComponent extends BaseBootstrapComponent
             PaymentPageSettingsService::class,
             new SingleInstance(static function () {
                 return new PaymentPageSettingsService(
-                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class)
+                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    ServiceRegister::getService(UploaderService::class)
+
                 );
             })
         );
@@ -139,6 +145,25 @@ class BootstrapComponent extends BaseBootstrapComponent
                 return new PaymentPageService(
                     $unzerFactory,
                     ServiceRegister::getService(PaymentMethodService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapService::class,
+            new SingleInstance(static function () use ($unzerFactory) {
+                return new PaymentStatusMapService(
+                    ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+                    ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            TransactionHistoryService::class,
+            new SingleInstance(static function () {
+                return new TransactionHistoryService(
+                    ServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
                 );
             })
         );
@@ -186,6 +211,26 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new PaymentMethodConfigRepository(
                     RepositoryRegistry::getRepository(PaymentMethodConfig::getClassName()),
+                    ServiceRegister::getService(StoreContext::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapRepositoryInterface::class,
+            new SingleInstance(static function () {
+                return new PaymentStatusMapRepository(
+                    RepositoryRegistry::getRepository(PaymentStatusMap::getClassName()),
+                    ServiceRegister::getService(StoreContext::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            TransactionHistoryRepositoryInterface::class,
+            new SingleInstance(static function () {
+                return new TransactionHistoryRepository(
+                    RepositoryRegistry::getRepository(TransactionHistory::getClassName()),
                     ServiceRegister::getService(StoreContext::class)
                 );
             })
@@ -282,6 +327,13 @@ class BootstrapComponent extends BaseBootstrapComponent
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
                 return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentStatusMapController::class,
+            new SingleInstance(static function () {
+                return new PaymentStatusMapController(ServiceRegister::getService(PaymentStatusMapService::class));
             })
         );
     }
