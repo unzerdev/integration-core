@@ -3,13 +3,16 @@
 namespace BusinessLogic\Domain\PaymentPageSettings\Services;
 
 use Exception;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -33,12 +36,26 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     private PaymentPageSettingsService $service;
 
     /**
+     * @var UploaderServiceMock
+     */
+    private UploaderServiceMock $uploaderService;
+
+    /**
      * @throws RepositoryClassException
      * @throws RepositoryNotRegisteredException
      */
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->uploaderService = new UploaderServiceMock();
+
+        TestServiceRegister::registerService(
+            UploaderService::class,
+            function () {
+                return $this->uploaderService;
+            }
+        );
 
         $this->repository = TestRepositoryRegistry::getRepository(PaymentPageSettingsEntity::getClassName());
         $this->service = TestServiceRegister::getService(PaymentPageSettingsService::class);
@@ -63,6 +80,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -85,6 +103,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -105,10 +124,11 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testSaveSettings(): void
+    public function testSaveSettingsWithoutFile(): void
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -122,12 +142,45 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     }
 
     /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testSaveSettingsWithFile(): void
+    {
+        // arrange
+        $settings = new PaymentPageSettingsModel(
+            new UploadedFile(null, new \SplFileInfo('path')),
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
+        );
+
+        $uploadedPath = 'new path';
+
+        $this->uploaderService->setPath($uploadedPath);
+
+        $newSettings = new PaymentPageSettingsModel(
+            new UploadedFile($uploadedPath),
+            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
+            [new TranslatableLabel("Description", "en")]
+        );
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'savePaymentPageSettings'], [$settings]);
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertEquals($newSettings, $savedEntity[0]->getPaymentPageSettings());
+    }
+
+    /**
      * @throws Exception
      */
     public function testSaveSettingsAlreadyExists(): void
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile(null, new \SplFileInfo('path')),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFFF',
@@ -139,6 +192,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
+            new UploadedFile(null, null),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
@@ -162,6 +216,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile(null),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
         );
@@ -172,6 +227,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $this->repository->save($settingsEntity);
 
         $newSettings = new PaymentPageSettingsModel(
+            new UploadedFile(null),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',

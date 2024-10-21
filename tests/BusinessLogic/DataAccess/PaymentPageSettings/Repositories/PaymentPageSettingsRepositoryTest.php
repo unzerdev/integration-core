@@ -6,6 +6,7 @@ use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -65,6 +66,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile(null),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
         );
@@ -87,6 +89,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -111,6 +114,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
         );
@@ -131,6 +135,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
         );
@@ -140,6 +145,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
@@ -164,6 +170,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -174,6 +181,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $this->repository->save($settingsEntity);
 
         $newSettings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
@@ -200,6 +208,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );
@@ -238,6 +247,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('url'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")]
         );

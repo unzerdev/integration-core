@@ -26,6 +26,7 @@ use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -110,7 +111,8 @@ class BootstrapComponent extends BaseBootstrapComponent
             PaymentPageSettingsService::class,
             new SingleInstance(static function () {
                 return new PaymentPageSettingsService(
-                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class)
+                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    ServiceRegister::getService(UploaderService::class)
                 );
             })
         );
