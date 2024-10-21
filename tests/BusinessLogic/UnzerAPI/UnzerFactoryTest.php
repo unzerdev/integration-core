@@ -15,6 +15,7 @@ use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Unzer;
 
@@ -40,6 +41,7 @@ class UnzerFactoryTest extends BaseTestCase
         parent::setUp();
 
         $this->connectionServiceMock = new ConnectionServiceMock(
+            new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
             TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),
@@ -50,7 +52,6 @@ class UnzerFactoryTest extends BaseTestCase
             ConnectionService::class, function () {
             return $this->connectionServiceMock;
         });
-        UnzerFactory::resetInstance();
     }
 
     /**
@@ -68,7 +69,7 @@ class UnzerFactoryTest extends BaseTestCase
         $expectedUnzer = new Unzer($connectionSettings->getLiveConnectionData()->getPrivateKey());
 
         // act
-        $unzer = UnzerFactory::getInstance()->makeUnzerAPI($connectionSettings);
+        $unzer = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
         // assert
         self::assertEquals($expectedUnzer, $unzer);
     }
@@ -88,8 +89,8 @@ class UnzerFactoryTest extends BaseTestCase
         $expectedUnzer = new Unzer($connectionSettings->getLiveConnectionData()->getPrivateKey());
 
         // act
-        $unzer1 = UnzerFactory::getInstance()->makeUnzerAPI($connectionSettings);
-        $unzer2 = UnzerFactory::getInstance()->makeUnzerAPI($connectionSettings);
+        $unzer1 = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
+        $unzer2 = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
         // assert
         self::assertEquals($expectedUnzer, $unzer1);
         self::assertEquals($expectedUnzer, $unzer2);
@@ -106,7 +107,7 @@ class UnzerFactoryTest extends BaseTestCase
         $this->expectException(ConnectionSettingsNotFoundException::class);
 
         // act
-        UnzerFactory::getInstance()->makeUnzerAPI();
+        (new UnzerFactory())->makeUnzerAPI();
         // assert
     }
 
@@ -127,7 +128,7 @@ class UnzerFactoryTest extends BaseTestCase
         $expectedUnzer = new Unzer('s-priv-live-test');
 
         // act
-        $unzer = UnzerFactory::getInstance()->makeUnzerAPI();
+        $unzer = (new UnzerFactory())->makeUnzerAPI();
         // assert
         self::assertEquals($expectedUnzer, $unzer);
     }

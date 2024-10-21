@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
@@ -56,9 +57,9 @@ class PaymentPageSettings extends Entity
         $paypageData = $data['paymentPageSettings'] ?? [];
 
         $this->paymentPageSettings = new DomainPaymentPageSettings(
+            new UploadedFile($paypageData['logoImageUrl']),
             TranslatableLabel::fromArrayToBatch($paypageData['shopName']),
             TranslatableLabel::fromArrayToBatch($paypageData['shopTagline']),
-            $paypageData['logoImageUrl'],
             $paypageData['headerBackgroundColor'],
             $paypageData['headerFontColor'],
             $paypageData['shopNameBackgroundColor'],
@@ -77,7 +78,7 @@ class PaymentPageSettings extends Entity
         $data['paymentPageSettings'] = [
             'shopName' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopName()),
             'shopTagline' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopTagline()),
-            'logoImageUrl' => $this->paymentPageSettings->getLogoImageUrl(),
+            'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
             'shopNameBackgroundColor' => $this->paymentPageSettings->getShopNameBackgroundColor(),

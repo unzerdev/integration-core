@@ -22,11 +22,6 @@ class PaymentPageSettings
     private array $shopTagline = [];
 
     /**
-     * @var ?string $logoImageUrl
-     */
-    private ?string $logoImageUrl;
-
-    /**
      * @var ?string $headerBackgroundColor
      */
     private ?string $headerBackgroundColor;
@@ -57,9 +52,14 @@ class PaymentPageSettings
     private ?string $shopTaglineFontColor;
 
     /**
+     * @var UploadedFile
+     */
+    private UploadedFile $file;
+
+    /**
      * @param array $shopName
      * @param array $shopTagline
-     * @param string|null $logoImageUrl
+     * @param UploadedFile $file
      * @param string|null $headerBackgroundColor
      * @param string|null $headerFontColor
      * @param string|null $shopNameBackgroundColor
@@ -68,9 +68,9 @@ class PaymentPageSettings
      * @param string|null $shopTaglineFontColor
      */
     public function __construct(
+        UploadedFile $file,
         array $shopName = [],
         array $shopTagline = [],
-        ?string $logoImageUrl = null,
         ?string $headerBackgroundColor = null,
         ?string $headerFontColor = null,
         ?string $shopNameBackgroundColor = null,
@@ -80,13 +80,21 @@ class PaymentPageSettings
     ) {
         $this->shopName = $shopName;
         $this->shopTagline = $shopTagline;
-        $this->logoImageUrl = $logoImageUrl;
+        $this->file = $file;
         $this->headerBackgroundColor = $headerBackgroundColor;
         $this->headerFontColor = $headerFontColor;
         $this->shopNameBackgroundColor = $shopNameBackgroundColor;
         $this->shopNameFontColor = $shopNameFontColor;
         $this->shopTaglineBackgroundColor = $shopTaglineBackgroundColor;
         $this->shopTaglineFontColor = $shopTaglineFontColor;
+    }
+
+    /**
+     * @return UploadedFile
+     */
+    public function getFile(): UploadedFile
+    {
+        return $this->file;
     }
 
     /**
@@ -103,14 +111,6 @@ class PaymentPageSettings
     public function getShopTagline(): array
     {
         return $this->shopTagline;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getLogoImageUrl(): ?string
-    {
-        return $this->logoImageUrl;
     }
 
     /**

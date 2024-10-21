@@ -9,6 +9,7 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryIn
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\DisconnectServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -35,7 +36,7 @@ class DisconnectControllerTest extends BaseTestCase
         parent::setUp();
 
         $this->disconnectService = new DisconnectServiceMock(
-            new UnzerMock('s-priv-test'),
+            (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
             TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
         );

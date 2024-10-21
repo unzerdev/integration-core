@@ -9,10 +9,10 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\EnablePaymentMetho
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\GetPaymentConfigResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\PaymentMethodsResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Response\SavePaymentMethodConfigResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -30,17 +30,25 @@ class PaymentMethodsController
     private PaymentMethodService $paymentMethodService;
 
     /**
-     * @param PaymentMethodService $paymentMethodService
+     * @var CurrencyServiceInterface
      */
-    public function __construct(PaymentMethodService $paymentMethodService)
+    private CurrencyServiceInterface $currencyService;
+
+    /**
+     * @param PaymentMethodService $paymentMethodService
+     * @param CurrencyServiceInterface $currencyService
+     */
+    public function __construct(PaymentMethodService $paymentMethodService, CurrencyServiceInterface $currencyService)
     {
         $this->paymentMethodService = $paymentMethodService;
+        $this->currencyService = $currencyService;
     }
 
     /**
      * @return PaymentMethodsResponse
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function getPaymentMethods(): PaymentMethodsResponse
     {
@@ -51,12 +59,10 @@ class PaymentMethodsController
      * @param EnablePaymentMethodRequest $request
      *
      * @return EnablePaymentMethodResponse
-     *
-     * @throws InvalidPaymentTypeException
      */
     public function enablePaymentMethod(EnablePaymentMethodRequest $request): EnablePaymentMethodResponse
     {
-        $this->paymentMethodService->enablePaymentMethodConfig($request->toDomainModel());
+        $this->paymentMethodService->enablePaymentMethodConfig($request->getType(), $request->isEnabled());
 
         return new EnablePaymentMethodResponse();
     }
@@ -65,9 +71,6 @@ class PaymentMethodsController
      * @param GetPaymentMethodConfigRequest $request
      *
      * @return GetPaymentConfigResponse
-     *
-     * @throws InvalidPaymentTypeException
-     * @throws PaymentConfigNotFoundException
      */
     public function getPaymentConfig(GetPaymentMethodConfigRequest $request): GetPaymentConfigResponse
     {
@@ -85,7 +88,7 @@ class PaymentMethodsController
      */
     public function savePaymentConfig(SavePaymentMethodConfigRequest $request): SavePaymentMethodConfigResponse
     {
-        $this->paymentMethodService->savePaymentMethodConfig($request->toDomainModel());
+        $this->paymentMethodService->savePaymentMethodConfig($request->toDomainModel($this->currencyService->getDefaultCurrency()));
 
         return new SavePaymentMethodConfigResponse();
     }

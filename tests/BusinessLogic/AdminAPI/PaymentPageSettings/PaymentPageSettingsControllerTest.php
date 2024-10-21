@@ -5,13 +5,16 @@ namespace BusinessLogic\AdminAPI\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSettingsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentPageSettingsServiceMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 
@@ -28,6 +31,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     private PaymentPageSettingsServiceMock $paymentPageSettingsService;
 
     /**
+     * @var UploaderServiceMock
+     */
+    private UploaderServiceMock $uploaderService;
+
+    /**
      * @return void
      *
      * @throws RepositoryClassException
@@ -36,9 +44,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         parent::setUp();
 
-        $this->paymentPageSettingsService = new PaymentPageSettingsServiceMock(
-            TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
-        );
+        $this->uploaderService = new UploaderServiceMock();
 
         TestServiceRegister::registerService(
             PaymentPageSettingsService::class,
@@ -46,6 +52,19 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 return $this->paymentPageSettingsService;
             }
         );
+
+        TestServiceRegister::registerService(
+            UploaderService::class,
+            function () {
+                return $this->uploaderService;
+            }
+        );
+
+        $this->paymentPageSettingsService = new PaymentPageSettingsServiceMock(
+            TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+            TestServiceRegister::getService(UploaderService::class)
+        );
+
     }
 
     /**
@@ -56,6 +75,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $this->paymentPageSettingsService->setPaymentPageSettings(
             new PaymentPageSettingsModel(
+                new UploadedFile('file'),
                 [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
                 [new TranslatableLabel("Description", "en")],
                 '#FFFFFF',
@@ -64,7 +84,6 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 '#555555',
                 '#333333',
                 '#222222',
-                '#000000'
             )
         );
 
@@ -82,6 +101,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('file'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
@@ -89,8 +109,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#111111',
             '#555555',
             '#333333',
-            '#222222',
-            '#000000'
+            '#222222'
         );
 
         $this->paymentPageSettingsService->setPaymentPageSettings($settings);
@@ -111,6 +130,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
+            new UploadedFile('file'),
             [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
             [new TranslatableLabel("Description", "en")],
             '#FFFFFF',
@@ -119,7 +139,6 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#555555',
             '#333333',
             '#222222',
-            '#000000'
         );
 
         $this->paymentPageSettingsService->setPaymentPageSettings($settings);
@@ -137,7 +156,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     public function testGetResponseToArrayNoSettings(): void
     {
         // Arrange
-        $settings = new PaymentPageSettingsModel();
+        $settings = new PaymentPageSettingsModel(new UploadedFile());
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPageSettings();
 
@@ -155,13 +174,14 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $settingsRequest = new PaymentPageSettingsRequest(
             [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
             [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            'path',
+            null,
             '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
             '#333333',
             '#222222',
-            '#000000'
         );
 
         // Act
@@ -181,14 +201,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $settingsRequest = new PaymentPageSettingsRequest(
             [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
             [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            null,
+            new \SplFileInfo('path'),
             '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
             '#333333',
-            '#222222',
-            '#000000'
+            '#222222'
         );
+
+        $this->uploaderService->setPath('path');
 
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->savePaymentPageSettings($settingsRequest);
@@ -207,7 +230,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         return [
             'shopName' => $this->translatableLabelsToArray($paymentPageSettings->getShopName()),
             'shopTagline' => $this->translatableLabelsToArray($paymentPageSettings->getShopTagline()),
-            'logoImageUrl' => $paymentPageSettings->getLogoImageUrl(),
+            'logoImageUrl' => $paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $paymentPageSettings->getHeaderFontColor(),
             'shopNameBackgroundColor' => $paymentPageSettings->getShopNameBackgroundColor(),

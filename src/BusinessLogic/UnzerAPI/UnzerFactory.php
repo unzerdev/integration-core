@@ -15,12 +15,9 @@ use UnzerSDK\Unzer;
  *
  * @package Unzer\Core\BusinessLogic\UnzerAPI
  */
-class UnzerFactory extends Singleton
+class UnzerFactory
 {
-    /**
-     * @var Unzer|null
-     */
-    private static ?Unzer $unzer = null;
+    private ?ConnectionSettings $connectionSettings = null;
 
     /**
      * @param ConnectionSettings|null $connectionSettings
@@ -31,44 +28,33 @@ class UnzerFactory extends Singleton
      */
     public function makeUnzerAPI(?ConnectionSettings $connectionSettings = null): Unzer
     {
-        if (self::$unzer) {
-            return self::$unzer;
-        }
-
         if ($connectionSettings) {
-            self::$unzer = new Unzer($connectionSettings->getActiveConnectionData()->getPrivateKey());
-
-            return self::$unzer;
+            return $this->create($connectionSettings->getActiveConnectionData()->getPrivateKey());
         }
 
-        $connectionSettings = static::getConnectionService()->getConnectionSettings();
+        if (!$this->connectionSettings) {
+            $this->connectionSettings = $this->getConnectionService()->getConnectionSettings();
+        }
 
-        if (!$connectionSettings) {
+        if (!$this->connectionSettings) {
             throw new ConnectionSettingsNotFoundException(
                 new TranslatableLabel('Connection settings not found.',
                     'connectionSettings.notFound')
             );
         }
 
-        self::$unzer = new Unzer($connectionSettings->getActiveConnectionData()->getPrivateKey());
-
-        return self::$unzer;
+        return $this->create($this->connectionSettings->getActiveConnectionData()->getPrivateKey());
     }
 
-    /**
-     * @return void
-     */
-    public static function resetInstance(): void
+    protected function create(string $sdkKey): Unzer
     {
-        parent::resetInstance();
-
-        self::$unzer = null;
+        return new Unzer($sdkKey);
     }
 
     /**
      * @return ConnectionService
      */
-    protected static function getConnectionService(): ConnectionService
+    protected function getConnectionService(): ConnectionService
     {
         return ServiceRegister::getService(ConnectionService::class);
     }

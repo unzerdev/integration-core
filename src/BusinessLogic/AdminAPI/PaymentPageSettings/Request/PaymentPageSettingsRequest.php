@@ -2,7 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request;
 
+use SplFileInfo;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
@@ -26,44 +28,50 @@ class PaymentPageSettingsRequest
     private array $shopTagline;
 
     /**
-     * @var string $logoImageUrl
+     * @var null|string $logoImageUrl
      */
-    private string $logoImageUrl;
+    private ?string $logoImageUrl;
 
     /**
-     * @var string $headerBackgroundColor
+     * @var null|string $headerBackgroundColor
      */
-    private string $headerBackgroundColor;
+    private ?string $headerBackgroundColor;
 
     /**
-     * @var string $headerFontColor
+     * @var null|string $headerFontColor
      */
-    private string $headerFontColor;
+    private ?string $headerFontColor;
 
     /**
-     * @var string $shopNameBackgroundColor
+     * @var null|string $shopNameBackgroundColor
      */
-    private string $shopNameBackgroundColor;
+    private ?string $shopNameBackgroundColor;
 
     /**
-     * @var string $shopNameFontColor
+     * @var null|string $shopNameFontColor
      */
-    private string $shopNameFontColor;
+    private ?string $shopNameFontColor;
 
     /**
-     * @var string $shopTaglineBackgroundColor
+     * @var null|string $shopTaglineBackgroundColor
      */
-    private string $shopTaglineBackgroundColor;
+    private ?string $shopTaglineBackgroundColor;
 
     /**
-     * @var string $shopTaglineFontColor
+     * @var null|string $shopTaglineFontColor
      */
-    private string $shopTaglineFontColor;
+    private ?string $shopTaglineFontColor;
+
+    /**
+     * @var SplFileInfo|null
+     */
+    private ?SplFileInfo $file;
 
     /**
      * @param array $shopName
      * @param array $shopTagline
      * @param string|null $logoImageUrl
+     * @param SplFileInfo|null $file
      * @param string|null $headerBackgroundColor
      * @param string|null $headerFontColor
      * @param string|null $shopNameBackgroundColor
@@ -75,6 +83,7 @@ class PaymentPageSettingsRequest
         array $shopName = [],
         array $shopTagline = [],
         ?string $logoImageUrl = null,
+        ?SplFileInfo $file = null,
         ?string $headerBackgroundColor = null,
         ?string $headerFontColor = null,
         ?string $shopNameBackgroundColor = null,
@@ -85,6 +94,7 @@ class PaymentPageSettingsRequest
         $this->shopName = $shopName;
         $this->shopTagline = $shopTagline;
         $this->logoImageUrl = $logoImageUrl;
+        $this->file = $file;
         $this->headerBackgroundColor = $headerBackgroundColor;
         $this->headerFontColor = $headerFontColor;
         $this->shopNameBackgroundColor = $shopNameBackgroundColor;
@@ -103,9 +113,9 @@ class PaymentPageSettingsRequest
     public function transformToDomainModel(): object
     {
         return new PaymentPageSettings(
+            new UploadedFile($this->logoImageUrl,$this->file),
             TranslatableLabel::fromArrayToBatch($this->shopName),
             TranslatableLabel::fromArrayToBatch($this->shopTagline),
-            $this->logoImageUrl,
             $this->headerBackgroundColor,
             $this->headerFontColor,
             $this->shopNameBackgroundColor,

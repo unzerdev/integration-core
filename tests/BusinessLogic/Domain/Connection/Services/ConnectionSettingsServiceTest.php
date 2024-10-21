@@ -13,9 +13,13 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PublicKeyInvalidExcept
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
+use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -51,6 +55,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
      * @var MemoryRepository
      */
     public $webhookDataRepository;
+    private $unzerFactory;
 
     /**
      * @throws RepositoryClassException
@@ -60,10 +65,19 @@ class ConnectionSettingsServiceTest extends BaseTestCase
     {
         parent::setUp();
 
+        $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+        TestServiceRegister::registerService(ConnectionService::class, function () {
+            return new ConnectionService(
+                $this->unzerFactory,
+                TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
+                TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                TestServiceRegister::getService(EncryptorInterface::class),
+                TestServiceRegister::getService(WebhookUrlServiceInterface::class)
+            );
+        },);
         $this->repository = TestRepositoryRegistry::getRepository(ConnectionSettingsEntity::getClassName());
         $this->webhookDataRepository = TestRepositoryRegistry::getRepository(WebhookDataEntity::getClassName());
         $this->service = TestServiceRegister::getService(ConnectionService::class);
-        UnzerFactoryMock::getInstance();
     }
 
     /**
@@ -434,7 +448,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         self::assertNotNull($webhookData);
         self::assertEquals('https://test.com', $webhookData->getUrl());
         self::assertCount(2, $webhookData->getEvents());
-        self::assertEquals($webhookData,$webhookDataSaved);
+        self::assertEquals($webhookData, $webhookDataSaved);
     }
 
     /**
@@ -530,6 +544,6 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $unzerMock = new UnzerMock($privateKey);
         $unzerMock->setKeypair($keypair);
         $unzerMock->setWebhooks($webhooks);
-        UnzerFactoryMock::getInstance()->setMockUnzer($unzerMock);
+        $this->unzerFactory->setMockUnzer($unzerMock);
     }
 }

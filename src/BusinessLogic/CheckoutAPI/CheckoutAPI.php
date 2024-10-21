@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 
 /**
  * Class AdminAPI. Integrations should use this class for communicating with Admin API.
@@ -37,5 +38,13 @@ class CheckoutAPI
             ::run(new ErrorHandlingAspect())
             ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(CheckoutPaymentMethodsController::class);
+    }
+
+    public function paymentPage(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(CheckoutPaymentPageController::class);
     }
 }

@@ -4,6 +4,8 @@ namespace Unzer\Core\Tests\BusinessLogic\PaymentMethodConfig\Repositories;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig as PaymentMethodConfigEntity;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
@@ -65,7 +67,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     {
         // arrange
         for ($i = 0; $i < 10; $i++) {
-            $config = new PaymentMethodConfig("type{$i}", true);
+            $config = new PaymentMethodConfig("type{$i}", true, BookingMethod::charge());
             $entity = new PaymentMethodConfigEntity();
             $entity->setPaymentMethodConfig($config);
             $entity->setStoreId('1');
@@ -86,7 +88,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testEnableConfigNoConfig(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('eps', true);
+        $config = new PaymentMethodConfig('eps', true, BookingMethod::charge());
 
         // act
         StoreContext::doWithStore('1',
@@ -105,7 +107,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testEnableConfigConfigExists(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('eps', true);
+        $config = new PaymentMethodConfig('eps', true, BookingMethod::charge());
 
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
@@ -113,7 +115,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $configEntity->setStoreId('1');
         $this->repository->save($configEntity);
 
-        $newConfig = new PaymentMethodConfig('eps', false);
+        $newConfig = new PaymentMethodConfig('eps', false, BookingMethod::charge());
 
         // act
         StoreContext::doWithStore('1',
@@ -132,7 +134,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testEnableConfigConfigExistsDifferentType(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('cards', true);
+        $config = new PaymentMethodConfig('cards', true, BookingMethod::charge());
 
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
@@ -140,7 +142,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $configEntity->setStoreId('1');
         $this->repository->save($configEntity);
 
-        $newConfig = new PaymentMethodConfig('eps', false);
+        $newConfig = new PaymentMethodConfig('eps', false, BookingMethod::charge());
 
         // act
         StoreContext::doWithStore('1',
@@ -178,7 +180,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testGetPaymentConfig(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('cards', true);
+        $config = new PaymentMethodConfig('cards', true, BookingMethod::charge());
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
         $configEntity->setType('cards');
@@ -202,7 +204,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testGetPaymentConfigDifferentStore(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('cards', true);
+        $config = new PaymentMethodConfig('cards', true, BookingMethod::charge());
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
         $configEntity->setType('cards');
@@ -226,7 +228,7 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testGetPaymentConfigDifferentType(): void
     {
         // arrange
-        $config = new PaymentMethodConfig('cards', true);
+        $config = new PaymentMethodConfig('cards', true, BookingMethod::charge());
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
         $configEntity->setType('cards');
@@ -253,15 +255,15 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $config = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
+            BookingMethod::authorize(),
+            true,
             [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
             [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
-            BookingMethod::authorize(),
             '1',
-            1.1,
-            2.2,
-            3.3,
-            [new Country('de', 'Germany'), new Country('fr', 'France')],
-            true
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('de', 'Germany'), new Country('fr', 'France')]
         );
 
         // act
@@ -284,35 +286,35 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $config = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
+            BookingMethod::authorize(),
+            true,
             [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
             [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
-            BookingMethod::authorize(),
             '1',
-            1.1,
-            2.2,
-            3.3,
-            [new Country('de', 'Germany'), new Country('fr', 'France')],
-            true
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('de', 'Germany'), new Country('fr', 'France')]
         );
 
         $configEntity = new PaymentMethodConfigEntity();
         $configEntity->setPaymentMethodConfig($config);
-        $configEntity->setType('eps');
+        $configEntity->setType('EPS');
         $configEntity->setStoreId('1');
         $this->repository->save($configEntity);
 
         $newConfig = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
+            BookingMethod::charge(),
+            false,
             [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
             [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            BookingMethod::charge(),
             '1',
-            1.1,
-            2.2,
-            3.3,
-            [new Country('gb', 'Great Britain'), new Country('fr', 'France')],
-            false
+            Amount::fromFloat(1.1, Currency::getDefault()),
+            Amount::fromFloat(2.2, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
         );
 
         // act

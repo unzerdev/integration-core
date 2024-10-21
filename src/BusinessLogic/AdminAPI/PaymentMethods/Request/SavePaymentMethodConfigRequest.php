@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
@@ -21,14 +23,14 @@ class SavePaymentMethodConfigRequest extends Request
     /** @var string */
     private string $type;
 
+    /** @var string */
+    private string $bookingMethod;
+
     /** @var array */
     private array $name;
 
     /** @var array */
     private array $description;
-
-    /** @var ?string */
-    private ?string $bookingMethod;
 
     /** @var ?string */
     private ?string $statusIdToCharge = null;
@@ -62,9 +64,9 @@ class SavePaymentMethodConfigRequest extends Request
      */
     public function __construct(
         string $type,
+        string $bookingMethod,
         array $name = [],
         array $description = [],
-        ?string $bookingMethod = null,
         ?string $statusIdToCharge = null,
         ?float $minOrderAmount = null,
         ?float $maxOrderAmount = null,
@@ -85,26 +87,28 @@ class SavePaymentMethodConfigRequest extends Request
     }
 
     /**
+     * @param Currency $currency
+     *
      * @return PaymentMethodConfig
      *
      * @throws InvalidBookingMethodException
      * @throws InvalidCountryArrayException
      * @throws InvalidTranslatableArrayException
      */
-    public function toDomainModel(): PaymentMethodConfig
+    public function toDomainModel(Currency $currency): PaymentMethodConfig
     {
         return new PaymentMethodConfig(
             $this->type,
             true,
+            BookingMethod::parse($this->bookingMethod),
+            $this->sendBasketData,
             TranslatableLabel::fromArrayToBatch($this->name),
             TranslatableLabel::fromArrayToBatch($this->description),
-            $this->bookingMethod ? BookingMethod::parse($this->bookingMethod) : null,
             $this->statusIdToCharge,
-            $this->minOrderAmount,
-            $this->maxOrderAmount,
-            $this->surcharge,
-            Country::fromArrayToBatch($this->restrictedCountries),
-            $this->sendBasketData
+            $this->minOrderAmount ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
+            $this->maxOrderAmount ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,
+            $this->surcharge ? Amount::fromFloat($this->surcharge, $currency) : null,
+            Country::fromArrayToBatch($this->restrictedCountries)
         );
     }
 }

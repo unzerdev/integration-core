@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services;
 
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 
@@ -17,9 +18,16 @@ class PaymentPageSettingsService
      */
     private $repository;
 
-    public function __construct(PaymentPageSettingsRepositoryInterface $repository)
+    /**
+     * @var UploaderService
+     */
+    private UploaderService $uploaderService;
+
+    public function __construct(PaymentPageSettingsRepositoryInterface $repository,
+    UploaderService $uploaderService)
     {
         $this->repository = $repository;
+        $this->uploaderService = $uploaderService;
     }
 
     /**
@@ -29,6 +37,10 @@ class PaymentPageSettingsService
      */
     public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): void
     {
+        if($paymentPageSettings->getFile()->isFileInfo()) {
+            $url = $this->uploaderService->uploadImage($paymentPageSettings->getFile()->getFileInfo());
+            $paymentPageSettings->getFile()->setUrl($url);
+        }
         $this->repository->setPaymentPageSettings($paymentPageSettings);
     }
 

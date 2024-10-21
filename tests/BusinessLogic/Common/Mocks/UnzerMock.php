@@ -2,7 +2,11 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
+use UnzerSDK\Resources\Basket;
+use UnzerSDK\Resources\Customer;
 use UnzerSDK\Resources\Keypair;
+use UnzerSDK\Resources\Metadata;
+use UnzerSDK\Resources\PaymentTypes\Paypage;
 use UnzerSDK\Resources\Webhook;
 use UnzerSDK\Unzer;
 
@@ -13,6 +17,8 @@ use UnzerSDK\Unzer;
  */
 class UnzerMock extends Unzer
 {
+    private $callHistory = [];
+
     /**
      * @var Keypair|null
      */
@@ -22,6 +28,12 @@ class UnzerMock extends Unzer
      * @var Webhook[]
      */
     private array $webhooks = [];
+    private ?array $payPageData = [];
+
+    public function getMethodCallHistory($methodName)
+    {
+        return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
+    }
 
     /**
      * @param Keypair $keypair
@@ -77,5 +89,42 @@ class UnzerMock extends Unzer
     public function setWebhooks(array $webhooks): void
     {
         $this->webhooks = $webhooks;
+    }
+
+    public function setPayPageData(array $payPageData)
+    {
+        $this->payPageData = $payPageData;
+    }
+
+    public function initPayPageAuthorize(
+        Paypage $paypage,
+        Customer $customer = null,
+        Basket $basket = null,
+        Metadata $metadata = null
+    ): Paypage
+    {
+        $this->callHistory['initPayPageAuthorize'][] = ['paypage' => $paypage];
+
+        $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
+        $result->setId($this->payPageData['id'] ?? null);
+        $result->setRedirectUrl($this->payPageData['redirectUrl'] ?? null);
+
+        return $result;
+    }
+
+    public function initPayPageCharge(
+        Paypage $paypage,
+        Customer $customer = null,
+        Basket $basket = null,
+        Metadata $metadata = null
+    ): Paypage
+    {
+        $this->callHistory['initPayPageCharge'][] = ['paypage' => $paypage];
+
+        $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
+        $result->setId($this->payPageData['id'] ?? null);
+        $result->setRedirectUrl($this->payPageData['redirectUrl'] ?? null);
+
+        return $result;
     }
 }

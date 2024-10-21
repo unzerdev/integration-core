@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
@@ -14,7 +15,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 class PaymentMethodServiceMock extends PaymentMethodService
 {
     /**
-     * @var PaymentMethod[]
+     * @var PaymentMethodConfig[]
      */
     private array $paymentMethods = [];
 
@@ -24,7 +25,7 @@ class PaymentMethodServiceMock extends PaymentMethodService
     private ?PaymentMethodConfig $paymentMethod = null;
 
     /**
-     * @return PaymentMethod[]
+     * @return PaymentMethodConfig[]
      */
     public function getAllPaymentMethods(): array
     {
@@ -34,11 +35,18 @@ class PaymentMethodServiceMock extends PaymentMethodService
     /**
      * @param string $type
      *
-     * @return PaymentMethodConfig
+     * @return ?PaymentMethodConfig
      */
-    public function getPaymentMethodConfigByType(string $type): PaymentMethodConfig
+    public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig
     {
-        return $this->paymentMethod;
+        if ($this->paymentMethod) {
+            return $this->paymentMethod;
+        }
+
+        $result = array_filter($this->paymentMethods, function (PaymentMethodConfig $paymentMethod) use ($type): bool {
+            return $paymentMethod->getType() === $type;
+        });
+        return !empty($result) ? current($result) : null;
     }
 
     /**
@@ -59,5 +67,16 @@ class PaymentMethodServiceMock extends PaymentMethodService
     public function setMockPaymentMethod(PaymentMethodConfig $paymentMethod): void
     {
         $this->paymentMethod = $paymentMethod;
+    }
+
+    /**
+     * @param Amount $orderAmount
+     * @param string $billingCountryIso
+     *
+     * @return PaymentMethodConfig[]
+     */
+    public function getPaymentMethodsForCheckout(Amount $orderAmount, string $billingCountryIso): array
+    {
+        return $this->paymentMethods;
     }
 }

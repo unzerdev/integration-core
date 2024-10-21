@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPage
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig;
@@ -23,7 +24,9 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRe
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -31,6 +34,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as Integratio
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -65,14 +69,16 @@ class BootstrapComponent extends BaseBootstrapComponent
     {
         parent::initServices();
 
+        $unzerFactory = new UnzerFactory();
         ServiceRegister::registerService(StoreContext::class, static function () {
             return StoreContext::getInstance();
         });
 
         ServiceRegister::registerService(
             ConnectionService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new ConnectionService(
+                    $unzerFactory,
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class),
                     ServiceRegister::getService(EncryptorInterface::class),
@@ -83,9 +89,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             DisconnectService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new DisconnectService(
-                    UnzerFactory::getInstance()->makeUnzerAPI(),
+                    $unzerFactory,
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class)
                 );
@@ -105,17 +111,29 @@ class BootstrapComponent extends BaseBootstrapComponent
             PaymentPageSettingsService::class,
             new SingleInstance(static function () {
                 return new PaymentPageSettingsService(
-                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class)
+                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    ServiceRegister::getService(UploaderService::class)
                 );
             })
         );
 
         ServiceRegister::registerService(
             PaymentMethodService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new PaymentMethodService(
-                    UnzerFactory::getInstance()->makeUnzerAPI(),
-                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class)
+                    $unzerFactory,
+                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                    ServiceRegister::getService(CurrencyServiceInterface::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentPageService::class,
+            new SingleInstance(static function () use ($unzerFactory) {
+                return new PaymentPageService(
+                    $unzerFactory,
+                    ServiceRegister::getService(PaymentMethodService::class)
                 );
             })
         );
@@ -241,14 +259,24 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             PaymentMethodsController::class,
             new SingleInstance(static function () {
-                return new PaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
+                return new PaymentMethodsController(
+                    ServiceRegister::getService(PaymentMethodService::class),
+                    ServiceRegister::getService(CurrencyServiceInterface::class)
+                );
             })
         );
 
         ServiceRegister::registerService(
             CheckoutPaymentMethodsController::class,
             new SingleInstance(static function () {
-                return new CheckoutPaymentMethodsController();
+                return new CheckoutPaymentMethodsController(ServiceRegister::getService(PaymentMethodService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            CheckoutPaymentPageController::class,
+            new SingleInstance(static function () {
+                return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class));
             })
         );
     }

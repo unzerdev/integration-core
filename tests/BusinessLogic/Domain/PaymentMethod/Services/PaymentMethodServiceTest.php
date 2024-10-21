@@ -4,17 +4,24 @@ namespace Unzer\Core\Tests\BusinessLogic\Domain\PaymentMethod\Services;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities\PaymentMethodConfig as PaymentMethodConfigEntity;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
+use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidPaymentTypeException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
@@ -35,9 +42,15 @@ class PaymentMethodServiceTest extends BaseTestCase
     public $service;
 
     /**
+     * @var CurrencyServiceMock
+     */
+    public CurrencyServiceMock $currencyServiceMock;
+
+    /**
      * @var MemoryRepository
      */
     public $paymentMethodConfigRepository;
+    private UnzerFactoryMock $unzerFactory;
 
     /**
      * @return void
@@ -49,9 +62,18 @@ class PaymentMethodServiceTest extends BaseTestCase
     {
         parent::setUp();
 
+        $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+        TestServiceRegister::registerService(PaymentMethodService::class, function () {
+            return new PaymentMethodService(
+                $this->unzerFactory,
+                TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                TestServiceRegister::getService(CurrencyServiceInterface::class),
+            );
+        });
+
         $this->paymentMethodConfigRepository = TestRepositoryRegistry::getRepository(PaymentMethodConfigEntity::getClassName());
         $this->service = TestServiceRegister::getService(PaymentMethodService::class);
-        UnzerFactoryMock::getInstance();
+        $this->currencyServiceMock = TestServiceRegister::getService(CurrencyServiceInterface::class);
     }
 
     /**
@@ -79,7 +101,7 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsNoConfigs(): void
     {
         // arrange
-        $this->mockData('s-pub-test', 's-priv-test', ['eps', 'googlepay', 'card', 'test']);
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
 
         // act
         $methods = StoreContext::doWithStore('1', [$this->service, 'getAllPaymentMethods']);
@@ -87,10 +109,10 @@ class PaymentMethodServiceTest extends BaseTestCase
         // assert
 
         $expectedMethods = [
-            new PaymentMethod('eps', PaymentMethodNames::PAYMENT_METHOD_NAMES['eps'], false),
+            new PaymentMethod('EPS', PaymentMethodNames::PAYMENT_METHOD_NAMES['EPS'], false),
             new PaymentMethod('googlepay', PaymentMethodNames::PAYMENT_METHOD_NAMES['googlepay'], false),
             new PaymentMethod('card', PaymentMethodNames::PAYMENT_METHOD_NAMES['card'], false),
-            new PaymentMethod('test', PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME, false),
+            new PaymentMethod('test', PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' test', false),
         ];
 
         self::assertCount(4, $methods);
@@ -105,13 +127,12 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethods(): void
     {
         // arrange
-
         $this->setEntities(
             [
-                new PaymentMethodConfig('przelewy24', true),
-                new PaymentMethodConfig('giropay', false),
-                new PaymentMethodConfig('twint', true),
-                new PaymentMethodConfig('wechatpay', true),
+                new PaymentMethodConfig('przelewy24', true, BookingMethod::charge()),
+                new PaymentMethodConfig('giropay', false, BookingMethod::charge()),
+                new PaymentMethodConfig('twint', true, BookingMethod::charge()),
+                new PaymentMethodConfig('wechatpay', true, BookingMethod::charge()),
             ]
         );
 
@@ -141,10 +162,10 @@ class PaymentMethodServiceTest extends BaseTestCase
         // arrange
         $this->setEntities(
             [
-                new PaymentMethodConfig('prepayment', true),
-                new PaymentMethodConfig('post-finance-card', false),
-                new PaymentMethodConfig('paylater-direct-debit', false),
-                new PaymentMethodConfig('bancontact', true),
+                new PaymentMethodConfig('prepayment', true, BookingMethod::charge()),
+                new PaymentMethodConfig('post-finance-card', false, BookingMethod::charge()),
+                new PaymentMethodConfig('paylater-direct-debit', false, BookingMethod::charge()),
+                new PaymentMethodConfig('bancontact', true, BookingMethod::charge()),
             ]
         );
 
@@ -175,30 +196,17 @@ class PaymentMethodServiceTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testEnablePaymentConfigInvalidType(): void
-    {
-        // arrange
-        $this->expectException(InvalidPaymentTypeException::class);
-        $paymentMethodConfig = new PaymentMethodConfig('test', true);
-
-        // act
-        StoreContext::doWithStore('1', [$this->service, 'enablePaymentMethodConfig'], [$paymentMethodConfig]);
-
-        // assert
-    }
-
-    /**
-     * @return void
-     *
-     * @throws Exception
-     */
     public function testEnablePaymentConfig(): void
     {
         // arrange
-        $paymentMethodConfig = new PaymentMethodConfig(PaymentMethodTypes::KLARNA, true);
+        $paymentMethodConfig = new PaymentMethodConfig(PaymentMethodTypes::CARDS, true, BookingMethod::charge());
 
         // act
-        StoreContext::doWithStore('1', [$this->service, 'enablePaymentMethodConfig'], [$paymentMethodConfig]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->service, 'enablePaymentMethodConfig'],
+            [PaymentMethodTypes::CARDS, true]
+        );
 
         // assert
         $savedEntity = $this->paymentMethodConfigRepository->selectOne();
@@ -211,31 +219,27 @@ class PaymentMethodServiceTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testGetPaymentConfigInvalidType(): void
+    public function testEnablePaymentConfigAuthorizeType(): void
     {
         // arrange
-        $this->expectException(InvalidPaymentTypeException::class);
+        $paymentMethodConfig = new PaymentMethodConfig(
+            PaymentMethodTypes::KLARNA,
+            true,
+            BookingMethod::authorize(),
+            true
+        );
 
         // act
-        StoreContext::doWithStore('1', [$this->service, 'getPaymentMethodConfigByType'], ['test']);
+        StoreContext::doWithStore(
+            '1',
+            [$this->service, 'enablePaymentMethodConfig'],
+            [PaymentMethodTypes::KLARNA, true]
+        );
 
         // assert
-    }
+        $savedEntity = $this->paymentMethodConfigRepository->selectOne();
 
-    /**
-     * @return void
-     *
-     * @throws Exception
-     */
-    public function testGetPaymentConfigNoConfig(): void
-    {
-        // arrange
-        $this->expectException(PaymentConfigNotFoundException::class);
-
-        // act
-        StoreContext::doWithStore('1', [$this->service, 'getPaymentMethodConfigByType'], ['eps']);
-
-        // assert
+        self::assertEquals($paymentMethodConfig, $savedEntity->getPaymentMethodConfig());
     }
 
     /**
@@ -246,7 +250,7 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentConfig(): void
     {
         // arrange
-        $paymentMethodConfig = new PaymentMethodConfig(PaymentMethodTypes::KLARNA, true);
+        $paymentMethodConfig = new PaymentMethodConfig(PaymentMethodTypes::KLARNA, true, BookingMethod::charge());
         $this->setEntities([$paymentMethodConfig]);
 
         // act
@@ -254,6 +258,470 @@ class PaymentMethodServiceTest extends BaseTestCase
 
         // assert
         self::assertEquals($paymentMethodConfig, $config);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testSavePaymentMethodConfig(): void
+    {
+        // arrange
+        $paymentMethodConfig = new PaymentMethodConfig(PaymentMethodTypes::KLARNA, true, BookingMethod::charge());
+        $this->setEntities([$paymentMethodConfig]);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'savePaymentMethodConfig'], [$paymentMethodConfig]);
+
+        // assert
+        $savedEntity = $this->paymentMethodConfigRepository->selectOne();
+
+        self::assertEquals($paymentMethodConfig, $savedEntity->getPaymentMethodConfig());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutEmptyNoConfig(): void
+    {
+        // arrange
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(1, Currency::getDefault()), 'en']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutEmptyDisabledConfigs(): void
+    {
+        // arrange
+        $this->setEntities(
+            [
+                new PaymentMethodConfig('prepayment', false, BookingMethod::charge()),
+                new PaymentMethodConfig('post-finance-card', false, BookingMethod::charge()),
+                new PaymentMethodConfig('paylater-direct-debit', false, BookingMethod::charge()),
+                new PaymentMethodConfig('bancontact', false, BookingMethod::charge()),
+            ]
+        );
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(1, Currency::getDefault()), 'en']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutEmptyRestrictedCountries(): void
+    {
+        // arrange
+        $this->setEntities(
+            [
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::EPS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    '1',
+                    Amount::fromFloat(1.1, Currency::getDefault()),
+                    Amount::fromFloat(2.2, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+                ),
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::CARDS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    '1',
+                    Amount::fromFloat(1.1, Currency::getDefault()),
+                    Amount::fromFloat(2.2, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+                )
+            ]
+        );
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(12, Currency::fromIsoCode('USD')), 'gb']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutEmptyMinOrderAmount(): void
+    {
+        // arrange
+        $this->setEntities(
+            [
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::EPS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    '1',
+                    Amount::fromFloat(2, Currency::getDefault()),
+                    Amount::fromFloat(3, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+                ),
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::CARDS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    '1',
+                    Amount::fromFloat(4, Currency::getDefault()),
+                    Amount::fromFloat(5, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+
+                )
+            ]
+        );
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(1, Currency::getDefault()), 'ch']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutEmptyMaxOrderAmount(): void
+    {
+        // arrange
+        $this->setEntities(
+            [
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::EPS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    '1',
+                    Amount::fromFloat(2, Currency::getDefault()),
+                    Amount::fromFloat(3, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+                ),
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::CARDS,
+                    true,
+                    BookingMethod::charge(),
+                    false,
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    '1',
+                    Amount::fromFloat(4, Currency::getDefault()),
+                    Amount::fromFloat(5, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+                )
+            ]
+        );
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(1212121212, Currency::getDefault()), 'ch']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutInvalidUnzerAPIResponse(): void
+    {
+        // arrange
+        $method1 = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(30, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+        );
+        $method2 = new PaymentMethodConfig(
+            PaymentMethodTypes::CARDS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+        );
+        $method3 = new PaymentMethodConfig(
+            PaymentMethodTypes::PRZELEWY24,
+            false,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+        );
+
+        $method4 = new PaymentMethodConfig(
+            PaymentMethodTypes::PRZELEWY24,
+            false,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('ch', 'Switzerland'), new Country('us', 'United States')]
+        );
+        $this->setEntities([$method1, $method2, $method3, $method4]);
+        $this->mockData('s-pub-test', 's-priv-test', [], [
+            (object)[
+                "type" => "przelewy24",
+                "allowCustomerTypes" => "B2C",
+                "allowCreditTransaction" => false,
+                "3ds" => false
+            ]
+        ]);
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(200, Currency::fromIsoCode('EUR')), 'ch']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutInvalidCurrency(): void
+    {
+        // arrange
+        $method1 = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(30, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+
+        );
+
+        $this->setEntities([$method1]);
+        $this->mockData('s-pub-test', 's-priv-test');
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(200, Currency::fromIsoCode('USD')), 'ch']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckoutInvalidCountry(): void
+    {
+        // arrange
+        $method1 = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(30, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+        );
+
+        $this->setEntities([$method1]);
+        $this->mockData('s-pub-test', 's-priv-test', [], [
+            (object)[
+                "supports" => [
+                    (object)[
+                        "brands" => ["PRZELEWY24"],
+                        "countries" => ['FR'],
+                        "channel" => "31HA07BC81AE5E9FBF7C1A4AE013EA94",
+                        "currency" => ["EUR"]
+                    ]
+                ],
+                "type" => "EPS",
+                "allowCustomerTypes" => "B2C",
+                "allowCreditTransaction" => false,
+                "3ds" => false
+            ]
+        ]);
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(200, Currency::fromIsoCode('EUR')), 'ch']
+        );
+
+        // assert
+        self::assertEmpty($paymentMethods);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsForCheckout(): void
+    {
+        // arrange
+        $method1 = new PaymentMethodConfig(
+            PaymentMethodTypes::EPS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(30, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('fr', 'France')]
+        );
+        $method2 = new PaymentMethodConfig(
+            PaymentMethodTypes::CARDS,
+            true,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+        );
+        $method3 = new PaymentMethodConfig(
+            PaymentMethodTypes::PRZELEWY24,
+            false,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
+        );
+
+        $method4 = new PaymentMethodConfig(
+            PaymentMethodTypes::PRZELEWY24,
+            false,
+            BookingMethod::charge(),
+            false,
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            '1',
+            Amount::fromFloat(1, Currency::getDefault()),
+            Amount::fromFloat(222, Currency::getDefault()),
+            Amount::fromFloat(3.3, Currency::getDefault()),
+            [new Country('ch', 'Switzerland'), new Country('us', 'United States')]
+        );
+        $this->setEntities([$method1, $method2, $method3, $method4]);
+        $this->mockData('s-pub-test', 's-priv-test');
+
+        // act
+        $paymentMethods = StoreContext::doWithStore(
+            '1',
+            [$this->service, 'getPaymentMethodsForCheckout'],
+            [Amount::fromInt(200, Currency::fromIsoCode('EUR')), 'ch']
+        );
+
+        // assert
+        self::assertEquals([$method1, $method2], $paymentMethods);
     }
 
     /**
@@ -275,13 +743,14 @@ class PaymentMethodServiceTest extends BaseTestCase
     /**
      * @return void
      */
-    private function mockData(string $publicKey, string $privateKey, array $types = [])
+    private function mockData(string $publicKey, string $privateKey, array $types = [], array $paymentTypes = [])
     {
         $keypair = new KeypairMock();
         $keypair->setPublicKey($publicKey);
         $keypair->setAvailablePaymentTypes($types);
+        $keypair->setPaymentTypes($paymentTypes);
         $unzerMock = new UnzerMock($privateKey);
         $unzerMock->setKeypair($keypair);
-        UnzerFactoryMock::getInstance()->setMockUnzer($unzerMock);
+        $this->unzerFactory->setMockUnzer($unzerMock);
     }
 }

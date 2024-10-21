@@ -3,7 +3,6 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 
 /**
  * Class EnablePaymentMethodRequest.
@@ -29,10 +28,18 @@ class EnablePaymentMethodRequest extends Request
     }
 
     /**
-     * @return PaymentMethodConfig
+     * @return string
      */
-    public function toDomainModel(): PaymentMethodConfig
+    public function getType(): string
     {
-        return new PaymentMethodConfig($this->type, $this->enabled);
+        return $this->type;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
     }
 }

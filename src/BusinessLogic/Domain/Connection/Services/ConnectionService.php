@@ -30,6 +30,8 @@ use UnzerSDK\Validators\PublicKeyValidator;
  */
 class ConnectionService
 {
+    private UnzerFactory $unzerFactory;
+
     /** @var ConnectionSettingsRepositoryInterface */
     private ConnectionSettingsRepositoryInterface $connectionSettingsRepository;
 
@@ -38,22 +40,24 @@ class ConnectionService
 
     /** @var EncryptorInterface */
     private EncryptorInterface $encryptor;
-
     /** @var WebhookUrlServiceInterface */
     private WebhookUrlServiceInterface $webhookUrlService;
 
     /**
+     * @param UnzerFactory $unzerFactory
      * @param ConnectionSettingsRepositoryInterface $connectionSettingsRepository
      * @param WebhookDataRepositoryInterface $webhookDataRepository
      * @param EncryptorInterface $encryptor
      * @param WebhookUrlServiceInterface $webhookUrlService
      */
     public function __construct(
+        UnzerFactory $unzerFactory,
         ConnectionSettingsRepositoryInterface $connectionSettingsRepository,
         WebhookDataRepositoryInterface $webhookDataRepository,
         EncryptorInterface $encryptor,
         WebhookUrlServiceInterface $webhookUrlService
     ) {
+        $this->unzerFactory = $unzerFactory;
         $this->connectionSettingsRepository = $connectionSettingsRepository;
         $this->webhookDataRepository = $webhookDataRepository;
         $this->encryptor = $encryptor;
@@ -76,7 +80,7 @@ class ConnectionService
     public function initializeConnection(ConnectionSettings $connectionSettings): void
     {
         $this->validateKeys($connectionSettings);
-        $unzer = UnzerFactory::getInstance()->makeUnzerAPI($connectionSettings);
+        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
         $this->validateKeypair($unzer, $connectionSettings);
         $unregisteredEvents = $this->getUnregisteredEvents($unzer);
         if (!empty($unregisteredEvents)) {
@@ -121,7 +125,7 @@ class ConnectionService
             );
         }
 
-        $unzer = UnzerFactory::getInstance()->makeUnzerAPI($connectionSettings);
+        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
         $unzer->deleteAllWebhooks();
         $this->webhookDataRepository->deleteWebhookData();
         $this->registerWebhooks($unzer, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);

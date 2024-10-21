@@ -2,7 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -27,6 +29,16 @@ class PaymentMethodConfig
     private bool $enabled;
 
     /**
+     * @var BookingMethod
+     */
+    private BookingMethod $bookingMethod;
+
+    /**
+     * @var bool
+     */
+    private bool $sendBasketData = false;
+
+    /**
      * @var TranslatableLabel[]
      */
     private array $name = [];
@@ -37,31 +49,26 @@ class PaymentMethodConfig
     private array $description = [];
 
     /**
-     * @var ?BookingMethod
-     */
-    private ?BookingMethod $bookingMethod = null;
-
-    /**
      * Shop status ID. When order changes to this status, charge action is triggered.
      *
      * @var ?string
      */
-    private ?string $statusIdToCharge = null;
+    private ?string $statusIdToCharge;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $minOrderAmount = 0.0;
+    private ?Amount $minOrderAmount;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $maxOrderAmount = 0.0;
+    private ?Amount $maxOrderAmount;
 
     /**
-     * @var ?float
+     * @var ?Amount
      */
-    private ?float $surcharge = 0.0;
+    private ?Amount $surcharge;
 
     /**
      * @var Country[]
@@ -69,47 +76,42 @@ class PaymentMethodConfig
     private array $restrictedCountries = [];
 
     /**
-     * @var bool
-     */
-    private bool $sendBasketData = false;
-
-    /**
      * @param string $type
      * @param bool $enabled
      * @param array $name
      * @param array $description
-     * @param BookingMethod|null $bookingMethod
+     * @param BookingMethod $bookingMethod
      * @param string|null $statusIdToCharge
-     * @param float|null $minOrderAmount
-     * @param float|null $maxOrderAmount
-     * @param float|null $surcharge
+     * @param Amount|null $minOrderAmount
+     * @param Amount|null $maxOrderAmount
+     * @param Amount|null $surcharge
      * @param array $restrictedCountries
      * @param bool $sendBasketData
      */
     public function __construct(
         string $type,
         bool $enabled,
+        BookingMethod $bookingMethod,
+        bool $sendBasketData = false,
         array $name = [],
         array $description = [],
-        ?BookingMethod $bookingMethod = null,
         ?string $statusIdToCharge = null,
-        ?float $minOrderAmount = null,
-        ?float $maxOrderAmount = null,
-        ?float $surcharge = null,
-        array $restrictedCountries = [],
-        bool $sendBasketData = false
+        ?Amount $minOrderAmount = null,
+        ?Amount $maxOrderAmount = null,
+        ?Amount $surcharge = null,
+        array $restrictedCountries = []
     ) {
         $this->type = $type;
         $this->enabled = $enabled;
+        $this->bookingMethod = $bookingMethod;
+        $this->sendBasketData = $sendBasketData;
         $this->name = $name;
         $this->description = $description;
-        $this->bookingMethod = $bookingMethod;
         $this->statusIdToCharge = $statusIdToCharge;
         $this->minOrderAmount = $minOrderAmount;
         $this->maxOrderAmount = $maxOrderAmount;
         $this->surcharge = $surcharge;
         $this->restrictedCountries = $restrictedCountries;
-        $this->sendBasketData = $sendBasketData;
     }
 
     /**
@@ -155,9 +157,9 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return ?BookingMethod
+     * @return BookingMethod
      */
-    public function getBookingMethod(): ?BookingMethod
+    public function getBookingMethod(): BookingMethod
     {
         return $this->bookingMethod;
     }
@@ -171,25 +173,25 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getMinOrderAmount(): ?float
+    public function getMinOrderAmount(): ?Amount
     {
         return $this->minOrderAmount;
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getMaxOrderAmount(): ?float
+    public function getMaxOrderAmount(): ?Amount
     {
         return $this->maxOrderAmount;
     }
 
     /**
-     * @return ?float
+     * @return ?Amount
      */
-    public function getSurcharge(): ?float
+    public function getSurcharge(): ?Amount
     {
         return $this->surcharge;
     }
@@ -208,5 +210,60 @@ class PaymentMethodConfig
     public function isSendBasketData(): bool
     {
         return $this->sendBasketData;
+    }
+
+    /**
+     * @param Amount|null $surcharge
+     *
+     * @return void
+     */
+    public function setSurcharge(?Amount $surcharge): void
+    {
+        $this->surcharge = $surcharge;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return string
+     */
+    public function getNameByLocale(string $locale): string
+    {
+        foreach ($this->name as $name) {
+            if ($name->getCode() === $locale) {
+                return $name->getMessage();
+            }
+        }
+
+        foreach ($this->name as $name) {
+            if ($name->getCode() === 'default') {
+                return $name->getMessage();
+            }
+        }
+
+        return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type] ??
+            PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' ' . $this->type;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return ?string
+     */
+    public function getDescriptionByLocale(string $locale): ?string
+    {
+        foreach ($this->description as $name) {
+            if ($name->getCode() === $locale) {
+                return $name->getMessage();
+            }
+        }
+
+        foreach ($this->description as $name) {
+            if ($name->getCode() === 'default') {
+                return $name->getMessage();
+            }
+        }
+
+        return null;
     }
 }

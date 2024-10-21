@@ -73,7 +73,7 @@ interface PaymentMethodTypes
     public const WECHATPAY = 'wechatpay';
 
     /** @var string */
-    public const EPS = 'eps';
+    public const EPS = 'EPS';
 
     /** @var string[] */
     public const PAYMENT_TYPES = [
