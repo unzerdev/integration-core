@@ -28,6 +28,7 @@ use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -115,6 +116,7 @@ class BaseTestCase extends TestCase
             PaymentPageSettingsService::class => static function () {
                 return new PaymentPageSettingsService(
                     TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    TestServiceRegister::getService(UploaderService::class),
                 );
             },
             WebhookDataRepositoryInterface::class => function () {

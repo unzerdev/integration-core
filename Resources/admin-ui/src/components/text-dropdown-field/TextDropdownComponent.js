@@ -7,30 +7,60 @@
  *
  * @constructor
  */
-const TextDropdownComponent = (dropdownProps, textFieldProps, className = '') => {
+const TextDropdownComponent = (dropdownProps, textFieldProps, values = [], onChange = (x) => {
+}, className = '', selected = {
+    locale: 'default',
+    value: ''
+}) => {
     const generator = Unzer.elementGenerator;
+    dropdownProps.options = [
+        {label: Unzer.imagesProvider.languageIcon, value: "default"},
+        ...dropdownProps.options.map(x => {
+            const imageUrl = x.value !== "default"
+                ? `${Unzer.config.flagsUrl}/${x.label}.svg`
+                : `${Unzer.config.imagesUrl}`;
+            return {
+                label: `<img src="${imageUrl}" alt="${x.value}"/>`,
+                value: x.value
+            };
+        })
+    ];
 
-  const languages = dropdownProps.languages || [];
 
-  const languageOptions = languages.map(x => {
-    const imageUrl = x.flag !== "default"
-        ? `${Unzer.config.flagsUrl}/${x.flag}.svg`
-        : `${Unzer.config.flagsUrl}/country-xx.svg`;
-    return {
-      label: `<img src="${imageUrl}" alt="${x.code}"/>`,
-      value: x.code
-    };
-  });
+    const wrapper = generator.createElement("div", `unzer-text-dropdown ${className}`, '', [], []);
 
-  dropdownProps.options = [
-    ...dropdownProps.options,
-    ...languageOptions
-  ];
 
-    return generator.createElement("div", `unzer-text-dropdown ${className}`, '', [], [
-        Unzer.components.TextField.create({ className: `${textFieldProps.className} unzer-label-input-field-no-radius`, ...textFieldProps }),
-        Unzer.components.Dropdown.create(dropdownProps),
-    ]);
+    dropdownProps.onChange = (value) => {
+        selected = values?.find(x => x.locale == value);
+        if (!selected) {
+            selected = {locale: value, value: ''};
+            values.push(selected);
+        }
+
+        textFieldProps.value = selected.value
+        wrapper.replaceChild(Unzer.components.TextField.create({className: `${textFieldProps.className} unzer-label-input-field-no-radius`, ...textFieldProps}), wrapper.firstChild);
+
+        onChange(values);
+    }
+
+    textFieldProps.onChange = (value) => {
+        selected = values.find(x => x.locale == selected.locale);
+        if (!selected) {
+            selected = {locale: 'default', value: value};
+            values.push(selected);
+        }
+
+        selected.value = value;
+
+        onChange(values);
+    }
+
+    const text = Unzer.components.TextField.create({className: `${textFieldProps.className} unzer-label-input-field-no-radius`, ...textFieldProps});
+    const dropdown = Unzer.components.Dropdown.create(dropdownProps);
+    wrapper.append(text);
+    wrapper.append(dropdown);
+
+    return wrapper;
 
 };
 

@@ -3,6 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
+use Unzer\Core\BusinessLogic\Domain\Stores\Models\StoreOrderStatus;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 
 /**
@@ -21,6 +22,11 @@ class StoreServiceMock extends StoreService
      * @var array
      */
     private array $stores = [];
+
+    /**
+     * @var StoreOrderStatus
+     */
+    private array $orderStatuses = [];
 
     /**
      * @inheritDoc
@@ -56,5 +62,22 @@ class StoreServiceMock extends StoreService
     public function setMockStores(array $mockStores): void
     {
         $this->stores = $mockStores;
+    }
+
+    /**
+     * @param StoreOrderStatus[] $mockStatuses
+     *
+     * @return void
+     */
+    public function setMockStoreOrderStatuses(array $mockStatuses): void {
+        $this->orderStatuses = $mockStatuses;
+    }
+
+    /**
+     * @return array|StoreOrderStatus[]
+     */
+    public function getStoreOrderStatuses(): array
+    {
+        return $this->orderStatuses;
     }
 }

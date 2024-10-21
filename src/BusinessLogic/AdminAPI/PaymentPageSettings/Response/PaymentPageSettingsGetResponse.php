@@ -56,7 +56,7 @@ class PaymentPageSettingsGetResponse extends Response
         return [
             'shopName' => $this->translatableLabelsToArray($this->paymentPageSettings->getShopName()),
             'shopTagline' => $this->translatableLabelsToArray($this->paymentPageSettings->getShopTagline()),
-            'logoImageUrl' => $this->paymentPageSettings->getLogoImageUrl(),
+            'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
             'shopNameBackgroundColor' => $this->paymentPageSettings->getShopNameBackgroundColor(),

@@ -206,14 +206,14 @@
      */
     const setError = (element, message) => {
         const parent = getFieldElement(element);
-        const child = element.querySelector('.unzer-label-input-field');
+        const child = element.querySelectorAll('.unzer-label-input-field');
 
         if (!parent) {
             return;
         }
 
         if (child) {
-            child.classList.add("unzer-label-input-field-error");
+            child.forEach(x=> x.classList.add("unzer-label-input-field-error"));
         }
 
         parent.classList.add('adls--error');

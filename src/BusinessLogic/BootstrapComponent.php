@@ -30,6 +30,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -141,16 +142,6 @@ class BootstrapComponent extends BaseBootstrapComponent
                 );
             })
         );
-
-        ServiceRegister::registerService(
-            PaymentStatusMapService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
-                return new PaymentStatusMapService(
-                    ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
-                    ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
-                );
-            })
-        );
     }
 
     /**
@@ -195,16 +186,6 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new PaymentMethodConfigRepository(
                     RepositoryRegistry::getRepository(PaymentMethodConfig::getClassName()),
-                    ServiceRegister::getService(StoreContext::class)
-                );
-            })
-        );
-
-        ServiceRegister::registerService(
-            PaymentStatusMapRepositoryInterface::class,
-            new SingleInstance(static function () {
-                return new PaymentStatusMapRepository(
-                    RepositoryRegistry::getRepository(PaymentStatusMap::getClassName()),
                     ServiceRegister::getService(StoreContext::class)
                 );
             })
@@ -301,13 +282,6 @@ class BootstrapComponent extends BaseBootstrapComponent
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
                 return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class));
-            })
-        );
-
-        ServiceRegister::registerService(
-            PaymentStatusMapController::class,
-            new SingleInstance(static function () {
-                return new PaymentStatusMapController(ServiceRegister::getService(PaymentStatusMapService::class));
             })
         );
     }

@@ -3,19 +3,19 @@
      *
      * @type {string}
      */
-    const baseUrl = Unzer.config.apiUrl;
+    const baseUrl = Unzer.config.storeUrl;
 
     /**
      *
      * @returns {Promise<*>}
      */
-    const get = () => {
-        return Unzer.ajaxService.get(`${baseUrl}/stores`, (exception) => {
+    const getOrderStatuses = () => {
+        return Unzer.ajaxService.get(`${baseUrl}`, (exception) => {
             return Promise.reject(exception);
         });
     };
 
     Unzer.StoresService = {
-        get
+        getOrderStatuses
     };
 })();

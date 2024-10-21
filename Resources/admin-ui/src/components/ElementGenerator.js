@@ -76,7 +76,7 @@ const createElementFromHTML = (html) => {
  * @param {{ type?: 'small' | 'large', variation?: 'dark', fullPage?: boolean }} props
  * @return {HTMLElement}
  */
-const createLoader = ({ type, variation, fullPage }) => {
+const createLoader = ({type, variation, fullPage}) => {
     const cssClass = ['adl-loader'];
     type && cssClass.push('adlt--' + type);
     variation && cssClass.push('adlm--' + variation);
@@ -127,9 +127,9 @@ const createFieldWrapper = (input, label, description, error, className = '', ho
  * @param {ElementProps} props The properties.
  * @return {HTMLElement}
  */
-const createText = ({ className = '', onChange, ...rest }) => {
+const createText = ({className = '', onChange, ...rest}) => {
     /** @type HTMLInputElement */
-    const input = createElement('input', `unzer-field-component ${className}`, '', { type: 'text', ...rest });
+    const input = createElement('input', `unzer-field-component ${className}`, '', {type: 'text', ...rest});
     onChange && input.addEventListener('change', (event) => onChange(event.currentTarget?.value));
 
     return input;
@@ -141,9 +141,9 @@ const createText = ({ className = '', onChange, ...rest }) => {
  * @param {ElementProps & {rows?: number}} props The properties.
  * @return {HTMLElement}
  */
-const createTextArea = ({ className = '', onChange, rows = 3, ...rest }) => {
+const createTextArea = ({className = '', onChange, rows = 3, ...rest}) => {
     /** @type HTMLTextAreaElement */
-    const textarea = createElement('textarea', `unzer-field-component ${className}`, '', { rows, ...rest });
+    const textarea = createElement('textarea', `unzer-field-component ${className}`, '', {rows, ...rest});
     onChange && textarea.addEventListener('change', (event) => onChange(event.currentTarget?.value));
 
     return textarea;
@@ -175,7 +175,7 @@ const createFlashMessage = (messageKey, status, clearAfter) => {
         messageBlock = createElement('span', 'unzer-alert-title', messageKey);
     }
 
-    const button = Unzer.components.Button.create({ onClick: hideHandler });
+    const button = Unzer.components.Button.create({onClick: hideHandler});
 
     if (clearAfter) {
         setTimeout(hideHandler, clearAfter);
@@ -212,7 +212,7 @@ const createHint = (element, hint, className = '') => {
  * @param {...Object} rest - Additional properties for the input field.
  * @return {HTMLElement} The created input field element.
  */
-const createTextWithLabel = ({ className = '', description, label = '', onChange, ...rest }) => {
+const createTextWithLabel = ({className = '', description, label = '', onChange, ...rest}) => {
     /** @type HTMLDivElement */
     const container = createElement('div', 'unzer-label-input-container');
 
@@ -222,10 +222,12 @@ const createTextWithLabel = ({ className = '', description, label = '', onChange
         placeholder: ' ',
         ...rest
     });
-    onChange && input.addEventListener('input', (event) => onChange(event.currentTarget?.value));
+    onChange && input.addEventListener('input', (event) => {
+        onChange(event.currentTarget?.value)
+    });
 
     /** @type HTMLLabelElement */
-    const inputLabel = createElement('label', 'unzer-label-input-label', label, { for: input.id });
+    const inputLabel = createElement('label', 'unzer-label-input-label', label, {for: input.id});
 
     const descriptionSpan = createElement('span', 'unzer-dropdown-description', description ?? '', [], []);
 
