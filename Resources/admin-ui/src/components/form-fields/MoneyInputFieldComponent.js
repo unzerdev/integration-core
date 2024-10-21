@@ -53,6 +53,7 @@ const MoneyInputFieldComponent = ({
         },
         name: name + '_amount',
         step: step,
+        min: 0,
         title: minAmountTitle,
         onChange: handleChange
     })
@@ -61,6 +62,7 @@ const MoneyInputFieldComponent = ({
         value: value?.maxAmount || 0,
         name: name + '_currency',
         type: 'number',
+        min: 0,
         dataset: {
             validationRule: 'nonNegative'
         },

@@ -28,20 +28,20 @@ const preventDefaults = (e) => {
  * @constructor
  */
 const MultiselectDropdownComponent = ({
-    options,
-    name = '',
-    title = '',
-    values = [],
-    placeholder,
-    selectedText = 'general.selectedItems',
-    onChange,
-    updateTextOnChange = true,
-    useAny = true,
-    className = '',
-    searchable = false,
-    orientation = 'bottom'
-}) => {
-    const { elementGenerator: generator, translationService } = Unzer;
+                                          options,
+                                          name = '',
+                                          title = '',
+                                          values = [],
+                                          placeholder,
+                                          selectedText = 'general.selectedItems',
+                                          onChange,
+                                          updateTextOnChange = true,
+                                          useAny = true,
+                                          className = '',
+                                          searchable = false,
+                                          orientation = 'bottom'
+                                      }) => {
+    const {elementGenerator: generator, translationService} = Unzer;
 
     const filterItems = (text) => {
         const filteredItems = text ? options.filter((option) => option.label.toLowerCase().includes(text.toLowerCase())) : options;
@@ -102,12 +102,12 @@ const MultiselectDropdownComponent = ({
             )).forEach(item => buttonWrapper.lastElementChild.append(item));
         }
 
-        fireChange && onChange?.(selectedItems.map((item) => item.value));
+        fireChange && onChange?.(selectedItems.map((item) => ({name: item.label, code: item.value})));
     };
 
     const createListItem = (additionalClass, label, htmlKey) => {
         const item = generator.createElement('li', `unzer-dropdown-list-item ${additionalClass}`, label, htmlKey, [
-            generator.createElement('input', 'unzer-checkbox', '', { type: 'checkbox' })
+            generator.createElement('input', 'unzer-checkbox', '', {type: 'checkbox'})
         ]);
         list.append(item);
         return item;

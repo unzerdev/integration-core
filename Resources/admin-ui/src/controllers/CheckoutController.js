@@ -1,267 +1,457 @@
 ﻿Unzer.CheckoutController = function () {
-  /**
-   *
-   * @type {HTMLElement}
-   */
-  const page = Unzer.pageService.getContentPage();
+    /**
+     *
+     * @type {HTMLElement}
+     */
+    const page = Unzer.pageService.getContentPage();
 
-  /**
-   * @type {[{
-   *     @property {string?} name
-   *     @property {string?} description
-   *     @property {string?} image
-   *     @property {boolean} state
-   * }]}
-   */
-  let paymentMethods = [];
+    /**
+     * @type {[{
+     *     @property {string?} name
+     *     @property {string?} description
+     *     @property {string?} image
+     *     @property {boolean} state
+     * }]}
+     */
+    let paymentMethods = [];
 
-  let icons = [
-    {
-      language: '',
-      icon: Unzer.imagesProvider.languageIcon
+    let countries = [];
+
+    let orderStatuses = [];
+
+    /**
+     *
+     * @type {{bookingMethod: null,
+     * surcharge: number,
+     * restrictedCountries: [string],
+     * sendBasketData: boolean,
+     * minOrderAmount: number,
+     * name: [{language: string, text: string}],
+     * description: [{language: string, text: string}],
+     * statusIdToCharge: null,
+     * maxOrderAmount: null}}
+     */
+    let paymentMethodConfig = {
+        name: [{
+            language: "",
+            text: ""
+        }],
+        description: [{
+            language: "",
+            text: ""
+        }],
+        bookingMethod: null,
+        statusIdToCharge: null,
+        minOrderAmount: null,
+        maxOrderAmount: null,
+        surcharge: null,
+        restrictedCountries: null,
+        sendBasketData: false
     }
-  ];
 
-  const docsUrl = {
-    "paylater-direct-debit": "direct-debit-secured",
-    "paylater-installment": "unzer-installment-upl",
-    "paylater-invoice": "unzer-invoice-upl",
-    "wechatpay": "wechat-pay",
-    "sepa-direct-debit": "unzer-direct-debit",
-    "prepayment": "unzer-prepayment"
-  }
+    let icons = [
+        {
+            language: '',
+            icon: Unzer.imagesProvider.languageIcon
+        }
+    ];
 
-  /**
-   * renders checkout page
-   * @param {StateParamsModel} params
-   */
-  this.display = (params) => {
-    if (!Unzer.config.store.isLoggedIn) {
-      Unzer.stateController.navigate('login');
-
-      return;
+    const docsUrl = {
+        "paylater-direct-debit": "direct-debit-secured",
+        "paylater-installment": "unzer-installment-upl",
+        "paylater-invoice": "unzer-invoice-upl",
+        "wechatpay": "wechat-pay",
+        "sepa-direct-debit": "unzer-direct-debit",
+        "prepayment": "unzer-prepayment"
     }
 
-    getData();
-  };
+    /**
+     * renders checkout page
+     * @param {StateParamsModel} params
+     */
+    this.display = (params) => {
+        if (!Unzer.config.store.isLoggedIn) {
+            Unzer.stateController.navigate('login');
 
-  //todo: this is language icon retrieval
-  // Unzer.utilities.showLoader();
-  //
-  // Unzer.CheckoutService.icons()
-  //     .then((result) => {
-  //         icons = [...icons, ...result];
-  //         render();
-  //     })
-  //     .catch((ex) => Unzer.utilities.createToasterMessage(ex.message, true))
-  //     .finally(Unzer.utilities.hideLoader);
+            return;
+        }
 
-  const getData = () => {
-    Unzer.utilities.showLoader();
+        getData();
+    };
 
-    Unzer.PaymentMethodService.getAll()
-        .then((result) => {
-          paymentMethods = result;
-          render();
-        })
-        .catch((ex) => {
-          Unzer.utilities.createToasterMessage(ex.message, true);
-        })
-        .finally(Unzer.utilities.hideLoader);
 
-    render();
-  };
+    const getPaymentMethodConfig = (paymentMethod) => {
+        Unzer.utilities.showLoader();
 
-  const render = () => {
-    Unzer.pageService.clearComponent(page);
+        Unzer.PaymentMethodService.getConfiguration(paymentMethod.type)
+            .then((result) => {
+                Object.assign(paymentMethodConfig, {
+                    bookingMethod: result.bookingMethod,
+                    name: result.name,
+                    sendBasketData: result.sendBasketData,
+                    surcharge: result.surcharge,
+                    description: result.description,
+                    restrictedCountries: result.restrictedCountries,
+                    minOrderAmount: result.minOrderAmount,
+                    maxOrderAmount: result.maxOrderAmount,
+                    statusIdToCharge: result.statusIdToCharge
+                });
+                openSettingModal(result, paymentMethod)
+            })
+            .catch((ex) => {
+                Unzer.utilities.createToasterMessage(ex.message, true);
+            })
+            .finally(Unzer.utilities.hideLoader);
+    }
 
-    const buttons = Unzer.components.Button.createList([
-      {
-        type: 'primary',
-        label: 'Paymnent page settings',
-        className: 'adlt--settings',
-        onClick: () => Unzer.stateController.navigate('design')
-      }
-    ]);
+    const enablePaymentMethod = (type, enabled) => {
+        Unzer.utilities.showLoader();
 
-    const midpoint = Math.ceil(paymentMethods.length / 2);
-    const left = paymentMethods.slice(0, midpoint);
-    const right = paymentMethods.slice(midpoint);
+        Unzer.PaymentMethodService.enable(type, enabled)
+            .then()
+            .catch((ex) => {
+                Unzer.utilities.createToasterMessage(ex.message, true);
+            })
+            .finally(Unzer.utilities.hideLoader);
+    }
 
-    page.append(
-        Unzer.components.PageHeading.create({
-          title: 'checkout.page.paymentMethodTitle',
-          description: 'checkout.page.paymentMethodDescription',
-          button: buttons
-        }),
-        Unzer.components.SearchBox.create({
-          onSearch: (value) => {
-            const results = paymentMethods.filter((item) =>
-                item.name.toLocaleLowerCase().includes(value.toLowerCase())
-            );
-            const midpoint = Math.ceil(results.length / 2);
-            const left = results.slice(0, midpoint);
-            const right = results.slice(midpoint);
 
-            Unzer.components.TwoColumnLayout.updateLeft(
-                page,
+    const getData = () => {
+        Unzer.utilities.showLoader();
+
+        Promise.all([
+            Unzer.PaymentMethodService
+                .getAll()
+                .then((result) => {
+                    paymentMethods = result;
+                    render();
+                })
+                .catch((ex) => {
+                    Unzer.utilities.createToasterMessage(ex.message, true);
+                    return Promise.reject();
+                }),
+            Unzer.CountriesService
+                .get()
+                .then((result) => {
+                    countries = result
+                }).catch(),
+            Unzer.StoresService
+                .getOrderStatuses()
+                .then(result => {
+                    orderStatuses = result;
+                })
+                .catch(ex => {
+                    Unzer.utilities.createToasterMessage(ex.message, true);
+                    return Promise.reject();
+                })
+        ])
+            .then(() => {
+                render();
+            })
+            .finally(Unzer.utilities.hideLoader);
+
+    };
+
+    const render = () => {
+        Unzer.pageService.clearComponent(page);
+
+        const buttons = Unzer.components.Button.createList([
+            {
+                type: 'primary',
+                label: 'Paymnent page settings',
+                className: 'adlt--settings',
+                onClick: () => Unzer.stateController.navigate('design')
+            }
+        ]);
+
+        const midpoint = Math.ceil(paymentMethods.length / 2);
+        const left = paymentMethods.slice(0, midpoint);
+        const right = paymentMethods.slice(midpoint);
+
+        page.append(
+            Unzer.components.PageHeading.create({
+                title: 'checkout.page.paymentMethodTitle',
+                description: 'checkout.page.paymentMethodDescription',
+                button: buttons
+            }),
+            Unzer.components.SearchBox.create({
+                onSearch: (value) => {
+                    const results = paymentMethods.filter((item) =>
+                        item.name.toLocaleLowerCase().includes(value.toLowerCase())
+                    );
+                    const midpoint = Math.ceil(results.length / 2);
+                    const left = results.slice(0, midpoint);
+                    const right = results.slice(midpoint);
+
+                    Unzer.components.TwoColumnLayout.updateLeft(
+                        page,
+                        left.map((x) =>
+                            Unzer.components.PaymentMethodComponent.create({
+                                description: x.description,
+                                name: x.name,
+                                state: x.enabled,
+                                image: x.type ?? "",
+                                onChange: (value) => {
+                                    x.enabled = value;
+                                    enablePaymentMethod(x.type, value);
+                                },
+                                onClick: () => getPaymentMethodConfig(x)
+                            })
+                        )
+                    );
+
+                    Unzer.components.TwoColumnLayout.updateRight(
+                        page,
+                        right.map((x) =>
+                            Unzer.components.PaymentMethodComponent.create({
+                                description: x.description,
+                                name: x.name,
+                                state: x.enabled,
+                                image: x.type ?? "",
+                                onChange: (value) => {
+                                    x.enabled = value;
+                                    enablePaymentMethod(x.type, value);
+                                },
+                                onClick: () => getPaymentMethodConfig(x)
+                            })
+                        )
+                    );
+                }
+            }),
+            Unzer.components.TwoColumnLayout.create(
                 left.map((x) =>
                     Unzer.components.PaymentMethodComponent.create({
-                      description: x.description,
-                      name: x.name,
-                      state: x.enabled,
-                      image: x.type ?? "",
-                      onChange: (value) => {
-                        x.enabled = value;
-                      },
-                      onClick: () => openSettingModal(x)
+                        description: x.description,
+                        name: x.name,
+                        state: x.enabled,
+                        image: x.type ?? "",
+                        onChange: (value) => {
+                            x.enabled = value;
+                            enablePaymentMethod(x.type, value);
+                        },
+                        onClick: () => getPaymentMethodConfig(x)
                     })
-                )
-            );
-
-            Unzer.components.TwoColumnLayout.updateRight(
-                page,
+                ),
                 right.map((x) =>
                     Unzer.components.PaymentMethodComponent.create({
-                      description: x.description,
-                      name: x.name,
-                      state: x.enabled,
-                      image: x.type ?? "",
-                      onChange: (value) => {
-                        x.enabled = value;
-                      },
-                      onClick: () => openSettingModal(x)
+                        description: x.description,
+                        name: x.name,
+                        state: x.enabled,
+                        image: x.type ?? "",
+                        onChange: (value) => {
+                            x.enabled = value;
+                            enablePaymentMethod(x.type, value);
+                        },
+                        onClick: () => getPaymentMethodConfig(x)
                     })
                 )
-            );
-          }
-        }),
-        Unzer.components.TwoColumnLayout.create(
-            left.map((x) =>
-                Unzer.components.PaymentMethodComponent.create({
-                  description: x.description,
-                  name: x.name,
-                  state: x.enabled,
-                  image: x.type ?? "",
-                  onChange: (value) => {
-                    x.enabled = value;
-                  },
-                  onClick: () => openSettingModal(x)
-                })
-            ),
-            right.map((x) =>
-                Unzer.components.PaymentMethodComponent.create({
-                  description: x.description,
-                  name: x.name,
-                  state: x.enabled,
-                  image: x.type ?? "",
-                  onChange: (value) => {
-                    x.enabled = value;
-                  },
-                  onClick: () => openSettingModal(x)
-                })
             )
-        )
-    );
-  };
+        );
+    };
 
 
-  const getPaynmentMethodUrl = (key) => {
-    return docsUrl[key] || key;
-  }
-  /**
-   * Opens modal for payment method
-   */
-  const openSettingModal = (paymentMethod) => {
-    if (!paymentMethod.enabled) {
-      window.open(
-          `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type)}`,
-          '_blank'
-      ).focus();
-
-      return;
+    const getPaynmentMethodUrl = (key) => {
+        return docsUrl[key] || key;
     }
 
-    const modal = Unzer.components.Modal.create({
-      title: 'Title',
-      canClose: true,
-      fullHeight: true,
-      description:
-          'With instalment payments from Unzer, you gain more financial freedom and incentivise your customers to buy. Paying in instalments is a particuarly popular payment method for more expensive purchases. You can increase your average basket sizes and conversion rate – with no risk. ' +
-          '<a href="">Learn more</a>',
-      content: [
-        Unzer.components.TextDropdownComponent.create({
-              isIcon: true,
-              value: "default",
-              options: [{ label: Unzer.imagesProvider.languageIcon, value: "default" }]
-            }, {
-              maxWidth: false,
-              title: "Payment method name",
-              subtitle: "Payment method name on the checkout."
-            },
-            'unzer-text-dropdown-max-width'
-        ),
-        Unzer.components.TextDropdownComponent.create({
-              isIcon: true,
-              value: "default",
-              options: [{ label: Unzer.imagesProvider.languageIcon, value: "default" }]
-            }, {
-              maxWidth: false,
-              title: "Payment method description",
-              subtitle: "Payment method description on the checkout."
-            },
-            'unzer-text-dropdown-max-width'
-        ),
-        Unzer.components.DropdownField.create({
-          title: 'checkout.modal.method',
-          description: "checkout.modal.methodDescription",
-          options: [
-            { label: 'Capture', value: 'capture' },
-            { label: 'Authorize', value: 'authorize' }
-          ]
-        }),
-        Unzer.components.DropdownField.create({
-          title: 'Charge on status changed',
-          description: "Select the status that will trigger the payment capture.",
-          options: [
-            { label: 'Capture', value: 'capture' },
-            { label: 'Authorize', value: 'authorize' }
-          ]
-        }),
-        Unzer.components.MoneyInputField.create({
-          minAmountTitle: 'checkout.modal.minAmount',
-          maxAmountTitle: 'checkout.modal.maxAmount'
-        }),
-        Unzer.components.TextField.create({
-          title: 'checkout.modal.surcharge',
-          type: 'number',
-          maxWidth: false
-        }),
-        Unzer.components.MultiselectDropdownField.create({
-          title: 'checkout.modal.restrictCountries',
-          useAny: false,
-          values: [],
-          options: [
-            { label: 'Capture', value: 'capture' },
-            { label: 'Authorize', value: 'authorize' }
-          ]
-        })
-      ],
-      buttons: [
-        {
-          type: 'ghost-black',
-          label: 'Cancel',
-          onClick: () => modal.close()
-        },
-        {
-          type: 'secondary',
-          label: 'general.saveChanges',
-          onClick: () => {
-          }
-        }
-      ]
-    });
+    /**
+     * Opens modal for payment method
+     */
+    const openSettingModal = (config, paymentMethod) => {
+        if (!paymentMethod.enabled) {
+            window.open(
+                `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type)}`,
+                '_blank'
+            ).focus();
 
-    modal.open();
-  };
+            return;
+        }
+
+        const nameField = Unzer.components.TextDropdownComponent.create({
+                isIcon: true,
+                value: "default",
+                options: Unzer.config.locales?.map(x => ({value: x.code, label: x.flag}))
+            }, {
+                maxWidth: false,
+                value: paymentMethodConfig?.name?.find(x => x.locale == 'default')?.value ?? '',
+                title: "checkout.fields.paymentMethodName.label",
+                subtitle: "checkout.fields.paymentMethodName.description"
+            },
+            paymentMethodConfig?.name?.map(x => ({locale: x.locale, value: x.value})),
+            (value) => {
+                paymentMethodConfig.name = value;
+            },
+            'unzer-text-dropdown-max-width',
+            paymentMethodConfig?.name?.find(x => x.locale === 'default') ?? {
+                locale: 'default',
+                value: ''
+            }
+        );
+        let descriptionField = Unzer.components.TextDropdownComponent.create({
+                isIcon: true,
+                value: "default",
+                options: Unzer.config.locales?.map(x => ({value: x.code, label: x.flag}))
+            }, {
+                maxWidth: false,
+                title: "checkout.fields.paymentMethodDescription.label",
+                value: paymentMethodConfig?.description?.find(x => x.locale == 'default')?.value ?? '',
+                subtitle: "checkout.fields.paymentMethodDescription.description"
+            },
+            paymentMethodConfig?.description?.map(x => ({locale: x.locale, value: x.value})),
+            (value) => {
+                paymentMethodConfig.description = value;
+            },
+            'unzer-text-dropdown-max-width',
+            paymentMethodConfig?.description?.find(x => x.locale === 'default') ?? {
+                locale: 'default',
+                value: ''
+            }
+        );
+
+        let content = [
+            nameField,
+            descriptionField
+        ];
+
+        const bookingField = Unzer.components.DropdownField.create({
+            title: 'checkout.modal.method',
+            description: "checkout.modal.methodDescription",
+            options: [
+                {label: 'Charge', value: 'charge'},
+                {label: 'Authorize', value: 'authorize'}
+            ],
+            value: paymentMethodConfig.bookingMethod,
+            onChange: (value) => {
+                paymentMethodConfig.bookingMethod = value
+            }
+        });
+
+        if (config.bookingAvailable) {
+            content.push(bookingField);
+        }
+
+        if (config.chargeAvailable) {
+            content.push(Unzer.components.DropdownField.create({
+                title: 'Charge on status changed',
+                description: "Select the status that will trigger the payment capture.",
+                onChange: (value) => {
+                    paymentMethodConfig.statusIdToCharge = value
+                },
+                value: paymentMethodConfig.statusIdToCharge,
+                options: orderStatuses.map(x => ({label: x.name, value: x.id}))
+            }))
+        }
+        const minMaxField = Unzer.components.MoneyInputField.create({
+            minAmountTitle: 'checkout.modal.minAmount',
+            maxAmountTitle: 'checkout.modal.maxAmount',
+            value: {
+                minAmount: paymentMethodConfig.minOrderAmount,
+                maxAmount: paymentMethodConfig.maxOrderAmount
+            },
+            onChange: (value) => {
+                paymentMethodConfig.minOrderAmount = value?.minAmount
+                paymentMethodConfig.maxOrderAmount = value?.maxAmount
+            }
+        });
+
+        const surchargeField = Unzer.components.TextField.create({
+            title: 'checkout.modal.surcharge',
+            type: 'number',
+            value: paymentMethodConfig.surcharge,
+            maxWidth: false,
+            onChange: (value) => {
+                paymentMethodConfig.surcharge = value;
+            }
+        });
+
+        content.push(
+            minMaxField,
+            surchargeField,
+            Unzer.components.MultiselectDropdownField.create({
+                title: 'checkout.modal.restrictCountries',
+                useAny: false,
+                options: countries.map(x => ({value: x.code, label: x.name})),
+                values: paymentMethodConfig.restrictedCountries?.map(x => x.code),
+                onChange: (values) => {
+                    paymentMethodConfig.restrictedCountries = values;
+                }
+            })
+        )
+
+        if (config.displaySendBasketData) {
+            content.push(
+                Unzer.components.ToggleField.create({
+                    label: "checkout.modal.basketData",
+                    description: "checkout.modal.basketDataDescription",
+                    value: paymentMethodConfig.sendBasketData ?? false,
+                    onChange: (value) => {
+                        paymentMethodConfig.sendBasketData = value;
+                    }
+                })
+            )
+        }
+
+        const modal = Unzer.components.Modal.create({
+            title: config.typeName,
+            canClose: true,
+            description: `paymentMethods.${config.type}`,
+            content: content,
+            image: config.type,
+            buttons: [
+                {
+                    type: 'ghost-black',
+                    label: 'Cancel',
+                    onClick: () => modal.close()
+                },
+                {
+                    type: 'secondary',
+                    label: 'general.saveChanges',
+                    onClick: () => {
+                        let isValid = true;
+                        isValid &= Unzer.validationService.validateField(
+                            minMaxField,
+                            paymentMethodConfig?.minOrderAmount && paymentMethodConfig.maxOrderAmount &&
+                            paymentMethodConfig.minOrderAmount > paymentMethodConfig.maxOrderAmount,
+                            'The min order value is grater than max order value.'
+                        );
+                        if (isValid) isValid &= Unzer.validationService.validateField(
+                            minMaxField,
+                            paymentMethodConfig?.minOrderAmount && paymentMethodConfig.maxOrderAmount &&
+                            (paymentMethodConfig.minOrderAmount < 0 || paymentMethodConfig.maxOrderAmount < 0),
+                            'validation.greaterThanZero'
+                        );
+                        isValid &= Unzer.validationService.validateField(
+                            surchargeField,
+                            paymentMethodConfig?.surcharge &&
+                            paymentMethodConfig.surcharge < 0,
+                            'validation.greaterThanZero'
+                        );
+                        isValid &= Unzer.validationService.validateField(
+                            bookingField,
+                            config.bookingAvailable && (paymentMethodConfig.bookingMethod?.length === 0 ||
+                                !paymentMethodConfig.bookingMethod),
+                            'validation.requiredField'
+                        );
+                        isValid && upsertPaymentMethodConfiguration(paymentMethod.type, modal);
+                    }
+                }
+            ]
+        });
+
+        modal.open();
+    };
+
+    const upsertPaymentMethodConfiguration = (type, modal) => {
+        Unzer.utilities.showLoader();
+
+        Unzer.PaymentMethodService.upsert(type, paymentMethodConfig)
+            .then(result => {
+                Unzer.utilities.createToasterMessage('Configuration is saved successfully');
+                modal.close();
+            })
+            .catch(error => {
+                Unzer.utilities.createToasterMessage(ex.message, true);
+            })
+            .finally(Unzer.utilities.hideLoader)
+    }
 };

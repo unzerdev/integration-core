@@ -58,13 +58,17 @@
       color: $adl-color--unzer-black;
       display: flex;
       gap: 10px;
-      max-width: 70px;
+      max-width: 150px;
 
       svg {
         width: 26px;
         height: 18px;
       }
 
+      img {
+        width: 26px;
+        height: 18px;
+      }
 
       span {
         background-color: #15273C33;
@@ -140,6 +144,11 @@
     cursor: pointer;
 
     svg {
+      width: 26px;
+      height: 18px;
+    }
+
+    img {
       width: 26px;
       height: 18px;
     }

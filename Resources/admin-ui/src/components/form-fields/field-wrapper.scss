@@ -130,8 +130,9 @@
   &.adlt--toggle-input {
     .unzer-field-title {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      color: $unzer-color-grey;
       column-gap: 10px;
       font-size: 14px;
     }

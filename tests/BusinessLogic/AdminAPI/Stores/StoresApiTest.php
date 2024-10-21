@@ -4,6 +4,7 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Stores;
 
 use Exception;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
+use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreOrderStatusesResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoresResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
@@ -14,6 +15,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
+use Unzer\Core\BusinessLogic\Domain\Stores\Models\StoreOrderStatus;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -77,6 +79,7 @@ class StoresApiTest extends BaseTestCase
     public function testGetStoresSuccess(): void
     {
         // Arrange
+        
 
         // Act
         $response = AdminAPI::get()->stores()->getStores();
@@ -153,6 +156,25 @@ class StoresApiTest extends BaseTestCase
 
     /**
      * @return void
+     */
+    public function testGetStoreOrderStatuses(): void
+    {
+        // Arrange
+        $this->storeService->setMockStoreOrderStatuses([
+            new StoreOrderStatus('authorized', 'Authorized'),
+            new StoreOrderStatus('paid', 'Paid'),
+            new StoreOrderStatus('refunded', 'Refunded')
+        ]);
+
+        // Act
+        $response = AdminAPI::get()->stores()->getStoreOrderStatuses();
+
+        // Assert
+        self::assertEquals($response->toArray(), $this->expectedStoreOrderStatusesResponse()->toArray());
+    }
+
+    /**
+     * @return void
      *
      * @throws Exception
      */
@@ -203,6 +225,18 @@ class StoresApiTest extends BaseTestCase
             new Store('store1', 'store1'),
             new Store('store2', 'store2'),
             new Store('store3', 'store3',)
+        ]);
+    }
+
+    /**
+     * @return StoreOrderStatusesResponse
+     */
+    private function expectedStoreOrderStatusesResponse(): StoreOrderStatusesResponse
+    {
+        return new StoreOrderStatusesResponse([
+            new StoreOrderStatus('authorized', 'Authorized'),
+            new StoreOrderStatus('paid', 'Paid'),
+            new StoreOrderStatus('refunded', 'Refunded')
         ]);
     }
 

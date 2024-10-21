@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller;
 
 use Exception;
+use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreOrderStatusesResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoreResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Response\StoresResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -67,6 +68,17 @@ class StoresController
         return $currentStore ?
             new StoreResponse($currentStore, $connectionSettings) : new StoreResponse($this->failBackStore());
     }
+
+    /**
+     * @return StoreOrderStatusesResponse
+     */
+    public function getStoreOrderStatuses(): StoreOrderStatusesResponse
+    {
+        $statuses = $this->storeService->getStoreOrderStatuses();
+
+        return new StoreOrderStatusesResponse($statuses);
+    }
+    
 
     /**
      * Creates failBack store in case there is no connected and default store.
