@@ -104,4 +104,14 @@ class StoreServiceMock implements StoreService
     {
         $this->orderStatuses = $orderStatuses;
     }
+
+    /**
+     * @param int $id
+     *
+     * @return Store|null
+     */
+    public function getStoreById(int $id): ?Store
+    {
+        return $this->currentStore;
+    }
 }
