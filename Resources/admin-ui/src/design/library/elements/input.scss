@@ -79,29 +79,30 @@
 
   [type="radio"] + span {
     position: relative;
-    padding-left: 4px;
     cursor: pointer;
     line-height: 24px;
     display: inline-flex;
     align-items: center;
     column-gap: 12px;
     font-size: 15px;
-    color: $adl-color--grey-70;
+    color: #757575;
   }
 
   [type="radio"] + span:before {
     content: "";
     width: 14px;
     height: 14px;
-    border: 1px solid $adl-color--grey-30;
-    border-radius: 100%;
-    background: $adl-color--white;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    background-color: #fff;
+    position: relative;
+    z-index: 1;
   }
 
   [type="radio"]:checked + span:before {
-    width: 8px;
-    height: 8px;
-    border: 4px solid $adl-color--blue-40;
+    background-color: #000000;
+    border-color: transparent;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px #000000;
   }
 }
 

@@ -70,6 +70,30 @@ class StoresController
     }
 
     /**
+     * @param int $storeId
+     *
+     * @return StoreResponse
+     * @throws Exception
+     */
+    public function getStoreById(int $storeId): StoreResponse
+    {
+        $store = $this->storeService->getStoreById($storeId);
+        $connectionSettings = null;
+
+        if ($store !== null) {
+            $connectionSettings = StoreContext::doWithStore(
+                $store->getStoreId(),
+                [$this->connectionService, 'getConnectionSettings']
+            );
+        }
+
+        $this->connectionService->getConnectionSettings();
+
+        return $store ?
+            new StoreResponse($store, $connectionSettings) : new StoreResponse($this->failBackStore());
+    }
+
+    /**
      * @return StoreOrderStatusesResponse
      */
     public function getStoreOrderStatuses(): StoreOrderStatusesResponse

@@ -17,6 +17,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "discard": "Discard",
+    "disconnect": "Disconnect",
     "any": "ANY",
     "at": "at",
     "clear": "Clear",
@@ -45,18 +46,12 @@
         "invalidMode": "Invalid mode.",
         "emptyData": "Empty connection data.",
         "settingsNotFound": "Connection settings not found.",
-        "invalidRoles": "User does not have all necessary roles.",
         "invalidSettings": "Connection settings are not valid.",
         "credentialsDoNotExist": "Api credential details do not exist.",
         "testKeyChanged": "Test api key has been changed.",
         "liveKeyChanged": "Live api key has been changed.",
-        "testMerchantIdChanged": "Test merchant id has been changed.",
-        "liveMerchantIdChanged": "Live merchant id has been changed.",
-        "companyLevelKey": "Api key is not merchant level.",
         "invalidKey": "Api key is not valid.",
-        "invalidMerchant": "Merchant account is not connected to provided credentials.",
-        "originFailed": "Adding allowed origin failed",
-        "clientKeyGenerationFailed": "Failed to generate client key."
+        "originFailed": "Adding allowed origin failed"
       }
     },
     "selectedItems": "%s items selected",
@@ -68,7 +63,8 @@
     "saveChanges": "Save changes",
     "disconnect": "Disconnect",
     "event": "Events",
-    "disconnectWarning": "Are you sure you want to disconnect store?"
+    "disconnectWarning": "Are you sure you want to disconnect store?",
+    "saveChangesWarning": "Thn environment change has been detected. Do you want to use the same configuration?"
   },
   "footer": {
     "support": "Need help?",

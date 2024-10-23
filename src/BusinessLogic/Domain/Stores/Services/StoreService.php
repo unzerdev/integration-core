@@ -47,6 +47,18 @@ class StoreService
     }
 
     /**
+     * @param int $storeId
+     * 
+     * @return Store|null
+     */
+    public function getStoreById(int $storeId): ?Store
+    {
+        $store = $this->integrationStoreService->getStoreById($storeId);
+
+        return $store ?? $this->integrationStoreService->getDefaultStore();
+    }
+
+    /**
      * @return StoreOrderStatus[]
      */
     public function getStoreOrderStatuses(): array

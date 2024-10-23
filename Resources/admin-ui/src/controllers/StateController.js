@@ -60,9 +60,9 @@ const activateController = (path, config) => {
  */
 const navigate = (to, additionalConfig = {}, reload = false) => {
   if (reload) {
-    window.location.assign(to);
+    window.location.assign(addOrUpdateQueryParam(to, 'store', Unzer.config.store.storeId));
   } else {
-    window.history.pushState(additionalConfig, null, to);
+    window.history.pushState(additionalConfig, null, addOrUpdateQueryParam(to, 'store', Unzer.config.store.storeId));
     dispatchEvent(new PopStateEvent('popstate', { state: additionalConfig }));
   }
 };
@@ -87,12 +87,15 @@ const start = () => {
   };
 
   const handlePageNavigation = (value) => {
+    const stores = Unzer.config.stores.filter(x => x.storeId === value.storeId)
+    Unzer.config.store = stores[0];
+    
     const currentURL = window.location.href;
     const url = new URL(currentURL);
-    Unzer.components.PageHeader.updateCredentials();
+    url.searchParams.delete('store');
+    url.searchParams.set('store', value.storeId);
     window.history.pushState(null, null, url.href);
-    goToPage();
-    renderFooter();
+    window.location.reload(true);
   };
 
   const options = Unzer.config.stores.map((store) => ({ label: store.storeName, value: store.storeId }));
@@ -104,6 +107,29 @@ const start = () => {
   goToPage();
   utilities.hideLoader();
 };
+
+function addOrUpdateQueryParam(url, paramKey, paramValue) {
+  const queryStringStart = url.indexOf("?");
+
+  if (queryStringStart === -1) {
+    url += `?${paramKey}=${paramValue}`;
+  } else {
+    const baseUrl = url.substring(0, queryStringStart);
+    const queryString = url.substring(queryStringStart + 1);
+
+    const queryParams = new URLSearchParams(queryString);
+
+    if (queryParams.has(paramKey)) {
+      queryParams.set(paramKey, paramValue);
+    } else {
+      queryParams.append(paramKey, paramValue);
+    }
+
+    url = `${baseUrl}?${queryParams.toString()}`;
+  }
+
+  return url;
+}
 
 
 Unzer.stateController = {

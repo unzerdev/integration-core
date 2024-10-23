@@ -39,4 +39,11 @@ interface StoreService
      * @return StoreOrderStatus[]
      */
     public function getStoreOrderStatuses(): array;
+
+    /**
+     * @param int $id
+     * 
+     * @return Store|null
+     */
+    public function getStoreById(int $id): ?Store;
 }

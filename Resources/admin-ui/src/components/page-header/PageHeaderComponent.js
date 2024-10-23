@@ -15,21 +15,25 @@ const createDropdown = (options = [], onStoreSelect) => {
     const generator = Unzer.elementGenerator;
 
     const optionElements = [];
+    let defaultOption = null;
     options.forEach((option) => {
         const optionElement = generator.createElement('div', '', option.label, {
             onclick: () =>
                 selectOption(
                     optionElement,
-                    Unzer.config.stores.find((x) => x.id === option.value),
+                    Unzer.config.stores.find((x) => x.storeId === option.value),
                     onStoreSelect
                 )
         });
         optionElements.push(optionElement);
+        if (option.value === Unzer.config.store.storeId) {
+            defaultOption = optionElement;
+        }
     });
 
     const dropdownContent = generator.createElement('div', 'dropdown-content', '', {}, optionElements);
     const dropdownLabel = generator.createElement('span', 'dropdown-label', 'Select');
-    const dropdown = generator.createElement('div', 'dropdown', '', { onclick: (event) => event.stopPropagation() }, [
+    const dropdown = generator.createElement('div', 'dropdown', '', {onclick: (event) => event.stopPropagation()}, [
         dropdownLabel,
         dropdownContent
     ]);
@@ -52,9 +56,7 @@ const createDropdown = (options = [], onStoreSelect) => {
         }
     });
 
-    if (options.length > 0) {
-        optionElements[0].click();
-    }
+    selectOption(defaultOption, Unzer.config.store, null);
 
     return dropdown;
 };
@@ -74,8 +76,10 @@ const selectOption = (option, store, onStoreSelect) => {
     const label = dropdown.querySelector('.dropdown-label');
     label.textContent = option.textContent;
     dropdown.classList.remove('show');
-    toggleDropdown(dropdown);
-    onStoreSelect(store);
+    if (onStoreSelect) {
+        toggleDropdown(dropdown);
+        onStoreSelect(store);
+    }
 };
 
 const createConnection = () => {

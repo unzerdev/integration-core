@@ -13,6 +13,7 @@
  * @property {boolean?} fullHeight
  * @property {image?} image
  * @property {string?} className
+ * @property {boolean?} paymentMethod
  * @property {HTMLElement | HTMLElement[]} content The content of the body.
  * @property {ModalButtonConfig[]} buttons Footer buttons.
  * @property {{label: string, href: string}?} footerLink Footer link.
@@ -28,7 +29,7 @@
  * @param {ModalConfiguration} configuration
  */
 const ModalComponent = (configuration) => {
-    const { pageService, translationService, utilities, components } = Unzer,
+    const {pageService, translationService, utilities, components} = Unzer,
         config = configuration;
 
 
@@ -62,109 +63,111 @@ const ModalComponent = (configuration) => {
      * Opens the modal.
      */
     const open = () => {
-      const imageUrl = `${Unzer.config.imagesUrl}/${configuration.image}.svg` ?? '';
-      configuration.image = imageUrl !== '' ? `<img src="${imageUrl}"/>` : '';
+        const imageUrl = configuration.image != '' && configuration.image != null ? `${Unzer.config.imagesUrl}/${configuration.image}.svg` : '';
+        configuration.image = imageUrl !== '' ? `<img src="${imageUrl}"/>` : '';
 
-      const contentClass = configuration.fullHeight ? "unzer-modal-content unzer-modal-max-height" : "unzer-modal-content";
-      const header =
-          '<div class="unzer-payment-method-info">\n' +
-          '    <div class="unzer-payment-method-logo">\n' +
-          configuration.image +
-          '    </div>\n' +
-          '    <div class="unzer-payment-method-headline">\n' +
-          '        <span class="unzer-payment-method-title"></span>\n' +
-          '        <span class="unzer-payment-method-description"></span>\n' +
-          '    </div>\n' +
-          '</div>'
-      const modalTemplate =
-          '<div id="adl-modal" class="adl-modal">\n' +
-          `<div class="${contentClass}">` +
-          '        <button class="adl-button adlt--ghost adlm--icon-only unzer-close-button"><span></span></button>' +
-          '        <div class="unzer-title">' +
-          header +
-          '        </div>' +
-          '        <div class="unzer-body-wrapper"><div class="unzer-body"></div></div>' +
-          '        <div class="unzer-footer"></div>' +
-          '    </div>' +
-          '</div>';
+        const contentClass = configuration.fullHeight ? "unzer-modal-content unzer-modal-max-height" : "unzer-modal-content";
+        const paymentMethodClass = !configuration.paymentMethod ? "unzer-payment-method-info" : "";
+        const titleClass = configuration.paymentMethod ? "unzer-title unzer-title-no-padding" : "unzer-title";
+        const header =
+            `<div class="${paymentMethodClass}">\n` +
+            '    <div class="unzer-payment-method-logo">\n' +
+            configuration.image +
+            '    </div>\n' +
+            '    <div class="unzer-payment-method-headline">\n' +
+            '        <span class="unzer-payment-method-title"></span>\n' +
+            '        <span class="unzer-payment-method-description"></span>\n' +
+            '    </div>\n' +
+            '</div>'
+        const modalTemplate =
+            '<div id="adl-modal" class="adl-modal">\n' +
+            `<div class="${contentClass}">` +
+            '        <button class="adl-button adlt--ghost adlm--icon-only unzer-close-button"><span></span></button>' +
+            `        <div class="${titleClass}">` +
+            header +
+            '        </div>' +
+            '        <div class="unzer-body-wrapper"><div class="unzer-body"></div></div>' +
+            '        <div class="unzer-footer"></div>' +
+            '    </div>' +
+            '</div>';
 
-      modal = Unzer.elementGenerator.createElementFromHTML(modalTemplate);
-      const closeBtn = modal.querySelector('.unzer-close-button'),
-          closeBtnSpan = modal.querySelector('.unzer-close-button span'),
-          title = modal.querySelector('.unzer-payment-method-title'),
-          description = modal.querySelector('.unzer-payment-method-description'),
-          body = modal.querySelector('.unzer-body'),
-          footer = modal.querySelector('.unzer-footer');
+        modal = Unzer.elementGenerator.createElementFromHTML(modalTemplate);
+        const closeBtn = modal.querySelector('.unzer-close-button'),
+            closeBtnSpan = modal.querySelector('.unzer-close-button span'),
+            title = modal.querySelector('.unzer-payment-method-title'),
+            description = modal.querySelector('.unzer-payment-method-description'),
+            body = modal.querySelector('.unzer-body'),
+            footer = modal.querySelector('.unzer-footer');
 
-      if (config.canClose === false) {
-        utilities.hideElement(closeBtn);
-      } else {
-        window.addEventListener('keyup', closeOnEsc);
-        closeBtn.addEventListener('click', close);
-        closeBtnSpan.style.display = 'flex';
-        modal.addEventListener('click', (event) => {
-          if (event.target.id === 'adl-modal') {
-            event.preventDefault();
-            close();
+        if (config.canClose === false) {
+            utilities.hideElement(closeBtn);
+        } else {
+            window.addEventListener('keyup', closeOnEsc);
+            closeBtn.addEventListener('click', close);
+            closeBtnSpan.style.display = 'flex';
+            modal.addEventListener('click', (event) => {
+                if (event.target.id === 'adl-modal') {
+                    event.preventDefault();
+                    close();
 
-            return false;
-          }
-        });
-      }
-
-      if (config.title) {
-        title.innerHTML = translationService.translate(config.title);
-      } else {
-        utilities.hideElement(title);
-      }
-
-      if (config.description) {
-        description.innerHTML = translationService.translate(config.description)
-      } else {
-        utilities.hideElement(description);
-      }
-
-      if (config.className) {
-        modal.classList.add(config.className);
-      }
-
-      body.append(...(Array.isArray(config.content) ? config.content : [config.content]));
-      if (configuration.fullWidthBody) {
-        body.classList.add('adlm--full-width');
-      }
-
-      if (!config.buttons && !config.footerLink) {
-        utilities.hideElement(footer);
-      } else {
-        if (config.buttons) {
-          const buttonsWrapper = Unzer.elementGenerator.createElement(
-              'div',
-              'unzer-buttons',
-              '',
-              null,
-              config.buttons.map(components.Button.create)
-          );
-          footer.append(buttonsWrapper);
+                    return false;
+                }
+            });
         }
 
-        if (config.footerLink) {
-          footer.classList.add('adlm--with-link');
-          footer.append(
-              Unzer.elementGenerator.createElement('a', '', config.footerLink.label, {
-                href: config.footerLink.href,
-                target: '_blank'
-              })
-          );
+        if (config.title) {
+            title.innerHTML = translationService.translate(config.title);
+        } else {
+            utilities.hideElement(title);
         }
-      }
 
-      pageService.getPage().appendChild(modal);
-      config.onOpen?.(modal);
+        if (config.description) {
+            description.innerHTML = translationService.translate(config.description)
+        } else {
+            utilities.hideElement(description);
+        }
+
+        if (config.className) {
+            modal.classList.add(config.className);
+        }
+
+        body.append(...(Array.isArray(config.content) ? config.content : [config.content]));
+        if (configuration.fullWidthBody) {
+            body.classList.add('adlm--full-width');
+        }
+
+        if (!config.buttons && !config.footerLink) {
+            utilities.hideElement(footer);
+        } else {
+            if (config.buttons) {
+                const buttonsWrapper = Unzer.elementGenerator.createElement(
+                    'div',
+                    'unzer-buttons',
+                    '',
+                    null,
+                    config.buttons.map(components.Button.create)
+                );
+                footer.append(buttonsWrapper);
+            }
+
+            if (config.footerLink) {
+                footer.classList.add('adlm--with-link');
+                footer.append(
+                    Unzer.elementGenerator.createElement('a', '', config.footerLink.label, {
+                        href: config.footerLink.href,
+                        target: '_blank'
+                    })
+                );
+            }
+        }
+
+        pageService.getPage().appendChild(modal);
+        config.onOpen?.(modal);
     };
 
-  return {
-    open,
-    close
+    return {
+        open,
+        close
     };
 };
 
