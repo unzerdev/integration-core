@@ -211,8 +211,9 @@ class ConnectionService
      */
     private function validateKeys(ConnectionSettings $connectionSettings): void
     {
-        $this->validatePrivateKey($connectionSettings->getActiveConnectionData()->getPrivateKey());
-        $this->validatePublicKey($connectionSettings->getActiveConnectionData()->getPublicKey());
+        $mode = $connectionSettings->getMode();
+        $this->validatePrivateKey($connectionSettings->getActiveConnectionData()->getPrivateKey(), $mode);
+        $this->validatePublicKey($connectionSettings->getActiveConnectionData()->getPublicKey(), $mode);
     }
 
     /**
@@ -237,12 +238,12 @@ class ConnectionService
 
     /**
      * @param string $privateKey
-     *
+     * @param Mode $mode
      * @return void
      *
      * @throws PrivateKeyInvalidException
      */
-    private function validatePrivateKey(string $privateKey): void
+    private function validatePrivateKey(string $privateKey, Mode $mode): void
     {
         if (!PrivateKeyValidator::validate($privateKey)) {
             throw new PrivateKeyInvalidException(
@@ -250,16 +251,30 @@ class ConnectionService
                     'connection.invalidPrivateKey')
             );
         }
+
+        if ($mode->equal(Mode::live()) && !$this->isLiveKey($privateKey)) {
+            throw new PrivateKeyInvalidException(
+                new TranslatableLabel("The private key: {$privateKey} does not match live mode.",
+                    'connection.invalidPrivateKeyForMode')
+            );
+        }
+
+        if ($mode->equal(Mode::sandbox()) && !$this->isSandboxKey($privateKey)) {
+            throw new PrivateKeyInvalidException(
+                new TranslatableLabel("The public key: {$privateKey} does not match sandbox mode.",
+                    'connection.invalidPrivateKeyForMode')
+            );
+        }
     }
 
     /**
      * @param string $publicKey
-     *
+     * @param Mode $mode
      * @return void
      *
      * @throws PublicKeyInvalidException
      */
-    private function validatePublicKey(string $publicKey): void
+    private function validatePublicKey(string $publicKey, Mode $mode): void
     {
         if (!PublicKeyValidator::validate($publicKey)) {
             throw new PublicKeyInvalidException(
@@ -267,6 +282,40 @@ class ConnectionService
                     'connection.invalidPublicKey')
             );
         }
+
+        if ($mode->equal(Mode::live()) && !$this->isLiveKey($publicKey)) {
+            throw new PublicKeyInvalidException(
+                new TranslatableLabel("The private key: {$publicKey} does not match live mode.",
+                    'connection.invalidPublicKeyForMode')
+            );
+        }
+
+        if ($mode->equal(Mode::sandbox()) && !$this->isSandboxKey($publicKey)) {
+            throw new PublicKeyInvalidException(
+                new TranslatableLabel("The public key: {$publicKey} does not match sandbox mode.",
+                    'connection.invalidPublicKeyForMode')
+            );
+        }
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    private function isLiveKey(string $key): bool
+    {
+        return strpos($key, 'p') === 0;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    private function isSandboxKey(string $key): bool
+    {
+        return strpos($key, 's') === 0;
     }
 
     /**

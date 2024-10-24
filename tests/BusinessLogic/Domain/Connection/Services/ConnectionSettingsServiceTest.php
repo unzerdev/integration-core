@@ -105,6 +105,44 @@ class ConnectionSettingsServiceTest extends BaseTestCase
 
     /**
      * @return void
+     * @throws InvalidModeException
+     */
+    public function testInvalidPrivateKeyForLiveMode(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-test', 's-priv-test'),
+            new ConnectionData('s-pub-test', 's-priv-test')
+        );
+
+        $this->expectException(PrivateKeyInvalidException::class);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+    }
+
+    /**
+     * @return void
+     * @throws InvalidModeException
+     */
+    public function testInvalidPrivateKeyForSandboxMode(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-test', 'p-priv-test'),
+            new ConnectionData('s-pub-test', 'p-priv-test')
+        );
+
+        $this->expectException(PrivateKeyInvalidException::class);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+    }
+
+    /**
+     * @return void
      *
      * @throws InvalidModeException
      * @throws Exception
@@ -114,10 +152,52 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('publicKey', 's-priv-test'),
+            new ConnectionData('publicKey', 'p-priv-test'),
             new ConnectionData('s-pub-test', 's-priv-test')
         );
-        $this->mockData('s-pub-test', 's-priv-test');
+        $this->mockData('p-pub-test', 'p-priv-test');
+        $this->expectException(PublicKeyInvalidException::class);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+
+        // assert
+    }
+
+    /**
+     * @return void
+     * @throws InvalidModeException
+     */
+    public function testInvalidPublicKeyForSandboxMode(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-test', 'p-priv-test'),
+            new ConnectionData('p-pub-test', 's-priv-test')
+        );
+
+        $this->expectException(PublicKeyInvalidException::class);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testInvalidPublicKeyForLiveMode(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('s-pub-test', 'p-priv-test'),
+            new ConnectionData('p-pub-test', 'p-priv-test')
+        );
+
         $this->expectException(PublicKeyInvalidException::class);
 
         // act
@@ -137,10 +217,10 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-test', 's-priv-test'),
+            new ConnectionData('p-pub-test', 'p-priv-test'),
             new ConnectionData('s-pub-test', 's-priv-test')
         );
-        $this->mockData('s-pub-test2', 's-priv-test');
+        $this->mockData('p-pub-test2', 'p-priv-test');
         $this->expectException(InvalidKeypairException::class);
 
         // act
@@ -162,10 +242,10 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-test', 's-priv-test'),
+            new ConnectionData('p-pub-test', 'p-priv-test'),
             new ConnectionData('s-pub-test', 's-priv-test')
         );
-        $this->mockData('s-pub-test', 's-priv-test');
+        $this->mockData('p-pub-test', 'p-priv-test');
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
@@ -188,10 +268,10 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
-        $this->mockData('s-pub-live-test', 's-priv-live-test');
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
@@ -200,8 +280,8 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         /** @var ConnectionSettings $connectionSettings */
         $connectionSettings = $this->repository->selectOne()->getConnectionSettings();
 
-        self::assertEquals('s-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
-        self::assertEquals('s-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
+        self::assertEquals('p-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
+        self::assertEquals('p-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
         self::assertEquals('s-pub-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPublicKey());
         self::assertEquals('s-priv-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPrivateKey());
     }
@@ -219,14 +299,14 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $liveSettings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test')
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test')
         );
         $sandboxSettings = new ConnectionSettings(
             Mode::parse('sandbox'),
             null,
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
-        $this->mockData('s-pub-live-test', 's-priv-live-test');
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$liveSettings]);
         $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test');
 
@@ -238,8 +318,8 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $connectionSettings = $this->repository->selectOne()->getConnectionSettings();
 
         self::assertEquals(Mode::sandbox(), $connectionSettings->getMode());
-        self::assertEquals('s-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
-        self::assertEquals('s-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
+        self::assertEquals('p-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
+        self::assertEquals('p-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
         self::assertEquals('s-pub-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPublicKey());
         self::assertEquals('s-priv-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPrivateKey());
     }
@@ -257,7 +337,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $liveSettings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test')
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test')
         );
         $sandboxSettings = new ConnectionSettings(
             Mode::parse('sandbox'),
@@ -266,7 +346,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         );
         $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test');
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$sandboxSettings]);
-        $this->mockData('s-pub-live-test', 's-priv-live-test');
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$liveSettings]);
@@ -276,8 +356,8 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $connectionSettings = $this->repository->selectOne()->getConnectionSettings();
 
         self::assertEquals(Mode::live(), $connectionSettings->getMode());
-        self::assertEquals('s-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
-        self::assertEquals('s-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
+        self::assertEquals('p-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
+        self::assertEquals('p-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
         self::assertEquals('s-pub-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPublicKey());
         self::assertEquals('s-priv-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPrivateKey());
     }
@@ -295,7 +375,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
         $webhook1 = new Webhook();
@@ -307,7 +387,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $webhook3 = new Webhook();
         $webhook3->setUrl('https://test.com');
         $webhook3->setEvent(WebhookEvents::AUTHORIZE);
-        $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2, $webhook3]);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2, $webhook3]);
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
@@ -332,7 +412,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
         $webhook1 = new Webhook();
@@ -342,7 +422,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $webhook2->setUrl('https://test.com');
         $webhook2->setEvent(WebhookEvents::CHARGE);
 
-        $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2]);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
@@ -367,7 +447,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
         $webhook1 = new Webhook();
@@ -381,7 +461,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $oldData->setWebhookData($webhookData);
         $oldData->setStoreId('1');
         $this->webhookDataRepository->save($oldData);
-        $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2]);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
@@ -423,7 +503,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
         $connectionSettings = new ConnectionSettings(
             Mode::parse('live'),
-            new ConnectionData('s-pub-live-test', 's-priv-live-test'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
             new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
         );
         $settings = new ConnectionSettingsEntity();
@@ -436,7 +516,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $webhook2 = new Webhook();
         $webhook2->setUrl('https://test.com');
         $webhook2->setEvent(WebhookEvents::CHARGE);
-        $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2]);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
         $webhookDataSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
@@ -501,7 +581,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $connectionSettings = new ConnectionSettings(
             Mode::parse('live'),
             new ConnectionData('s-pub-live-test', 's-priv-live-test'),
-            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+            new ConnectionData('p-pub-sandbox-test', 'p-priv-sandbox-test')
         );
         $settings = new ConnectionSettingsEntity();
         $settings->setConnectionSettings($connectionSettings);
@@ -520,7 +600,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $webhook2 = new Webhook();
         $webhook2->setUrl('https://test.com');
         $webhook2->setEvent(WebhookEvents::CHARGE);
-        $this->mockData('s-pub-live-test', 's-priv-live-test', [$webhook1, $webhook2]);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
         StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
