@@ -212,7 +212,8 @@ class BaseTestCase extends TestCase
             PaymentPageService::class => static function () {
                 return new PaymentPageService(
                     (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
-                    TestServiceRegister::getService(PaymentMethodService::class)
+                    TestServiceRegister::getService(PaymentMethodService::class),
+                    TestServiceRegister::getService(TransactionHistoryService::class)
                 );
             },
             CheckoutPaymentPageController::class => static function () {

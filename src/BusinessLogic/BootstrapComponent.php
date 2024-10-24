@@ -144,7 +144,8 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () use ($unzerFactory) {
                 return new PaymentPageService(
                     $unzerFactory,
-                    ServiceRegister::getService(PaymentMethodService::class)
+                    ServiceRegister::getService(PaymentMethodService::class),
+                    ServiceRegister::getService(TransactionHistoryService::class)
                 );
             })
         );

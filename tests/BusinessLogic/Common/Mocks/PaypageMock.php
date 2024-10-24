@@ -11,16 +11,27 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaypageMock extends Paypage
 {
-    private string $redirectUrl;
+    private ?string $paymentId;
+    private ?string $redirectUrl;
 
-    public function setRedirectUrl(string $redirectUrl): Paypage
+    public function setPaymentId(?string $paymentId)
+    {
+        $this->paymentId = $paymentId;
+    }
+
+    public function getPaymentId(): ?string
+    {
+        return $this->paymentId;
+    }
+
+    public function setRedirectUrl(?string $redirectUrl): Paypage
     {
         $this->redirectUrl = $redirectUrl;
 
         return $this;
     }
 
-    public function getRedirectUrl(): string
+    public function getRedirectUrl(): ?string
     {
         return $this->redirectUrl;
     }

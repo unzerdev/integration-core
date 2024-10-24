@@ -108,6 +108,7 @@ class UnzerMock extends Unzer
         $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
         $result->setId($this->payPageData['id'] ?? null);
         $result->setRedirectUrl($this->payPageData['redirectUrl'] ?? null);
+        $result->setPaymentId($this->payPageData['paymentId'] ?? null);
 
         return $result;
     }
@@ -124,6 +125,7 @@ class UnzerMock extends Unzer
         $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
         $result->setId($this->payPageData['id'] ?? null);
         $result->setRedirectUrl($this->payPageData['redirectUrl'] ?? null);
+        $result->setPaymentId($this->payPageData['paymentId'] ?? null);
 
         return $result;
     }

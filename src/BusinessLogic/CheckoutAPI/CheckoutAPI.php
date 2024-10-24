@@ -40,6 +40,11 @@ class CheckoutAPI
             ->beforeEachMethodOfService(CheckoutPaymentMethodsController::class);
     }
 
+    /**
+     * @param string $storeId
+     *
+     * @return CheckoutPaymentPageController
+     */
     public function paymentPage(string $storeId): object
     {
         return Aspects
