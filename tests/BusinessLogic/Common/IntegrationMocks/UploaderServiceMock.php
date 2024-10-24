@@ -17,19 +17,13 @@ class UploaderServiceMock implements UploaderService
      */
     private ?string $path;
     /**
+     * @param SplFileInfo $file
+     * @param string $name
      * @inheritDoc
      */
-    public function uploadImage(SplFileInfo $file): string
+    public function uploadImage(SplFileInfo $file, string $name = ''): string
     {
         return $this->path;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function removeImage(string $path): bool
-    {
-        return true;
     }
 
     /**
@@ -37,7 +31,6 @@ class UploaderServiceMock implements UploaderService
      *
      * @return void
      */
-
     public function setPath(?string $path): void
     {
         $this->path = $path;

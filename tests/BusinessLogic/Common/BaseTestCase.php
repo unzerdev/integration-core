@@ -46,6 +46,7 @@ use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\Http\HttpClient;
 use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use Unzer\Core\Infrastructure\Logger\Logger;
@@ -121,6 +122,7 @@ class BaseTestCase extends TestCase
                 return new PaymentPageSettingsService(
                     TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(UploaderService::class),
+                    TestServiceRegister::getService(UnzerFactory::class),
                 );
             },
             WebhookDataRepositoryInterface::class => function () {

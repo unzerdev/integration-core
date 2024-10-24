@@ -3,10 +3,13 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller;
 
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSettingsRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPagePreviewResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsPutResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
+use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
  * Class PaymentPageController.
@@ -53,4 +56,20 @@ class PaymentPageSettingsController
         return new PaymentPageSettingsGetResponse($this->paymentPageSettingsService->getPaymentPageSettings());
     }
 
+    /**
+     * @param PaymentPageSettingsRequest $pageSettingsRequest
+     *
+     * @return PaymentPagePreviewResponse
+     * @throws InvalidTranslatableArrayException
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function getPaymentPagePreview(PaymentPageSettingsRequest $pageSettingsRequest): PaymentPagePreviewResponse
+    {
+        $paypage = $this->paymentPageSettingsService->createMockPaypage(
+            $pageSettingsRequest->transformToDomainModel()
+        );
+
+        return new PaymentPagePreviewResponse($paypage);
+    }
 }

@@ -8,11 +8,14 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -40,6 +43,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      */
     private UploaderServiceMock $uploaderService;
 
+    private UnzerFactory $unzerService;
+
     /**
      * @throws RepositoryClassException
      * @throws RepositoryNotRegisteredException
@@ -54,6 +59,15 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
             UploaderService::class,
             function () {
                 return $this->uploaderService;
+            }
+        );
+
+        $this->unzerService = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+
+        TestServiceRegister::registerService(
+            UnzerFactory::class,
+            function () {
+                return $this->unzerService;
             }
         );
 
@@ -244,5 +258,92 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         self::assertCount(2, $savedEntity);
         self::assertEquals($settings, $savedEntity[0]->getPaymentPageSettings());
         self::assertEquals($newSettings, $savedEntity[1]->getPaymentPageSettings());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCreateMockPaypageNoSettings() : void
+    {
+        //arrange
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null,null),
+            [new TranslatableLabel("Shop1", "default")],
+            [new TranslatableLabel("Description", "default")]);
+
+
+        $id = "123";
+        $url = "url";
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+
+        //act
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+
+
+        //assert
+        self::assertEquals($id, $paypage->getId());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCreateMockPaypageWithSettings() : void
+    {
+        //arrange
+        $settings = new PaymentPageSettingsModel(new UploadedFile("url",null),
+            [new TranslatableLabel("Shop1", "default")],
+            [new TranslatableLabel("Description", "default")],
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#FFFFFF',
+            '#666666',
+        );
+
+
+        $id = "123";
+        $url = "url";
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+
+        //act
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+
+        //assert
+        self::assertEquals($id, $paypage->getId());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCreateMockPaypageWithFile() : void
+    {
+        //arrange
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
+            [new TranslatableLabel("Shop1", "default")],
+            [new TranslatableLabel("Description", "default")],
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#FFFFFF',
+            '#666666',
+        );
+
+        $path = 'new path';
+
+        $this->uploaderService->setPath($path);
+
+        $id = "123";
+        $url = "url";
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+
+        //act
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+
+        //assert
+        self::assertEquals($id, $paypage->getId());
     }
 }

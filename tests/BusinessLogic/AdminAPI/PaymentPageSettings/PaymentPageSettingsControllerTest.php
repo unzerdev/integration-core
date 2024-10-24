@@ -5,6 +5,7 @@ namespace BusinessLogic\AdminAPI\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSettingsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
@@ -12,11 +13,16 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPage
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentPageSettingsServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
+use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\PaymentTypes\Paypage;
 
 /**
  * Class PaymentPageSettingsControllerTest
@@ -60,9 +66,19 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             }
         );
 
+        $this->unzerService = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+
+        TestServiceRegister::registerService(
+            UnzerFactory::class,
+            function () {
+                return $this->unzerService;
+            }
+        );
+
         $this->paymentPageSettingsService = new PaymentPageSettingsServiceMock(
             TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
-            TestServiceRegister::getService(UploaderService::class)
+            TestServiceRegister::getService(UploaderService::class),
+            TestServiceRegister::getService(UnzerFactory::class)
         );
 
     }
@@ -201,8 +217,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $settingsRequest = new PaymentPageSettingsRequest(
             [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
             [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
-            null,
             new \SplFileInfo('path'),
+            null,
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -253,5 +269,64 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 'value' => $label->getMessage()
             ];
         }, $labels);
+    }
+
+
+    /**
+     * @return void
+     * @throws InvalidTranslatableArrayException
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function testIsCreatePreviewPageResponseSuccessful(): void
+    {
+        // Arrange
+        $settingsRequest = new PaymentPageSettingsRequest(
+            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
+            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            'path',
+            null,
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#333333',
+            '#222222',
+        );
+
+        $this->paymentPageSettingsService->setPaypage(new Paypage(100,"EUR","return"));
+        // Act
+        $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPagePreview($settingsRequest);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    public function testPaymentPagePreviewResponseToArray(): void
+    {
+        // Arrange
+        $settingsRequest = new PaymentPageSettingsRequest(
+            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
+            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            'path',
+            null,
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#333333',
+            '#222222',
+        );
+
+        $id = "Id";
+        $paypage = new Paypage(100,"EUR","return");
+        $paypage->setId($id);
+        $this->paymentPageSettingsService->setPaypage($paypage);
+
+        // Act
+        $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPagePreview($settingsRequest);
+
+        // Assert
+        self::assertEquals(['id' => $id], $response->toArray());
     }
 }

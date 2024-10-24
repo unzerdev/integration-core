@@ -59,10 +59,16 @@
   },
   "credentials": {
     "title": "Credentials",
+    "notificationsDescription": "You can find registrated webhook for your store here.",
     "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
     "saveChanges": "Save changes",
     "disconnect": "Disconnect",
+    "notifications": "Notifications",
+    "registrationDate": "Registration Date",
+    "webhook": "Webhooks IDs",
+    "webhookUrl": "Webhooks URLs",
     "event": "Events",
+    "reRegister": "Re-register webhook",
     "disconnectWarning": "Are you sure you want to disconnect store?",
     "saveChangesWarning": "Thn environment change has been detected. Do you want to use the same configuration?"
   },

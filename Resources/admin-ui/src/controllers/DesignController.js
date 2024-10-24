@@ -28,21 +28,23 @@
         value: ""
       }
     ],
-    logoImageUrl: "",
-    logoFile: "",
-    headerColor: "",
-    shopTaglineBackgroundColor: "",
-    shopNameColor: "",
-    headerFontColor: "",
-    shopTaglineColor: "",
-    shopNameBackground: "",
+    logoImageUrl: null,
+    logoFile: null,
+    headerColor: null,
+    shopTaglineBackgroundColor: null,
+    shopNameColor: null,
+    headerFontColor: null,
+    shopTaglineColor: null,
+    shopNameBackground: null,
   };
 
+  let current_name = "";
+  let current_tagline = "";
   /**
    * display design page
    */
 
-  this.display = (params) => {
+  this.display = () => {
     if (!Unzer.config.store.isLoggedIn) {
       Unzer.stateController.navigate('login');
 
@@ -68,22 +70,24 @@
               locale: x.locale,
               value: x.value
             })) || [{ locale: 'default', value: '' }];
+
+            current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
+
             selectedValues.tagline = result?.shopTagline?.map(x => ({
               locale: x.locale,
               value: x.value
             })) || [{ locale: 'default', value: '' }];
 
+            current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
 
-            console.log("Logo Image URL:", result.logoImageUrl);
-            selectedValues.logoImageUrl = result.logoImageUrl || '';
-            selectedValues.headerColor = result.headerBackgroundColor || '';
-            selectedValues.headerFontColor = result.headerFontColor || '';
-            selectedValues.shopNameColor = result.shopNameFontColor || '';
-            selectedValues.shopTaglineColor = result.shopTaglineFontColor || '';
-            selectedValues.shopTaglineBackgroundColor = result.shopTaglineBackgroundColor || '';
-            selectedValues.shopNameBackground = result.shopNameBackgroundColor || '';
+            selectedValues.logoImageUrl = result.logoImageUrl;
+            selectedValues.headerColor = result.headerBackgroundColor;
+            selectedValues.headerFontColor = result.headerFontColor;
+            selectedValues.shopNameColor = result.shopNameFontColor;
+            selectedValues.shopTaglineColor = result.shopTaglineFontColor;
+            selectedValues.shopTaglineBackgroundColor = result.shopTaglineBackgroundColor;
+            selectedValues.shopNameBackground = result.shopNameBackgroundColor;
 
-            console.log(selectedValues);
           }
 
           render();
@@ -111,9 +115,7 @@
               label: "design.heading.previewLabel",
               type: "primary",
               className: "adlt--export",
-              onClick: () => {
-
-              }
+              onClick: createPreviewPage
             },
             {
               label: "design.heading.saveLabel",
@@ -262,13 +264,51 @@
       }
     }
 
-    // Dodajte nameArray i taglineArray u formData
     formData.append('name', JSON.stringify(nameArray));
     formData.append('tagline', JSON.stringify(taglineArray));
 
     Unzer.DesignService.saveDesign(formData)
+        .then(() => {
+          Unzer.utilities.createToasterMessage("general.changesSaved",false);
+        })
+        .catch((ex) => {
+          Unzer.utilities.createToasterMessage(ex.errorMessage, true);
+        })
+        .finally(Unzer.utilities.hideLoader);
+  }
+
+  /**
+   * Save changes of payment page
+   */
+
+  function createPreviewPage() {
+    Unzer.utilities.showLoader();
+
+    const formData = new FormData();
+
+    for (const key in selectedValues) {
+      if (key !== 'name' && key !== 'tagline') {
+        formData.append(key, selectedValues[key]);
+      }
+    }
+
+    formData.append('name', JSON.stringify([["default",current_name]]));
+    formData.append('tagline', JSON.stringify([["default", current_tagline]]));
+
+    Unzer.DesignService.createPreviewPage(formData)
         .then((response) => {
-          console.log(response);
+          if (typeof response.id === 'undefined') {
+            Unzer.utilities.createToasterMessage("general.errors.general.unhandled", true);
+            return;
+          }
+          var checkout = new window.checkout(response.id);
+          checkout.init()
+              .then(() => {
+                checkout.open();
+              })
+              .catch((ex) => {
+                Unzer.utilities.createToasterMessage(ex.errorMessage, true);
+              });
         })
         .catch((ex) => {
           Unzer.utilities.createToasterMessage(ex.errorMessage, true);
@@ -278,7 +318,7 @@
 
   /**
    * Converts into array
-   * @param array
+   * @param objects
    * @returns {*[]}
    */
 

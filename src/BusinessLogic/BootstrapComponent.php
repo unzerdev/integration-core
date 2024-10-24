@@ -119,11 +119,11 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             PaymentPageSettingsService::class,
-            new SingleInstance(static function () {
+            new SingleInstance(static function () use ($unzerFactory) {
                 return new PaymentPageSettingsService(
                     ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
-                    ServiceRegister::getService(UploaderService::class)
-
+                    ServiceRegister::getService(UploaderService::class),
+                    $unzerFactory
                 );
             })
         );

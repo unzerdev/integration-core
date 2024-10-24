@@ -13,15 +13,8 @@ interface UploaderService
 {
     /**
      * @param SplFileInfo $file
-     *
+     * @param string $name
      * @return string
      */
-    public function uploadImage(SplFileInfo $file): string;
-
-    /**
-     * @param string $path
-     *
-     * @return bool
-     */
-    public function removeImage(string $path): bool;
+    public function uploadImage(SplFileInfo $file, string $name = ''): string;
 }

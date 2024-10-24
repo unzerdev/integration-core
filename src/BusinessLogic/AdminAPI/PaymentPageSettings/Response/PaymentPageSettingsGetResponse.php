@@ -37,13 +37,13 @@ class PaymentPageSettingsGetResponse extends Response
             [
                 'shopName' => [],
                 'shopTagline' => [],
-                'logoImageUrl' => '',
-                'headerBackgroundColor' => '',
-                'headerFontColor' => '',
-                'shopNameBackgroundColor' => '',
-                'shopNameFontColor' => '',
-                'shopTaglineBackgroundColor' => '',
-                'shopTaglineFontColor' => '',
+                'logoImageUrl' => null,
+                'headerBackgroundColor' => null,
+                'headerFontColor' => null,
+                'shopNameBackgroundColor' => null,
+                'shopNameFontColor' => null,
+                'shopTaglineBackgroundColor' => null,
+                'shopTaglineFontColor' => null,
             ];
     }
 

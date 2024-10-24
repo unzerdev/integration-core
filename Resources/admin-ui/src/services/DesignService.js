@@ -34,8 +34,26 @@
     );
   };
 
+  /**
+   * @returns {Promise<*>}
+   */
+  const createPreviewPage = (data) => {
+    data.forEach((value, key) => {
+      console.log(key, value);
+    });
+    return Unzer.ajaxService.post(
+        `${baseUrl}/design/createPreviewPage?storeId=${Unzer.config.store.storeId}`,
+        data,
+        {'Content-Type': 'multipart/form-data'},
+        (exception) => {
+          return Promise.reject(exception);
+        }
+    );
+  };
+
   Unzer.DesignService = {
     saveDesign,
-    getDesign
+    getDesign,
+    createPreviewPage
   };
 })();

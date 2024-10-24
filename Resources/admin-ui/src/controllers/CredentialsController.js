@@ -19,25 +19,24 @@
      * @type {{webhookID: string, registrationDate: string, events: string, webhookUrl: string}}
      */
     let webhookData = {
-        registrationDate: 'undefined',
-        webhookID: 'undefined',
-        events: 'undefined',
-        webhookUrl: 'undefined',
+        registrationDate: '',
+        webhookID: '',
+        events: '',
+        webhookUrl: '',
     }
 
     /**
      * @type {{privateKey: string, publicKey: string}}
      */
     let connectionData = {
-        publicKey: 'unedefined',
-        privateKey: 'undefined',
+        publicKey: '',
+        privateKey: '',
     }
 
     /**
      * renders credentials page
-     * @param {StateParamsModel} params
      */
-    this.display = (params) => {
+    this.display = () => {
         if (!Unzer.config.store.isLoggedIn) {
             Unzer.stateController.navigate('login');
 
@@ -250,7 +249,6 @@
     /**
      * ReRegister webhooks
      *
-     * @param loginData
      */
 
     function reRegisterWebhooks() {
@@ -269,8 +267,7 @@
     }
 
     /**
-     * Connect store
-     * @param loginData
+     * @param modal
      */
     function saveChanges(modal) {
         Unzer.utilities.showLoader();
