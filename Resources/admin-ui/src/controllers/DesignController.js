@@ -65,7 +65,6 @@
         .then((result) => {
 
           if (result) {
-            console.log(result);
             selectedValues.name = result?.shopName?.map(x => ({
               locale: x.locale,
               value: x.value
@@ -139,6 +138,7 @@
                   selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value })),
                   (value) => {
                     selectedValues.name = value;
+                    current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
                   },
                   'unzer-text-dropdown-max-width',
                   selectedValues?.name?.find(x => x.locale === 'default') ?? {
@@ -176,6 +176,7 @@
                   selectedValues?.tagline?.map(x => ({ locale: x.locale, value: x.value })),
                   (value) => {
                     selectedValues.tagline = value;
+                    current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
                   },
                   'unzer-text-dropdown-max-width',
                   selectedValues?.tagline?.find(x => x.locale === 'default') ?? {
@@ -280,7 +281,6 @@
   /**
    * Save changes of payment page
    */
-
   function createPreviewPage() {
     Unzer.utilities.showLoader();
 

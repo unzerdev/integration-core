@@ -8,9 +8,6 @@
    * @returns {Promise<*>}
    */
   const saveDesign = (data) => {
-    data.forEach((value, key) => {
-      console.log(key, value);
-    });
     return Unzer.ajaxService.post(
         `${baseUrl}/design/saveDesign?storeId=${Unzer.config.store.storeId}`,
         data,
@@ -38,9 +35,6 @@
    * @returns {Promise<*>}
    */
   const createPreviewPage = (data) => {
-    data.forEach((value, key) => {
-      console.log(key, value);
-    });
     return Unzer.ajaxService.post(
         `${baseUrl}/design/createPreviewPage?storeId=${Unzer.config.store.storeId}`,
         data,
