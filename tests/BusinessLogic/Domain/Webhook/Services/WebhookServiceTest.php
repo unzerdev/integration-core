@@ -126,7 +126,7 @@ class WebhookServiceTest extends BaseTestCase
         // Assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchResourceFromEvent');
         self::assertNotEmpty($methodCallHistory);
-        self::assertEquals($webhook->toPayload(), $methodCallHistory['event']);
+        self::assertEquals($webhook->toPayload(), $methodCallHistory[0]['event']);
     }
 
     /**
@@ -153,7 +153,7 @@ class WebhookServiceTest extends BaseTestCase
         $fetchedPaymentHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
 
         self::assertNotEmpty($fetchedResourceHistory);
-        self::assertEquals($webhook->toPayload(), $fetchedResourceHistory['event']);
+        self::assertEquals($webhook->toPayload(), $fetchedResourceHistory[0]['event']);
         self::assertNotEmpty($fetchedPaymentHistory);
         self::assertEquals('payment1', $fetchedPaymentHistory[0]['paymentId']);
     }

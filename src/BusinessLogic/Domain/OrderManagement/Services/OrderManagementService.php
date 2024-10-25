@@ -5,9 +5,6 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\CancellationNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargeNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\RefundNotPossibleException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\InvalidTransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
@@ -46,7 +43,6 @@ class OrderManagementService
      *
      * @return void
      *
-     * @throws ChargeNotPossibleException
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
@@ -55,7 +51,10 @@ class OrderManagementService
     public function chargeOrder(string $orderId, Amount $chargeAmount): void
     {
         $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
-        $this->validateChargePossibility($transactionHistory, $chargeAmount);
+        if (!$this->isChargeNecessary($transactionHistory, $chargeAmount)) {
+            return;
+        }
+
         $this->unzerFactory->makeUnzerAPI()->chargeAuthorization(
             $transactionHistory->getPaymentId(),
             $chargeAmount->getPriceInCurrencyUnits(),
@@ -69,7 +68,6 @@ class OrderManagementService
      *
      * @return void
      *
-     * @throws CancellationNotPossibleException
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
@@ -78,7 +76,10 @@ class OrderManagementService
     public function cancelOrder(string $orderId, Amount $amount): void
     {
         $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
-        $this->validateCancellationPossibility($transactionHistory, $amount);
+        if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
+            return;
+        }
+
         $this->unzerFactory->makeUnzerAPI()->cancelAuthorizationByPayment(
             $transactionHistory->getPaymentId(),
             $amount->getPriceInCurrencyUnits()
@@ -93,14 +94,15 @@ class OrderManagementService
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
      * @throws InvalidTransactionHistory
-     * @throws RefundNotPossibleException
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function refundOrder(string $orderId, Amount $refundAmount): void
     {
         $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
-        $this->validateRefundPossibility($transactionHistory, $refundAmount);
+        if (!$this->isRefundNecessary($transactionHistory, $refundAmount)) {
+            return;
+        }
 
         /** @var ChargeHistoryItem[] $chargeItems */
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
@@ -175,44 +177,24 @@ class OrderManagementService
      * @param TransactionHistory $transactionHistory
      * @param Amount $amountToCharge
      *
-     * @return void
-     *
-     * @throws ChargeNotPossibleException
+     * @return bool
      */
-    private function validateChargePossibility(TransactionHistory $transactionHistory, Amount $amountToCharge): void
+    private function isChargeNecessary(TransactionHistory $transactionHistory, Amount $amountToCharge): bool
     {
-        if (!$transactionHistory->getRemainingAmount()->getValue() ||
-            $amountToCharge->getValue() > $transactionHistory->getRemainingAmount()->getValue()
-        ) {
-            throw new ChargeNotPossibleException(
-                new TranslatableLabel(
-                    "Charge for orderID:{$transactionHistory->getOrderId()} is not possible",
-                    'charge.notPossible')
-            );
-        }
+        return $transactionHistory->getRemainingAmount()->getValue() &&
+            $amountToCharge->getValue() <= $transactionHistory->getRemainingAmount()->getValue();
     }
 
     /**
-     * Validates cancellation possibility.
-     *
      * @param TransactionHistory $transactionHistory
      * @param Amount $amount
      *
-     * @return void
-     *
-     * @throws CancellationNotPossibleException
+     * @return bool
      */
-    private function validateCancellationPossibility(TransactionHistory $transactionHistory, Amount $amount): void
+    private function isCancellationNecessary(TransactionHistory $transactionHistory, Amount $amount): bool
     {
-        if (!$transactionHistory->getRemainingAmount()->getValue() ||
-            $amount->getValue() > $transactionHistory->getRemainingAmount()->getValue()
-        ) {
-            throw new CancellationNotPossibleException(
-                new TranslatableLabel(
-                    "Cancellation for orderID:{$transactionHistory->getOrderId()} is not possible",
-                    'cancellation.notPossible')
-            );
-        }
+        return $transactionHistory->getRemainingAmount()->getValue() &&
+            $amount->getValue() <= $transactionHistory->getRemainingAmount()->getValue();
     }
 
     /**
@@ -221,19 +203,11 @@ class OrderManagementService
      *
      * @return void
      *
-     * @throws RefundNotPossibleException
      * @throws CurrencyMismatchException
      */
-    private function validateRefundPossibility(TransactionHistory $transactionHistory, Amount $refundAmount)
+    private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $refundAmount): bool
     {
-        if (
-            ($transactionHistory->getCancelledAmount()->plus($refundAmount))->getValue() > $transactionHistory->getChargedAmount()->getValue()
-        ) {
-            throw new RefundNotPossibleException(
-                new TranslatableLabel(
-                    "Refund for orderID:{$transactionHistory->getOrderId()} is not possible",
-                    'refund.notPossible')
-            );
-        }
+        return ($transactionHistory->getCancelledAmount()->plus($refundAmount))->getValue()
+            <= $transactionHistory->getChargedAmount()->getValue();
     }
 }

@@ -180,8 +180,7 @@ class ConnectionService
             if ($registeredWebhook->getUrl() === $webhookUrl) {
                 $webhooks[] = $registeredWebhook;
             }
-        };
-
+        }
 
         $supportedEvents = SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS;
         if (empty($webhooks)) {
@@ -205,6 +204,7 @@ class ConnectionService
      *
      * @param Unzer $unzer
      * @param array $events
+     * @param string $webhookUrl
      *
      * @return void
      *

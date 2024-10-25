@@ -167,7 +167,7 @@ class UnzerMock extends Unzer
         string $orderId = null,
         string $invoiceId = null
     ): Charge {
-        $this->callHistory['chargeAuthorization'] = ['payment' => $payment, 'amount' => $amount];
+        $this->callHistory['chargeAuthorization'][] = ['payment' => $payment, 'amount' => $amount];
 
         return new Charge();
     }
@@ -180,7 +180,7 @@ class UnzerMock extends Unzer
      */
     public function cancelAuthorizationByPayment($payment, float $amount = null): Cancellation
     {
-        $this->callHistory['cancelAuthorizationByPayment'] = ['payment' => $payment, 'amount' => $amount];
+        $this->callHistory['cancelAuthorizationByPayment'][] = ['payment' => $payment, 'amount' => $amount];
 
         return new Cancellation();
     }
@@ -226,7 +226,7 @@ class UnzerMock extends Unzer
 
     public function fetchResourceFromEvent(string $eventJson = null): AbstractUnzerResource
     {
-        $this->callHistory['fetchResourceFromEvent'] = ['event' => $eventJson];
+        $this->callHistory['fetchResourceFromEvent'][] = ['event' => $eventJson];
 
         return $this->resource;
     }
