@@ -533,11 +533,11 @@ class TransactionHistoryModelTest extends BaseTestCase
             null,
             $items
         );
-        $this->expectException(AuthorizedItemNotFoundException::class);
 
         // act
-        $transactionHistory->collection()->authorizedItem();
+        $item = $transactionHistory->collection()->authorizedItem();
 
         // assert
+        self::assertNull($item);
     }
 }

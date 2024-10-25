@@ -61,11 +61,9 @@ class HistoryItemCollection
     }
 
     /**
-     * @return HistoryItem
-     *
-     * @throws AuthorizedItemNotFoundException
+     * @return AuthorizeHistoryItem
      */
-    public function authorizedItem(): HistoryItem
+    public function authorizedItem(): ?HistoryItem
     {
         $authorizedItems = new self(
             array_values(array_filter($this->historyItems, static function ($item) {
@@ -73,13 +71,7 @@ class HistoryItemCollection
             }))
         );
 
-        if(!($item = $authorizedItems->first())) {
-            throw new AuthorizedItemNotFoundException(
-                new TranslatableLabel('Authorized item not found', 'authorization.notFound'),
-            );
-        }
-
-        return $item;
+        return $authorizedItems->first();
     }
 
     /**

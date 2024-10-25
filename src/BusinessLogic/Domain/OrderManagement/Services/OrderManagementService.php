@@ -181,7 +181,8 @@ class OrderManagementService
      */
     private function isChargeNecessary(TransactionHistory $transactionHistory, Amount $amountToCharge): bool
     {
-        return $transactionHistory->getRemainingAmount()->getValue() &&
+        return $transactionHistory->getRemainingAmount() &&
+            $transactionHistory->getRemainingAmount()->getValue() &&
             $amountToCharge->getValue() <= $transactionHistory->getRemainingAmount()->getValue();
     }
 
@@ -201,13 +202,19 @@ class OrderManagementService
      * @param TransactionHistory $transactionHistory
      * @param Amount $refundAmount
      *
-     * @return void
+     * @return bool
      *
      * @throws CurrencyMismatchException
      */
     private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $refundAmount): bool
     {
-        return ($transactionHistory->getCancelledAmount()->plus($refundAmount))->getValue()
-            <= $transactionHistory->getChargedAmount()->getValue();
+        $refundedAmount = $transactionHistory->getRefundedAmount();
+        $cancelledAuthorizeAmount = $transactionHistory->collection()->authorizedItem();
+
+        if($cancelledAuthorizeAmount) {
+            $refundedAmount = $refundAmount->plus($cancelledAuthorizeAmount->getCancelledAmount());
+        }
+
+        return $refundedAmount->getValue() !== $transactionHistory->getCancelledAmount()->getValue();
     }
 }

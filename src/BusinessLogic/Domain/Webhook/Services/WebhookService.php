@@ -8,7 +8,6 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotF
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Enums\PaymentStatus;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\AuthorizedItemNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -76,7 +75,6 @@ class WebhookService
      * @throws InvalidCurrencyCode
      * @throws TransactionHistoryNotFoundException
      * @throws CurrencyMismatchException
-     * @throws AuthorizedItemNotFoundException
      */
     public function handle(Webhook $webhook): void
     {
@@ -176,7 +174,7 @@ class WebhookService
     {
         $refundedOnShop = $this->orderService->getRefundedAmountForOrder($history->getOrderId());
 
-        if ($refundedOnShop->getValue() < $history->getCancelledAmount()->getValue()) {
+        if ($refundedOnShop->getValue() < $history->getRefundedAmount()->getValue()) {
             $this->orderService->refundOrder(
                 $history->getOrderId(),
                 $history->getCancelledAmount()->minus($refundedOnShop)
@@ -190,7 +188,6 @@ class WebhookService
      * @return void
      *
      * @throws CurrencyMismatchException
-     * @throws AuthorizedItemNotFoundException
      */
     private function handleCancellation(TransactionHistory $history): void
     {
@@ -198,7 +195,7 @@ class WebhookService
         /** @var ?AuthorizeHistoryItem $authorizedItem */
         $authorizedItem = $history->collection()->authorizedItem();
 
-        if ($refundedOnShop->getValue() < $authorizedItem->getCancelledAmount()->getValue()) {
+        if ($authorizedItem && $refundedOnShop->getValue() < $authorizedItem->getCancelledAmount()->getValue()) {
             $this->orderService->cancelOrder(
                 $history->getOrderId(),
                 $history->getCancelledAmount()->minus($refundedOnShop)

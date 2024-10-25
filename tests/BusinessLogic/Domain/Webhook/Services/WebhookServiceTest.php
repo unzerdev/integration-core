@@ -19,6 +19,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\OrderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServiceMock as PaymentStatusMapIntegrationMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CancellationSDK;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentSDK;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentStatusMapServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\SdkAmount;
@@ -462,6 +463,21 @@ class WebhookServiceTest extends BaseTestCase
         $amount->setCharged(1000.00);
         $amount->setCanceled(300.00);
         $amount->setRemaining(0.00);
+        $charge1 = new Charge(50, 'EUR', 'test');
+        $charge1->setId('chargeId1');
+        $charge1->setDate('2024-10-21 16:58:08');
+        $cancellation1 = new CancellationSDK(300);
+        $cancellation1->setIsSuccess(true);
+        $charge1->addCancellation(new Cancellation(300));
+        $payment->addCharge($charge1);
+
+        $charge2 = new Charge(60, 'EUR', 'test');
+        $charge2->setId('chargeId2');
+        $charge2->setDate('2024-10-21 17:58:08');
+        $cancellation2 = new CancellationSDK(300);
+        $cancellation2->setIsSuccess(true);
+        $charge2->addCancellation($cancellation2);
+        $payment->addCharge($charge2);
 
         $this->orderService->setRefundedAmount(Amount::fromFloat(200, Currency::getDefault()));
         $payment->setAmount($amount);

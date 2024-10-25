@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
@@ -264,6 +265,27 @@ class TransactionHistory
         }
 
         return $historyItemCollection;
+    }
+
+    /**
+     * @return Amount
+     *
+     * @throws CurrencyMismatchException
+     */
+    public function getRefundedAmount(): Amount
+    {
+        $chargedItems = $this->collection()->chargeItems();
+
+        if ($chargedItems->isEmpty()) {
+            return Amount::fromInt(0, $this->getTotalAmount()->getCurrency());
+        }
+
+        return array_reduce($this->collection()->chargeItems()->getAll(), static function (
+            ?Amount $totalAmount,
+            ChargeHistoryItem $item
+        ) {
+            return $totalAmount ? $totalAmount->plus($item->getCancelledAmount()) : $item->getCancelledAmount();
+        });
     }
 
     /**
