@@ -21,6 +21,9 @@ class OrderServiceMock implements OrderServiceInterface
     /** @var Amount|null */
     private static ?Amount $chargedAmount = null;
 
+    /** @var array */
+    private array $callHistory = [];
+
     /**
      * @inheritDoc
      */
@@ -64,6 +67,7 @@ class OrderServiceMock implements OrderServiceInterface
      */
     public function refundOrder(string $orderId, Amount $amount): void
     {
+        $this->callHistory['refundOrder'][] = ['orderId' => $orderId, 'amount' => $amount->getPriceInCurrencyUnits()];
     }
 
     /**
@@ -71,7 +75,7 @@ class OrderServiceMock implements OrderServiceInterface
      */
     public function getCancelledAmountForOrder(string $orderId): ?Amount
     {
-       return self::$cancelledAmount;
+        return self::$cancelledAmount;
     }
 
     /**
@@ -79,6 +83,7 @@ class OrderServiceMock implements OrderServiceInterface
      */
     public function cancelOrder(string $orderId, Amount $amount): void
     {
+        $this->callHistory['cancelOrder'][] = ['orderId' => $orderId, 'amount' => $amount->getPriceInCurrencyUnits()];
     }
 
     /**
@@ -94,6 +99,7 @@ class OrderServiceMock implements OrderServiceInterface
      */
     public function chargeOrder(string $orderId, Amount $amount): void
     {
+        $this->callHistory['chargeOrder'][] = ['orderId' => $orderId, 'amount' => $amount->getPriceInCurrencyUnits()];
     }
 
     /**
@@ -101,5 +107,16 @@ class OrderServiceMock implements OrderServiceInterface
      */
     public function changeOrderStatus(string $orderId, string $statusId): void
     {
+        $this->callHistory['changeOrderStatus'][] = ['orderId' => $orderId, 'statusId' => $statusId];
+    }
+
+    /**
+     * @param string $methodName
+     *
+     * @return array
+     */
+    public function getCallHistory(string $methodName): array
+    {
+        return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
     }
 }
