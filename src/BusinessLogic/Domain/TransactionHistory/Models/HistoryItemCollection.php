@@ -2,6 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\AuthorizedItemNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use UnzerSDK\Constants\TransactionTypes;
 
 /**
@@ -59,15 +61,25 @@ class HistoryItemCollection
     }
 
     /**
-     * @return self
+     * @return HistoryItem
+     *
+     * @throws AuthorizedItemNotFoundException
      */
-    public function authorizedItems(): self
+    public function authorizedItem(): HistoryItem
     {
-        return new self(
+        $authorizedItems = new self(
             array_values(array_filter($this->historyItems, static function ($item) {
                 return $item->getType() === TransactionTypes::AUTHORIZATION && $item instanceof AuthorizeHistoryItem;
             }))
         );
+
+        if(!($item = $authorizedItems->first())) {
+            throw new AuthorizedItemNotFoundException(
+                new TranslatableLabel('Authorized item not found', 'authorization.notFound'),
+            );
+        }
+
+        return $item;
     }
 
     /**

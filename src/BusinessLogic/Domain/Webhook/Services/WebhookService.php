@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotF
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Enums\PaymentStatus;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\AuthorizedItemNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -75,6 +76,7 @@ class WebhookService
      * @throws InvalidCurrencyCode
      * @throws TransactionHistoryNotFoundException
      * @throws CurrencyMismatchException
+     * @throws AuthorizedItemNotFoundException
      */
     public function handle(Webhook $webhook): void
     {
@@ -90,7 +92,8 @@ class WebhookService
 
         if (!$existingTransactionHistory) {
             throw new TransactionHistoryNotFoundException(
-                new TranslatableLabel("Transaction history for orderId: not found.", 'transactionHistory.notFound')
+                new TranslatableLabel("Transaction history for orderId:{$transactionHistory->getOrderId()} not found.",
+                    'transactionHistory.notFound')
             );
         }
 
@@ -173,7 +176,7 @@ class WebhookService
     {
         $refundedOnShop = $this->orderService->getRefundedAmountForOrder($history->getOrderId());
 
-        if ($refundedOnShop < $history->getCancelledAmount()->getValue()) {
+        if ($refundedOnShop->getValue() < $history->getCancelledAmount()->getValue()) {
             $this->orderService->refundOrder(
                 $history->getOrderId(),
                 $history->getCancelledAmount()->minus($refundedOnShop)
@@ -187,16 +190,13 @@ class WebhookService
      * @return void
      *
      * @throws CurrencyMismatchException
+     * @throws AuthorizedItemNotFoundException
      */
     private function handleCancellation(TransactionHistory $history): void
     {
         $refundedOnShop = $this->orderService->getCancelledAmountForOrder($history->getOrderId());
         /** @var ?AuthorizeHistoryItem $authorizedItem */
-        $authorizedItem = $history->collection()->authorizedItems()->first();
-
-        if (!$authorizedItem) {
-            return;
-        }
+        $authorizedItem = $history->collection()->authorizedItem();
 
         if ($refundedOnShop->getValue() < $authorizedItem->getCancelledAmount()->getValue()) {
             $this->orderService->cancelOrder(
@@ -217,7 +217,7 @@ class WebhookService
     {
         $chargedOnShop = $this->orderService->getChargeAmountForOrder($history->getOrderId());
 
-        if ($chargedOnShop < $history->getChargedAmount()->getValue()) {
+        if ($chargedOnShop->getValue() < $history->getChargedAmount()->getValue()) {
             $this->orderService->chargeOrder(
                 $history->getOrderId(),
                 $history->getChargedAmount()->minus($chargedOnShop)

@@ -17,6 +17,11 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
      */
     private ?TransactionHistory $transactionHistory = null;
 
+    /** @var array  */
+    private array $callHistory = [];
+
+    private int $timeSaved = 0;
+
     /**
      * @param string $orderId
      *
@@ -34,6 +39,18 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
      */
     public function saveTransactionHistory(TransactionHistory $transactionHistory): void
     {
+        $this->callHistory['saveTransactionHistory'] = ['transactionId' => $transactionHistory->getPaymentId(), 'count' => ++$this->timeSaved];
+
         $this->transactionHistory = $transactionHistory;
+    }
+
+    /**
+     * @param string $methodName
+     *
+     * @return array
+     */
+    public function getCallHistory(string $methodName): array
+    {
+        return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
     }
 }

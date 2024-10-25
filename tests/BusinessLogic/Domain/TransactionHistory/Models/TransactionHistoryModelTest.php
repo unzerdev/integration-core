@@ -7,6 +7,8 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\AuthorizedItemNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\HistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
@@ -464,5 +466,78 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         // assert
         self::assertFalse($isEqual);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetAuthorizedItem(): void
+    {
+        // arrange
+
+        $authorizedItem = new AuthorizeHistoryItem('id1', 'type1', Amount::fromFloat(1, Currency::getDefault()),
+            'status1',
+            Amount::fromFloat(1, Currency::getDefault()));
+
+        $items = [
+            $authorizedItem,
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3')
+        ];
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null,
+            $items
+        );
+
+        // act
+        $item = $transactionHistory->collection()->authorizedItem();
+
+        // assert
+        self::assertEquals($item, $authorizedItem);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetAuthorizedItemNoItem(): void
+    {
+        // arrange
+
+        $items = [
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3')
+        ];
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null,
+            $items
+        );
+        $this->expectException(AuthorizedItemNotFoundException::class);
+
+        // act
+        $transactionHistory->collection()->authorizedItem();
+
+        // assert
     }
 }
