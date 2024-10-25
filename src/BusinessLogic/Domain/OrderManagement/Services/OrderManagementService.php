@@ -159,16 +159,16 @@ class OrderManagementService
      */
     private function validateTransactionHistory(TransactionHistory $transactionHistory): void
     {
-        if (!$transactionHistory->getChargedAmount() ||
-            !$transactionHistory->getCancelledAmount() ||
-            !$transactionHistory->getTotalAmount() ||
-            !$transactionHistory->getRemainingAmount()) {
-            throw new InvalidTransactionHistory(
-                new TranslatableLabel(
-                    "Invalid amount for transaction history for orderID:{$transactionHistory->getOrderId()}.",
-                    'transactionHistory.invalidAmount')
-            );
-        }
+//        if (!$transactionHistory->getChargedAmount() ||
+//            !$transactionHistory->getCancelledAmount() ||
+//            !$transactionHistory->getTotalAmount() ||
+//            !$transactionHistory->getRemainingAmount()) {
+//            throw new InvalidTransactionHistory(
+//                new TranslatableLabel(
+//                    "Invalid amount for transaction history for orderID:{$transactionHistory->getOrderId()}.",
+//                    'transactionHistory.invalidAmount')
+//            );
+//        }
     }
 
     /**
