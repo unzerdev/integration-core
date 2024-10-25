@@ -88,6 +88,15 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param $webhook
+     *
+     * @return void
+     */
+    public function deleteWebhook($webhook)
+    {
+    }
+
+    /**
      * @return array
      */
     public function fetchAllWebhooks(): array

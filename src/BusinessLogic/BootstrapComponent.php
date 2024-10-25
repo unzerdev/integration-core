@@ -113,9 +113,7 @@ class BootstrapComponent extends BaseBootstrapComponent
             DisconnectService::class,
             new SingleInstance(static function () {
                 return new DisconnectService(
-                    ServiceRegister::getService(UnzerFactory::class),
-                    ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                    ServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    ServiceRegister::getService(ConnectionService::class),
                     ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
                     ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),

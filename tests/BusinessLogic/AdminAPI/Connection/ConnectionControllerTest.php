@@ -27,6 +27,8 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\TransactionTypes\Charge;
+use UnzerSDK\Unzer;
 
 /**
  * Class ConnectionControllerTest.
@@ -75,6 +77,22 @@ class ConnectionControllerTest extends BaseTestCase
      */
     public function testSuccessfulLiveConnection(): void
     {
+
+        //$unzer = new Unzer('s-priv-2a109x2I6C7ZEAqNH9enriXSOPCcgpDX');
+
+      //  $i = $unzer->chargeAuthorization('s-pay-248', 10);
+//        $i = $unzer->chargeAuthorization('s-pay-56', 10);
+
+       // $u = $unzer->cancelChargeById('s-pay-56', 's-chg-4', 5);
+       // $u = $unzer->cancelAuthorizationByPayment('s-pay-189');
+
+
+
+
+//        foreach ($u->getCharges() as $charge) {
+//
+//            $u = 1;
+//        }
         // Arrange
         $connectionRequest = new ConnectionRequest('live', 'pKey', 'privKey');
 

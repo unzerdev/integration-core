@@ -146,9 +146,7 @@ class BaseTestCase extends TestCase
             },
             DisconnectService::class => static function () {
                 return new DisconnectService(
-                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
-                    TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                    TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    TestServiceRegister::getService(ConnectionService::class),
                     TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
                     TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),

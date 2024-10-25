@@ -126,11 +126,37 @@ class ConnectionService
         }
 
         $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
-        $unzer->deleteAllWebhooks();
-        $this->webhookDataRepository->deleteWebhookData();
+        $this->deleteWebhooks();
         $this->registerWebhooks($unzer, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
 
         return $this->getWebhookData();
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function deleteWebhooks(): void
+    {
+        if (!($webhookData = $this->getWebhookData())) {
+            return;
+        }
+
+        foreach ($webhookData->getIds() as $webhookId) {
+            $this->unzerFactory->makeUnzerAPI()->deleteWebhook($webhookId);
+        }
+
+        $this->webhookDataRepository->deleteWebhookData();
+    }
+
+    /**
+     * @return void
+     */
+    public function deleteConnectionSettings(): void
+    {
+        $this->connectionSettingsRepository->deleteConnectionSettings();
     }
 
     /**
@@ -175,7 +201,7 @@ class ConnectionService
         $webhookUrl = $this->webhookUrlService->getWebhookUrl();
         $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, $events);
 
-        if(!empty($webhooks)){
+        if (!empty($webhooks)) {
             $webhookData = WebhookData::fromBatch($webhooks);
             $this->saveWebhookData($webhookData);
         }
@@ -190,7 +216,7 @@ class ConnectionService
     {
         $existingData = $this->webhookDataRepository->getWebhookData();
 
-        if(!$existingData) {
+        if (!$existingData) {
             $this->webhookDataRepository->setWebhookData($webhookData);
 
             return;
@@ -239,6 +265,7 @@ class ConnectionService
     /**
      * @param string $privateKey
      * @param Mode $mode
+     *
      * @return void
      *
      * @throws PrivateKeyInvalidException
@@ -270,6 +297,7 @@ class ConnectionService
     /**
      * @param string $publicKey
      * @param Mode $mode
+     *
      * @return void
      *
      * @throws PublicKeyInvalidException

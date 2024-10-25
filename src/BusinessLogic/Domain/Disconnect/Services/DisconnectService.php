@@ -3,13 +3,11 @@
 namespace Unzer\Core\BusinessLogic\Domain\Disconnect\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
-use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -21,19 +19,9 @@ use UnzerSDK\Exceptions\UnzerApiException;
 class DisconnectService
 {
     /**
-     * @var UnzerFactory
+     * @var ConnectionService
      */
-    private UnzerFactory $unzerFactory;
-
-    /**
-     * @var ConnectionSettingsRepositoryInterface
-     */
-    private ConnectionSettingsRepositoryInterface $connectionSettingsRepository;
-
-    /**
-     * @var WebhookDataRepositoryInterface
-     */
-    private WebhookDataRepositoryInterface $webhookDataRepository;
+    private ConnectionService $connectionService;
 
     /**
      * @var PaymentMethodConfigRepositoryInterface
@@ -56,26 +44,20 @@ class DisconnectService
     private TransactionHistoryRepositoryInterface $transactionHistoryRepository;
 
     /**
-     * @param UnzerFactory $unzerFactory
-     * @param ConnectionSettingsRepositoryInterface $connectionSettingsRepository
-     * @param WebhookDataRepositoryInterface $webhookDataRepository
+     * @param ConnectionService $connectionService
      * @param PaymentMethodConfigRepositoryInterface $paymentMethodConfigRepository
      * @param PaymentPageSettingsRepositoryInterface $paymentPageSettingsRepository
      * @param PaymentStatusMapRepositoryInterface $paymentStatusMapRepository
      * @param TransactionHistoryRepositoryInterface $transactionHistoryRepository
      */
     public function __construct(
-        UnzerFactory $unzerFactory,
-        ConnectionSettingsRepositoryInterface $connectionSettingsRepository,
-        WebhookDataRepositoryInterface $webhookDataRepository,
+        ConnectionService $connectionService,
         PaymentMethodConfigRepositoryInterface $paymentMethodConfigRepository,
         PaymentPageSettingsRepositoryInterface $paymentPageSettingsRepository,
         PaymentStatusMapRepositoryInterface $paymentStatusMapRepository,
         TransactionHistoryRepositoryInterface $transactionHistoryRepository
     ) {
-        $this->unzerFactory = $unzerFactory;
-        $this->connectionSettingsRepository = $connectionSettingsRepository;
-        $this->webhookDataRepository = $webhookDataRepository;
+        $this->connectionService = $connectionService;
         $this->paymentMethodConfigRepository = $paymentMethodConfigRepository;
         $this->paymentPageSettingsRepository = $paymentPageSettingsRepository;
         $this->paymentStatusMapRepository = $paymentStatusMapRepository;
@@ -91,12 +73,11 @@ class DisconnectService
      */
     public function disconnect(): void
     {
-        $this->unzerFactory->makeUnzerAPI()->deleteAllWebhooks();
-        $this->webhookDataRepository->deleteWebhookData();
-        $this->connectionSettingsRepository->deleteConnectionSettings();
+        $this->connectionService->deleteWebhooks();
         $this->paymentPageSettingsRepository->deletePaymentPageSettings();
         $this->paymentStatusMapRepository->deletePaymentStatusMapEntity();
         $this->paymentMethodConfigRepository->deletePaymentConfigEntities();
         $this->transactionHistoryRepository->deleteTransactionHistoryEntities();
+        $this->connectionService->deleteConnectionSettings();
     }
 }

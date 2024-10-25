@@ -511,9 +511,11 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $settings->setStoreId('1');
         $this->repository->save($settings);
         $webhook1 = new Webhook();
+        $webhook1->setId('1');
         $webhook1->setUrl('https://test.com');
         $webhook1->setEvent(WebhookEvents::PAYMENT);
         $webhook2 = new Webhook();
+        $webhook2->setId('2');
         $webhook2->setUrl('https://test.com');
         $webhook2->setEvent(WebhookEvents::CHARGE);
         $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
