@@ -2,6 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces;
 
+use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
+
 /**
  * Interface PaymentStatusMapRepositoryInterface.
  *
@@ -22,4 +24,11 @@ interface PaymentStatusMapRepositoryInterface
      * @return void
      */
     public function setPaymentStatusMap(array $paymentStatusMap): void;
+
+    /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deletePaymentStatusMapEntity(): void;
 }

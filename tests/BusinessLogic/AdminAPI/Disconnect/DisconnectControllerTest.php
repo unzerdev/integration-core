@@ -5,6 +5,10 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Disconnect;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -39,6 +43,10 @@ class DisconnectControllerTest extends BaseTestCase
             (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
             TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+            TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+            TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+            TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
         );
 
         TestServiceRegister::registerService(

@@ -233,4 +233,48 @@ class PaymentStatusMapRepositoryTest extends BaseTestCase
         $savedEntity = $this->repository->select();
         self::assertCount(2, $savedEntity);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testDeletePaymentStatusMapExists(): void
+    {
+        // arrange
+        $map = [
+            PaymentStatus::PAID => '1',
+            PaymentStatus::UNPAID => '2',
+            PaymentStatus::FULL_REFUND => '3',
+            PaymentStatus::CANCELLED => '4',
+            PaymentStatus::CHARGEBACK => '5',
+            PaymentStatus::COLLECTION => '6',
+            PaymentStatus::PARTIAL_REFUND => '7',
+            PaymentStatus::DECLINED => '8'
+        ];
+
+        $settingsEntity = new PaymentStatusMap();
+        $settingsEntity->setPaymentStatusMap($map);
+        $settingsEntity->setStoreId('1');
+        $this->repository->save($settingsEntity);
+
+        // act
+        StoreContext::doWithStore('1', [$this->paymentStatusMapRepository, 'deletePaymentStatusMapEntity']);
+
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertCount(0,$savedEntity);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDeleteSettingsNotExists(): void
+    {
+        // act
+        StoreContext::doWithStore('1', [$this->paymentStatusMapRepository, 'deletePaymentStatusMapEntity']);
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertCount(0,$savedEntity);
+    }
 }

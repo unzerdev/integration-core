@@ -73,6 +73,22 @@ class PaymentStatusMapRepository implements PaymentStatusMapRepositoryInterface
     }
 
     /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deletePaymentStatusMapEntity(): void
+    {
+        $paymentStatusMapEntity = $this->getPaymentStatusMapEntity();
+
+        if (!$paymentStatusMapEntity) {
+            return;
+        }
+
+        $this->repository->delete($paymentStatusMapEntity);
+    }
+
+    /**
      * @return PaymentStatusMap|null
      *
      * @throws QueryFilterInvalidParamException

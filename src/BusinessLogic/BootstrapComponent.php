@@ -108,7 +108,11 @@ class BootstrapComponent extends BaseBootstrapComponent
                 return new DisconnectService(
                     $unzerFactory,
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                    ServiceRegister::getService(WebhookDataRepositoryInterface::class)
+                    ServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                    ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+                    ServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
                 );
             })
         );

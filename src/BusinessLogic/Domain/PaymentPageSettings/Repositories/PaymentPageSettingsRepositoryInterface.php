@@ -34,5 +34,4 @@ interface PaymentPageSettingsRepositoryInterface
      *
      */
     public function deletePaymentPageSettings(): void;
-
 }

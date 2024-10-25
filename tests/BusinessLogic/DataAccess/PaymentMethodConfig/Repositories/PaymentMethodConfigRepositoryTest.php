@@ -327,4 +327,36 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $savedEntity = $this->repository->select();
         self::assertEquals($newConfig, $savedEntity[0]->getPaymentMethodConfig());
     }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeletePaymentConfigEntities() : void
+    {
+        // arrange
+        $config = new PaymentMethodConfig('eps', true, BookingMethod::charge());
+
+        $configEntity = new PaymentMethodConfigEntity();
+        $configEntity->setPaymentMethodConfig($config);
+        $configEntity->setType('eps');
+        $configEntity->setStoreId('1');
+        $this->repository->save($configEntity);
+
+        $newConfig = new PaymentMethodConfig('eps', false, BookingMethod::charge());
+
+        $configEntity = new PaymentMethodConfigEntity();
+        $configEntity->setPaymentMethodConfig($newConfig);
+        $configEntity->setType('eps');
+        $configEntity->setStoreId('1');
+        $this->repository->save($configEntity);
+
+        // act
+        StoreContext::doWithStore('1', [$this->paymentMethodConfigRepository, 'deletePaymentConfigEntities']);
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertCount(0, $savedEntity);
+    }
 }

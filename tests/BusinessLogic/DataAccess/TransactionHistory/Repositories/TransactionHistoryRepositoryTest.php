@@ -43,7 +43,9 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repository = TestRepositoryRegistry::getRepository(TransactionHistoryEntity::getClassName());
-        $this->transactionHistoryRepository = TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class);
+        $this->transactionHistoryRepository = TestServiceRegister::getService(
+            TransactionHistoryRepositoryInterface::class
+        );
     }
 
     /**
@@ -198,7 +200,8 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         );
 
         // act
-        StoreContext::doWithStore('1',
+        StoreContext::doWithStore(
+            '1',
             [$this->transactionHistoryRepository, 'setTransactionHistory'],
             [$transactionHistory]
         );
@@ -248,7 +251,8 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         );
 
         // act
-        StoreContext::doWithStore('1',
+        StoreContext::doWithStore(
+            '1',
             [$this->transactionHistoryRepository, 'setTransactionHistory'],
             [$newTransactionHistory]
         );
@@ -256,5 +260,54 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // assert
         $savedEntity = $this->repository->select();
         self::assertEquals($newTransactionHistory, $savedEntity[0]->getTransactionHistory());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeleteTransactionHistoryEntities(): void
+    {
+        $transactionHistory1 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $transactionHistory2 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory1);
+        $configEntity->setOrderId('order1');
+        $configEntity->setStoreId('1');
+        $this->repository->save($configEntity);
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory2);
+        $configEntity->setOrderId('order2');
+        $configEntity->setStoreId('1');
+        $this->repository->save($configEntity);
+
+        // act
+        StoreContext::doWithStore('1', [$this->transactionHistoryRepository, 'deleteTransactionHistoryEntities']);
+
+        // assert
+        $savedEntity = $this->repository->select();
+        self::assertCount(0, $savedEntity);
     }
 }

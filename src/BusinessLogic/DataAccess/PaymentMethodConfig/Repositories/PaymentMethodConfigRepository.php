@@ -128,6 +128,20 @@ class PaymentMethodConfigRepository implements PaymentMethodConfigRepositoryInte
     }
 
     /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deletePaymentConfigEntities(): void
+    {
+        $paymentConfigEntities = $this->getPaymentConfigEntities();
+
+        foreach ($paymentConfigEntities as $paymentConfigEntity) {
+            $this->repository->delete($paymentConfigEntity);
+        }
+    }
+
+    /**
      * @return PaymentMethodConfigEntity[]
      *
      * @throws QueryFilterInvalidParamException

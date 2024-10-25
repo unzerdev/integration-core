@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces;
 
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
+use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 
 /**
  * Interface TransactionHistoryRepositoryInterface.
@@ -24,4 +25,11 @@ interface TransactionHistoryRepositoryInterface
      * @return TransactionHistory|null
      */
     public function getTransactionHistoryByOrderId(string $orderId): ?TransactionHistory;
+
+    /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deleteTransactionHistoryEntities(): void;
 }

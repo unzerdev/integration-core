@@ -144,6 +144,10 @@ class BaseTestCase extends TestCase
                     (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+                    TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+                    TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+                    TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
                 );
             },
             ConnectionController::class => function () {

@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 
 /**
  * Interface PaymentMethodConfigRepositoryInterface.
@@ -36,4 +37,12 @@ interface PaymentMethodConfigRepositoryInterface
      * @return ?PaymentMethodConfig
      */
     public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig;
+
+    /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deletePaymentConfigEntities(): void;
+
 }

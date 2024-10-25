@@ -78,6 +78,33 @@ class TransactionHistoryRepository implements TransactionHistoryRepositoryInterf
     }
 
     /**
+     * @return void
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function deleteTransactionHistoryEntities(): void
+    {
+        $transactionHistoryEntities = $this->getTransactionHistoryEntities();
+
+        foreach ($transactionHistoryEntities as $transactionHistoryEntity) {
+            $this->repository->delete($transactionHistoryEntity);
+        }
+    }
+
+    /**
+     * @return TransactionHistoryEntity[]
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    protected function getTransactionHistoryEntities(): array
+    {
+        $queryFilter = new QueryFilter();
+        $queryFilter->where('storeId', Operators::EQUALS, $this->storeContext->getStoreId());
+
+        return $this->repository->select($queryFilter);
+    }
+
+    /**
      * @param string $orderId
      *
      * @return ?TransactionHistoryEntity
