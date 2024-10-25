@@ -105,9 +105,11 @@ class UnzerMock extends Unzer
         $this->webhooks = $webhooks;
     }
 
-    public function setPayPageData(array $payPageData)
+    public function setPayPageData(array $payPageData): UnzerMock
     {
         $this->payPageData = $payPageData;
+
+        return $this;
     }
 
     public function initPayPageAuthorize(
@@ -237,7 +239,7 @@ class UnzerMock extends Unzer
      */
     public function fetchPayment($payment): Payment
     {
-        $this->callHistory['fetchPayment'] = ['paymentId' => $payment];
+        $this->callHistory['fetchPayment'][] = ['paymentId' => $payment];
 
         return $this->payment;
     }

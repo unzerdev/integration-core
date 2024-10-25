@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller;
 
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 
 /**
@@ -34,5 +35,10 @@ class CheckoutPaymentPageController
                 $request->getReturnUrl()
             )
         );
+    }
+
+    public function getPaymentState(string $orderId): PaymentStateResponse
+    {
+        return new PaymentStateResponse($this->paymentPageService->getPaymentState($orderId));
     }
 }

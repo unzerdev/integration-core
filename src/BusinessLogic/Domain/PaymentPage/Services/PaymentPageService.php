@@ -7,6 +7,8 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotF
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
@@ -80,6 +82,20 @@ class PaymentPageService
         );
 
         return $payPageResponse;
+    }
+
+    public function getPaymentState(string $orderId): PaymentState
+    {
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+        if (!$transactionHistory) {
+            throw new TransactionHistoryNotFoundException(new TranslatableLabel(
+                "Transaction history for orderId: $orderId not found.", 'transactionHistory.notFound'
+            ));
+        }
+
+        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
+
+        return new PaymentState($payment->getState(), $payment->getStateName());
     }
 
     private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
