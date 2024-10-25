@@ -43,6 +43,9 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\ExcludeTypesProcessor;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
@@ -75,6 +78,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         parent::init();
 
         static::initControllers();
+        static::initPaymentPageProcessors();
     }
 
     /**
@@ -84,16 +88,19 @@ class BootstrapComponent extends BaseBootstrapComponent
     {
         parent::initServices();
 
-        $unzerFactory = new UnzerFactory();
+        ServiceRegister::registerService(UnzerFactory::class, new SingleInstance(static function () {
+            return new UnzerFactory();
+        }));
+
         ServiceRegister::registerService(StoreContext::class, static function () {
             return StoreContext::getInstance();
         });
 
         ServiceRegister::registerService(
             ConnectionService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new ConnectionService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class),
                     ServiceRegister::getService(EncryptorInterface::class),
@@ -104,9 +111,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             DisconnectService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new DisconnectService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
                     ServiceRegister::getService(WebhookDataRepositoryInterface::class),
                     ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
@@ -128,20 +135,20 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             PaymentPageSettingsService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new PaymentPageSettingsService(
                     ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     ServiceRegister::getService(UploaderService::class),
-                    $unzerFactory
+                    ServiceRegister::getService(UnzerFactory::class)
                 );
             })
         );
 
         ServiceRegister::registerService(
             PaymentMethodService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new PaymentMethodService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
                     ServiceRegister::getService(CurrencyServiceInterface::class)
                 );
@@ -150,18 +157,19 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             PaymentPageService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new PaymentPageService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(PaymentMethodService::class),
-                    ServiceRegister::getService(TransactionHistoryService::class)
+                    ServiceRegister::getService(TransactionHistoryService::class),
+                    ServiceRegister::getService(PaymentPageFactory::class)
                 );
             })
         );
 
         ServiceRegister::registerService(
             PaymentStatusMapService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new PaymentStatusMapService(
                     ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
                     ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
@@ -180,9 +188,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             OrderManagementService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new OrderManagementService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(TransactionHistoryService::class)
                 );
             })
@@ -190,9 +198,9 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         ServiceRegister::registerService(
             WebhookService::class,
-            new SingleInstance(static function () use ($unzerFactory) {
+            new SingleInstance(static function () {
                 return new WebhookService(
-                    $unzerFactory,
+                    ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
                     ServiceRegister::getService(OrderServiceInterface::class),
                     ServiceRegister::getService(PaymentStatusMapService::class)
@@ -382,5 +390,22 @@ class BootstrapComponent extends BaseBootstrapComponent
                 return new WebhookHandlerController(ServiceRegister::getService(WebhookService::class));
             })
         );
+    }
+
+    private static function initPaymentPageProcessors(): void
+    {
+        ServiceRegister::registerService(
+            PaymentPageFactory::class,
+            new SingleInstance(static function () {
+                return new PaymentPageFactory();
+            })
+        );
+
+        PaymentPageProcessorsRegistry::registerGlobal(ExcludeTypesProcessor::class);
+        ServiceRegister::registerService(ExcludeTypesProcessor::class, new SingleInstance(static function () {
+            return new ExcludeTypesProcessor(
+                ServiceRegister::getService(UnzerFactory::class)
+            );
+        }));
     }
 }

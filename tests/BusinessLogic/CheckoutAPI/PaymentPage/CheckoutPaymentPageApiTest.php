@@ -14,10 +14,12 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfig
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
@@ -51,6 +53,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
             new CurrencyServiceMock()
         );
 
+        TestServiceRegister::registerService(UnzerFactory::class, function () {
+            return $this->unzerFactory;
+        });
         TestServiceRegister::registerService(PaymentMethodService::class, function () {
             return $this->paymentMethodService;
         });
@@ -58,7 +63,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
             return new PaymentPageService(
                 $this->unzerFactory,
                 TestServiceRegister::getService(PaymentMethodService::class),
-                TestServiceRegister::getService(TransactionHistoryService::class)
+                TestServiceRegister::getService(TransactionHistoryService::class),
+                TestServiceRegister::getService(PaymentPageFactory::class)
             );
         });
 

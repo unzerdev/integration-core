@@ -5,6 +5,8 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 
 /**
@@ -28,12 +30,13 @@ class CheckoutPaymentPageController
     public function create(PaymentPageCreateRequest $request): PaymentPageResponse
     {
         return new PaymentPageResponse(
-            $this->paymentPageService->create(
+            $this->paymentPageService->create(new PaymentPageCreateContext(
                 $request->getPaymentMethodType(),
                 $request->getOrderId(),
                 $request->getAmount(),
-                $request->getReturnUrl()
-            )
+                $request->getReturnUrl(),
+                new DataBag($request->getSessionData())
+            ))
         );
     }
 

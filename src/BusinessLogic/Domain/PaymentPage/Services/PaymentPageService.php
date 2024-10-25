@@ -7,6 +7,8 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotF
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -26,21 +28,25 @@ class PaymentPageService
     private UnzerFactory $unzerFactory;
     private PaymentMethodService $paymentMethodService;
     private TransactionHistoryService $transactionHistoryService;
+    private PaymentPageFactory $paymentPageFactory;
 
     /**
      * PaymentPageService constructor.
      * @param UnzerFactory $unzerFactory
      * @param PaymentMethodService $paymentMethodService
      * @param TransactionHistoryService $transactionHistoryService
+     * @param PaymentPageFactory $paymentPageFactory
      */
     public function __construct(
         UnzerFactory $unzerFactory,
         PaymentMethodService $paymentMethodService,
-        TransactionHistoryService $transactionHistoryService
+        TransactionHistoryService $transactionHistoryService,
+        PaymentPageFactory $paymentPageFactory
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->paymentMethodService = $paymentMethodService;
         $this->transactionHistoryService = $transactionHistoryService;
+        $this->paymentPageFactory = $paymentPageFactory;
     }
 
     /**
@@ -48,37 +54,28 @@ class PaymentPageService
      * @throws PaymentConfigNotFoundException
      * @throws UnzerApiException
      */
-    public function create(string $paymentMethodType, string $orderId, Amount $amount, string $returnUrl): Paypage
+    public function create(PaymentPageCreateContext $context): Paypage
     {
-        $paymentMethodSettings = $this->paymentMethodService->getPaymentMethodConfigByType($paymentMethodType);
+        $paymentMethodSettings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
         if (!$paymentMethodSettings || !$paymentMethodSettings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
                 new TranslatableLabel(
-                    "Enabled payment method config for type: $paymentMethodType not found",
+                    "Enabled payment method config for type: {$context->getPaymentMethodType()} not found",
                     'paymentMethod.configNotFound'
                 ),
             );
         }
 
-        $unzerApi = $this->unzerFactory->makeUnzerAPI();
-
-        $payPageRequest = (new Paypage(
-            $amount->getPriceInCurrencyUnits(),
-            $amount->getCurrency()->getIsoCode(),
-            $returnUrl
-        ))->setExcludeTypes($this->getExcludePaymentTypesList(
-            $unzerApi->fetchKeypair()->getAvailablePaymentTypes(),
-            $paymentMethodType
-        ))->setOrderId($orderId);
+        $payPageRequest = $this->paymentPageFactory->crate($context);
 
         if ($paymentMethodSettings->getBookingMethod()->equal(BookingMethod::authorize())) {
-            $payPageResponse = $unzerApi->initPayPageAuthorize($payPageRequest);
+            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageAuthorize($payPageRequest);
         } else {
-            $payPageResponse = $unzerApi->initPayPageCharge($payPageRequest);
+            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageCharge($payPageRequest);
         }
 
         $this->transactionHistoryService->saveTransactionHistory(
-            new TransactionHistory($paymentMethodType, $payPageResponse->getPaymentId(), $orderId)
+            new TransactionHistory($context->getPaymentMethodType(), $payPageResponse->getPaymentId(), $context->getOrderId())
         );
 
         return $payPageResponse;
@@ -96,15 +93,5 @@ class PaymentPageService
         $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
 
         return new PaymentState($payment->getState(), $payment->getStateName());
-    }
-
-    private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
-    {
-        return array_values(array_filter(
-            array_unique($availablePaymentTypes),
-            static function ($paymentMethodType) use ($selectedPaymentType) {
-                return $paymentMethodType !== $selectedPaymentType;
-            }
-        ));
     }
 }

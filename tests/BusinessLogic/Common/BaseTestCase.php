@@ -13,6 +13,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPage
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
+use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
@@ -39,6 +40,9 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\ExcludeTypesProcessor;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
@@ -54,6 +58,7 @@ use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use Unzer\Core\Infrastructure\Logger\Logger;
 use Unzer\Core\Infrastructure\Logger\LoggerConfiguration;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
+use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
@@ -215,11 +220,20 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(PaymentMethodService::class)
                 );
             },
+            PaymentPageFactory::class => static function () {
+                return new PaymentPageFactory();
+            },
+            ExcludeTypesProcessor::class => static function () {
+                return new ExcludeTypesProcessor(
+                    TestServiceRegister::getService(UnzerFactory::class)
+                );
+            },
             PaymentPageService::class => static function () {
                 return new PaymentPageService(
                     (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(PaymentMethodService::class),
-                    TestServiceRegister::getService(TransactionHistoryService::class)
+                    TestServiceRegister::getService(TransactionHistoryService::class),
+                    TestServiceRegister::getService(PaymentPageFactory::class)
                 );
             },
             CheckoutPaymentPageController::class => static function () {
@@ -265,6 +279,8 @@ class BaseTestCase extends TestCase
                 );
             },
         ]);
+
+        PaymentPageProcessorsRegistry::registerGlobal(ExcludeTypesProcessor::class);
 
         TestServiceRegister::registerService(
             TimeProvider::class,

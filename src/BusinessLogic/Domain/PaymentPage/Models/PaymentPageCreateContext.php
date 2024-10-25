@@ -1,37 +1,43 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
+namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 
 /**
- * Class PaymentPageCreateRequest
+ * Class PaymentPageCreateContext
  *
- * @package Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request
+ * @package Unzer\Core\BusinessLogic\Domain\PaymentPage\Models
  */
-class PaymentPageCreateRequest
+class PaymentPageCreateContext
 {
     private string $paymentMethodType;
     private string $orderId;
     private Amount $amount;
     private string $returnUrl;
-    private array $sessionData;
+    private DataBag $checkoutSession;
 
     /**
-     * PaymentPageCreateRequest constructor.
+     * PaymentPageCreateContext constructor.
      * @param string $paymentMethodType
      * @param string $orderId
      * @param Amount $amount
      * @param string $returnUrl
-     * @param array $sessionData
+     * @param DataBag $checkoutSession
      */
-    public function __construct(string $paymentMethodType, string $orderId, Amount $amount, string $returnUrl, array $sessionData = [])
-    {
+    public function __construct(
+        string $paymentMethodType,
+        string $orderId,
+        Amount $amount,
+        string $returnUrl,
+        DataBag $checkoutSession
+    ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
         $this->amount = $amount;
         $this->returnUrl = $returnUrl;
-        $this->sessionData = $sessionData;
+        $this->checkoutSession = $checkoutSession;
     }
 
     public function getPaymentMethodType(): string
@@ -54,8 +60,8 @@ class PaymentPageCreateRequest
         return $this->returnUrl;
     }
 
-    public function getSessionData(): array
+    public function getCheckoutSession(): DataBag
     {
-        return $this->sessionData;
+        return $this->checkoutSession;
     }
 }
