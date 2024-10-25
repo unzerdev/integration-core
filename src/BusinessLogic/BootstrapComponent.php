@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Controller\OrderManagementController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
@@ -31,6 +32,7 @@ use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
@@ -38,6 +40,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
@@ -49,7 +52,9 @@ use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
 use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
 use Unzer\Core\Infrastructure\ORM\RepositoryRegistry;
 use Unzer\Core\Infrastructure\ServiceRegister;
@@ -165,6 +170,28 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new TransactionHistoryService(
                     ServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            OrderManagementService::class,
+            new SingleInstance(static function () use ($unzerFactory) {
+                return new OrderManagementService(
+                    $unzerFactory,
+                    ServiceRegister::getService(TransactionHistoryService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            WebhookService::class,
+            new SingleInstance(static function () use ($unzerFactory) {
+                return new WebhookService(
+                    $unzerFactory,
+                    ServiceRegister::getService(TransactionHistoryService::class),
+                    ServiceRegister::getService(OrderServiceInterface::class),
+                    ServiceRegister::getService(PaymentStatusMapService::class)
                 );
             })
         );
@@ -335,6 +362,20 @@ class BootstrapComponent extends BaseBootstrapComponent
             PaymentStatusMapController::class,
             new SingleInstance(static function () {
                 return new PaymentStatusMapController(ServiceRegister::getService(PaymentStatusMapService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            OrderManagementController::class,
+            new SingleInstance(static function () {
+                return new OrderManagementController(ServiceRegister::getService(OrderManagementService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            WebhookHandlerController::class,
+            new SingleInstance(static function () {
+                return new WebhookHandlerController(ServiceRegister::getService(WebhookService::class));
             })
         );
     }

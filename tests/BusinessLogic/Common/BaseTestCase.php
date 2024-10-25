@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller\ConnectionController
 use Unzer\Core\BusinessLogic\AdminAPI\Country\Controller\CountryController;
 use Unzer\Core\BusinessLogic\AdminAPI\Disconnect\Controller\DisconnectController;
 use Unzer\Core\BusinessLogic\AdminAPI\Language\Controller\LanguageController;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Controller\OrderManagementController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
@@ -35,6 +36,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
@@ -245,6 +247,17 @@ class BaseTestCase extends TestCase
             TransactionHistoryService::class => function () {
                 return new TransactionHistoryService(
                     TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+                );
+            },
+            OrderManagementService::class => static function () {
+                return new OrderManagementService(
+                    (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
+                    TestServiceRegister::getService(TransactionHistoryService::class)
+                );
+            },
+            OrderManagementController::class => static function () {
+                return new OrderManagementController(
+                    TestServiceRegister::getService(OrderManagementService::class)
                 );
             },
         ]);

@@ -166,29 +166,4 @@ class PaymentMethodConfig extends Entity
     {
         $this->type = $type;
     }
-
-    /**
-     * @param ?Amount $amount
-     *
-     * @return array
-     */
-    private function amountToArray(?Amount $amount): array
-    {
-        return $amount ? [
-            'value' => $amount->getValue(),
-            'currency' => $amount->getCurrency()->getIsoCode()
-        ] : [];
-    }
-
-    /**
-     * @param array $amount
-     *
-     * @return Amount
-     *
-     * @throws InvalidCurrencyCode
-     */
-    private function amountFromArray(array $amount): ?Amount
-    {
-        return !empty($amount) ? Amount::fromInt($amount['value'], Currency::fromIsoCode($amount['currency'])) : null;
-    }
 }

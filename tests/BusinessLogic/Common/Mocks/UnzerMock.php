@@ -6,9 +6,15 @@ use UnzerSDK\Resources\Basket;
 use UnzerSDK\Resources\Customer;
 use UnzerSDK\Resources\Keypair;
 use UnzerSDK\Resources\Metadata;
+use UnzerSDK\Resources\Payment;
+use UnzerSDK\Resources\PaymentTypes\BasePaymentType;
+use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
 use UnzerSDK\Resources\Webhook;
 use UnzerSDK\Unzer;
+use UnzerSDK\Resources\TransactionTypes\Charge;
+use UnzerSDK\Resources\TransactionTypes\Cancellation;
+use UnzerSDK\Resources\AbstractUnzerResource;
 
 /**
  * Class UnzerMock.
@@ -29,6 +35,14 @@ class UnzerMock extends Unzer
      */
     private array $webhooks = [];
     private ?array $payPageData = [];
+
+    /** @var AbstractUnzerResource|null */
+    private ?AbstractUnzerResource $resource = null;
+
+    /**
+     * @var Payment $payment
+     */
+    private Payment $payment;
 
     public function getMethodCallHistory($methodName)
     {
@@ -101,8 +115,7 @@ class UnzerMock extends Unzer
         Customer $customer = null,
         Basket $basket = null,
         Metadata $metadata = null
-    ): Paypage
-    {
+    ): Paypage {
         $this->callHistory['initPayPageAuthorize'][] = ['paypage' => $paypage];
 
         $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
@@ -118,8 +131,7 @@ class UnzerMock extends Unzer
         Customer $customer = null,
         Basket $basket = null,
         Metadata $metadata = null
-    ): Paypage
-    {
+    ): Paypage {
         $this->callHistory['initPayPageCharge'][] = ['paypage' => $paypage];
 
         $result = new PaypageMock($paypage->getAmount(), $paypage->getCurrency(), $paypage->getReturnUrl());
@@ -128,5 +140,115 @@ class UnzerMock extends Unzer
         $result->setPaymentId($this->payPageData['paymentId'] ?? null);
 
         return $result;
+    }
+
+    /**
+     * @param $payment
+     * @param float|null $amount
+     * @param string|null $orderId
+     * @param string|null $invoiceId
+     *
+     * @return Charge
+     */
+    public function chargeAuthorization(
+        $payment,
+        float $amount = null,
+        string $orderId = null,
+        string $invoiceId = null
+    ): Charge {
+        $this->callHistory['chargeAuthorization'] = ['payment' => $payment, 'amount' => $amount];
+
+        return new Charge();
+    }
+
+    /**
+     * @param $payment
+     * @param float|null $amount
+     *
+     * @return Cancellation
+     */
+    public function cancelAuthorizationByPayment($payment, float $amount = null): Cancellation
+    {
+        $this->callHistory['cancelAuthorizationByPayment'] = ['payment' => $payment, 'amount' => $amount];
+
+        return new Cancellation();
+    }
+
+    /**
+     * @param $payment
+     * @param string $chargeId
+     * @param float|null $amount
+     * @param string|null $reasonCode
+     * @param string|null $referenceText
+     * @param float|null $amountNet
+     * @param float|null $amountVat
+     *
+     * @return Cancellation
+     */
+    public function cancelChargeById(
+        $payment,
+        string $chargeId,
+        float $amount = null,
+        string $reasonCode = null,
+        string $referenceText = null,
+        float $amountNet = null,
+        float $amountVat = null
+    ): Cancellation {
+        $this->callHistory['cancelChargeById'][] = [
+            'payment' => $payment,
+            'chargeId' => $chargeId,
+            'amount' => $amount
+        ];
+
+        return new Cancellation();
+    }
+
+    /**
+     * @param BasePaymentType $paymentType
+     *
+     * @return BasePaymentType
+     */
+    public function createPaymentType(BasePaymentType $paymentType): BasePaymentType
+    {
+        return new Card('123', '03/30');
+    }
+
+    public function fetchResourceFromEvent(string $eventJson = null): AbstractUnzerResource
+    {
+        $this->callHistory['fetchResourceFromEvent'] = ['event' => $eventJson];
+
+        return $this->resource;
+    }
+
+    /**
+     * @param AbstractUnzerResource $resource
+     *
+     * @return void
+     */
+    public function setResourceFromEvent(AbstractUnzerResource $resource): void
+    {
+        $this->resource = $resource;
+    }
+
+    /**
+     * @param $payment
+     *
+     * @return Payment
+     */
+    public function fetchPayment($payment): Payment
+    {
+        $this->callHistory['fetchPayment'] = ['paymentId' => $payment];
+
+        return $this->payment;
+    }
+
+    /**
+     * @param Payment $payment
+     *
+     * @return void
+     */
+    public function setPayment(Payment $payment): void
+    {
+        $this->payment = $payment;
     }
 }

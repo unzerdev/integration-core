@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Entities;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\HistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
@@ -59,6 +60,7 @@ class TransactionHistory extends Entity
             !empty($transactionHistory['chargedAmount']) ? Amount::fromArray($transactionHistory['chargedAmount']) : null,
             !empty($transactionHistory['cancelledAmount']) ? Amount::fromArray($transactionHistory['cancelledAmount']) : null,
             !empty($transactionHistory['remainingAmount']) ? Amount::fromArray($transactionHistory['remainingAmount']) : null,
+            HistoryItem::fromBatchArray($transactionHistory['historyItems'] ?? []),
         );
     }
 
@@ -80,6 +82,7 @@ class TransactionHistory extends Entity
             'chargedAmount' => $this->transactionHistory->getChargedAmount() ? $this->transactionHistory->getChargedAmount()->toArray() : null,
             'cancelledAmount' => $this->transactionHistory->getCancelledAmount() ? $this->transactionHistory->getCancelledAmount()->toArray() : null,
             'remainingAmount' => $this->transactionHistory->getRemainingAmount() ? $this->transactionHistory->getRemainingAmount()->toArray() : null,
+            'historyItems' => $this->transactionHistory->historyItemCollectionToArray()
         ];
 
         return $data;

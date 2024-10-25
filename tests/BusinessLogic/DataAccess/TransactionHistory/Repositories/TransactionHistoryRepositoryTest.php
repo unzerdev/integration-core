@@ -9,6 +9,9 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\HistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
@@ -61,7 +64,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
     /**
      * @throws Exception
      */
-    public function testTransactionHistory(): void
+    public function testGetTransactionHistory(): void
     {
         // arrange
         $transactionHistory = new TransactionHistory(
@@ -72,7 +75,12 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
-            null
+            null,
+            [
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
+                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+            ]
         );
         $configEntity = new TransactionHistoryEntity();
         $configEntity->setTransactionHistory($transactionHistory);
@@ -94,7 +102,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
     /**
      * @throws Exception
      */
-    public function testGetPaymentConfigDifferentStore(): void
+    public function testGetHistoryDifferentStore(): void
     {
         // arrange
         $transactionHistory = new TransactionHistory(
@@ -105,7 +113,12 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
-            null
+            null,
+            [
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
+                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+            ]
         );
         $configEntity = new TransactionHistoryEntity();
         $configEntity->setTransactionHistory($transactionHistory);
@@ -127,7 +140,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
     /**
      * @throws Exception
      */
-    public function testGetPaymentConfigDifferentOrderId(): void
+    public function testGetHistoryDifferentOrderId(): void
     {
         // arrange
         $transactionHistory = new TransactionHistory(
@@ -138,7 +151,12 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
-            null
+            null,
+            [
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
+                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+            ]
         );
         $configEntity = new TransactionHistoryEntity();
         $configEntity->setTransactionHistory($transactionHistory);
@@ -171,7 +189,12 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
-            null
+            null,
+            [
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
+                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+            ]
         );
 
         // act
@@ -199,7 +222,12 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
-            null
+            null,
+            [
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
+                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+            ]
         );
 
         $configEntity = new TransactionHistoryEntity();
