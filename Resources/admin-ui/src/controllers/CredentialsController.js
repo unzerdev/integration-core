@@ -271,11 +271,10 @@
      */
     function saveChanges(modal) {
         Unzer.utilities.showLoader();
-        console.log(values);
 
         Unzer.LoginService.login(values)
             .then(() => {
-                console.log(values);
+                Unzer.utilities.createToasterMessage("general.changesSaved",false);
             })
             .catch((ex) => {
                 Unzer.utilities.createToasterMessage(ex.errorMessage, true);

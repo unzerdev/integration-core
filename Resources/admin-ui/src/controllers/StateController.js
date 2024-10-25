@@ -58,11 +58,11 @@ const activateController = (path, config) => {
  * @param {any?} additionalConfig
  * @param {boolean?} [reload=false]
  */
-const navigate = (to, additionalConfig = {}, reload = false) => {
+const navigate = (to, additionalConfig = {}, reload = false, append = false) => {
   if (reload) {
-    window.location.assign(addOrUpdateQueryParam(to, 'store', Unzer.config.store.storeId));
+    window.location.assign(addOrUpdateQueryParam(`${baseUrl}${to}`, 'store', Unzer.config.store.storeId));
   } else {
-    window.history.pushState(additionalConfig, null, addOrUpdateQueryParam(to, 'store', Unzer.config.store.storeId));
+    window.history.pushState(additionalConfig, null, addOrUpdateQueryParam(`${baseUrl}${to}`, 'store', Unzer.config.store.storeId));
     dispatchEvent(new PopStateEvent('popstate', { state: additionalConfig }));
   }
 };
@@ -89,7 +89,7 @@ const start = () => {
   const handlePageNavigation = (value) => {
     const stores = Unzer.config.stores.filter(x => x.storeId === value.storeId)
     Unzer.config.store = stores[0];
-    
+
     const currentURL = window.location.href;
     const url = new URL(currentURL);
     url.searchParams.delete('store');

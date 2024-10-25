@@ -51,4 +51,5 @@ require('./controllers/CheckoutController');
 require('./controllers/LoginController');
 require('./controllers/CredentialsController');
 require('./controllers/DesignController');
+require('./controllers/Controller');
 
