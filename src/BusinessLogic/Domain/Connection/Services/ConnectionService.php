@@ -82,9 +82,10 @@ class ConnectionService
         $this->validateKeys($connectionSettings);
         $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
         $this->validateKeypair($unzer, $connectionSettings);
-        $unregisteredEvents = $this->getUnregisteredEvents($unzer);
+        $webhookUrl = $this->webhookUrlService->getWebhookUrl();
+        $unregisteredEvents = $this->getUnregisteredEvents($unzer, $webhookUrl);
         if (!empty($unregisteredEvents)) {
-            $this->registerWebhooks($unzer, $unregisteredEvents);
+            $this->registerWebhooks($unzer, $unregisteredEvents, $webhookUrl);
         }
 
         $this->saveConnectionSettings($connectionSettings);
@@ -127,7 +128,11 @@ class ConnectionService
 
         $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
         $this->deleteWebhooks();
-        $this->registerWebhooks($unzer, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
+        $this->registerWebhooks(
+            $unzer,
+            SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS,
+            $this->webhookUrlService->getWebhookUrl()
+        );
 
         return $this->getWebhookData();
     }
@@ -161,21 +166,30 @@ class ConnectionService
 
     /**
      * @param Unzer $unzer
+     * @param string $webhookUrl
      *
      * @return array
      *
      * @throws UnzerApiException
      */
-    private function getUnregisteredEvents(Unzer $unzer): array
+    private function getUnregisteredEvents(Unzer $unzer, string $webhookUrl): array
     {
-        $registeredWebhooks = $unzer->fetchAllWebhooks();
+        $webhooks = [];
+
+        foreach ($unzer->fetchAllWebhooks() as $registeredWebhook) {
+            if ($registeredWebhook->getUrl() === $webhookUrl) {
+                $webhooks[] = $registeredWebhook;
+            }
+        };
+
+
         $supportedEvents = SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS;
-        if (empty($registeredWebhooks)) {
+        if (empty($webhooks)) {
             return $supportedEvents;
         }
 
         $events = [];
-        $registeredEvents = array_map(fn(Webhook $webhook) => $webhook->getEvent(), $registeredWebhooks);
+        $registeredEvents = array_map(fn(Webhook $webhook) => $webhook->getEvent(), $webhooks);
         foreach ($supportedEvents as $supportedEvent) {
             if (in_array($supportedEvent, $registeredEvents)) {
                 continue;
@@ -196,9 +210,8 @@ class ConnectionService
      *
      * @throws UnzerApiException
      */
-    private function registerWebhooks(Unzer $unzer, array $events): void
+    private function registerWebhooks(Unzer $unzer, array $events, string $webhookUrl): void
     {
-        $webhookUrl = $this->webhookUrlService->getWebhookUrl();
         $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, $events);
 
         if (!empty($webhooks)) {
