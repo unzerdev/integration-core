@@ -31,7 +31,7 @@ class WebhookAPI
      *
      * @return WebhookHandlerController
      */
-    public function connection(string $storeId): object
+    public function webhookHandle(string $storeId): object
     {
         return Aspects
             ::run(new ErrorHandlingAspect())
