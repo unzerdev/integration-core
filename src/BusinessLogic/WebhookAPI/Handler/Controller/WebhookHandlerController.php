@@ -7,8 +7,8 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
-use Unzer\Core\BusinessLogic\WebhookAPI\Validation\Request\WebhookHandleRequest;
-use Unzer\Core\BusinessLogic\WebhookAPI\Validation\Response\WebhookHandleResponse;
+use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Request\WebhookHandleRequest;
+use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Response\WebhookHandleResponse;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**

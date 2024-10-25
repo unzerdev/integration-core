@@ -1,6 +1,6 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\WebhookAPI\Validation\Request;
+namespace Unzer\Core\BusinessLogic\WebhookAPI\Handler\Request;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
