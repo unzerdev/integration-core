@@ -90,16 +90,15 @@ class WebhookService
 
         if (!$existingTransactionHistory) {
             throw new TransactionHistoryNotFoundException(
-                new TranslatableLabel("Transaction history for orderId:{$transactionHistory->getOrderId()} not found.",
+                new TranslatableLabel("Transaction history for orderId: {$transactionHistory->getOrderId()} not found.",
                     'transactionHistory.notFound')
             );
         }
 
-        if ($transactionHistory->isEqual($existingTransactionHistory)) {
-            return;
+        if (!$transactionHistory->isEqual($existingTransactionHistory)) {
+            $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
         }
 
-        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
         $this->handleOrderStatusChange($transactionHistory, $webhook);
 
         if ($webhook->getEvent() === WebhookEvents::CHARGE_CANCELED) {
@@ -108,7 +107,7 @@ class WebhookService
             return;
         }
 
-        if ($webhook->getEvent() === WebhookEvents::PAYMENT_CANCELED) {
+        if ($webhook->getEvent() === WebhookEvents::AUTHORIZE_CANCELED) {
             $this->handleCancellation($transactionHistory);
 
             return;
@@ -191,14 +190,15 @@ class WebhookService
      */
     private function handleCancellation(TransactionHistory $history): void
     {
-        $refundedOnShop = $this->orderService->getCancelledAmountForOrder($history->getOrderId());
+        $cancelledOnShop = $this->orderService->getCancelledAmountForOrder($history->getOrderId());
         /** @var ?AuthorizeHistoryItem $authorizedItem */
         $authorizedItem = $history->collection()->authorizedItem();
 
-        if ($authorizedItem && $refundedOnShop->getValue() < $authorizedItem->getCancelledAmount()->getValue()) {
+        if ($authorizedItem && $cancelledOnShop->getValue() < $authorizedItem->getCancelledAmount()->getValue()) {
             $this->orderService->cancelOrder(
                 $history->getOrderId(),
-                $history->getCancelledAmount()->minus($refundedOnShop)
+                $history->getCancelledAmount()->minus($cancelledOnShop),
+                !$history->getTotalAmount()->getValue()
             );
         }
     }
@@ -214,10 +214,15 @@ class WebhookService
     {
         $chargedOnShop = $this->orderService->getChargeAmountForOrder($history->getOrderId());
 
+        $isFullCharge = $history->getChargedAmount() &&
+            $history->getTotalAmount() &&
+            $history->getChargedAmount()->getValue() === $history->getTotalAmount()->getValue();
+
         if ($chargedOnShop->getValue() < $history->getChargedAmount()->getValue()) {
             $this->orderService->chargeOrder(
                 $history->getOrderId(),
-                $history->getChargedAmount()->minus($chargedOnShop)
+                $history->getChargedAmount()->minus($chargedOnShop),
+                $isFullCharge
             );
         }
     }

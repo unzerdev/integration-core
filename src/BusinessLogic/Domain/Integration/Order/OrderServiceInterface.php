@@ -36,10 +36,11 @@ interface OrderServiceInterface
     /**
      * @param string $orderId
      * @param Amount $amount
+     * @param bool $isFullCancellation
      *
      * @return void
      */
-    public function cancelOrder(string $orderId, Amount $amount): void;
+    public function cancelOrder(string $orderId, Amount $amount, bool $isFullCancellation): void;
 
     /**
      * @param string $orderId
@@ -51,10 +52,11 @@ interface OrderServiceInterface
     /**
      * @param string $orderId
      * @param Amount $amount
+     * @param bool $isFullCharge
      *
      * @return void
      */
-    public function chargeOrder(string $orderId, Amount $amount): void;
+    public function chargeOrder(string $orderId, Amount $amount, bool $isFullCharge): void;
 
     /**
      * @param string $orderId

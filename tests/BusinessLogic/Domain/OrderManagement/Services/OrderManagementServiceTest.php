@@ -717,7 +717,7 @@ class OrderManagementServiceTest extends BaseTestCase
             'orderId',
             null,
             Amount::fromFloat(1000, Currency::getDefault()),
-            Amount::fromFloat(1000, Currency::getDefault()),
+            Amount::fromFloat(980, Currency::getDefault()),
             Amount::fromFloat(20, Currency::getDefault()),
             Amount::fromFloat(0, Currency::getDefault()),
             [
@@ -765,7 +765,7 @@ class OrderManagementServiceTest extends BaseTestCase
             'orderId',
             null,
             Amount::fromFloat(1000, Currency::getDefault()),
-            Amount::fromFloat(1000, Currency::getDefault()),
+            Amount::fromFloat(980, Currency::getDefault()),
             Amount::fromFloat(20, Currency::getDefault()),
             Amount::fromFloat(0, Currency::getDefault()),
             [

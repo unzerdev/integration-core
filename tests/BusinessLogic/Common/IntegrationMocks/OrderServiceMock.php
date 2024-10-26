@@ -79,9 +79,13 @@ class OrderServiceMock implements OrderServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $orderId
+     * @param Amount $amount
+     * @param bool $isFullCancellation *
+     *
+* @inheritDoc
      */
-    public function cancelOrder(string $orderId, Amount $amount): void
+    public function cancelOrder(string $orderId, Amount $amount, bool $isFullCancellation): void
     {
         $this->callHistory['cancelOrder'][] = ['orderId' => $orderId, 'amount' => $amount->getPriceInCurrencyUnits()];
     }
@@ -95,9 +99,13 @@ class OrderServiceMock implements OrderServiceInterface
     }
 
     /**
-     * @inheritDoc
+     * @param string $orderId
+     * @param Amount $amount
+     * @param bool $isFullCharge *
+     *
+* @inheritDoc
      */
-    public function chargeOrder(string $orderId, Amount $amount): void
+    public function chargeOrder(string $orderId, Amount $amount, bool $isFullCharge): void
     {
         $this->callHistory['chargeOrder'][] = ['orderId' => $orderId, 'amount' => $amount->getPriceInCurrencyUnits()];
     }

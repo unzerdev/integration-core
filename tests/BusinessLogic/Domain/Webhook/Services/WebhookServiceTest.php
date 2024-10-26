@@ -542,7 +542,7 @@ class WebhookServiceTest extends BaseTestCase
     public function testHandleCancellation(): void
     {
         // Arrange
-        $webhook = new Webhook('test', WebhookEvents::PAYMENT_CANCELED, 'p-key', 'payment1');
+        $webhook = new Webhook('test', WebhookEvents::AUTHORIZE_CANCELED, 'p-key', 'payment1');
         $unzerMock = new UnzerMock('s-priv-test');
 
         $payment = $this->generateValidPayment();
