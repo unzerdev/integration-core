@@ -400,7 +400,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
     }
 
-    private static function initRequestProcessors(): void
+    protected static function initRequestProcessors(): void
     {
         ServiceRegister::registerService(
             PaymentPageFactory::class,
