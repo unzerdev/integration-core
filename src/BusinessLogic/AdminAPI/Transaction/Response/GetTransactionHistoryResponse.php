@@ -14,9 +14,6 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory
  */
 class GetTransactionHistoryResponse extends Response
 {
-    /** @var string  */
-    private const PAYMENT_TYPE = 'Embedded Payment Page (EPP)';
-
     /**
      * @var TransactionHistory|null $transactionHistory
      */
@@ -59,8 +56,7 @@ class GetTransactionHistoryResponse extends Response
                 'id' => $historyItem->getId(),
                 'date' => $historyItem->getDate(),
                 'type' => $historyItem->getType(),
-                'amount' => $this->amountToArray($historyItem->getAmount()),
-                'paymentType' => self::PAYMENT_TYPE,
+                'amount' => $this->amountToArray($historyItem->getAmount())
             ];
         }
 

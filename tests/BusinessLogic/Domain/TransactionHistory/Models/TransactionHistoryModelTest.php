@@ -339,7 +339,7 @@ class TransactionHistoryModelTest extends BaseTestCase
         self::assertEquals(Amount::fromFloat(100, Currency::fromIsoCode('EUR')),
             $transactionHistory->getRemainingAmount());
 
-        self::assertCount(8, $transactionHistory->collection()->getAll());
+        self::assertCount(10, $transactionHistory->collection()->getAll());
 
         self::assertCount(1, $authorizationItems->getAll());
         self::assertEquals(Amount::fromFloat(1000, Currency::fromIsoCode('EUR')),
@@ -368,7 +368,7 @@ class TransactionHistoryModelTest extends BaseTestCase
         self::assertEquals('2024-10-22 17:58:08', $reversalItems->last()->getDate());
         self::assertEquals(TransactionTypes::REVERSAL, $reversalItems->last()->getType());
         self::assertEquals('success', $reversalItems->last()->getStatus());
-        self::assertCount(1, $refundItems->getAll());
+        self::assertCount(3, $refundItems->getAll());
         self::assertEquals(Amount::fromFloat(44, Currency::fromIsoCode('EUR')),
             $refundItems->last()->getAmount());
         self::assertEquals('refundId', $refundItems->last()->getId());

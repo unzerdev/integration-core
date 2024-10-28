@@ -142,8 +142,5 @@ class TransactionControllerTest extends BaseTestCase
         self::assertEquals('EUR', $response->toArray()['items'][0]['amount']['currency']);
         self::assertEquals('EUR', $response->toArray()['items'][1]['amount']['currency']);
         self::assertEquals('EUR', $response->toArray()['items'][2]['amount']['currency']);
-        self::assertEquals('Embedded Payment Page (EPP)', $response->toArray()['items'][0]['paymentType']);
-        self::assertEquals('Embedded Payment Page (EPP)', $response->toArray()['items'][1]['paymentType']);
-        self::assertEquals('Embedded Payment Page (EPP)', $response->toArray()['items'][2]['paymentType']);
     }
 }

@@ -344,6 +344,16 @@ class TransactionHistory
             );
         }
 
+        foreach ($payment->getCancellations() as $refund) {
+            $historyItems[] = new HistoryItem(
+                $refund->getId() ?? '',
+                TransactionTypes::REFUND,
+                $refund->getDate() ?? '',
+                Amount::fromFloat($refund->getAmount() ?? 0, $currency),
+                'success'
+            );
+        }
+
         foreach ($payment->getReversals() as $reversal) {
             $historyItems[] = new HistoryItem(
                 $reversal->getId() ?? '',
@@ -416,7 +426,8 @@ class TransactionHistory
             ($this->cancelledAmount && $transactionHistory->cancelledAmount && $this->cancelledAmount->getValue() ==
                 $transactionHistory->cancelledAmount->getValue()) &&
             ($this->remainingAmount && $transactionHistory->remainingAmount &&
-                $this->remainingAmount->getValue() == $transactionHistory->remainingAmount->getValue());
+                $this->remainingAmount->getValue() == $transactionHistory->remainingAmount->getValue()) &&
+            count($this->collection()->getAll()) === count($transactionHistory->collection()->getAll());
     }
 
     /**
