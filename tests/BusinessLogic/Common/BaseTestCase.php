@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsCo
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
+use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Controller\TransactionController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
@@ -58,7 +59,9 @@ use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
 use Unzer\Core\Infrastructure\Http\HttpClient;
 use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use Unzer\Core\Infrastructure\Logger\Logger;
@@ -302,6 +305,16 @@ class BaseTestCase extends TestCase
             OrderManagementController::class => static function () {
                 return new OrderManagementController(
                     TestServiceRegister::getService(OrderManagementService::class)
+                );
+            },
+            TransactionController::class => static function () {
+                return new TransactionController(
+                    TestServiceRegister::getService(TransactionHistoryService::class)
+                );
+            },
+            WebhookHandlerController::class => static function () {
+                return new WebhookHandlerController(
+                    TestServiceRegister::getService(WebhookService::class)
                 );
             },
         ]);

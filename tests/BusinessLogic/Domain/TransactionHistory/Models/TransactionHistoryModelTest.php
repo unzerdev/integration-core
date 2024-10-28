@@ -540,4 +540,49 @@ class TransactionHistoryModelTest extends BaseTestCase
         // assert
         self::assertNull($item);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testSorting(): void
+    {
+        // arrange
+
+        $authorizedItem = new AuthorizeHistoryItem('id1', '2024-10-28 09:11:43', Amount::fromFloat(1, Currency::getDefault()),
+            'status1',
+            Amount::fromFloat(1, Currency::getDefault()));
+
+        $items = [
+            $authorizedItem,
+            new HistoryItem('id2', 'type2', '2024-10-28 09:11:44', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id3', 'type3', '2024-10-28 09:11:45', Amount::fromFloat(1, Currency::getDefault()), 'status3'),
+            new HistoryItem('id4', 'type5', '2024-10-28 09:11:46', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
+            new HistoryItem('id5', 'type5', '2024-10-28 09:11:47', Amount::fromFloat(1, Currency::getDefault()), 'status2'),
+            new HistoryItem('id6', 'type5', '2024-10-28 09:11:48', Amount::fromFloat(1, Currency::getDefault()), 'status3')
+        ];
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null,
+            $items
+        );
+
+        // act
+        $items = $transactionHistory->collection()->sortByDateDecreasing()->getAll();
+
+        // assert
+        self::assertCount(6, $items);
+        self::assertEquals('id6', $items[0]->getId());
+        self::assertEquals('id5', $items[1]->getId());
+        self::assertEquals('id4', $items[2]->getId());
+        self::assertEquals('id3', $items[3]->getId());
+        self::assertEquals('id2', $items[4]->getId());
+        self::assertEquals('id1', $items[5]->getId());
+    }
 }

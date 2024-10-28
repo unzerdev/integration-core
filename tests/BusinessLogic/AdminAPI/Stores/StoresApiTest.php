@@ -81,7 +81,6 @@ class StoresApiTest extends BaseTestCase
     public function testGetStoresSuccess(): void
     {
         // Arrange
-        
 
         // Act
         $response = AdminAPI::get()->stores()->getStores();
@@ -201,7 +200,7 @@ class StoresApiTest extends BaseTestCase
     public function testGetCurrentStoreLiveConnectionData(): void
     {
         // Arrange
-        $settings = new ConnectionSettings(Mode::live(), new ConnectionData('publicKey' , 'private'));
+        $settings = new ConnectionSettings(Mode::live(), new ConnectionData('publicKey', 'private'));
         $this->connectionService->setConnectionSettings($settings);
         $this->storeService->setMockCurrentStore(new Store('storeId', 'store1'));
 
@@ -215,6 +214,66 @@ class StoresApiTest extends BaseTestCase
             'isLoggedIn' => true,
             'mode' => 'live',
             'publicKey' => 'publicKey',
+        ], $response->toArray());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetStoreByIdSuccess(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->stores()->getStoreById('1');
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetStoreByIdToFailBack(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->stores()->getStoreById('1');
+
+        // Assert
+        self::assertEquals($response, $this->expectedFailBackResponse());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetStoreById(): void
+    {
+        // Act
+        $response = AdminAPI::get()->stores()->getStoreById('1');
+
+        // Assert
+        self::assertEquals($response, $this->expectedFailBackResponse());
+        // Arrange
+        $this->storeService->setMockCurrentStore(new Store('storeId', 'store1'));
+
+        // Act
+        $response = AdminAPI::get()->stores()->getStoreById('1');
+
+        // Assert
+        self::assertEquals([
+            'storeId' => 'storeId',
+            'storeName' => 'store1',
+            'isLoggedIn' => false,
+            'mode' => 'live',
+            'publicKey' => ''
         ], $response->toArray());
     }
 

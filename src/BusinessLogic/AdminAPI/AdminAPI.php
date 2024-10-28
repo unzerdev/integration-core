@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentMethods\Controller\PaymentMethodsCo
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPageSettingsController;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
+use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Controller\TransactionController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
@@ -157,5 +158,18 @@ class AdminAPI
             ::run(new ErrorHandlingAspect())
             ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(OrderManagementController::class);
+    }
+
+    /**
+     * @param string $storeId
+     *
+     * @return TransactionController
+     */
+    public function transaction(string $storeId): object
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(TransactionController::class);
     }
 }

@@ -75,6 +75,18 @@ class HistoryItemCollection
     }
 
     /**
+     * @return self
+     */
+    public function sortByDateDecreasing(): self
+    {
+        usort($this->historyItems, function ($a, $b) {
+            return strtotime($b->getDate()) <=> strtotime($a->getDate());
+        });
+
+        return new self($this->historyItems);
+    }
+
+    /**
      * Adds history item to collection.
      *
      * @param HistoryItem $item

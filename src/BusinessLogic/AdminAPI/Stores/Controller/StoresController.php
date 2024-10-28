@@ -63,8 +63,6 @@ class StoresController
             );
         }
 
-        $this->connectionService->getConnectionSettings();
-
         return $currentStore ?
             new StoreResponse($currentStore, $connectionSettings) : new StoreResponse($this->failBackStore());
     }
@@ -87,8 +85,6 @@ class StoresController
             );
         }
 
-        $this->connectionService->getConnectionSettings();
-
         return $store ?
             new StoreResponse($store, $connectionSettings) : new StoreResponse($this->failBackStore());
     }
@@ -102,7 +98,7 @@ class StoresController
 
         return new StoreOrderStatusesResponse($statuses);
     }
-    
+
 
     /**
      * Creates failBack store in case there is no connected and default store.

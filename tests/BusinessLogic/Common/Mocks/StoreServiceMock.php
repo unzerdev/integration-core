@@ -69,7 +69,8 @@ class StoreServiceMock extends StoreService
      *
      * @return void
      */
-    public function setMockStoreOrderStatuses(array $mockStatuses): void {
+    public function setMockStoreOrderStatuses(array $mockStatuses): void
+    {
         $this->orderStatuses = $mockStatuses;
     }
 
@@ -79,5 +80,15 @@ class StoreServiceMock extends StoreService
     public function getStoreOrderStatuses(): array
     {
         return $this->orderStatuses;
+    }
+
+    /**
+     * @param int $storeId
+     *
+     * @return Store|null
+     */
+    public function getStoreById(int $storeId): ?Store
+    {
+        return $this->currentStore;
     }
 }
