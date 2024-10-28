@@ -13,11 +13,7 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaymentPageFactory
 {
-    public function __construct()
-    {
-    }
-
-    public function crate(PaymentPageCreateContext $context): Paypage
+    public function create(PaymentPageCreateContext $context): Paypage
     {
         $payPage = $this->initializePayPage($context);
         foreach (PaymentPageProcessorsRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {

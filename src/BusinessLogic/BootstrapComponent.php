@@ -33,6 +33,9 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\CustomerProcessor;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\LineItemsProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
@@ -43,7 +46,11 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\BasketProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\CustomerProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\ExcludeTypesProcessor;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
@@ -78,7 +85,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         parent::init();
 
         static::initControllers();
-        static::initPaymentPageProcessors();
+        static::initRequestProcessors();
     }
 
     /**
@@ -160,7 +167,10 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(PaymentMethodService::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
-                    ServiceRegister::getService(PaymentPageFactory::class)
+                    ServiceRegister::getService(PaymentPageFactory::class),
+                    ServiceRegister::getService(CustomerFactory::class),
+                    ServiceRegister::getService(BasketFactory::class),
+                    ServiceRegister::getService(MetadataProvider::class)
                 );
             })
         );
@@ -390,12 +400,24 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
     }
 
-    private static function initPaymentPageProcessors(): void
+    private static function initRequestProcessors(): void
     {
         ServiceRegister::registerService(
             PaymentPageFactory::class,
             new SingleInstance(static function () {
                 return new PaymentPageFactory();
+            })
+        );
+        ServiceRegister::registerService(
+            CustomerFactory::class,
+            new SingleInstance(static function () {
+                return new CustomerFactory();
+            })
+        );
+        ServiceRegister::registerService(
+            BasketFactory::class,
+            new SingleInstance(static function () {
+                return new BasketFactory(ServiceRegister::getService(PaymentMethodService::class));
             })
         );
 
@@ -405,5 +427,8 @@ class BootstrapComponent extends BaseBootstrapComponent
                 ServiceRegister::getService(UnzerFactory::class)
             );
         }));
+
+        CustomerProcessorsRegistry::registerGlobal(CustomerProcessor::class);
+        BasketProcessorsRegistry::registerGlobal(LineItemsProcessor::class);
     }
 }

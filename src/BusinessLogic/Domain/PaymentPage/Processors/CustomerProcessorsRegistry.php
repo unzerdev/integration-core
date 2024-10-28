@@ -7,13 +7,13 @@ use Unzer\Core\Infrastructure\Singleton;
 /**
  * Class Registry
  *
- * @template T of PaymentPageProcessor
+ * @template T of CustomerProcessor
  *
- * @method static PaymentPageProcessor[] getProcessors(string $type)
+ * @method static CustomerProcessor[] getProcessors(string $type)
  *
  * @package Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors
  */
-class PaymentPageProcessorsRegistry extends AbstractRequestProcessorsRegistry
+class CustomerProcessorsRegistry extends AbstractRequestProcessorsRegistry
 {
     protected static ?Singleton $instance = null;
 }

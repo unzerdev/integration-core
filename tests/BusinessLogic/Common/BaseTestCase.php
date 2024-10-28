@@ -13,7 +13,6 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Controller\PaymentPage
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusMapController;
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
-use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
@@ -32,6 +31,9 @@ use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\CustomerProcessor;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\LineItemsProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
@@ -40,7 +42,11 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\BasketProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\CustomerProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\ExcludeTypesProcessor;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
@@ -66,6 +72,9 @@ use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockBasketLIneItemsProcessor;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockCustomerProcessor;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadtaProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
@@ -221,17 +230,35 @@ class BaseTestCase extends TestCase
             PaymentPageFactory::class => static function () {
                 return new PaymentPageFactory();
             },
+            CustomerFactory::class => static function () {
+                return new CustomerFactory();
+            },
+            BasketFactory::class => static function () {
+                return new BasketFactory(TestServiceRegister::getService(PaymentMethodService::class));
+            },
             ExcludeTypesProcessor::class => static function () {
                 return new ExcludeTypesProcessor(
                     TestServiceRegister::getService(UnzerFactory::class)
                 );
+            },
+            CustomerProcessor::class => static function () {
+                return new MockCustomerProcessor();
+            },
+            LineItemsProcessor::class => static function () {
+                return new MockBasketLIneItemsProcessor();
+            },
+            MetadataProvider::class => static function () {
+                return new MockMetadtaProvider();
             },
             PaymentPageService::class => static function () {
                 return new PaymentPageService(
                     (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(PaymentMethodService::class),
                     TestServiceRegister::getService(TransactionHistoryService::class),
-                    TestServiceRegister::getService(PaymentPageFactory::class)
+                    TestServiceRegister::getService(PaymentPageFactory::class),
+                    TestServiceRegister::getService(CustomerFactory::class),
+                    ServiceRegister::getService(BasketFactory::class),
+                    ServiceRegister::getService(MetadataProvider::class)
                 );
             },
             CheckoutPaymentPageController::class => static function () {
@@ -279,6 +306,8 @@ class BaseTestCase extends TestCase
         ]);
 
         PaymentPageProcessorsRegistry::registerGlobal(ExcludeTypesProcessor::class);
+        CustomerProcessorsRegistry::registerGlobal(CustomerProcessor::class);
+        BasketProcessorsRegistry::registerGlobal(LineItemsProcessor::class);
 
         TestServiceRegister::registerService(
             TimeProvider::class,

@@ -4,9 +4,12 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
@@ -29,6 +32,9 @@ class PaymentPageService
     private PaymentMethodService $paymentMethodService;
     private TransactionHistoryService $transactionHistoryService;
     private PaymentPageFactory $paymentPageFactory;
+    private CustomerFactory $customerFactory;
+    private BasketFactory $basketFactory;
+    private MetadataProvider $metadataProvider;
 
     /**
      * PaymentPageService constructor.
@@ -36,17 +42,26 @@ class PaymentPageService
      * @param PaymentMethodService $paymentMethodService
      * @param TransactionHistoryService $transactionHistoryService
      * @param PaymentPageFactory $paymentPageFactory
+     * @param CustomerFactory $customerFactory
+     * @param BasketFactory $basketFactory
+     * @param MetadataProvider $metadataProvider
      */
     public function __construct(
         UnzerFactory $unzerFactory,
         PaymentMethodService $paymentMethodService,
         TransactionHistoryService $transactionHistoryService,
-        PaymentPageFactory $paymentPageFactory
+        PaymentPageFactory $paymentPageFactory,
+        CustomerFactory $customerFactory,
+        BasketFactory $basketFactory,
+        MetadataProvider $metadataProvider
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->paymentMethodService = $paymentMethodService;
         $this->transactionHistoryService = $transactionHistoryService;
         $this->paymentPageFactory = $paymentPageFactory;
+        $this->customerFactory = $customerFactory;
+        $this->basketFactory = $basketFactory;
+        $this->metadataProvider = $metadataProvider;
     }
 
     /**
@@ -66,12 +81,25 @@ class PaymentPageService
             );
         }
 
-        $payPageRequest = $this->paymentPageFactory->crate($context);
+        $customer = $this->customerFactory->create($context);
+        if ($customer !== null) {
+            $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+        }
 
         if ($paymentMethodSettings->getBookingMethod()->equal(BookingMethod::authorize())) {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageAuthorize($payPageRequest);
+            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageAuthorize(
+                $this->paymentPageFactory->create($context),
+                $customer,
+                $this->basketFactory->create($context),
+                $this->metadataProvider->get($context)
+            );
         } else {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageCharge($payPageRequest);
+            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageCharge(
+                $this->paymentPageFactory->create($context),
+                $customer,
+                $this->basketFactory->create($context),
+                $this->metadataProvider->get($context)
+            );
         }
 
         $this->transactionHistoryService->saveTransactionHistory(

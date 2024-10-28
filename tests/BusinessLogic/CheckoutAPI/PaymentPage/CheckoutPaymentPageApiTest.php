@@ -8,18 +8,22 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRe
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
@@ -64,7 +68,10 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                 $this->unzerFactory,
                 TestServiceRegister::getService(PaymentMethodService::class),
                 TestServiceRegister::getService(TransactionHistoryService::class),
-                TestServiceRegister::getService(PaymentPageFactory::class)
+                TestServiceRegister::getService(PaymentPageFactory::class),
+                TestServiceRegister::getService(CustomerFactory::class),
+                ServiceRegister::getService(BasketFactory::class),
+                ServiceRegister::getService(MetadataProvider::class)
             );
         });
 
