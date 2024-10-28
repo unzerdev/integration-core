@@ -78,15 +78,15 @@ class ConnectionController
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      * @throws UnzerApiException
-     * @throws QueryFilterInvalidParamException|InvalidModeException
+     * @throws InvalidModeException
      */
     public function reconnect(ReconnectRequest $reconnectRequest): ConnectionResponse
     {
-        if($reconnectRequest->isDeleteConfig()) {
-            $this->disconnectService->disconnect();
-        }
-
         $this->connectionService->initializeConnection($reconnectRequest->toDomainModel());
+
+        if($reconnectRequest->isDeleteConfig()) {
+            $this->disconnectService->deleteAdditionalSettings();
+        }
 
         return new ConnectionResponse();
     }

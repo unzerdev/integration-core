@@ -63,7 +63,8 @@
                 }
 
                 if (result.connectionData) {
-                    connectionData = result.connectionData;
+                    values.publicKey = result.connectionData.publicKey;
+                    values.privateKey = result.connectionData.privateKey;
                 }
                 render();
             })
@@ -120,18 +121,18 @@
                 title: 'login.credentials.public',
                 fieldClasses: 'unzer-input-wrapper-padding',
                 description: 'login.credentials.description',
-                value: connectionData.publicKey,
+                value: values.publicKey,
                 onChange: (value) => {
-                    connectionData.publicKey = value;
+                    values.publicKey = value;
                 }
             }),
             Unzer.components.TextField.create({
                 title: 'login.credentials.private',
                 type: 'password',
                 fieldClasses: 'unzer-input-wrapper-padding',
-                value: connectionData.privateKey,
+                value: values.privateKey,
                 onChange: (value) => {
-                    connectionData.privateKey = value;
+                    values.privateKey = value;
                 }
             }),
             Unzer.components.TextField.create({

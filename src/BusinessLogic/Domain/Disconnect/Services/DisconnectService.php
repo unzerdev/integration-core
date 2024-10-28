@@ -67,17 +67,28 @@ class DisconnectService
     /**
      * @return void
      *
-     * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
      * @throws QueryFilterInvalidParamException
      */
     public function disconnect(): void
     {
         $this->connectionService->deleteWebhooks();
+
+        $this->connectionService->deleteConnectionSettings();
+
+        $this->deleteAdditionalSettings();
+    }
+
+    /**
+     * @return void
+     * @throws QueryFilterInvalidParamException
+     */
+
+    public function deleteAdditionalSettings(): void
+    {
         $this->paymentPageSettingsRepository->deletePaymentPageSettings();
         $this->paymentStatusMapRepository->deletePaymentStatusMapEntity();
         $this->paymentMethodConfigRepository->deletePaymentConfigEntities();
         $this->transactionHistoryRepository->deleteTransactionHistoryEntities();
-        $this->connectionService->deleteConnectionSettings();
     }
 }
