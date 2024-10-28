@@ -141,7 +141,6 @@ class ConnectionService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      */
     public function deleteWebhooks(): void
     {
@@ -150,7 +149,11 @@ class ConnectionService
         }
 
         foreach ($webhookData->getIds() as $webhookId) {
-            $this->unzerFactory->makeUnzerAPI()->deleteWebhook($webhookId);
+            try {
+                $this->unzerFactory->makeUnzerAPI()->deleteWebhook($webhookId);
+            } catch (UnzerApiException $e) {
+                // if webhook id does not exist on API continue
+            }
         }
 
         $this->webhookDataRepository->deleteWebhookData();
