@@ -10,7 +10,8 @@
     const values = {
         environment: Unzer.config.store.mode,
         privateKey: Unzer.connectionData.privateKey,
-        publicKey: Unzer.connectionData.publicKey
+        publicKey: Unzer.connectionData.publicKey,
+        deleteConfig: false
     };
 
     let openEnvModal = false;
@@ -211,12 +212,18 @@
                 {
                     type: 'ghost-black',
                     label: 'general.no',
-                    onClick: () => saveChanges(modal)
+                    onClick: () => {
+                      values.deleteConfig = true;
+                      saveChanges(modal)
+                    }
                 },
                 {
                     type: 'secondary',
                     label: 'general.yes',
-                    onClick: () => modal.close()
+                    onClick: () => {
+                      values.deleteConfig = false;
+                      saveChanges(modal)
+                    }
                 }
             ]
         });
@@ -257,7 +264,16 @@
             .then((response) => {
                 if (response.webhookData) {
                     webhookData = response.webhookData;
-                }
+                    Unzer.utilities.createToasterMessage("credentials.webhookRegistered", false);
+                } else {
+                webhookData = {
+                    registrationDate: '',
+                    webhookID: '',
+                    events: '',
+                    webhookUrl: '',
+                  };
+                Unzer.utilities.createToasterMessage("credentials.webhookUnsuccessful", true);
+              }
                 render();
             })
             .catch((ex) => {
@@ -272,7 +288,7 @@
     function saveChanges(modal) {
         Unzer.utilities.showLoader();
 
-        Unzer.LoginService.login(values)
+        Unzer.LoginService.reconnect(values)
             .then(() => {
                 Unzer.utilities.createToasterMessage("general.changesSaved",false);
             })

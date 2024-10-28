@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetCredentialsRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
@@ -17,13 +18,20 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\DisconnectServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -39,6 +47,11 @@ class ConnectionControllerTest extends BaseTestCase
      * @var ConnectionServiceMock
      */
     private ConnectionServiceMock $connectionService;
+
+    /**
+     * @var DisconnectServiceMock
+     */
+    private DisconnectServiceMock $disconnectService;
 
     /**
      * @return void
@@ -60,6 +73,19 @@ class ConnectionControllerTest extends BaseTestCase
         TestServiceRegister::registerService(
             ConnectionService::class, function () {
             return $this->connectionService;
+        });
+
+        $this->disconnectService = new DisconnectServiceMock(
+            TestServiceRegister::getService(ConnectionService::class),
+            TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
+            TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
+            TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
+            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+        );
+
+        TestServiceRegister::registerService(
+            DisconnectService::class, function () {
+            return $this->disconnectService;
         });
     }
 
@@ -372,5 +398,48 @@ class ConnectionControllerTest extends BaseTestCase
         self::assertEquals('test.com', $response->toArray()['webhookData']['webhookUrl']);
         self::assertEquals('test, test2', $response->toArray()['webhookData']['events']);
         self::assertEquals('October 03, 2024 14:30', $response->toArray()['webhookData']['registrationDate']);
+    }
+
+    /**
+     * @throws InvalidModeException
+     * @throws PublicKeyInvalidException
+     * @throws QueryFilterInvalidParamException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     * @throws InvalidKeypairException
+     * @throws PrivateKeyInvalidException
+     */
+    public function testSuccessfulReconnect(): void
+    {
+        // Arrange
+        $reconnectionRequest = new ReconnectRequest('sandbox', 'pKey', 'privKey');
+
+        // Act
+        $response = AdminAPI::get()->connection('1')->reconnect($reconnectionRequest);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @return void
+     * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidKeypairException
+     * @throws InvalidModeException
+     * @throws PrivateKeyInvalidException
+     * @throws PublicKeyInvalidException
+     * @throws QueryFilterInvalidParamException
+     * @throws UnzerApiException
+     */
+    public function testReconnectDeleteData(): void
+    {
+        // Arrange
+        $reconnectionRequest = new ReconnectRequest('live', 'pKey', 'privKey', true);
+
+        // Act
+        $response = AdminAPI::get()->connection('1')->reconnect($reconnectionRequest);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
     }
 }

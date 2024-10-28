@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetCredentialsRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ConnectionResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetConnectionDataResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetCredentialsResponse;
@@ -18,6 +19,8 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
+use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
@@ -33,11 +36,18 @@ class ConnectionController
     private ConnectionService $connectionService;
 
     /**
-     * @param ConnectionService $connectionService
+     * @var DisconnectService
      */
-    public function __construct(ConnectionService $connectionService)
+    private DisconnectService $disconnectService;
+
+    /**
+     * @param ConnectionService $connectionService
+     * @param DisconnectService $disconnectService
+     */
+    public function __construct(ConnectionService $connectionService, DisconnectService $disconnectService)
     {
         $this->connectionService = $connectionService;
+        $this->disconnectService = $disconnectService;
     }
 
     /**
@@ -55,6 +65,28 @@ class ConnectionController
     public function connect(ConnectionRequest $connectionRequest): ConnectionResponse
     {
         $this->connectionService->initializeConnection($connectionRequest->toDomainModel());
+
+        return new ConnectionResponse();
+    }
+
+    /**
+     * @param ReconnectRequest $reconnectRequest
+     *
+     * @return ConnectionResponse
+     * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidKeypairException
+     * @throws PrivateKeyInvalidException
+     * @throws PublicKeyInvalidException
+     * @throws UnzerApiException
+     * @throws QueryFilterInvalidParamException|InvalidModeException
+     */
+    public function reconnect(ReconnectRequest $reconnectRequest): ConnectionResponse
+    {
+        if($reconnectRequest->isDeleteConfig()) {
+            $this->disconnectService->disconnect();
+        }
+
+        $this->connectionService->initializeConnection($reconnectRequest->toDomainModel());
 
         return new ConnectionResponse();
     }

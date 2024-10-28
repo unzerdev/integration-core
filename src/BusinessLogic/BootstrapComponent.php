@@ -294,7 +294,8 @@ class BootstrapComponent extends BaseBootstrapComponent
             ConnectionController::class,
             new SingleInstance(static function () {
                 return new ConnectionController(
-                    ServiceRegister::getService(ConnectionService::class)
+                    ServiceRegister::getService(ConnectionService::class),
+                    ServiceRegister::getService(DisconnectService::class)
                 );
             })
         );

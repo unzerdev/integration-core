@@ -63,10 +63,26 @@
     );
   };
 
+  /**
+   *
+   * @returns {Promise<*>}
+   */
+  const reconnect = (data) => {
+    return Unzer.ajaxService.post(
+        `${Unzer.config.credentialUrl}/reconnect?storeId=${Unzer.config.store.storeId}`,
+        data,
+        null,
+        (exception) => {
+          return Promise.reject(exception);
+        }
+    );
+  };
+
   Unzer.LoginService = {
     login,
     disconnect,
     reRegisterWebhooks,
-    getCredentialsData
+    getCredentialsData,
+    reconnect
   };
 })();

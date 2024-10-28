@@ -70,7 +70,9 @@
     "event": "Events",
     "reRegister": "Re-register webhook",
     "disconnectWarning": "Are you sure you want to disconnect store?",
-    "saveChangesWarning": "Thn environment change has been detected. Do you want to use the same configuration?"
+    "saveChangesWarning": "The environment change has been detected. Do you want to use the same configuration?",
+    "webhookRegistered": "Webhooks are successfully registered!",
+    "webhookUnsuccessful": "Webhook registration failed!"
   },
   "footer": {
     "support": "Need help?",
