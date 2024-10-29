@@ -91,8 +91,6 @@ class PaymentPageSettingsService
             $paymentPageSettings->getFile()->setUrl($url);
         }
 
-        $paymentPageSettings->setDefaultLocale('default');
-
         $payPageRequest = $paymentPageSettings->inflate(new Paypage(
             self::AMOUNT,
             self::CURRENCY,

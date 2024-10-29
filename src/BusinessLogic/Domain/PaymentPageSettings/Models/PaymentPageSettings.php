@@ -63,11 +63,6 @@ class PaymentPageSettings
     private Paypage $paypage;
 
     /**
-     * @var string
-     */
-    private string $defaultLocale = 'default';
-
-    /**
      * @param array $shopName
      * @param array $shopTagline
      * @param UploadedFile $file
@@ -102,15 +97,15 @@ class PaymentPageSettings
 
     /**
      * @param Paypage $paypage
-     *
+     * @param string $locale
      * @return Paypage
      */
-    public function inflate(Paypage $paypage): Paypage
+    public function inflate(Paypage $paypage, string $locale = 'default'): Paypage
     {
         $this->paypage = $paypage;
 
-        $shopName = $this->getShopNameByLocale() ? $this->getShopNameByLocale($this->defaultLocale)->getMessage() : '';
-        $tagline = $this->getTaglineByLocale() ? $this->getTaglineByLocale($this->defaultLocale)->getMessage() : '';
+        $shopName = $this->getShopNameByLocale() ? $this->getShopNameByLocale($locale)->getMessage() : '';
+        $tagline = $this->getTaglineByLocale() ? $this->getTaglineByLocale($locale)->getMessage() : '';
 
         $this->paypage->setShopName($shopName);
         $this->paypage->setTagline($tagline);
@@ -230,16 +225,6 @@ class PaymentPageSettings
         }
 
         return null;
-    }
-
-    /**
-     * @param string $locale
-     *
-     * @return void
-     */
-    public function setDefaultLocale(string $locale): void
-    {
-        $this->defaultLocale = $locale;
     }
 
     /**
