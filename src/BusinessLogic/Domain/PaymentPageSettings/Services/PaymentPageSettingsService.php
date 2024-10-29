@@ -21,6 +21,8 @@ class PaymentPageSettingsService
     private const CURRENCY = 'EUR';
     private const CALLBACK_URL = "https://mockurl.com/payment-callback";
 
+    private const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
+
     /**
      * @var PaymentPageSettings
      */
@@ -81,69 +83,22 @@ class PaymentPageSettingsService
     {
         $unzerApi = $this->unzerFactory->makeUnzerAPI();
 
-        $payPageRequest = new Paypage(
-            self::AMOUNT,
-            self::CURRENCY,
-            self::CALLBACK_URL,
-        );
-
         if ($paymentPageSettings->getFile()->isFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getFile()->getFileInfo(),
-                "logo_preview.png"
+                self::LOGO_IMAGE_PREVIEW_NAME
             );
             $paymentPageSettings->getFile()->setUrl($url);
         }
 
-        $shopName = (!empty($paymentPageSettings->getShopName()) && isset($paymentPageSettings->getShopName()[0]))
-            ? $paymentPageSettings->getShopName()[0]->getMessage()
-            : "";
+        $paymentPageSettings->setDefaultLocale('default');
 
-        $tagline = (!empty($paymentPageSettings->getShopTagline()) && isset($paymentPageSettings->getShopTagline()[0]))
-            ? $paymentPageSettings->getShopTagline()[0]->getMessage()
-            : "";
-
-        $payPageRequest->setShopName($shopName);
-        $payPageRequest->setTagline($tagline);
-
-        if ($paymentPageSettings->getFile()->getUrl()) {
-            $payPageRequest->setLogoImage($paymentPageSettings->getFile()->getUrl());
-        }
-
-        $css = $this->getCss($paymentPageSettings);
-
-        $filteredCss = array_filter($css);
-        if (!empty($filteredCss)) {
-            $payPageRequest->setCss($filteredCss);
-        }
+        $payPageRequest = $paymentPageSettings->inflate(new Paypage(
+            self::AMOUNT,
+            self::CURRENCY,
+            self::CALLBACK_URL,
+        ));
 
         return $unzerApi->initPayPageCharge($payPageRequest);
-    }
-
-    /**
-     * @param PaymentPageSettings $paymentPageSettings
-     *
-     * @return null[]|string[]
-     */
-    private function getCss(PaymentPageSettings $paymentPageSettings): array
-    {
-        return [
-            "shopDescription" => $paymentPageSettings->getHeaderFontColor()
-                ? "color:" . $paymentPageSettings->getHeaderFontColor()
-                : null,
-            "header" => $paymentPageSettings->getHeaderBackgroundColor()
-                ? "background-color:" . $paymentPageSettings->getHeaderBackgroundColor()
-                : null,
-            "shopName" => ($paymentPageSettings->getShopNameFontColor()
-                && $paymentPageSettings->getShopNameBackgroundColor())
-                ? "color:" . $paymentPageSettings->getShopNameFontColor()
-                . "; background-color:" . $paymentPageSettings->getShopNameBackgroundColor()
-                : null,
-            "tagline" => ($paymentPageSettings->getShopTaglineFontColor()
-                && $paymentPageSettings->getShopTaglineBackgroundColor())
-                ? "color:" . $paymentPageSettings->getShopTaglineFontColor()
-                . "; background-color:" . $paymentPageSettings->getShopTaglineBackgroundColor()
-                : null,
-        ];
     }
 }

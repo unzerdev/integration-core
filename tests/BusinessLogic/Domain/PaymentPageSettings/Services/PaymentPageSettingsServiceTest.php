@@ -346,4 +346,37 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         //assert
         self::assertEquals($id, $paypage->getId());
     }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCreateMockPaypageWithNoDefaultLabel() : void
+    {
+        //arrange
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
+            [new TranslatableLabel("Shop1", "")],
+            [new TranslatableLabel("Description", "")],
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#FFFFFF',
+            '#666666',
+        );
+
+        $path = 'new path';
+
+        $this->uploaderService->setPath($path);
+
+        $id = "123";
+        $url = "url";
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+
+        //act
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+
+        //assert
+        self::assertEquals($id, $paypage->getId());
+    }
 }

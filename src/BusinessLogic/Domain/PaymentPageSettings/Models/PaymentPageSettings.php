@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use UnzerSDK\Resources\PaymentTypes\Paypage;
 
 /**
  * Class PaymentPageSettings
@@ -57,6 +58,16 @@ class PaymentPageSettings
     private UploadedFile $file;
 
     /**
+     * @var Paypage
+     */
+    private Paypage $paypage;
+
+    /**
+     * @var string
+     */
+    private string $defaultLocale = 'default';
+
+    /**
      * @param array $shopName
      * @param array $shopTagline
      * @param UploadedFile $file
@@ -87,6 +98,34 @@ class PaymentPageSettings
         $this->shopNameFontColor = $shopNameFontColor;
         $this->shopTaglineBackgroundColor = $shopTaglineBackgroundColor;
         $this->shopTaglineFontColor = $shopTaglineFontColor;
+    }
+
+    /**
+     * @param Paypage $paypage
+     *
+     * @return Paypage
+     */
+    public function inflate(Paypage $paypage): Paypage
+    {
+        $this->paypage = $paypage;
+
+        $shopName = $this->getShopNameByLocale() ? $this->getShopNameByLocale($this->defaultLocale)->getMessage() : '';
+        $tagline = $this->getTaglineByLocale() ? $this->getTaglineByLocale($this->defaultLocale)->getMessage() : '';
+
+        $this->paypage->setShopName($shopName);
+        $this->paypage->setTagline($tagline);
+
+        if ($this->getFile()->getUrl()) {
+            $this->paypage->setLogoImage($this->getFile()->getUrl());
+        }
+
+        $css = $this->getCss();
+
+        if (!empty($css)) {
+            $this->paypage->setCss($css);
+        }
+
+        return $this->paypage;
     }
 
     /**
@@ -159,5 +198,72 @@ class PaymentPageSettings
     public function getShopTaglineBackgroundColor(): ?string
     {
         return $this->shopTaglineBackgroundColor;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return TranslatableLabel|null
+     */
+    public function getShopNameByLocale(string $locale = 'default'): ?TranslatableLabel
+    {
+        foreach ($this->shopName as $label) {
+            if ($label->getCode() === $locale) {
+                return $label;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return TranslatableLabel|null
+     */
+    public function getTaglineByLocale(string $locale = 'default'): ?TranslatableLabel
+    {
+        foreach ($this->shopTagline as $label) {
+            if ($label->getCode() === $locale) {
+                return $label;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return void
+     */
+    public function setDefaultLocale(string $locale): void
+    {
+        $this->defaultLocale = $locale;
+    }
+
+    /**
+     * @return array
+     */
+    private function getCss(): array
+    {
+        return array_filter([
+            "shopDescription" => $this->getHeaderFontColor()
+                ? "color:" . $this->getHeaderFontColor()
+                : null,
+            "header" => $this->getHeaderBackgroundColor()
+                ? "background-color:" . $this->getHeaderBackgroundColor()
+                : null,
+            "shopName" => ($this->getShopNameFontColor()
+                && $this->getShopNameBackgroundColor())
+                ? "color:" . $this->getShopNameFontColor()
+                . "; background-color:" . $this->getShopNameBackgroundColor()
+                : null,
+            "tagline" => ($this->getShopTaglineFontColor()
+                && $this->getShopTaglineBackgroundColor())
+                ? "color:" . $this->getShopTaglineFontColor()
+                . "; background-color:" . $this->getShopTaglineBackgroundColor()
+                : null,
+        ]);
     }
 }
