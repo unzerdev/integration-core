@@ -50,7 +50,7 @@ class PaymentMethodsResponse extends Response
 
             if ($surcharge = $paymentMethod->getSurcharge()) {
                 $formattedMethod['surcharge'] = [
-                    'value' => $surcharge->getPriceInCurrencyUnits(),
+                    'value' => $surcharge->getValue(),
                     'currency' => $surcharge->getCurrency(),
                 ];
             }

@@ -136,7 +136,7 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                 'name' => 'Eps eng',
                 'description' => 'Eps eng desc',
                 'surcharge' => [
-                    'value' => 3.3,
+                    'value' => 330,
                     'currency' => 'EUR'
                 ]
             ],
@@ -186,7 +186,7 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                 'name' => 'Eps eng',
                 'description' => 'Eps eng desc',
                 'surcharge' => [
-                    'value' => 3.3,
+                    'value' => 330,
                     'currency' => 'EUR'
                 ]
             ],
@@ -236,7 +236,7 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                 'name' => 'EPS',
                 'description' => '',
                 'surcharge' => [
-                    'value' => 3.3,
+                    'value' => 330,
                     'currency' => 'EUR'
                 ]
             ],
