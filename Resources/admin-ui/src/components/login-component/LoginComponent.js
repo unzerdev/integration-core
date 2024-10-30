@@ -42,6 +42,7 @@ const LoginComponent = ({ onLogin }) => {
 
     const privateKey = Unzer.components.TextField.create({
         title: 'login.credentials.private',
+        type: 'password',
         onChange: (value) => {
             values.privateKey = value;
         }
