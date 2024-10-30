@@ -34,6 +34,11 @@ class TransactionHistory extends Entity
     protected string $orderId;
 
     /**
+     * @var int
+     */
+    protected int $updatedAt;
+
+    /**
      * @var DomainTransactionHistory
      */
     protected DomainTransactionHistory $transactionHistory;
@@ -49,6 +54,7 @@ class TransactionHistory extends Entity
 
         $this->storeId = $data['storeId'];
         $this->orderId = $data['orderId'];
+        $this->updatedAt = $data['updatedAt'];
 
         $transactionHistory = $data['transactionHistory'] ?? [];
         $this->transactionHistory = new DomainTransactionHistory(
@@ -73,6 +79,7 @@ class TransactionHistory extends Entity
 
         $data['storeId'] = $this->storeId;
         $data['orderId'] = $this->orderId;
+        $data['updatedAt'] = $this->updatedAt;
         $data['transactionHistory'] = [
             'type' => $this->transactionHistory->getType(),
             'paymentId' => $this->transactionHistory->getPaymentId(),
@@ -96,7 +103,8 @@ class TransactionHistory extends Entity
         $indexMap = new IndexMap();
 
         $indexMap->addStringIndex('storeId')
-            ->addStringIndex('orderId');
+            ->addStringIndex('orderId')
+            ->addIntegerIndex('updatedAt');
 
         return new EntityConfiguration($indexMap, 'TransactionHistory');
     }
@@ -151,5 +159,23 @@ class TransactionHistory extends Entity
     public function setOrderId(string $orderId): void
     {
         $this->orderId = $orderId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUpdatedAt(): int
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param int $updatedAt
+     *
+     * @return void
+     */
+    public function setUpdatedAt(int $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 }

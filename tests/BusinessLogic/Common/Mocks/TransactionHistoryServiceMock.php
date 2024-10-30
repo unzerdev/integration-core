@@ -22,6 +22,9 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
 
     private int $timeSaved = 0;
 
+    /** @var array $orderIds */
+    private array $orderIds = [];
+
     /**
      * @param string $orderId
      *
@@ -52,5 +55,23 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
     public function getCallHistory(string $methodName): array
     {
         return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getOrderIdsForSynchronization(): array
+    {
+        return $this->orderIds;
+    }
+
+    /**
+     * @param array $orderIds
+     *
+     * @return void
+     */
+    public function setOrderIdsForSynchronization(array $orderIds): void
+    {
+        $this->orderIds = $orderIds;
     }
 }

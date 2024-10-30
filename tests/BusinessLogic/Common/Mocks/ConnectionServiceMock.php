@@ -3,7 +3,6 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
-use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 
@@ -24,10 +23,8 @@ class ConnectionServiceMock extends ConnectionService
      */
     private ?WebhookData $webhookData = null;
 
-    /**
-     * @var bool
-     */
-    private bool $isLoggedIn = false;
+    /** @var array */
+    private array $ids = [];
 
     /**
      * @param ConnectionSettings $connectionSettings
@@ -83,25 +80,20 @@ class ConnectionServiceMock extends ConnectionService
     }
 
     /**
-     * Change connection mode
-     *
-     * @param Mode $mode
-     *
-     * @return void
+     * @return string[]
      */
-
-    public function isLoggedIn(Mode $mode): bool
+    public function getConnectedStoreIds(): array
     {
-        return $this->isLoggedIn;
+        return $this->ids;
     }
 
     /**
-     * @param bool $isLoggedIn
+     * @param array $ids
      *
      * @return void
      */
-    public function setLoggedIn(bool $isLoggedIn): void
+    public function setIds(array $ids): void
     {
-        $this->isLoggedIn = $isLoggedIn;
+        $this->ids = $ids;
     }
 }

@@ -16,7 +16,7 @@ class TestTimeProvider extends TimeProvider
 {
     /** @var DateTime */
     private DateTime $time;
-    
+
     /** @noinspection PhpMissingParentConstructorInspection */
     /**
      *

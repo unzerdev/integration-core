@@ -3,6 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 
 /**
@@ -27,8 +28,12 @@ class OrderServiceMock implements OrderServiceInterface
     /**
      * @inheritDoc
      */
-    public function getRefundedAmountForOrder(string $orderId): ?Amount
+    public function getRefundedAmountForOrder(string $orderId): Amount
     {
+        if (!self::$refundedAmount) {
+            self::$refundedAmount = $this->defaultAmount();
+        }
+
         return self::$refundedAmount;
     }
 
@@ -73,8 +78,12 @@ class OrderServiceMock implements OrderServiceInterface
     /**
      * @inheritDoc
      */
-    public function getCancelledAmountForOrder(string $orderId): ?Amount
+    public function getCancelledAmountForOrder(string $orderId): Amount
     {
+        if (!self::$cancelledAmount) {
+            self::$cancelledAmount = $this->defaultAmount();
+        }
+
         return self::$cancelledAmount;
     }
 
@@ -83,7 +92,7 @@ class OrderServiceMock implements OrderServiceInterface
      * @param Amount $amount
      * @param bool $isFullCancellation *
      *
-* @inheritDoc
+     * @inheritDoc
      */
     public function cancelOrder(string $orderId, Amount $amount, bool $isFullCancellation): void
     {
@@ -93,8 +102,12 @@ class OrderServiceMock implements OrderServiceInterface
     /**
      * @inheritDoc
      */
-    public function getChargeAmountForOrder(string $orderId): ?Amount
+    public function getChargeAmountForOrder(string $orderId): Amount
     {
+        if (!self::$chargedAmount) {
+            self::$chargedAmount = $this->defaultAmount();
+        }
+
         return self::$chargedAmount;
     }
 
@@ -103,7 +116,7 @@ class OrderServiceMock implements OrderServiceInterface
      * @param Amount $amount
      * @param bool $isFullCharge *
      *
-* @inheritDoc
+     * @inheritDoc
      */
     public function chargeOrder(string $orderId, Amount $amount, bool $isFullCharge): void
     {
@@ -126,5 +139,13 @@ class OrderServiceMock implements OrderServiceInterface
     public function getCallHistory(string $methodName): array
     {
         return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
+    }
+
+    /**
+     * @return Amount
+     */
+    private function defaultAmount(): Amount
+    {
+        return Amount::fromInt(0, Currency::getDefault());
     }
 }

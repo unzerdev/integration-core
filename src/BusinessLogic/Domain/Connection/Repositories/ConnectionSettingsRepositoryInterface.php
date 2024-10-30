@@ -29,4 +29,9 @@ interface ConnectionSettingsRepositoryInterface
      * @return void
      */
     public function deleteConnectionSettings(): void;
+
+    /**
+     * @return string[]
+     */
+    public function getAllConnectedStoreIds(): array;
 }

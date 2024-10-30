@@ -198,7 +198,7 @@ class ConnectionSettingsRepositoryTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testDeleteWebhookData(): void
+    public function testDeleteConnectionSettings(): void
     {
         // arrange
         $settings = new ConnectionSettingsModel(
@@ -223,7 +223,7 @@ class ConnectionSettingsRepositoryTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testDeleteWebhookDataNoData(): void
+    public function testDeleteConnectionSettingsNoConnectionSettings(): void
     {
         // arrange
 
@@ -233,5 +233,69 @@ class ConnectionSettingsRepositoryTest extends BaseTestCase
         // assert
         $connectionSettings = $this->repository->select();
         self::assertEmpty($connectionSettings);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetConnectedStoreIdsNoIds()
+    {
+        // arrange
+        $settings = new ConnectionSettingsModel(
+            Mode::parse('live'),
+            new ConnectionData('publicKey', 'privateKey'),
+            new ConnectionData('publicKey', 'privateKey')
+        );
+        $settingsEntity = new ConnectionSettings();
+        $settingsEntity->setConnectionSettings($settings);
+        $settingsEntity->setStoreId('1');
+        $this->repository->save($settingsEntity);
+
+        $settings = new ConnectionSettingsModel(
+            Mode::parse('live'),
+            new ConnectionData('publicKey', 'privateKey'),
+            new ConnectionData('publicKey', 'privateKey')
+        );
+        $settingsEntity = new ConnectionSettings();
+        $settingsEntity->setConnectionSettings($settings);
+        $settingsEntity->setStoreId('2');
+        $this->repository->save($settingsEntity);
+
+        $settings = new ConnectionSettingsModel(
+            Mode::parse('live'),
+            new ConnectionData('publicKey', 'privateKey'),
+            new ConnectionData('publicKey', 'privateKey')
+        );
+        $settingsEntity = new ConnectionSettings();
+        $settingsEntity->setConnectionSettings($settings);
+        $settingsEntity->setStoreId('3');
+        $this->repository->save($settingsEntity);
+
+        // act
+        $storeIds = StoreContext::doWithStore('', [$this->connectionSettingsRepository, 'getAllConnectedStoreIds']);
+
+        // assert
+        self::assertNotEmpty($storeIds);
+        self::assertCount(3, $storeIds);
+        self::assertEquals(['1', '2', '3'], $storeIds);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetConnectedStores()
+    {
+        // arrange
+
+        // act
+        $storeIds = StoreContext::doWithStore('', [$this->connectionSettingsRepository, 'getAllConnectedStoreIds']);
+
+        // assert
+
+        self::assertEmpty($storeIds);
     }
 }

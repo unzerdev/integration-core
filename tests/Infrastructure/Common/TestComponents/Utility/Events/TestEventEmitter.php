@@ -15,9 +15,9 @@ class TestEventEmitter extends EventEmitter
     /**
      * Singleton instance of this class.
      *
-     * @var TestEventEmitter
+     * @var ?TestEventEmitter
      */
-    protected static TestEventEmitter $instance;
+    protected static ?TestEventEmitter $instance = null;
 
     /**
      * @return TestEventEmitter

@@ -24,7 +24,7 @@ class StoreServiceMock extends StoreService
     private array $stores = [];
 
     /**
-     * @var StoreOrderStatus
+     * @var StoreOrderStatus[]
      */
     private array $orderStatuses = [];
 

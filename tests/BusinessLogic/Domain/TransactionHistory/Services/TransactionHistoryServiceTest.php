@@ -15,6 +15,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
+use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
@@ -54,6 +55,7 @@ class TransactionHistoryServiceTest extends BaseTestCase
      *
      * @throws EntityClassException
      * @throws QueryFilterInvalidParamException
+     * @throws Exception
      */
     public function testSaveConnectionData(): void
     {
@@ -90,7 +92,6 @@ class TransactionHistoryServiceTest extends BaseTestCase
         $transactionHistory = StoreContext::doWithStore('1', [$this->service, 'getTransactionHistoryByOrderId'], ['1']);
 
         // assert
-
         self::assertNull($transactionHistory);
     }
 
@@ -116,6 +117,7 @@ class TransactionHistoryServiceTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory);
         $configEntity->setOrderId('1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         // act
@@ -127,6 +129,110 @@ class TransactionHistoryServiceTest extends BaseTestCase
 
         // assert
         self::assertEquals($transactionHistory, $fetchedTransactionHistory);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetTransactionHistoryForSynchronizationNoHistories(): void
+    {
+        // arrange
+
+        // act
+        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getOrderIdsForSynchronization']);
+
+        // assert
+
+        self::assertEmpty($transactionHistories);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetTransactionHistoryForSynchronization(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory);
+        $configEntity->setOrderId('1');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
+        $this->repository->save($configEntity);
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order2',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory);
+        $configEntity->setOrderId('2');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
+        $this->repository->save($configEntity);
+
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order3',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory);
+        $configEntity->setOrderId('3');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(1);
+        $this->repository->save($configEntity);
+
+
+        $transactionHistory = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order4',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory);
+        $configEntity->setOrderId('4');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(2);
+        $this->repository->save($configEntity);
+
+        // act
+        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getOrderIdsForSynchronization']);
+
+        // assert
+        self::assertNotEmpty($transactionHistories);
+        self::assertCount(2, $transactionHistories);
+        self::assertEquals(['order1', 'order2'], $transactionHistories);
     }
 }
 

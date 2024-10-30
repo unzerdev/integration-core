@@ -62,6 +62,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapSe
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Listeners\TransactionSyncListener;
+use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Service\TransactionSynchronizerService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -70,6 +72,8 @@ use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
 use Unzer\Core\Infrastructure\ORM\RepositoryRegistry;
 use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
+use Unzer\Core\Infrastructure\TaskExecution\TaskEvents\TickEvent;
+use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 
 /**
  * Class BootstrapComponent.
@@ -206,13 +210,23 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
 
         ServiceRegister::registerService(
-            WebhookService::class,
+            TransactionSynchronizerService::class,
             new SingleInstance(static function () {
-                return new WebhookService(
+                return new TransactionSynchronizerService(
                     ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
                     ServiceRegister::getService(OrderServiceInterface::class),
                     ServiceRegister::getService(PaymentStatusMapService::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            WebhookService::class,
+            new SingleInstance(static function () {
+                return new WebhookService(
+                    ServiceRegister::getService(UnzerFactory::class),
+                    ServiceRegister::getService(TransactionSynchronizerService::class)
                 );
             })
         );
@@ -289,7 +303,7 @@ class BootstrapComponent extends BaseBootstrapComponent
     /**
      * @return void
      */
-    private static function initControllers(): void
+    protected static function initControllers(): void
     {
         ServiceRegister::registerService(
             ConnectionController::class,
@@ -439,5 +453,23 @@ class BootstrapComponent extends BaseBootstrapComponent
 
         CustomerProcessorsRegistry::registerGlobal(CustomerProcessor::class);
         BasketProcessorsRegistry::registerGlobal(LineItemsProcessor::class);
+    }
+
+    /**
+     * @return void
+     */
+    protected static function initEvents()
+    {
+        parent::initEvents();
+
+        /** @var EventBus $eventBus */
+        $eventBus = ServiceRegister::getService(EventBus::CLASS_NAME);
+
+        $eventBus->when(
+            TickEvent::class,
+            static function () {
+                (new TransactionSyncListener())->handle();
+            }
+        );
     }
 }

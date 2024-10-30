@@ -15,6 +15,7 @@ use Unzer\Core\BusinessLogic\WebhookAPI\WebhookAPI;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\OrderServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionSynchronizerServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\WebhookServiceMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -47,9 +48,11 @@ class WebhookControllerApiTest extends BaseTestCase
 
         $this->webhookService = new WebhookServiceMock(
             new UnzerFactoryMock(),
-            TestServiceRegister::getService(TransactionHistoryService::class),
-            TestServiceRegister::getService(OrderServiceInterface::class),
-            TestServiceRegister::getService(PaymentStatusMapService::class)
+            new TransactionSynchronizerServiceMock(
+                new UnzerFactoryMock(),
+                TestServiceRegister::getService(TransactionHistoryService::class),
+                new OrderServiceMock(),
+                TestServiceRegister::getService(PaymentStatusMapService::class))
         );
 
         TestServiceRegister::registerService(WebhookService::class, function () {

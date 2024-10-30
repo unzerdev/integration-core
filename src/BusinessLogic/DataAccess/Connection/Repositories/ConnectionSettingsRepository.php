@@ -92,6 +92,23 @@ class ConnectionSettingsRepository implements ConnectionSettingsRepositoryInterf
     }
 
     /**
+     * @return string[]
+     */
+    public function getAllConnectedStoreIds(): array
+    {
+        $ids = [];
+
+        /** @var ConnectionSettingsEntity[] $connectionEntities */
+        $connectionEntities = $this->repository->select();
+
+        foreach ($connectionEntities as $connectionSettings) {
+            $ids[] = $connectionSettings->getStoreId();
+        }
+
+        return $ids;
+    }
+
+    /**
      * @return ConnectionSettingsEntity|null
      *
      * @throws QueryFilterInvalidParamException

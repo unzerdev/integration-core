@@ -32,4 +32,11 @@ interface TransactionHistoryRepositoryInterface
      * @throws QueryFilterInvalidParamException
      */
     public function deleteTransactionHistoryEntities(): void;
+
+    /**
+     * @param int $timeLimit
+     *
+     * @return TransactionHistory[]
+     */
+    public function getTransactionHistoriesByUpdateTime(int $timeLimit): array;
 }

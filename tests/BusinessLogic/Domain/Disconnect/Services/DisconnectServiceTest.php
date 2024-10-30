@@ -29,6 +29,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
+use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
@@ -295,6 +296,7 @@ class DisconnectServiceTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory1);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->transactionHistoryRepository->save($configEntity);
 
         // act

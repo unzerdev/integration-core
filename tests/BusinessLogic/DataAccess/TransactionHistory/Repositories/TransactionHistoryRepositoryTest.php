@@ -16,6 +16,7 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
+use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
@@ -88,6 +89,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         // act
@@ -126,6 +128,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         // act
@@ -164,6 +167,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         // act
@@ -237,6 +241,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         $newTransactionHistory = new TransactionHistory(
@@ -295,12 +300,14 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         $configEntity->setTransactionHistory($transactionHistory1);
         $configEntity->setOrderId('order1');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         $configEntity = new TransactionHistoryEntity();
         $configEntity->setTransactionHistory($transactionHistory2);
         $configEntity->setOrderId('order2');
         $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($configEntity);
 
         // act
@@ -309,5 +316,114 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // assert
         $savedEntity = $this->repository->select();
         self::assertCount(0, $savedEntity);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetTransactionByUpdateTimeNoEntities(): void
+    {
+        // arrange
+        // act
+        $result = StoreContext::doWithStore(
+            '1',
+            [$this->transactionHistoryRepository, 'getTransactionHistoriesByUpdateTime'], [123]
+        );
+
+        // assert
+        self::assertEmpty($result);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetTransactionByUpdateTime(): void
+    {
+        // arrange
+        $transactionHistory1 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $transactionHistory2 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $transactionHistory3 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $transactionHistory4 = new TransactionHistory(
+            PaymentMethodTypes::APPLE_PAY,
+            'payment1',
+            'order1',
+            new PaymentState(1, 'paid'),
+            Amount::fromFloat(11.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            Amount::fromFloat(1.11, Currency::getDefault()),
+            null
+        );
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory1);
+        $configEntity->setOrderId('order1');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(124);
+        $this->repository->save($configEntity);
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory2);
+        $configEntity->setOrderId('order2');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(111);
+        $this->repository->save($configEntity);
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory3);
+        $configEntity->setOrderId('order1');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(4432432);
+        $this->repository->save($configEntity);
+
+        $configEntity = new TransactionHistoryEntity();
+        $configEntity->setTransactionHistory($transactionHistory4);
+        $configEntity->setOrderId('order2');
+        $configEntity->setStoreId('1');
+        $configEntity->setUpdatedAt(12);
+        $this->repository->save($configEntity);
+
+        // act
+        $result = StoreContext::doWithStore(
+            '1',
+            [$this->transactionHistoryRepository, 'getTransactionHistoriesByUpdateTime'], [123]
+        );
+
+        // assert
+        self::assertNotEmpty($result);
+        self::assertCount(2, $result);
     }
 }

@@ -62,12 +62,19 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryIn
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
+use Unzer\Core\Infrastructure\Configuration\ConfigurationManager;
 use Unzer\Core\Infrastructure\Http\HttpClient;
 use Unzer\Core\Infrastructure\Logger\Interfaces\ShopLoggerAdapter;
 use Unzer\Core\Infrastructure\Logger\Logger;
 use Unzer\Core\Infrastructure\Logger\LoggerConfiguration;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
+use Unzer\Core\Infrastructure\Serializer\Concrete\JsonSerializer;
+use Unzer\Core\Infrastructure\Serializer\Serializer;
 use Unzer\Core\Infrastructure\ServiceRegister;
+use Unzer\Core\Infrastructure\TaskExecution\Events\QueueItemStateTransitionEventBus;
+use Unzer\Core\Infrastructure\TaskExecution\Interfaces\TaskRunnerWakeup;
+use Unzer\Core\Infrastructure\TaskExecution\QueueItem;
+use Unzer\Core\Infrastructure\TaskExecution\QueueService;
 use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
@@ -81,8 +88,12 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadtaProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
+use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryQueueItemRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryStorage;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
+use Unzer\Core\Tests\Infrastructure\Common\TestComponents\TaskExecution\TestQueueService;
+use Unzer\Core\Tests\Infrastructure\Common\TestComponents\TaskExecution\TestTaskRunnerWakeupService;
+use Unzer\Core\Tests\Infrastructure\Common\TestComponents\TestConfigurationManager;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\TestHttpClient;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Utility\Events\TestEventEmitter;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Utility\TestGuidProvider;
@@ -317,6 +328,18 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(WebhookService::class)
                 );
             },
+            QueueService::class => function () {
+                return new TestQueueService();
+            },
+            Serializer::class => function () {
+                return new JsonSerializer();
+            },
+            QueueItemStateTransitionEventBus::CLASS_NAME => function () {
+                return QueueItemStateTransitionEventBus::getInstance();
+            },
+            TaskRunnerWakeup::class => function () {
+                return new TestTaskRunnerWakeupService();
+            },
         ]);
 
         PaymentPageProcessorsRegistry::registerGlobal(ExcludeTypesProcessor::class);
@@ -367,6 +390,11 @@ class BaseTestCase extends TestCase
             MemoryRepositoryWithConditionalDelete::getClassName()
         );
 
+        TestRepositoryRegistry::registerRepository(
+            QueueItem::getClassName(),
+            MemoryQueueItemRepository::getClassName()
+        );
+
         TestServiceRegister::registerService(
             EncryptorInterface::class,
             function () {
@@ -385,6 +413,13 @@ class BaseTestCase extends TestCase
             CurrencyServiceInterface::class,
             function () {
                 return new CurrencyServiceMock();
+            }
+        );
+
+        TestServiceRegister::registerService(
+            ConfigurationManager::class,
+            static function () {
+                return new TestConfigurationManager();
             }
         );
     }

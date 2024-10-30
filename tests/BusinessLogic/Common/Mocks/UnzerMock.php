@@ -40,9 +40,9 @@ class UnzerMock extends Unzer
     private ?AbstractUnzerResource $resource = null;
 
     /**
-     * @var Payment $payment
+     * @var ?Payment $payment
      */
-    private Payment $payment;
+    private ?Payment $payment = null;
 
     public function getMethodCallHistory($methodName)
     {

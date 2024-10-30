@@ -16,7 +16,7 @@ interface OrderServiceInterface
      *
      * @return Amount|null
      */
-    public function getRefundedAmountForOrder(string $orderId): ?Amount;
+    public function getRefundedAmountForOrder(string $orderId): Amount;
 
     /**
      * @param string $orderId
@@ -31,7 +31,7 @@ interface OrderServiceInterface
      *
      * @return Amount|null
      */
-    public function getCancelledAmountForOrder(string $orderId): ?Amount;
+    public function getCancelledAmountForOrder(string $orderId): Amount;
 
     /**
      * @param string $orderId
@@ -47,7 +47,7 @@ interface OrderServiceInterface
      *
      * @return Amount|null
      */
-    public function getChargeAmountForOrder(string $orderId): ?Amount;
+    public function getChargeAmountForOrder(string $orderId): Amount;
 
     /**
      * @param string $orderId

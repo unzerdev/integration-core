@@ -168,6 +168,14 @@ class ConnectionService
     }
 
     /**
+     * @return string[]
+     */
+    public function getConnectedStoreIds(): array
+    {
+        return $this->connectionSettingsRepository->getAllConnectedStoreIds();
+    }
+
+    /**
      * @param Unzer $unzer
      * @param string $webhookUrl
      *

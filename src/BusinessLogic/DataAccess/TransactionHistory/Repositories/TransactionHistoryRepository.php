@@ -10,6 +10,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\QueryFilter\Operators;
 use Unzer\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
+use Unzer\Core\Infrastructure\Utility\TimeProvider;
 
 /**
  * Class TransactionHistoryRepository.
@@ -53,6 +54,7 @@ class TransactionHistoryRepository implements TransactionHistoryRepositoryInterf
             $existingHistory->setTransactionHistory($transactionHistory);
             $existingHistory->setStoreId($this->storeContext->getStoreId());
             $existingHistory->setOrderId($transactionHistory->getOrderId());
+            $existingHistory->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
             $this->repository->update($existingHistory);
 
             return;
@@ -62,6 +64,7 @@ class TransactionHistoryRepository implements TransactionHistoryRepositoryInterf
         $entity->setTransactionHistory($transactionHistory);
         $entity->setStoreId($this->storeContext->getStoreId());
         $entity->setOrderId($transactionHistory->getOrderId());
+        $entity->setUpdatedAt(TimeProvider::getInstance()->getCurrentLocalTime()->getTimestamp());
         $this->repository->save($entity);
     }
 
@@ -89,6 +92,25 @@ class TransactionHistoryRepository implements TransactionHistoryRepositoryInterf
         foreach ($transactionHistoryEntities as $transactionHistoryEntity) {
             $this->repository->delete($transactionHistoryEntity);
         }
+    }
+
+    /**
+     * @param int $timeLimit
+     *
+     * @return array|TransactionHistory[]
+     *
+     * @throws QueryFilterInvalidParamException
+     */
+    public function getTransactionHistoriesByUpdateTime(int $timeLimit): array
+    {
+        $queryFilter = (new QueryFilter())
+            ->where('storeId', Operators::EQUALS, $this->storeContext->getStoreId())
+            ->where('updatedAt', Operators::GREATER_OR_EQUAL_THAN, $timeLimit);
+
+        /** @var TransactionHistoryEntity[] $entities */
+        $entities = $this->repository->select($queryFilter);
+
+        return array_map(fn($entity) => $entity->getTransactionHistory(), $entities);
     }
 
     /**
