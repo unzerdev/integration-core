@@ -131,7 +131,7 @@ const render = (stores, onStoreSelect) => {
         wrapper.append(createConnection());
     }
 
-    const sandbox = generator.createElement('div', 'unzer-header-sandbox', 'login.sandbox', [], []);
+    const sandbox = generator.createElement('div', 'unzer-header-sandbox', `login.sandbox|credentials?store=${Unzer.config.store.storeId}`, [], []);
 
     container.append(wrapper);
     container.append(sandbox);
