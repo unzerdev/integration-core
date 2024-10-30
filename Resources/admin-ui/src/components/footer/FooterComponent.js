@@ -23,6 +23,11 @@ const FooterComponent = ({ version, hasNewVersion = false}) => {
         generator.createElement('span', '', 'footer.support', [], [])
     ]);
 
+  support.addEventListener('click', function() {
+    const supportUrl = Unzer.translationService.translate('footer.supportLink');
+    window.open(supportUrl, '_blank');
+  });
+
     const versionWrapper = generator.createElement('div', 'unzer-footer-version-wrapper', '', [], [
         generator.createElement('span', 'unzer-footer-version-version', `footer.version|${version}`)
     ]);
