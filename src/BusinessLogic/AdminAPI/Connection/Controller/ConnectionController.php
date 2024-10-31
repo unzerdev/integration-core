@@ -78,7 +78,7 @@ class ConnectionController
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      * @throws UnzerApiException
-     * @throws InvalidModeException
+     * @throws InvalidModeException|QueryFilterInvalidParamException
      */
     public function reconnect(ReconnectRequest $reconnectRequest): ConnectionResponse
     {

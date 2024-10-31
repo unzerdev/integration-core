@@ -5,6 +5,7 @@
      */
     const page = Unzer.pageService.getContentPage();
 
+    const chargeStatusFlag = Unzer.config.chargeStatusFlag ?? true;
     /**
      * @type {[{
      *     @property {string?} name
@@ -158,7 +159,7 @@
         const buttons = Unzer.components.Button.createList([
             {
                 type: 'primary',
-                label: 'Paymnent page settings',
+                label: 'checkout.page.settings',
                 className: 'adlt--settings',
                 onClick: () => Unzer.stateController.navigate('design')
             }
@@ -330,10 +331,10 @@
             content.push(bookingField);
         }
 
-        if (config.chargeAvailable) {
+        if (config.chargeAvailable && chargeStatusFlag) {
             content.push(Unzer.components.DropdownField.create({
-                title: 'Charge on status changed',
-                description: "Select the status that will trigger the payment capture.",
+                title: 'checkout.modal.chargeTitle',
+                description: "checkout.modal.chargeDescription",
                 onChange: (value) => {
                     paymentMethodConfig.statusIdToCharge = value
                 },
@@ -400,7 +401,7 @@
             buttons: [
                 {
                     type: 'ghost-black',
-                    label: 'Cancel',
+                    label: 'general.cancel',
                     onClick: () => modal.close()
                 },
                 {
@@ -412,7 +413,7 @@
                             minMaxField,
                             paymentMethodConfig?.minOrderAmount && paymentMethodConfig.maxOrderAmount &&
                             paymentMethodConfig.minOrderAmount > paymentMethodConfig.maxOrderAmount,
-                            'The min order value is grater than max order value.'
+                            'validation.minGreaterThanMax'
                         );
                         if (isValid) isValid &= Unzer.validationService.validateField(
                             minMaxField,
@@ -446,11 +447,11 @@
 
         Unzer.PaymentMethodService.upsert(type, paymentMethodConfig)
             .then(result => {
-                Unzer.utilities.createToasterMessage('Configuration is saved successfully');
+                Unzer.utilities.createToasterMessage('checkout.page.configurationSaved');
                 modal.close();
             })
             .catch(error => {
-                Unzer.utilities.createToasterMessage(ex.message, true);
+                Unzer.utilities.createToasterMessage(error.message, true);
             })
             .finally(Unzer.utilities.hideLoader)
     }

@@ -162,7 +162,9 @@
       "title": "Checkout Settings",
       "description": "In this section, you can set up and customize the Unzer payment method for use during the checkout process. This allows you to offer a seamless and secure payment option for your customers.",
       "paymentMethodTitle": "Payment Methods",
-      "paymentMethodDescription": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button."
+      "paymentMethodDescription": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
+      "settings" : "Payment page settings",
+      "configurationSaved" : "Configuration is saved successfully"
     },
     "modal": {
       "method": "Booking method",
@@ -171,8 +173,10 @@
       "maxAmount": "Max order amount",
       "surcharge": "Surcharge",
       "restrictCountries": "Restrict to specific countries",
-      "basketData": "Enable sending bastet",
-      "basketDataDescription": "If enabled, the basket data will always be sent."
+      "basketData": "Enable sending basket",
+      "basketDataDescription": "If enabled, the basket data will always be sent.",
+      "chargeTitle": "Charge on status changed",
+      "chargeDescription": "Select the status that will trigger the payment capture."
     },
     "fields": {
       "paymentMethodName": {
@@ -248,6 +252,7 @@
     "passwordUppercase": "Password must contain at least one uppercase letter.",
     "passwordNumber": "Password must contain at least one number.",
     "passwordSpecial": "Password must contain at least one special character.",
-    "passwordConfirm": "Passwords do not match."
+    "passwordConfirm": "Passwords do not match.",
+    "minGreaterThanMax": "The min order value is greater than max order value."
   }
 }

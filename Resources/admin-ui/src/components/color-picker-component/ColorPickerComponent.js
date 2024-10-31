@@ -12,7 +12,7 @@ const ColorPickerComponent = ({ defaultColor, className, onColorChange, label = 
 
     const inputElement = generator.createElement('input', 'unzer-color-input', '', {
         type: 'text',
-        value: defaultColor || '#ffffff',
+        value: defaultColor || '',
     });
 
     const inputLabel = generator.createElement('label', 'unzer-label-input-label ', label, { for: inputElement.id });
