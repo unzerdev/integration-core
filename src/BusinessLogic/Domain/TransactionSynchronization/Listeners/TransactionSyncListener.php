@@ -56,7 +56,11 @@ class TransactionSyncListener
         $connectedStores = $this->getConnectionService()->getConnectedStoreIds();
 
         foreach ($connectedStores as $storeId) {
-            $this->getQueueService()->enqueue('transaction-synchronizer-' . $storeId, new TransactionSynchronizer($storeId));
+            $this->getQueueService()->enqueue(
+                'transaction-synchronizer-' . $storeId,
+                new TransactionSynchronizer($storeId),
+                $storeId
+            );
         }
     }
 

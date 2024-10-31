@@ -8,19 +8,20 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\Infrastructure\Serializer\Serializer;
 use Unzer\Core\Infrastructure\ServiceRegister;
-use Unzer\Core\Infrastructure\TaskExecution\Composite\ExecutionDetails;
-use Unzer\Core\Infrastructure\TaskExecution\Composite\Orchestrator;
 use Unzer\Core\Infrastructure\Serializer\Interfaces\Serializable;
+use Unzer\Core\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException;
+use Unzer\Core\Infrastructure\TaskExecution\QueueService;
+use Unzer\Core\Infrastructure\TaskExecution\Task;
 
 /**
  * Class TransactionSynchronizer.
  *
  * @package Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Tasks
  */
-class TransactionSynchronizer extends Orchestrator
+class TransactionSynchronizer extends Task
 {
     /** @var int */
-    private const TRANSACTIONS_COUNT_TO_SYNC = 5;
+    private const TRANSACTIONS_COUNT_TO_SYNC = 100;
 
     /**
      * @var string[] $orderIds
@@ -82,19 +83,18 @@ class TransactionSynchronizer extends Orchestrator
     }
 
     /**
-     * @inheritDoc
+     * @return void
      *
-     * @throws Exception
+     * @throws QueueStorageUnavailableException
      */
-    protected function getSubTask(): ?ExecutionDetails
+    public function execute(): void
     {
-        $orderIdsToSynchronize = array_splice($this->orderIds, 0, self::TRANSACTIONS_COUNT_TO_SYNC);
-
-        if (empty($orderIdsToSynchronize)) {
-            return null;
+        while (count($orderIdsToSynchronize = array_splice($this->orderIds, 0, self::TRANSACTIONS_COUNT_TO_SYNC)) > 0) {
+            $this->getQueueService()->enqueue(
+                'transaction-sync-' . $this->storeId,
+                new TransactionSyncTask($orderIdsToSynchronize)
+            );
         }
-
-        return $this->createSubJob(new TransactionSyncTask($orderIdsToSynchronize));
     }
 
     /**
@@ -118,5 +118,13 @@ class TransactionSynchronizer extends Orchestrator
             $this->storeId,
             [$this->getTransactionHistoryService(), 'getOrderIdsForSynchronization']
         );
+    }
+
+    /**
+     * @return QueueService
+     */
+    protected function getQueueService(): QueueService
+    {
+        return ServiceRegister::getService(QueueService::class);
     }
 }

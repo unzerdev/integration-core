@@ -12,6 +12,7 @@ use Unzer\Core\Infrastructure\ORM\Interfaces\QueueItemRepository;
 use Unzer\Core\Infrastructure\Serializer\Concrete\JsonSerializer;
 use Unzer\Core\Infrastructure\Serializer\Concrete\NativeSerializer;
 use Unzer\Core\Infrastructure\Serializer\Serializer;
+use Unzer\Core\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionHistoryServiceMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
@@ -131,25 +132,19 @@ class TransactionSynchronizerTest extends BaseTestCase
 
     /**
      * @return void
+     * @throws QueueStorageUnavailableException
      */
     public function testThreeSubTasksCreated(): void
     {
-        // arrange
-        $this->historyServiceMock->setOrderIdsForSynchronization([
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
-            '10',
-            '11'
-        ]);
-        $task = new TransactionSynchronizer('1');
+        $ids = [];
 
+        for ($i = 0; $i < 250; $i++) {
+            $ids[] = (string)$i;
+        }
+
+        // arrange
+        $this->historyServiceMock->setOrderIdsForSynchronization($ids);
+        $task = new TransactionSynchronizer('1');
 
         // act
         $task->execute();
