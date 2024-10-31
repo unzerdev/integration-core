@@ -10,11 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchExceptio
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\CancellationNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargeNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\RefundNotPossibleException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\InvalidTransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -62,8 +58,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws ChargeNotPossibleException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      */
     public function testChargeSuccess(): void
@@ -87,8 +81,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws ChargeNotPossibleException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      */
     public function testChargeToArray(): void
@@ -109,12 +101,10 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      * @throws CurrencyMismatchException
-     * @throws RefundNotPossibleException
-     */
+     * */
     public function testRefundSuccess(): void
     {
         // Arrange
@@ -134,8 +124,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws InvalidTransactionHistory
-     * @throws RefundNotPossibleException
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
@@ -156,10 +144,8 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
-     * @throws CancellationNotPossibleException
      */
     public function testCancellationSuccess(): void
     {
@@ -178,9 +164,7 @@ class OrderManagementApiTest extends BaseTestCase
     /**
      * @return void
      *
-     * @throws CancellationNotPossibleException
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */

@@ -10,11 +10,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\RefundResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\CancellationNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargeNotPossibleException;
-use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\RefundNotPossibleException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\InvalidTransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -44,8 +40,6 @@ class OrderManagementController
      * @throws UnzerApiException
      * @throws CurrencyMismatchException
      * @throws ConnectionSettingsNotFoundException
-     * @throws RefundNotPossibleException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      */
     public function refund(RefundRequest $refundRequest): RefundResponse
@@ -61,10 +55,8 @@ class OrderManagementController
      * @return ChargeResponse
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
-     * @throws ChargeNotPossibleException
      */
     public function charge(ChargeRequest $chargeRequest): ChargeResponse
     {
@@ -79,10 +71,8 @@ class OrderManagementController
      * @return CancellationResponse
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
-     * @throws CancellationNotPossibleException
      */
     public function cancel(CancellationRequest $cancellationRequest): CancellationResponse
     {

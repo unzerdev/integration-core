@@ -5,13 +5,13 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\InvalidTransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
@@ -44,7 +44,6 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
@@ -69,7 +68,6 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
@@ -93,7 +91,6 @@ class OrderManagementService
      * @return void
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
@@ -134,7 +131,6 @@ class OrderManagementService
      *
      * @return TransactionHistory
      *
-     * @throws InvalidTransactionHistory
      * @throws TransactionHistoryNotFoundException
      */
     private function getTransactionHistoryByOrderId(string $orderId): TransactionHistory
@@ -147,30 +143,21 @@ class OrderManagementService
             );
         }
 
-        $this->validateTransactionHistory($transactionHistory);
-
         return $transactionHistory;
     }
 
     /**
      * @param TransactionHistory $transactionHistory
      *
-     * @return void
-     *
-     * @throws InvalidTransactionHistory
+     * @return bool
      */
-    private function validateTransactionHistory(TransactionHistory $transactionHistory): void
+    private function isTransactionHistoryValid(TransactionHistory $transactionHistory): bool
     {
-        if (!$transactionHistory->getChargedAmount() ||
-            !$transactionHistory->getCancelledAmount() ||
-            !$transactionHistory->getTotalAmount() ||
-            !$transactionHistory->getRemainingAmount()) {
-            throw new InvalidTransactionHistory(
-                new TranslatableLabel(
-                    "Invalid amount for transaction history for orderID:{$transactionHistory->getOrderId()}.",
-                    'transactionHistory.invalidAmount')
-            );
-        }
+        return $transactionHistory->getChargedAmount() &&
+            $transactionHistory->getCancelledAmount() &&
+            $transactionHistory->getTotalAmount() &&
+            $transactionHistory->getRemainingAmount() &&
+            $transactionHistory->getPaymentState();
     }
 
     /**
@@ -181,7 +168,11 @@ class OrderManagementService
      */
     private function isChargeNecessary(TransactionHistory $transactionHistory, Amount $amountToCharge): bool
     {
-        return $transactionHistory->getRemainingAmount() &&
+        return $this->isTransactionHistoryValid($transactionHistory) &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
+            $transactionHistory->getRemainingAmount() &&
             $transactionHistory->getRemainingAmount()->getValue() &&
             $amountToCharge->getValue() <= $transactionHistory->getRemainingAmount()->getValue();
     }
@@ -194,7 +185,11 @@ class OrderManagementService
      */
     private function isCancellationNecessary(TransactionHistory $transactionHistory, Amount $amount): bool
     {
-        return $transactionHistory->getRemainingAmount()->getValue() &&
+        return $this->isTransactionHistoryValid($transactionHistory) &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
+            $transactionHistory->getRemainingAmount()->getValue() &&
             $amount->getValue() <= $transactionHistory->getRemainingAmount()->getValue();
     }
 
@@ -208,9 +203,10 @@ class OrderManagementService
      */
     private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
     {
-        return $transactionHistory->getCancelledAmount() &&
-            $transactionHistory->getTotalAmount() &&
-            $transactionHistory->getChargedAmount() &&
+        return $this->isTransactionHistoryValid($transactionHistory) &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
+            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $transactionHistory->getCancelledAmount()->plus($transactionHistory->getChargedAmount())->getValue() ===
             $transactionHistory->getTotalAmount()->getValue() &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
