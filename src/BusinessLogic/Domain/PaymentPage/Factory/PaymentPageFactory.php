@@ -44,6 +44,6 @@ class PaymentPageFactory
             $context->getReturnUrl()
         ))->setOrderId($context->getOrderId());
 
-        return $paymentPageSettings ? $paymentPageSettings->inflate($result) : $result;
+        return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
     }
 }

@@ -16,6 +16,7 @@ class PaymentPageCreateRequest
     private Amount $amount;
     private string $returnUrl;
     private array $sessionData;
+    private string $locale;
 
     /**
      * PaymentPageCreateRequest constructor.
@@ -24,14 +25,22 @@ class PaymentPageCreateRequest
      * @param Amount $amount
      * @param string $returnUrl
      * @param array $sessionData
+     * @param string $locale
      */
-    public function __construct(string $paymentMethodType, string $orderId, Amount $amount, string $returnUrl, array $sessionData = [])
-    {
+    public function __construct(
+        string $paymentMethodType,
+        string $orderId,
+        Amount $amount,
+        string $returnUrl,
+        array $sessionData = [],
+        string $locale = 'default'
+    ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
         $this->amount = $amount;
         $this->returnUrl = $returnUrl;
         $this->sessionData = $sessionData;
+        $this->locale = $locale;
     }
 
     public function getPaymentMethodType(): string
@@ -57,5 +66,10 @@ class PaymentPageCreateRequest
     public function getSessionData(): array
     {
         return $this->sessionData;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
     }
 }

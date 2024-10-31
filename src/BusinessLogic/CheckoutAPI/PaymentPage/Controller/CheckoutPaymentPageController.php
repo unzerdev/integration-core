@@ -35,7 +35,8 @@ class CheckoutPaymentPageController
                 $request->getOrderId(),
                 $request->getAmount(),
                 $request->getReturnUrl(),
-                new DataBag($request->getSessionData())
+                new DataBag($request->getSessionData()),
+                $request->getLocale()
             ))
         );
     }

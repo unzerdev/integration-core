@@ -17,6 +17,7 @@ class PaymentPageCreateContext
     private Amount $amount;
     private string $returnUrl;
     private DataBag $checkoutSession;
+    private string $locale;
 
     /**
      * PaymentPageCreateContext constructor.
@@ -25,19 +26,22 @@ class PaymentPageCreateContext
      * @param Amount $amount
      * @param string $returnUrl
      * @param DataBag $checkoutSession
+     * @param string $locale
      */
     public function __construct(
         string $paymentMethodType,
         string $orderId,
         Amount $amount,
         string $returnUrl,
-        DataBag $checkoutSession
+        DataBag $checkoutSession,
+        string $locale = 'default'
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
         $this->amount = $amount;
         $this->returnUrl = $returnUrl;
         $this->checkoutSession = $checkoutSession;
+        $this->locale = $locale;
     }
 
     public function getPaymentMethodType(): string
@@ -63,5 +67,10 @@ class PaymentPageCreateContext
     public function getCheckoutSession(): DataBag
     {
         return $this->checkoutSession;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
     }
 }
