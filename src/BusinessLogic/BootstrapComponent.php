@@ -428,7 +428,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             PaymentPageFactory::class,
             new SingleInstance(static function () {
-                return new PaymentPageFactory();
+                return new PaymentPageFactory(ServiceRegister::getService(PaymentPageSettingsService::class));
             })
         );
         ServiceRegister::registerService(

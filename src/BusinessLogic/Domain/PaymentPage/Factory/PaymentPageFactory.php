@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
 
 /**
@@ -13,6 +14,17 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaymentPageFactory
 {
+    private PaymentPageSettingsService $paymentPageSettingsService;
+
+    /**
+     * PaymentPageFactory constructor.
+     * @param PaymentPageSettingsService $paymentPageSettingsService
+     */
+    public function __construct(PaymentPageSettingsService $paymentPageSettingsService)
+    {
+        $this->paymentPageSettingsService = $paymentPageSettingsService;
+    }
+
     public function create(PaymentPageCreateContext $context): Paypage
     {
         $payPage = $this->initializePayPage($context);
@@ -25,10 +37,13 @@ class PaymentPageFactory
 
     protected function initializePayPage(PaymentPageCreateContext $context): Paypage
     {
-        return (new Paypage(
+        $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
+        $result = (new Paypage(
             $context->getAmount()->getPriceInCurrencyUnits(),
             $context->getAmount()->getCurrency()->getIsoCode(),
             $context->getReturnUrl()
         ))->setOrderId($context->getOrderId());
+
+        return $paymentPageSettings ? $paymentPageSettings->inflate($result) : $result;
     }
 }

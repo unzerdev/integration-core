@@ -153,6 +153,13 @@ class UnzerMock extends Unzer
         return $result;
     }
 
+    public function createOrUpdateCustomer(Customer $customer): Customer
+    {
+        $this->callHistory['createOrUpdateCustomer'][] = ['customer' => $customer];
+
+        return $customer;
+    }
+
     /**
      * @param $payment
      * @param float|null $amount

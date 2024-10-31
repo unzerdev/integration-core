@@ -188,10 +188,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
     {
         // Arrange
         $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
-//        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), 'test.my.shop.com');
-//        $expectedPayPageRequest
-//            ->setExcludeTypes(['EPS', 'googlepay', 'test'])
-//            ->setOrderId('test-order-123');
 
         $this->unzerFactory->getMockUnzer()
             ->setPayPageData(
@@ -255,7 +251,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                     PaymentMethodTypes::CARDS,
                     true,
                     BookingMethod::charge(),
-                    false,
+                    true,
                     [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
                     [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
                     '1',

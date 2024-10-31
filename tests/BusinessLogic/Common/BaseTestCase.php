@@ -79,6 +79,7 @@ use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServiceMock;
@@ -147,6 +148,9 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(EncryptorInterface::class),
                     TestServiceRegister::getService(WebhookUrlServiceInterface::class)
                 );
+            },
+            UploaderService::class => static function () {
+                return new UploaderServiceMock();
             },
             PaymentPageSettingsService::class => static function () {
                 return new PaymentPageSettingsService(
@@ -243,7 +247,7 @@ class BaseTestCase extends TestCase
                 );
             },
             PaymentPageFactory::class => static function () {
-                return new PaymentPageFactory();
+                return new PaymentPageFactory(TestServiceRegister::getService(PaymentPageSettingsService::class));
             },
             CustomerFactory::class => static function () {
                 return new CustomerFactory();

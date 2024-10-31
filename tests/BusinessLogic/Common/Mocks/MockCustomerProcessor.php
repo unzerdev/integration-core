@@ -16,6 +16,8 @@ class MockCustomerProcessor implements CustomerProcessor
 
     public function process(Customer $customer, PaymentPageCreateContext $context): void
     {
-        $customer->setEmail('test@example.com');
+        $customer
+            ->setEmail('test@example.com')
+            ->setCustomerId($context->getCheckoutSession()->get('customerId', 'test-customer-123'));
     }
 }
