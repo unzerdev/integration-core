@@ -85,16 +85,21 @@ class TransactionSynchronizer extends Task
     /**
      * @return void
      *
-     * @throws QueueStorageUnavailableException
+     * @throws Exception
      */
     public function execute(): void
     {
-        while (count($orderIdsToSynchronize = array_splice($this->orderIds, 0, self::TRANSACTIONS_COUNT_TO_SYNC)) > 0) {
-            $this->getQueueService()->enqueue(
-                'transaction-sync-' . $this->storeId,
-                new TransactionSyncTask($orderIdsToSynchronize)
-            );
-        }
+        StoreContext::doWithStore($this->storeId, function () {
+            while (count($orderIdsToSynchronize = array_splice($this->orderIds, 0,
+                    self::TRANSACTIONS_COUNT_TO_SYNC)) > 0) {
+                $this->getQueueService()->enqueue(
+                    'transaction-sync-' . $this->storeId,
+                    new TransactionSyncTask($orderIdsToSynchronize)
+                );
+            }
+        });
+
+        $this->reportProgress(100);
     }
 
     /**
