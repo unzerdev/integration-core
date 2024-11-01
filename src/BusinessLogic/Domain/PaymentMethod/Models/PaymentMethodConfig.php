@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -87,6 +88,8 @@ class PaymentMethodConfig
      * @param Amount|null $surcharge
      * @param array $restrictedCountries
      * @param bool $sendBasketData
+     *
+     * @throws InvalidAmountsException
      */
     public function __construct(
         string $type,
@@ -101,6 +104,8 @@ class PaymentMethodConfig
         ?Amount $surcharge = null,
         array $restrictedCountries = []
     ) {
+        $this->validateAmounts($minOrderAmount, $maxOrderAmount);
+
         $this->type = $type;
         $this->enabled = $enabled;
         $this->bookingMethod = $bookingMethod;
@@ -265,5 +270,38 @@ class PaymentMethodConfig
         }
 
         return null;
+    }
+
+    /**
+     * @param Amount|null $minAmount
+     * @param Amount|null $maxAmount
+     *
+     * @return void
+     * @throws InvalidAmountsException
+     */
+    private function validateAmounts(?Amount $minAmount, ?Amount $maxAmount): void
+    {
+        if (!$minAmount && !$maxAmount) {
+            return;
+        }
+
+        if ($minAmount && !$maxAmount) {
+            throw new InvalidAmountsException(
+                new TranslatableLabel('Maximum amount is required.', 'paymentMethodConfig.maxAmountMissing')
+            );
+        }
+
+        if (!$minAmount && $maxAmount) {
+            throw new InvalidAmountsException(
+                new TranslatableLabel('Minimum amount is required.', 'paymentMethodConfig.minAmountMissing')
+            );
+        }
+
+        if ($minAmount->getValue() > $maxAmount->getValue()) {
+            throw new InvalidAmountsException(
+                new TranslatableLabel('Minimum amount can not be greater than maximum amount.',
+                    'paymentMethodConfig.amountMismatch')
+            );
+        }
     }
 }

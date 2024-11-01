@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
@@ -94,6 +95,7 @@ class SavePaymentMethodConfigRequest extends Request
      * @throws InvalidBookingMethodException
      * @throws InvalidCountryArrayException
      * @throws InvalidTranslatableArrayException
+     * @throws InvalidAmountsException
      */
     public function toDomainModel(Currency $currency): PaymentMethodConfig
     {

@@ -4,9 +4,9 @@ namespace Unzer\Core\BusinessLogic\DataAccess\PaymentMethodConfig\Entities;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
@@ -63,6 +63,7 @@ class PaymentMethodConfig extends Entity
      * @throws InvalidCountryArrayException
      * @throws InvalidBookingMethodException
      * @throws InvalidCurrencyCode
+     * @throws InvalidAmountsException
      */
     public function inflate(array $data): void
     {

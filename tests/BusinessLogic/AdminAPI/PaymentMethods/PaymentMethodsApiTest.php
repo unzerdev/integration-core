@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\Domain\Country\Exceptions\InvalidCountryArrayExcept
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
@@ -151,6 +152,8 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws InvalidAmountsException
      */
     public function testGetPaymentMethodSuccess(): void
     {
@@ -169,6 +172,8 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws InvalidAmountsException
      */
     public function testGetPaymentMethodEpsToArray(): void
     {
@@ -214,6 +219,8 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws InvalidAmountsException
      */
     public function testGetPaymentMethodApplePayToArray(): void
     {
@@ -259,6 +266,8 @@ class PaymentMethodsApiTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws InvalidAmountsException
      */
     public function testGetPaymentMethodKlarnaToArray(): void
     {
@@ -357,6 +366,7 @@ class PaymentMethodsApiTest extends BaseTestCase
      * @throws InvalidTranslatableArrayException
      * @throws InvalidCountryArrayException
      * @throws InvalidBookingMethodException
+     * @throws InvalidAmountsException
      */
     public function testSavePaymentMethodConfigInvalidTranslatableLabel(): void
     {
@@ -383,6 +393,7 @@ class PaymentMethodsApiTest extends BaseTestCase
      * @throws InvalidTranslatableArrayException
      * @throws InvalidCountryArrayException
      * @throws InvalidBookingMethodException
+     * @throws InvalidAmountsException
      */
     public function testSavePaymentMethodConfigInvalidCountryArray(): void
     {

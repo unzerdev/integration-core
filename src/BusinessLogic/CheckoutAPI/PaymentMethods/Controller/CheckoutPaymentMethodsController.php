@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller;
 
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodsRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response\PaymentMethodsResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -33,6 +34,7 @@ class CheckoutPaymentMethodsController
      * @return PaymentMethodsResponse
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function getAvailablePaymentMethods(PaymentMethodsRequest $request): PaymentMethodsResponse
     {
