@@ -105,8 +105,8 @@ class SavePaymentMethodConfigRequest extends Request
             TranslatableLabel::fromArrayToBatch($this->name),
             TranslatableLabel::fromArrayToBatch($this->description),
             $this->statusIdToCharge,
-            $this->minOrderAmount ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
-            $this->maxOrderAmount ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,
+            $this->minOrderAmount !== null ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
+            $this->maxOrderAmount !== null ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,
             $this->surcharge ? Amount::fromFloat($this->surcharge, $currency) : null,
             Country::fromArrayToBatch($this->restrictedCountries)
         );
