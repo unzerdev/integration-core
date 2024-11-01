@@ -67,7 +67,9 @@ class PaymentMethodService
     {
         $keypair = $this->unzerFactory->makeUnzerAPI()->fetchKeypair();
         $availablePaymentTypes = array_unique($keypair->getAvailablePaymentTypes());
-        $availablePaymentTypes = array_diff($availablePaymentTypes, UnsupportedPaymentTypes::UNSUPPORTED_METHOD_TYPES);
+        $availablePaymentTypes = array_values(
+            array_diff($availablePaymentTypes, UnsupportedPaymentTypes::UNSUPPORTED_METHOD_TYPES)
+        );
         $configuredPaymentMethods = $this->paymentMethodConfigRepository->getPaymentMethodConfigs();
 
         return array_map(function ($availablePaymentType) use ($configuredPaymentMethods) {
