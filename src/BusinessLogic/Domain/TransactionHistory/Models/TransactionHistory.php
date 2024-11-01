@@ -329,7 +329,7 @@ class TransactionHistory
                 $authorization->getId(),
                 $authorization->getDate(),
                 Amount::fromFloat($authorization->getAmount() ?? 0, $currency),
-                'success',
+                $authorization->isSuccess(),
                 Amount::fromFloat($authorization->getCancelledAmount() ?? 0, $currency)
             );
         }
@@ -339,7 +339,7 @@ class TransactionHistory
                 $charge->getId() ?? '',
                 $charge->getDate() ?? '',
                 Amount::fromFloat($charge->getAmount() ?? 0, $currency),
-                'success',
+                $charge->isSuccess(),
                 Amount::fromFloat($charge->getCancelledAmount() ?? 0, $currency)
             );
         }
@@ -360,7 +360,7 @@ class TransactionHistory
                 TransactionTypes::REVERSAL,
                 $reversal->getDate() ?? '',
                 Amount::fromFloat($reversal->getAmount() ?? 0, $currency),
-                'success'
+                $reversal->isSuccess()
             );
         }
 
@@ -370,7 +370,7 @@ class TransactionHistory
                 TransactionTypes::REFUND,
                 $refund->getDate() ?? '',
                 Amount::fromFloat($refund->getAmount() ?? 0, $currency),
-                'success'
+                $refund->isSuccess()
             );
         }
 
@@ -380,7 +380,7 @@ class TransactionHistory
                 TransactionTypes::SHIPMENT,
                 $shipment->getDate() ?? '',
                 Amount::fromFloat($shipment->getAmount() ?? 0, $currency),
-                'success'
+                $shipment->isSuccess()
             );
         }
 
@@ -390,7 +390,7 @@ class TransactionHistory
                 TransactionTypes::PAYOUT,
                 $payout->getDate() ?? '',
                 Amount::fromFloat($payout->getAmount() ?? 0, $currency),
-                'success'
+                $payout->isSuccess()
             );
         }
 
@@ -400,7 +400,7 @@ class TransactionHistory
                 TransactionTypes::CHARGEBACK,
                 $chargeback->getDate() ?? '',
                 Amount::fromFloat($chargeback->getAmount() ?? 0, $currency),
-                'success'
+                $chargeback->isSuccess()
             );
         }
 

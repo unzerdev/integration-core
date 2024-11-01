@@ -318,7 +318,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         $transactionHistory = TransactionHistory::fromUnzerPayment($payment);
 
         // assert
-
         $authorizationItems = $transactionHistory->collection()->filterByType(TransactionTypes::AUTHORIZATION);
         $chargeItems = $transactionHistory->collection()->filterByType(TransactionTypes::CHARGE);
         $reversalItems = $transactionHistory->collection()->filterByType(TransactionTypes::REVERSAL);
@@ -347,55 +346,55 @@ class TransactionHistoryModelTest extends BaseTestCase
         self::assertEquals('authId', $authorizationItems->first()->getId());
         self::assertEquals('2024-10-21 15:58:08', $authorizationItems->first()->getDate());
         self::assertEquals(TransactionTypes::AUTHORIZATION, $authorizationItems->first()->getType());
-        self::assertEquals('success', $authorizationItems->first()->getStatus());
+        self::assertFalse($authorizationItems->first()->getStatus());
         self::assertCount(2, $chargeItems->getAll());
         self::assertEquals(Amount::fromFloat(50, Currency::fromIsoCode('EUR')),
             $chargeItems->first()->getAmount());
         self::assertEquals('chargeId1', $chargeItems->first()->getId());
         self::assertEquals('2024-10-21 16:58:08', $chargeItems->first()->getDate());
         self::assertEquals(TransactionTypes::CHARGE, $chargeItems->first()->getType());
-        self::assertEquals('success', $chargeItems->first()->getStatus());
+        self::assertFalse($chargeItems->first()->getStatus());
         self::assertEquals(Amount::fromFloat(60, Currency::fromIsoCode('EUR')),
             $chargeItems->last()->getAmount());
         self::assertEquals('chargeId2', $chargeItems->last()->getId());
         self::assertEquals('2024-10-21 17:58:08', $chargeItems->last()->getDate());
         self::assertEquals(TransactionTypes::CHARGE, $chargeItems->last()->getType());
-        self::assertEquals('success', $chargeItems->last()->getStatus());
+        self::assertFalse( $chargeItems->last()->getStatus());
         self::assertCount(1, $reversalItems->getAll());
         self::assertEquals(Amount::fromFloat(20, Currency::fromIsoCode('EUR')),
             $reversalItems->last()->getAmount());
         self::assertEquals('reversalId', $reversalItems->last()->getId());
         self::assertEquals('2024-10-22 17:58:08', $reversalItems->last()->getDate());
         self::assertEquals(TransactionTypes::REVERSAL, $reversalItems->last()->getType());
-        self::assertEquals('success', $reversalItems->last()->getStatus());
+        self::assertFalse($reversalItems->last()->getStatus());
         self::assertCount(3, $refundItems->getAll());
         self::assertEquals(Amount::fromFloat(44, Currency::fromIsoCode('EUR')),
             $refundItems->last()->getAmount());
         self::assertEquals('refundId', $refundItems->last()->getId());
         self::assertEquals('2024-10-23 17:58:08', $refundItems->last()->getDate());
         self::assertEquals(TransactionTypes::REFUND, $refundItems->last()->getType());
-        self::assertEquals('success', $refundItems->last()->getStatus());
+        self::assertFalse($refundItems->last()->getStatus());
         self::assertCount(1, $shipmentItems->getAll());
         self::assertEquals(Amount::fromFloat(11, Currency::fromIsoCode('EUR')),
             $shipmentItems->last()->getAmount());
         self::assertEquals('shipmentId', $shipmentItems->last()->getId());
         self::assertEquals('2024-10-24 17:58:08', $shipmentItems->last()->getDate());
         self::assertEquals(TransactionTypes::SHIPMENT, $shipmentItems->last()->getType());
-        self::assertEquals('success', $shipmentItems->last()->getStatus());
+        self::assertFalse($shipmentItems->last()->getStatus());
         self::assertCount(1, $payoutItems->getAll());
         self::assertEquals(Amount::fromFloat(21, Currency::fromIsoCode('EUR')),
             $payoutItems->last()->getAmount());
         self::assertEquals('payoutId', $payoutItems->last()->getId());
         self::assertEquals('2024-10-25 17:58:08', $payoutItems->last()->getDate());
         self::assertEquals(TransactionTypes::PAYOUT, $payoutItems->last()->getType());
-        self::assertEquals('success', $payoutItems->last()->getStatus());
+        self::assertFalse($payoutItems->last()->getStatus());
         self::assertCount(1, $chargebackItems->getAll());
         self::assertEquals(Amount::fromFloat(60, Currency::fromIsoCode('EUR')),
             $chargebackItems->last()->getAmount());
         self::assertEquals('chargeBackId', $chargebackItems->last()->getId());
         self::assertEquals('2024-10-26 17:58:08', $chargebackItems->last()->getDate());
         self::assertEquals(TransactionTypes::CHARGEBACK, $chargebackItems->last()->getType());
-        self::assertEquals('success', $chargebackItems->last()->getStatus());
+        self::assertFalse($chargebackItems->last()->getStatus());
     }
 
     /**

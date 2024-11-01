@@ -169,7 +169,6 @@ class OrderManagementService
     private function isChargeNecessary(TransactionHistory $transactionHistory, Amount $amountToCharge): bool
     {
         return $this->isTransactionHistoryValid($transactionHistory) &&
-            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $transactionHistory->getRemainingAmount() &&
@@ -186,7 +185,6 @@ class OrderManagementService
     private function isCancellationNecessary(TransactionHistory $transactionHistory, Amount $amount): bool
     {
         return $this->isTransactionHistoryValid($transactionHistory) &&
-            $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $transactionHistory->getRemainingAmount()->getValue() &&
