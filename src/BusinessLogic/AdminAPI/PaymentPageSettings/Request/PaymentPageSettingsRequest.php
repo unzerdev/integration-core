@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class PaymentPageRequest.
@@ -16,16 +17,14 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 class PaymentPageSettingsRequest
 {
     /**
-     * @var array $shopName
-     *
-     * Example [['locale' => 'en', 'value' => 'Shop']]
+     * @var TranslationCollection
      */
-    private array $shopName;
+    private TranslationCollection $shopNames;
 
     /**
-     * @var array $shopTagline
+     * @var TranslationCollection $shopTaglines
      */
-    private array $shopTagline;
+    private TranslationCollection $shopTaglines;
 
     /**
      * @var null|string $logoImageUrl
@@ -68,8 +67,8 @@ class PaymentPageSettingsRequest
     private ?SplFileInfo $file;
 
     /**
-     * @param array $shopName
-     * @param array $shopTagline
+     * @param TranslationCollection $shopNames
+     * @param TranslationCollection $shopTaglines
      * @param string|null $logoImageUrl
      * @param SplFileInfo|null $file
      * @param string|null $headerBackgroundColor
@@ -80,8 +79,8 @@ class PaymentPageSettingsRequest
      * @param string|null $shopTaglineFontColor
      */
     public function __construct(
-        array $shopName = [],
-        array $shopTagline = [],
+        TranslationCollection $shopNames,
+        TranslationCollection $shopTaglines,
         ?string $logoImageUrl = null,
         ?SplFileInfo $file = null,
         ?string $headerBackgroundColor = null,
@@ -91,8 +90,8 @@ class PaymentPageSettingsRequest
         ?string $shopTaglineBackgroundColor = null,
         ?string $shopTaglineFontColor = null
     ) {
-        $this->shopName = $shopName;
-        $this->shopTagline = $shopTagline;
+        $this->shopNames = $shopNames;
+        $this->shopTaglines = $shopTaglines;
         $this->logoImageUrl = $logoImageUrl;
         $this->file = $file;
         $this->headerBackgroundColor = $headerBackgroundColor;
@@ -107,15 +106,14 @@ class PaymentPageSettingsRequest
      * Transform to Domain model
      *
      * @return PaymentPageSettings
-     * @throws InvalidTranslatableArrayException
      */
 
     public function transformToDomainModel(): object
     {
         return new PaymentPageSettings(
             new UploadedFile($this->logoImageUrl,$this->file),
-            TranslatableLabel::fromArrayToBatch($this->shopName),
-            TranslatableLabel::fromArrayToBatch($this->shopTagline),
+            $this->shopNames,
+            $this->shopTaglines,
             $this->headerBackgroundColor,
             $this->headerFontColor,
             $this->shopNameBackgroundColor,

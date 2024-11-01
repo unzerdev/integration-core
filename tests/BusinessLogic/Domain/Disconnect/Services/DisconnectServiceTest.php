@@ -23,7 +23,10 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Enums\PaymentStatus;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
@@ -219,14 +222,16 @@ class DisconnectServiceTest extends BaseTestCase
      *
      * @throws EntityClassException
      * @throws QueryFilterInvalidParamException
+     * @throws InvalidTranslatableArrayException
+     * @throws Exception
      */
     public function testPaymentPageSettingDataDeleted(): void
     {
         // arrange
         $settings = new PaymentPageSettings(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -249,6 +254,7 @@ class DisconnectServiceTest extends BaseTestCase
      *
      * @throws EntityClassException
      * @throws QueryFilterInvalidParamException
+     * @throws Exception
      */
     public function testPaymentStatusMapDataDeleted(): void
     {
@@ -279,6 +285,10 @@ class DisconnectServiceTest extends BaseTestCase
         self::assertEmpty($paymentStatusMapEntity);
     }
 
+    /**
+     * @throws QueryFilterInvalidParamException
+     * @throws EntityClassException
+     */
     public function testTransactionHistoryDataDeleted() : void
     {
         $transactionHistory1 = new TransactionHistory(

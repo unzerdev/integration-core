@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
 
 /**
@@ -13,14 +13,14 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
 class PaymentPageSettings
 {
     /**
-     * @var TranslatableLabel[] $shopName
+     * @var TranslationCollection $shopNames
      */
-    private array $shopName = [];
+    private TranslationCollection $shopNames;
 
     /**
-     * @var TranslatableLabel[] $shopTagline
+     * @var TranslationCollection $shopTaglines
      */
-    private array $shopTagline = [];
+    private TranslationCollection $shopTaglines;
 
     /**
      * @var ?string $headerBackgroundColor
@@ -63,8 +63,8 @@ class PaymentPageSettings
     private Paypage $paypage;
 
     /**
-     * @param array $shopName
-     * @param array $shopTagline
+     * @param TranslationCollection $shopNames
+     * @param TranslationCollection $shopTaglines
      * @param UploadedFile $file
      * @param string|null $headerBackgroundColor
      * @param string|null $headerFontColor
@@ -75,8 +75,8 @@ class PaymentPageSettings
      */
     public function __construct(
         UploadedFile $file,
-        array $shopName = [],
-        array $shopTagline = [],
+        TranslationCollection $shopNames,
+        TranslationCollection $shopTaglines,
         ?string $headerBackgroundColor = null,
         ?string $headerFontColor = null,
         ?string $shopNameBackgroundColor = null,
@@ -84,8 +84,8 @@ class PaymentPageSettings
         ?string $shopTaglineBackgroundColor = null,
         ?string $shopTaglineFontColor = null
     ) {
-        $this->shopName = $shopName;
-        $this->shopTagline = $shopTagline;
+        $this->shopNames = $shopNames;
+        $this->shopTaglines = $shopTaglines;
         $this->file = $file;
         $this->headerBackgroundColor = $headerBackgroundColor;
         $this->headerFontColor = $headerFontColor;
@@ -97,15 +97,15 @@ class PaymentPageSettings
 
     /**
      * @param Paypage $paypage
-     * @param string $locale
+     * @param string|null $locale
      * @return Paypage
      */
-    public function inflate(Paypage $paypage, string $locale = 'default'): Paypage
+    public function inflate(Paypage $paypage, ?string $locale = null): Paypage
     {
         $this->paypage = $paypage;
 
-        $shopName = $this->getShopNameByLocale() ? $this->getShopNameByLocale($locale)->getMessage() : '';
-        $tagline = $this->getTaglineByLocale() ? $this->getTaglineByLocale($locale)->getMessage() : '';
+        $shopName = $this->shopNames->getTranslationMessage($locale);
+        $tagline = $this->shopTaglines->getTranslationMessage($locale);
 
         $this->paypage->setShopName($shopName);
         $this->paypage->setTagline($tagline);
@@ -129,22 +129,6 @@ class PaymentPageSettings
     public function getFile(): UploadedFile
     {
         return $this->file;
-    }
-
-    /**
-     * @return TranslatableLabel[]
-     */
-    public function getShopName(): array
-    {
-        return $this->shopName;
-    }
-
-    /**
-     * @return TranslatableLabel[]
-     */
-    public function getShopTagline(): array
-    {
-        return $this->shopTagline;
     }
 
     /**
@@ -196,35 +180,19 @@ class PaymentPageSettings
     }
 
     /**
-     * @param string $locale
-     *
-     * @return TranslatableLabel|null
+     * @return TranslationCollection
      */
-    public function getShopNameByLocale(string $locale = 'default'): ?TranslatableLabel
+    public function getShopNames(): TranslationCollection
     {
-        foreach ($this->shopName as $label) {
-            if ($label->getCode() === $locale) {
-                return $label;
-            }
-        }
-
-        return null;
+        return $this->shopNames;
     }
 
     /**
-     * @param string $locale
-     *
-     * @return TranslatableLabel|null
+     * @return TranslationCollection
      */
-    public function getTaglineByLocale(string $locale = 'default'): ?TranslatableLabel
+    public function getShopTaglines(): TranslationCollection
     {
-        foreach ($this->shopTagline as $label) {
-            if ($label->getCode() === $locale) {
-                return $label;
-            }
-        }
-
-        return null;
+        return $this->shopTaglines;
     }
 
     /**

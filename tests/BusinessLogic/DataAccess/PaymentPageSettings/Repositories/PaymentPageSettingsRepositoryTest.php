@@ -9,6 +9,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -67,8 +69,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            new TranslationCollection(new Translation('default',"shop")),
+            new TranslationCollection(new Translation('default',"description")),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -90,8 +92,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            new TranslationCollection(new Translation('default',"shop")),
+            new TranslationCollection(new Translation('default',"description")),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -115,8 +117,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            new TranslationCollection(new Translation('default',"shop")),
+            new TranslationCollection(new Translation('default',"description")),
         );
 
         // act
@@ -136,8 +138,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -146,8 +148,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop']]),
+            new TranslationCollection(new Translation('default',"description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -171,8 +173,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -182,8 +184,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -209,8 +211,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -248,8 +250,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();

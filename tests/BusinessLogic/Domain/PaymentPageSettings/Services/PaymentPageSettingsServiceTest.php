@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
@@ -95,8 +96,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -118,8 +119,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -143,8 +144,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('url'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         // act
@@ -165,8 +166,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null, new \SplFileInfo('path')),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         $uploadedPath = 'new path';
@@ -175,8 +176,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile($uploadedPath),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")]
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         // act
@@ -195,8 +196,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null, new \SplFileInfo('path')),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFFF',
             '#666666',
         );
@@ -207,8 +208,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null, null),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -231,8 +232,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -242,8 +243,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -268,8 +269,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,null),
-            [new TranslatableLabel("Shop1", "default")],
-            [new TranslatableLabel("Description", "default")]);
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]));
 
 
         $id = "123";
@@ -292,8 +293,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile("url",null),
-            [new TranslatableLabel("Shop1", "default")],
-            [new TranslatableLabel("Description", "default")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -322,8 +323,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
-            [new TranslatableLabel("Shop1", "default")],
-            [new TranslatableLabel("Description", "default")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -355,8 +356,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
-            [new TranslatableLabel("Shop1", "")],
-            [new TranslatableLabel("Description", "")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',

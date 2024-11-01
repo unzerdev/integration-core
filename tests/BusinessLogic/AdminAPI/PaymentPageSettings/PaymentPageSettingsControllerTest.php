@@ -13,6 +13,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPage
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -85,6 +87,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
+     * @throws InvalidTranslatableArrayException
      */
     public function testIsGetResponseSuccessful(): void
     {
@@ -92,8 +95,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $this->paymentPageSettingsService->setPaymentPageSettings(
             new PaymentPageSettingsModel(
                 new UploadedFile('file'),
-                [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-                [new TranslatableLabel("Description", "en")],
+                TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+                new TranslationCollection(new Translation('en_us',"description")),
                 '#FFFFFF',
                 '#666666',
                 '#111111',
@@ -112,14 +115,15 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      *
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetResponse(): void
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('file'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new TranslationCollection(new Translation('en_us',"description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -141,14 +145,15 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetResponseToArray(): void
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('file'),
-            [new TranslatableLabel("Shop1", "en"), new TranslatableLabel("Shop2", "de")],
-            [new TranslatableLabel("Description", "en")],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -159,11 +164,23 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
         $this->paymentPageSettingsService->setPaymentPageSettings($settings);
 
+        $expectedResponse = new PaymentPageSettingsModel(
+            new UploadedFile('file'),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            '#FFFFFF',
+            '#666666',
+            '#111111',
+            '#555555',
+            '#333333',
+            '#222222',
+        );
+
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPageSettings();
 
         // Assert
-        self::assertEquals($response->toArray(), $this->expectedToArrayResponse($settings));
+        self::assertEquals($response->toArray(), $this->expectedToArrayResponse($expectedResponse));
     }
 
     /**
@@ -171,13 +188,20 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
      */
     public function testGetResponseToArrayNoSettings(): void
     {
-        // Arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile());
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPageSettings();
 
+        $expectedResponse = ['shopName' => [],
+                'shopTagline' => [],
+                'logoImageUrl' => null,
+                'headerBackgroundColor' => null,
+                'headerFontColor' => null,
+                'shopNameBackgroundColor' => null,
+                'shopNameFontColor' => null,
+                'shopTaglineBackgroundColor' => null,
+                'shopTaglineFontColor' => null ];
         // Assert
-        self::assertEquals($response->toArray(), $this->expectedToArrayResponse($settings));
+        self::assertEquals($response->toArray(), $expectedResponse);
     }
 
     /**
@@ -188,8 +212,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
-            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             'path',
             null,
             '#FFFFFF',
@@ -215,8 +239,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
-            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             new \SplFileInfo('path'),
             null,
             '#FFFFFF',
@@ -244,8 +268,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     private function expectedToArrayResponse(?PaymentPageSettingsModel $paymentPageSettings): array
     {
         return [
-            'shopName' => $this->translatableLabelsToArray($paymentPageSettings->getShopName()),
-            'shopTagline' => $this->translatableLabelsToArray($paymentPageSettings->getShopTagline()),
+            'shopName' => TranslationCollection::translationsToArray($paymentPageSettings->getShopNames()),
+            'shopTagline' => TranslationCollection::translationsToArray($paymentPageSettings->getShopTaglines()),
             'logoImageUrl' => $paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $paymentPageSettings->getHeaderFontColor(),
@@ -257,22 +281,6 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     }
 
     /**
-     * @param TranslatableLabel[] $labels
-     *
-     * @return array
-     */
-    private function translatableLabelsToArray(array $labels): array
-    {
-        return array_map(function ($label) {
-            return [
-                'locale' => $label->getCode(),
-                'value' => $label->getMessage()
-            ];
-        }, $labels);
-    }
-
-
-    /**
      * @return void
      * @throws InvalidTranslatableArrayException
      * @throws UnzerApiException
@@ -282,8 +290,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
-            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             'path',
             null,
             '#FFFFFF',
@@ -302,12 +310,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         self::assertTrue($response->isSuccessful());
     }
 
+    /**
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     * @throws InvalidTranslatableArrayException
+     */
     public function testPaymentPagePreviewResponseToArray(): void
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            [['locale' => 'en', 'value' => 'Shop eng'], ['locale' => 'de', 'value' => 'Shop De']],
-            [['locale' => 'en', 'value' => 'Shop2 eng'], ['locale' => 'de', 'value' => 'Shop2 De']],
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             'path',
             null,
             '#FFFFFF',

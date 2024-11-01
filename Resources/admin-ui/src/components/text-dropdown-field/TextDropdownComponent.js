@@ -20,8 +20,9 @@ const TextDropdownComponent = (dropdownProps, textFieldProps, values = [], onCha
                 ? `${Unzer.config.flagsUrl}/${x.label}.svg`
                 : `${Unzer.config.imagesUrl}`;
             return {
-                label: `<img src="${imageUrl}" alt="${x.value}"/>${x.value}`,
-                value: x.value
+                label: `<img src="${imageUrl}" alt="${x.value}"/>`,
+                value: x.value,
+                title: x.value
             };
         })
     ];

@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as DomainPaymentPageSettings;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
@@ -58,8 +59,8 @@ class PaymentPageSettings extends Entity
 
         $this->paymentPageSettings = new DomainPaymentPageSettings(
             new UploadedFile($paypageData['logoImageUrl']),
-            TranslatableLabel::fromArrayToBatch($paypageData['shopName']),
-            TranslatableLabel::fromArrayToBatch($paypageData['shopTagline']),
+            TranslationCollection::fromArray($paypageData['shopNames']),
+            TranslationCollection::fromArray($paypageData['shopTaglines']),
             $paypageData['headerBackgroundColor'],
             $paypageData['headerFontColor'],
             $paypageData['shopNameBackgroundColor'],
@@ -76,8 +77,8 @@ class PaymentPageSettings extends Entity
         $data = parent::toArray();
         $data['storeId'] = $this->storeId;
         $data['paymentPageSettings'] = [
-            'shopName' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopName()),
-            'shopTagline' => TranslatableLabel::fromBatchToArray($this->paymentPageSettings->getShopTagline()),
+            'shopNames' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopNames()),
+            'shopTaglines' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopTaglines()),
             'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),

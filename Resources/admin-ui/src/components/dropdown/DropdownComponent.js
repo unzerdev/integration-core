@@ -57,7 +57,8 @@ const DropdownComponent = ({
             const listItem = generator.createElement(
                 'li',
                 'unzer-dropdown-list-item' + (option === selectedItem ? ' adls--selected' : ''),
-                option.label
+                option.label,
+                { title: option.title}
             );
             list.append(listItem);
 
