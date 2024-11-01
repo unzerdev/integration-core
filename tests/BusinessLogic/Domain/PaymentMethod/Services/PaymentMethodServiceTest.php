@@ -724,6 +724,41 @@ class PaymentMethodServiceTest extends BaseTestCase
     }
 
     /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetPaymentMethodsExcludeUnsupported(): void
+    {
+        // arrange
+        $this->setEntities(
+            [
+                new PaymentMethodConfig('przelewy24', true, BookingMethod::charge()),
+                new PaymentMethodConfig('giropay', false, BookingMethod::charge()),
+                new PaymentMethodConfig('twint', true, BookingMethod::charge()),
+                new PaymentMethodConfig('wechatpay', true, BookingMethod::charge()),
+                new PaymentMethodConfig('applepay', true, BookingMethod::charge())
+            ]
+        );
+
+        $this->mockData('s-pub-test', 's-priv-test', ['przelewy24', 'giropay', 'twint', 'wechatpay', 'applepay']);
+
+        // act
+        $methods = StoreContext::doWithStore('1', [$this->service, 'getAllPaymentMethods']);
+
+        // assert
+        $expectedMethods = [
+            new PaymentMethod('przelewy24', PaymentMethodNames::PAYMENT_METHOD_NAMES['przelewy24'], true),
+            new PaymentMethod('giropay', PaymentMethodNames::PAYMENT_METHOD_NAMES['giropay'], false),
+            new PaymentMethod('twint', PaymentMethodNames::PAYMENT_METHOD_NAMES['twint'], true),
+            new PaymentMethod('wechatpay', PaymentMethodNames::PAYMENT_METHOD_NAMES['wechatpay'], true),
+        ];
+
+        self::assertEquals($expectedMethods, $methods);
+    }
+
+
+    /**
      * @param PaymentMethodConfig[] $paymentMethods
      *
      * @return void

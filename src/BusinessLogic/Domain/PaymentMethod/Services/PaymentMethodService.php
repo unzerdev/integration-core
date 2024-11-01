@@ -10,6 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BasketRequired;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingChargeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\UnsupportedPaymentTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
@@ -66,6 +67,7 @@ class PaymentMethodService
     {
         $keypair = $this->unzerFactory->makeUnzerAPI()->fetchKeypair();
         $availablePaymentTypes = array_unique($keypair->getAvailablePaymentTypes());
+        $availablePaymentTypes = array_diff($availablePaymentTypes, UnsupportedPaymentTypes::UNSUPPORTED_METHOD_TYPES);
         $configuredPaymentMethods = $this->paymentMethodConfigRepository->getPaymentMethodConfigs();
 
         return array_map(function ($availablePaymentType) use ($configuredPaymentMethods) {
