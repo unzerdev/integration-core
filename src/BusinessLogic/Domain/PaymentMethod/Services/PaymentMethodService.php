@@ -263,6 +263,10 @@ class PaymentMethodService
                 $currentContextCurrency
             );
 
+            if($maxOrderAmount->getValue() === 0 || $minOrderAmount->getValue() === 0) {
+                return true;
+            }
+
             return $orderAmount->getValue() > $minOrderAmount->getValue() && $orderAmount->getValue() < $maxOrderAmount->getValue();
         });
     }
