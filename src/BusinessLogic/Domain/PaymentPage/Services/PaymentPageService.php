@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Services;
 
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
@@ -109,6 +109,15 @@ class PaymentPageService
         return $payPageResponse;
     }
 
+    /**
+     * @param string $orderId
+     *
+     * @return PaymentState
+     * @throws ConnectionSettingsNotFoundException
+     * @throws TransactionHistoryNotFoundException
+     * @throws UnzerApiException
+     * @throws InvalidCurrencyCode
+     */
     public function getPaymentState(string $orderId): PaymentState
     {
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
@@ -119,6 +128,10 @@ class PaymentPageService
         }
 
         $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
+        $newTransactionHistory = TransactionHistory::fromUnzerPayment($payment);
+        if(!$newTransactionHistory->isEqual($transactionHistory)) {
+            $this->transactionHistoryService->saveTransactionHistory($newTransactionHistory);
+        }
 
         return new PaymentState($payment->getState(), $payment->getStateName());
     }

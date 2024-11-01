@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\CheckoutAPI\PaymentPage;
 
+use Exception;
 use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
@@ -29,12 +30,21 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentSDK;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\SdkAmount;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Constants\PaymentState;
+use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
+use UnzerSDK\Resources\TransactionTypes\Authorization;
+use UnzerSDK\Resources\TransactionTypes\Cancellation;
+use UnzerSDK\Resources\TransactionTypes\Charge;
+use UnzerSDK\Resources\TransactionTypes\Chargeback;
+use UnzerSDK\Resources\TransactionTypes\Payout;
+use UnzerSDK\Resources\TransactionTypes\Shipment;
 
 /**
  * Class CheckoutPaymentPageAPITest
@@ -184,6 +194,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertEquals('transactionHistory.notFound', $response->toArray()['errorCode']);
     }
 
+    /**
+     * @throws UnzerApiException
+     */
     public function testCheckSuccessfulPaymentStatus(): void
     {
         // Arrange
@@ -192,7 +205,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $this->unzerFactory->getMockUnzer()
             ->setPayPageData(
                 ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
-            )->setPayment((new PaymentSDK())->setState(PaymentState::STATE_COMPLETED));
+            )->setPayment($this->generateValidPayment()->setState(PaymentState::STATE_COMPLETED));
 
         CheckoutAPI::get()->paymentPage('1')->create(new PaymentPageCreateRequest(
             PaymentMethodTypes::CARDS,
@@ -273,5 +286,69 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $unzerMock = new UnzerMock($privateKey);
         $unzerMock->setKeypair($keypair);
         $this->unzerFactory->setMockUnzer($unzerMock);
+    }
+
+    /**
+     * @return PaymentSDK
+     *
+     * @throws UnzerApiException
+     * @throws Exception
+     */
+    private function generateValidPayment(): PaymentSDK
+    {
+        $payment = new PaymentSDK();
+        $payment->setParentResource(new UnzerMock('s-priv-test'));
+        $payment->setPaymentType(new Card('test', '03/30'));
+        $payment->setId('payment1');
+        $payment->setOrderId('order1');
+        $amount = new SdkAmount();
+        $amount->setCurrency('EUR');
+        $amount->setTotal(1000.00);
+        $amount->setCharged(900.00);
+        $amount->setCanceled(500.00);
+        $amount->setRemaining(100.00);
+        $payment->setAmount($amount);
+
+        $authorization = new Authorization(1000, 'EUR', 'test');
+        $authorization->setId('authId');
+        $authorization->setDate('2024-10-21 15:58:08');
+        $payment->setAuthorization($authorization);
+
+        $charge1 = new Charge(50, 'EUR', 'test');
+        $charge1->setId('chargeId1');
+        $charge1->setDate('2024-10-21 16:58:08');
+        $payment->addCharge($charge1);
+        $charge2 = new Charge(60, 'EUR', 'test');
+        $charge2->setId('chargeId2');
+        $charge2->setDate('2024-10-21 17:58:08');
+        $payment->addCharge($charge2);
+
+        $reversal = new Cancellation(20);
+        $reversal->setId('reversalId');
+        $reversal->setDate('2024-10-22 17:58:08');
+        $payment->addReversal($reversal);
+
+        $refund = new Cancellation(44);
+        $refund->setId('refundId');
+        $refund->setDate('2024-10-23 17:58:08');
+        $payment->addRefund($refund);
+
+        $shipment = new Shipment();
+        $shipment->setId('shipmentId');
+        $shipment->setDate('2024-10-24 17:58:08');
+        $shipment->setAmount(11);
+        $payment->addShipment($shipment);
+
+        $payout = new Payout(21, 'EUR', 'test');
+        $payout->setId('payoutId');
+        $payout->setDate('2024-10-25 17:58:08');
+        $payment->setPayout($payout);
+
+        $chargeBack = new ChargeBack(60);
+        $chargeBack->setId('chargeBackId');
+        $chargeBack->setDate('2024-10-26 17:58:08');
+        $payment->setChargebacks([$chargeBack]);
+
+        return $payment;
     }
 }
