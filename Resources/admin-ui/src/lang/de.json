@@ -78,7 +78,7 @@
     "support": "Need help?",
     "version": "Version: %s",
     "update": "(New version is available <a href = ''>here</a>)",
-    "supportLink": "https://help.unzer.com/kb/en/"
+    "supportLink": "https://help.unzer.com/kb/de/"
   },
   "login": {
     "sandbox": "You’re currently in the Sandbox environment. Switch to live mode <a href='%s'>here</a>.",
