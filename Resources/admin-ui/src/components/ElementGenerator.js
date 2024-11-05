@@ -96,7 +96,7 @@ const createLoader = ({type, variation, fullPage}) => {
  * @param {boolean?} horizontal Indicates horizontal layout.
  * @return {HTMLDivElement}
  */
-const createFieldWrapper = (input, label, description, error, className = '', horizontal = false) => {
+const createFieldWrapper = (input, label, description, descriptionPositionUp = true,  error, className = '', horizontal = false) => {
     const field = createElement('div', `adl-field-wrapper ${className}`);
     let textContainer;
     if (horizontal) {
@@ -109,16 +109,22 @@ const createFieldWrapper = (input, label, description, error, className = '', ho
 
     label && textContainer.append(createElement('h3', 'unzer-field-title', label));
 
-    description && textContainer.append(createElement('span', 'unzer-field-subtitle', description));
+    if(descriptionPositionUp) {
+      description && textContainer.append(createElement('span', 'unzer-field-subtitle', description));
+    }
 
     const inputWrapper = createElement('div', 'unzer-input-wrapper', '', null, [
         input,
         createElement('span', 'unzer-input-error', error)
     ]);
 
-    field.append(inputWrapper);
+  field.append(inputWrapper);
 
-    return field;
+  if(!descriptionPositionUp) {
+    description && textContainer.append(createElement('span', 'unzer-field-subtitle', description));
+  }
+
+  return field;
 };
 
 /**

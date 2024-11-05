@@ -149,7 +149,7 @@ const DropdownComponent = ({
         selectButton.classList.remove('adls--search-active');
     });
 
-    const descriptionSpan = generator.createElement('span', 'unzer-dropdown-description', description, [], [])
+    const descriptionSpan = generator.createElement('span', 'unzer-dropdown-description', description, [], []);
 
     wrapper.append(hiddenInput, selectButton, list, descriptionSpan);
 

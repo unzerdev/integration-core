@@ -106,9 +106,7 @@
   }
 
   .unzer-field-subtitle {
-    display: block;
-    margin-bottom: 10px;
-    color: $adl-color--grey-70;
+    @include field-description
   }
 
   .unzer-field-component:invalid {

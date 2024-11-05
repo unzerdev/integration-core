@@ -386,8 +386,11 @@
 
     const { elementGenerator: generator } = Unzer;
 
+    const descriptionSpan = generator.createElement('span', 'description', 'checkout.modal.surchargeDescription', [], [])
+
     const surchargeFieldWrapper = generator.createElement('div', 'surcharge-wrapper', '', null, [
       surchargeField,
+      descriptionSpan,
       generator.createElement('button', 'arrow-up', '', {
         type: 'button',
         onclick: () => {
@@ -413,6 +416,8 @@
           orientation: "top",
           options: countries.map(x => ({ value: x.code, label: x.name })),
           values: paymentMethodConfig.restrictedCountries?.map(x => x.code),
+          description: "checkout.modal.restrictCountriesDescription",
+          descriptionPositionUp: false,
           onChange: (values) => {
             paymentMethodConfig.restrictedCountries = values;
           }

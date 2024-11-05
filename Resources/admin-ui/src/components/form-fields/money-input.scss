@@ -16,13 +16,26 @@
   }
 }
 
+@mixin field-description{
+    padding-top: 5px;
+    font-size: 12px;
+    color: $unzer-color-grey;
+}
+
 .surcharge-wrapper{
   @include adl-field-wrapper;
   flex-grow: 1;
   display: flex;
   position: relative;
   align-items: center;
+
+  .description{
+    @include field-description;
+    margin-right: auto;
+  }
 }
+
+
 
 .input-wrapper, .dropdown-wrapper
 {
