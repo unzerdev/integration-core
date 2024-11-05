@@ -12,7 +12,7 @@
  * @param {TextFieldComponentModel} props The properties.
  * @return {HTMLElement}
  */
-const TextFieldComponent = ({ className = '', subtitle = '', fieldClasses = '', maxWidth = true, label, description, error, horizontal, onChange, title, ...rest }) => {
+const TextFieldComponent = ({ className = '', subtitle = '', descriptionPositionUp = true,fieldClasses = '', maxWidth = true, label, description, error, horizontal, onChange, title, ...rest }) => {
     const { elementGenerator: generator } = Unzer;
     const classes = maxWidth ? "adl-text-input unzer-label-input-container-max-width" : "adl-text-input"
 
@@ -26,6 +26,7 @@ const TextFieldComponent = ({ className = '', subtitle = '', fieldClasses = '', 
         }),
         label,
         description,
+        descriptionPositionUp,
         error,
         fieldClasses,
         horizontal
