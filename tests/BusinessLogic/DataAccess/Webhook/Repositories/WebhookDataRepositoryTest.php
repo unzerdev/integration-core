@@ -3,10 +3,12 @@
 namespace BusinessLogic\DataAccess\Webhook\Repositories;
 
 use Exception;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -24,7 +26,7 @@ class WebhookDataRepositoryTest extends BaseTestCase
     /** @var RepositoryInterface */
     private RepositoryInterface $repository;
 
-    /** @var WebhookDataRepositoryInterface */
+    /** @var WebhookSettingsRepositoryInterface */
     private $webhookDataRepository;
 
     /**
@@ -36,18 +38,18 @@ class WebhookDataRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repository = TestRepositoryRegistry::getRepository(WebhookDataEntity::getClassName());
-        $this->webhookDataRepository = TestServiceRegister::getService(WebhookDataRepositoryInterface::class);
+        $this->webhookDataRepository = TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class);
     }
 
     /**
      * @throws Exception
      */
-    public function testGetDataNoData(): void
+    public function testGetSettingsNoSettings(): void
     {
         // act
         $result = StoreContext::doWithStore(
             '1',
-            [$this->webhookDataRepository, 'getWebhookData']
+            [$this->webhookDataRepository, 'getWebhookSettings']
         );
 
         // assert
@@ -57,16 +59,19 @@ class WebhookDataRepositoryTest extends BaseTestCase
     /**
      * @throws Exception
      */
-    public function testGetData(): void
+    public function testGetSettings(): void
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
 
         StoreContext::doWithStore('1',
-            [$this->webhookDataRepository, 'setWebhookData'], [$settings]);
+            [$this->webhookDataRepository, 'setWebhookSettings'], [$settings]);
         // act
         $result = StoreContext::doWithStore('1',
-            [$this->webhookDataRepository, 'getWebhookData']);
+            [$this->webhookDataRepository, 'getWebhookSettings']);
 
         // assert
         self::assertEquals($settings, $result);
@@ -78,15 +83,18 @@ class WebhookDataRepositoryTest extends BaseTestCase
     public function testGetSettingsSetForDifferentStore(): void
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
         $settingsEntity = new WebhookDataEntity();
-        $settingsEntity->setWebhookData($settings);
+        $settingsEntity->setWebhookSettings($settings);
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
 
         // act
         $result = StoreContext::doWithStore('2',
-            [$this->webhookDataRepository, 'getWebhookData']);
+            [$this->webhookDataRepository, 'getWebhookSettings']);
 
         // assert
         self::assertNull($result);
@@ -100,17 +108,20 @@ class WebhookDataRepositoryTest extends BaseTestCase
     public function testSetSettings(): void
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
 
         // act
         StoreContext::doWithStore('1',
-            [$this->webhookDataRepository, 'setWebhookData'],
+            [$this->webhookDataRepository, 'setWebhookSettings'],
             [$settings]
         );
 
         // assert
         $savedEntity = $this->repository->select();
-        self::assertEquals($settings, $savedEntity[0]->getWebhookData());
+        self::assertEquals($settings, $savedEntity[0]->getWebhookSettings());
     }
 
     /**
@@ -121,22 +132,28 @@ class WebhookDataRepositoryTest extends BaseTestCase
     public function testSetSettingsAlreadyExists(): void
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
         $settingsEntity = new WebhookDataEntity();
-        $settingsEntity->setWebhookData($settings);
+        $settingsEntity->setWebhookSettings($settings);
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
-        $newSettings = new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2');
+        $newSettings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2')
+        );
 
         // act
         StoreContext::doWithStore('1',
-            [$this->webhookDataRepository, 'setWebhookData'],
+            [$this->webhookDataRepository, 'setWebhookSettings'],
             [$newSettings]
         );
 
         // assert
         $savedEntity = $this->repository->selectOne();
-        self::assertEquals($newSettings, $savedEntity->getWebhookData());
+        self::assertEquals($newSettings, $savedEntity->getWebhookSettings());
     }
 
     /**
@@ -147,14 +164,20 @@ class WebhookDataRepositoryTest extends BaseTestCase
     public function testSetSettingsAlreadyExistsForOtherStore()
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
         $settingsEntity = new WebhookDataEntity();
-        $settingsEntity->setWebhookData($settings);
+        $settingsEntity->setWebhookSettings($settings);
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
-        $newSettings = new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2');
+        $newSettings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2')
+        );
         // act
-        StoreContext::doWithStore('2', [$this->webhookDataRepository, 'setWebhookData'],
+        StoreContext::doWithStore('2', [$this->webhookDataRepository, 'setWebhookSettings'],
             [$newSettings]);
 
         // assert
@@ -167,17 +190,20 @@ class WebhookDataRepositoryTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testDeleteWebhookData(): void
+    public function testDeleteWebhookSettings(): void
     {
         // arrange
-        $settings = new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test');
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test'], 'test')
+        );
         $settingsEntity = new WebhookDataEntity();
-        $settingsEntity->setWebhookData($settings);
+        $settingsEntity->setWebhookSettings($settings);
         $settingsEntity->setStoreId('1');
         $this->repository->save($settingsEntity);
 
         // act
-        StoreContext::doWithStore('1', [$this->webhookDataRepository, 'deleteWebhookData']);
+        StoreContext::doWithStore('1', [$this->webhookDataRepository, 'deleteWebhookSettings']);
 
         // assert
         $webhookData = $this->repository->select();
@@ -189,12 +215,12 @@ class WebhookDataRepositoryTest extends BaseTestCase
      *
      * @throws Exception
      */
-    public function testDeleteWebhookDataNoData(): void
+    public function testDeleteWebhookSettingsNoSettings(): void
     {
         // arrange
 
         // act
-        StoreContext::doWithStore('1', [$this->webhookDataRepository, 'deleteWebhookData']);
+        StoreContext::doWithStore('1', [$this->webhookDataRepository, 'deleteWebhookSettings']);
 
         // assert
         $webhookData = $this->repository->select();

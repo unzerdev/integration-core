@@ -114,27 +114,20 @@ class ConnectionController
      */
     public function reRegisterWebhooks(): ReRegisterWebhooksResponse
     {
-        $webhookData = $this->connectionService->reRegisterWebhooks();
+        $webhookSettings = $this->connectionService->reRegisterWebhooks();
 
-        return new ReRegisterWebhooksResponse($webhookData);
+        return new ReRegisterWebhooksResponse($webhookSettings);
     }
 
     /**
-     * @param GetCredentialsRequest $request
-     *
      * @return GetCredentialsResponse
-     *
-     * @throws InvalidModeException
      */
-    public function getCredentials(GetCredentialsRequest $request): GetCredentialsResponse
+    public function getCredentials(): GetCredentialsResponse
     {
-        $mode = Mode::parse($request->getMode());
         $connectionSettings = $this->connectionService->getConnectionSettings();
-        $connectionData = $this->getConnectionDataFromConnectionSettings($mode, $connectionSettings);
-        $webhookData = $this->connectionService->getWebhookData();
+        $webhookSettings = $this->connectionService->getWebhookSettings();
 
-        return new GetCredentialsResponse($connectionData, $webhookData);
-
+        return new GetCredentialsResponse($connectionSettings, $webhookSettings);
     }
 
     /**

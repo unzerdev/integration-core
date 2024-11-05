@@ -6,7 +6,6 @@ use DateTime;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
-use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetCredentialsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
@@ -26,7 +25,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPage
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -65,7 +65,7 @@ class ConnectionControllerTest extends BaseTestCase
         $this->connectionService = new ConnectionServiceMock(
             new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-            TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+            TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),
             TestServiceRegister::getService(WebhookUrlServiceInterface::class)
         );
@@ -99,6 +99,7 @@ class ConnectionControllerTest extends BaseTestCase
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      */
+
     public function testSuccessfulLiveConnection(): void
     {
         // Arrange
@@ -296,9 +297,11 @@ class ConnectionControllerTest extends BaseTestCase
         // Arrange
         $date = new DateTime('2024-10-03 14:30:00');
         $time = $date->format('F d, Y H:i');
-        $this->connectionService->setWebhookData(
+        $settings = new WebhookSettings(
+            Mode::live(),
             new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time)
         );
+        $this->connectionService->setWebhookSettings($settings);
 
         // Act
         $response = AdminAPI::get()->connection('1')->reRegisterWebhooks();
@@ -314,16 +317,13 @@ class ConnectionControllerTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidModeException
      */
     public function testGetCredentialsSuccess(): void
     {
         // Arrange
-        $request = new GetCredentialsRequest('live');
 
         // Act
-        $response = AdminAPI::get()->connection('1')->getCredentials($request);
+        $response = AdminAPI::get()->connection('1')->getCredentials();
 
         // Assert
         self::assertTrue($response->isSuccessful());
@@ -331,16 +331,13 @@ class ConnectionControllerTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidModeException
      */
     public function testGetCredentialsToArrayEmpty(): void
     {
         // Arrange
-        $request = new GetCredentialsRequest('live');
 
         // Act
-        $response = AdminAPI::get()->connection('1')->getCredentials($request);
+        $response = AdminAPI::get()->connection('1')->getCredentials();
 
         // Assert
         self::assertEmpty($response->toArray());
@@ -348,56 +345,114 @@ class ConnectionControllerTest extends BaseTestCase
 
     /**
      * @return void
-     *
-     * @throws InvalidModeException
      */
-    public function testGetCredentialsToArrayOnlyConnectionData(): void
+    public function testGetCredentialsToArrayOnlyLive(): void
     {
         // Arrange
-        $request = new GetCredentialsRequest('live');
+        $date = new DateTime('2024-10-03 14:30:00');
+        $time = $date->format('F d, Y H:i');
         $this->connectionService->setConnectionSettings(
             new ConnectionSettings(
                 Mode::live(),
                 new ConnectionData('publicKeyTest', 'privateKeyTest')
             )
         );
+        $settings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time)
+        );
+
+        $this->connectionService->setWebhookSettings($settings);
 
         // Act
-        $response = AdminAPI::get()->connection('1')->getCredentials($request);
+        $response = AdminAPI::get()->connection('1')->getCredentials();
 
         // Assert
-        self::assertArrayHasKey('connectionData', $response->toArray());
-        self::assertArrayNotHasKey('webhookData', $response->toArray());
-        self::assertEquals('publicKeyTest', $response->toArray()['connectionData']['publicKey']);
-        self::assertEquals('privateKeyTest', $response->toArray()['connectionData']['privateKey']);
+        $array = $response->toArray();
+        self::assertEquals('publicKeyTest', $array['live']['connectionData']['publicKey']);
+        self::assertEquals('privateKeyTest', $array['live']['connectionData']['privateKey']);
+        self::assertEquals('October 03, 2024 14:30', $array['live']['webhookData']['registrationDate']);
+        self::assertEquals('1, 2', $array['live']['webhookData']['webhookID']);
+        self::assertEquals('test, test2', $array['live']['webhookData']['events']);
+        self::assertEquals('test.com', $array['live']['webhookData']['webhookUrl']);
     }
 
     /**
      * @return void
-     *
-     * @throws InvalidModeException
      */
-    public function testGetCredentialsToArrayOnlyWebhookData(): void
+    public function testGetCredentialsToArrayOnlySandbox(): void
     {
         // Arrange
-        $request = new GetCredentialsRequest('live');
-
         $date = new DateTime('2024-10-03 14:30:00');
         $time = $date->format('F d, Y H:i');
-        $this->connectionService->setWebhookData(
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::sandbox(),
+                null,
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+        $settings = new WebhookSettings(
+            Mode::sandbox(),
+            null,
             new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time)
         );
 
+        $this->connectionService->setWebhookSettings($settings);
+
         // Act
-        $response = AdminAPI::get()->connection('1')->getCredentials($request);
+        $response = AdminAPI::get()->connection('1')->getCredentials();
 
         // Assert
-        self::assertArrayHasKey('webhookData', $response->toArray());
-        self::assertArrayNotHasKey('connectionData', $response->toArray());
-        self::assertEquals('1, 2', $response->toArray()['webhookData']['webhookID']);
-        self::assertEquals('test.com', $response->toArray()['webhookData']['webhookUrl']);
-        self::assertEquals('test, test2', $response->toArray()['webhookData']['events']);
-        self::assertEquals('October 03, 2024 14:30', $response->toArray()['webhookData']['registrationDate']);
+        $array = $response->toArray();
+        self::assertEquals('publicKeyTest', $array['sandbox']['connectionData']['publicKey']);
+        self::assertEquals('privateKeyTest', $array['sandbox']['connectionData']['privateKey']);
+        self::assertEquals('October 03, 2024 14:30', $array['sandbox']['webhookData']['registrationDate']);
+        self::assertEquals('1, 2', $array['sandbox']['webhookData']['webhookID']);
+        self::assertEquals('test, test2', $array['sandbox']['webhookData']['events']);
+        self::assertEquals('test.com', $array['sandbox']['webhookData']['webhookUrl']);
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetCredentialsToArray(): void
+    {
+        // Arrange
+        $date = new DateTime('2024-10-03 14:30:00');
+        $time = $date->format('F d, Y H:i');
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::sandbox(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest'),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+        $settings = new WebhookSettings(
+            Mode::sandbox(),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time),
+            new WebhookData('test.com', ['1', '2'], ['test', 'test2'], $time)
+        );
+
+        $this->connectionService->setWebhookSettings($settings);
+
+        // Act
+        $response = AdminAPI::get()->connection('1')->getCredentials();
+
+        // Assert
+        $array = $response->toArray();
+        self::assertEquals('publicKeyTest', $array['sandbox']['connectionData']['publicKey']);
+        self::assertEquals('privateKeyTest', $array['sandbox']['connectionData']['privateKey']);
+        self::assertEquals('October 03, 2024 14:30', $array['sandbox']['webhookData']['registrationDate']);
+        self::assertEquals('1, 2', $array['sandbox']['webhookData']['webhookID']);
+        self::assertEquals('test, test2', $array['sandbox']['webhookData']['events']);
+        self::assertEquals('test.com', $array['sandbox']['webhookData']['webhookUrl']);
+        self::assertEquals('publicKeyTest', $array['live']['connectionData']['publicKey']);
+        self::assertEquals('privateKeyTest', $array['live']['connectionData']['privateKey']);
+        self::assertEquals('October 03, 2024 14:30', $array['live']['webhookData']['registrationDate']);
+        self::assertEquals('1, 2', $array['live']['webhookData']['webhookID']);
+        self::assertEquals('test, test2', $array['live']['webhookData']['events']);
+        self::assertEquals('test.com', $array['live']['webhookData']['webhookUrl']);
     }
 
     /**

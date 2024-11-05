@@ -16,6 +16,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
@@ -24,10 +25,10 @@ use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Enums\PaymentStatus;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
 use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -37,7 +38,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\MemoryRepository;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\ORM\TestRepositoryRegistry;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookDataEntity;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 
 /**
@@ -138,8 +139,11 @@ class DisconnectServiceTest extends BaseTestCase
         $this->connectionSettingsRepository->save($settings);
 
         $oldData = new WebhookDataEntity();
-        $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $oldData->setWebhookData($webhookData);
+        $webhookSettings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2')
+        );
+        $oldData->setWebhookSettings($webhookSettings);
         $oldData->setStoreId('1');
         $this->webhookDataRepository->save($oldData);
 
@@ -175,8 +179,11 @@ class DisconnectServiceTest extends BaseTestCase
         $this->connectionSettingsRepository->save($settings);
 
         $oldData = new WebhookDataEntity();
-        $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $oldData->setWebhookData($webhookData);
+        $webhookSettings = new WebhookSettings(
+            Mode::live(),
+            new WebhookData('test2.com', ['12', '23'], ['test2', 'test2'], 'test2')
+        );
+        $oldData->setWebhookSettings($webhookSettings);
         $oldData->setStoreId('1');
         $this->webhookDataRepository->save($oldData);
 
@@ -194,7 +201,7 @@ class DisconnectServiceTest extends BaseTestCase
      * @return void
      *
      * @throws EntityClassException
-     * @throws QueryFilterInvalidParamException
+     * @throws QueryFilterInvalidParamException|InvalidAmountsException
      */
     public function testPaymentMethodConfigDataDeleted(): void
     {

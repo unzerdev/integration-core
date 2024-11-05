@@ -4,7 +4,7 @@ namespace BusinessLogic\Domain\Connection\Services;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookSettingsEntity;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
@@ -19,7 +19,8 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\EntityClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -70,13 +71,13 @@ class ConnectionSettingsServiceTest extends BaseTestCase
             return new ConnectionService(
                 $this->unzerFactory,
                 TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
                 TestServiceRegister::getService(EncryptorInterface::class),
                 TestServiceRegister::getService(WebhookUrlServiceInterface::class)
             );
         },);
         $this->repository = TestRepositoryRegistry::getRepository(ConnectionSettingsEntity::getClassName());
-        $this->webhookDataRepository = TestRepositoryRegistry::getRepository(WebhookDataEntity::getClassName());
+        $this->webhookDataRepository = TestRepositoryRegistry::getRepository(WebhookSettingsEntity::getClassName());
         $this->service = TestServiceRegister::getService(ConnectionService::class);
     }
 
@@ -393,7 +394,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
 
         // assert
-        /** @var WebhookDataEntity $connectionSettings */
+        /** @var WebhookSettingsEntity $connectionSettings */
         $webhookData = $this->webhookDataRepository->selectOne();
 
         self::assertNull($webhookData);
@@ -428,8 +429,8 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
 
         // assert
-        /** @var WebhookDataEntity $connectionSettings */
-        $webhookData = $this->webhookDataRepository->selectOne()->getWebhookData();
+        /** @var WebhookSettingsEntity $connectionSettings */
+        $webhookData = $this->webhookDataRepository->selectOne()->getWebhookSettings();
 
         self::assertNotNull($webhookData);
     }
@@ -452,13 +453,19 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         );
         $webhook1 = new Webhook();
         $webhook1->setUrl('https://test.com');
+        $webhook1->setId('4');
         $webhook1->setEvent(WebhookEvents::PAYMENT);
         $webhook2 = new Webhook();
         $webhook2->setUrl('https://test.com');
+        $webhook2->setId('5');
         $webhook2->setEvent(WebhookEvents::CHARGE);
-        $oldData = new WebhookDataEntity();
+        $oldData = new WebhookSettingsEntity();
         $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $oldData->setWebhookData($webhookData);
+        $webhookSettings = new WebhookSettings(
+            Mode::live(),
+            $webhookData
+        );
+        $oldData->setWebhookSettings($webhookSettings);
         $oldData->setStoreId('1');
         $this->webhookDataRepository->save($oldData);
         $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
@@ -467,14 +474,14 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
 
         // assert
-        /** @var WebhookDataEntity $connectionSettings */
-        $webhookData = $this->webhookDataRepository->selectOne()->getWebhookData();
+        /** @var WebhookSettings $settings */
+        $settings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
 
-        self::assertNotNull($webhookData);
-        self::assertCount(5, $webhookData->getEvents());
-        self::assertCount(5, $webhookData->getIds());
-        self::assertTrue(in_array(WebhookEvents::PAYMENT, $webhookData->getEvents()));
-        self::assertTrue(in_array(WebhookEvents::CHARGE, $webhookData->getEvents()));
+        self::assertNotNull($settings);
+        self::assertCount(5, $settings->getLiveWebhookData()->getEvents());
+        self::assertCount(5, $settings->getLiveWebhookData()->getIds());
+        self::assertTrue(in_array(WebhookEvents::PAYMENT, $settings->getLiveWebhookData()->getEvents()));
+        self::assertTrue(in_array(WebhookEvents::CHARGE, $settings->getLiveWebhookData()->getEvents()));
     }
 
     /**
@@ -521,16 +528,16 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
-        $webhookDataSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
+        $webhookSettingsSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
 
         // assert
-        /** @var WebhookData $connectionSettings */
-        $webhookData = $this->webhookDataRepository->selectOne()->getWebhookData();
+        /** @var WebhookSettings $webhookSettings */
+        $webhookSettings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
 
-        self::assertNotNull($webhookData);
-        self::assertEquals('https://test.com', $webhookData->getUrl());
-        self::assertCount(2, $webhookData->getEvents());
-        self::assertEquals($webhookData, $webhookDataSaved);
+        self::assertNotNull($webhookSettings);
+        self::assertEquals('https://test.com', $webhookSettings->getLiveWebhookData()->getUrl());
+        self::assertCount(2, $webhookSettings->getLiveWebhookData()->getEvents());
+        self::assertEquals($webhookSettings, $webhookSettingsSaved);
     }
 
     /**
@@ -543,7 +550,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         // arrange
 
         // act
-        $webhookData = StoreContext::doWithStore('1', [$this->service, 'getWebhookData']);
+        $webhookData = StoreContext::doWithStore('1', [$this->service, 'getWebhookSettings']);
 
         // assert
 
@@ -559,17 +566,21 @@ class ConnectionSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $entity = new WebhookDataEntity();
-        $entity->setWebhookData($webhookData);
+        $webhookSettings = new WebhookSettings(
+            Mode::live(),
+            $webhookData
+        );
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings($webhookSettings);
         $entity->setStoreId('1');
         $this->webhookDataRepository->save($entity);
 
         // act
-        $fetchedWebhookData = StoreContext::doWithStore('1', [$this->service, 'getWebhookData']);
+        $fetchedWebhookSettings = StoreContext::doWithStore('1', [$this->service, 'getWebhookSettings']);
 
         // assert
 
-        self::assertEquals($webhookData, $fetchedWebhookData);
+        self::assertEquals($webhookSettings, $fetchedWebhookSettings);
     }
 
     /**
@@ -590,9 +601,13 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $settings->setStoreId('1');
         $this->repository->save($settings);
 
-        $oldData = new WebhookDataEntity();
+        $oldData = new WebhookSettingsEntity();
         $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $oldData->setWebhookData($webhookData);
+        $webhookSettings = new WebhookSettings(
+            Mode::live(),
+            $webhookData
+        );
+        $oldData->setWebhookSettings($webhookSettings);
         $oldData->setStoreId('1');
         $this->webhookDataRepository->save($oldData);
 
@@ -608,12 +623,14 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
 
         // assert
-        /** @var WebhookDataEntity $connectionSettings */
+        /** @var WebhookSettingsEntity $connectionSettings */
         $webhookDataEntity = $this->webhookDataRepository->select();
 
         self::assertNotNull($webhookData);
         self::assertCount(1, $webhookDataEntity);
-        self::assertEquals('https://test.com', $webhookDataEntity[0]->getWebhookData()->getUrl());
+        self::assertEquals(
+            'https://test.com', $webhookDataEntity[0]->getWebhookSettings()->getLiveWebhookData()->getUrl()
+        );
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
 
 /**
  * Class ConnectionServiceMock.
@@ -19,9 +20,9 @@ class ConnectionServiceMock extends ConnectionService
     private ?ConnectionSettings $connectionSettings = null;
 
     /**
-     * @var WebhookData|null
+     * @var WebhookSettings|null
      */
-    private ?WebhookData $webhookData = null;
+    private ?WebhookSettings $webhookSettings = null;
 
     /** @var array */
     private array $ids = [];
@@ -56,27 +57,27 @@ class ConnectionServiceMock extends ConnectionService
     /**
      * @return void
      */
-    public function reRegisterWebhooks(): ?WebhookData
+    public function reRegisterWebhooks(): ?WebhookSettings
     {
-        return $this->webhookData;
+        return $this->getWebhookSettings();
     }
 
     /**
      * @return WebhookData|null
      */
-    public function getWebhookData(): ?WebhookData
+    public function getWebhookSettings(): ?WebhookSettings
     {
-        return $this->webhookData;
+        return $this->webhookSettings;
     }
 
     /**
-     * @param WebhookData $webhookData
+     * @param WebhookSettings $webhookSettings
      *
      * @return void
      */
-    public function setWebhookData(WebhookData $webhookData): void
+    public function setWebhookSettings(WebhookSettings $webhookSettings): void
     {
-        $this->webhookData = $webhookData;
+        $this->webhookSettings = $webhookSettings;
     }
 
     /**

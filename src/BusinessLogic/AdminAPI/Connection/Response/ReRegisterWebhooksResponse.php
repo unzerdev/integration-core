@@ -3,7 +3,8 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\Connection\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
 
 /**
  * Class ReRegisterWebhooksResponse.
@@ -12,35 +13,51 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
  */
 class ReRegisterWebhooksResponse extends Response
 {
+    /**
+     * @var WebhookSettings|null
+     */
+    private ?WebhookSettings $webhookSettings;
 
     /**
-     * @var WebhookData|null
+     * @param ?WebhookSettings $webhookSettings
      */
-    private ?WebhookData $webhookData;
-
-    /**
-     * @param ?WebhookData $webhookData
-     */
-    public function __construct(?WebhookData $webhookData = null)
+    public function __construct(?WebhookSettings $webhookSettings = null)
     {
-        $this->webhookData = $webhookData;
+        $this->webhookSettings = $webhookSettings;
     }
+
     /**
      * @inheritDoc
      */
     public function toArray(): array
     {
         $returnArray = [];
+        if (!$this->webhookSettings) {
+            return $returnArray;
+        }
 
-        if ($this->webhookData) {
-            $returnArray['webhookData'] = [
-                'registrationDate' => $this->webhookData->getCreateAt(),
-                'webhookID' => implode(', ', $this->webhookData->getIds()),
-                'events' => implode(', ', $this->webhookData->getEvents()),
-                'webhookUrl' => $this->webhookData->getUrl(),
+        if ($this->webhookSettings->getMode()->equal(Mode::live()) && $this->webhookSettings->getLiveWebhookData()) {
+            return [
+                'webhookData' => [
+                    'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
+                    'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
+                    'events' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getEvents()),
+                    'webhookUrl' => $this->webhookSettings->getLiveWebhookData()->getUrl()
+                ]
             ];
         }
 
-        return $returnArray;
+        if ($this->webhookSettings->getMode()->equal(Mode::sandbox()) && $this->webhookSettings->getSandboxWebhookData()) {
+            return [
+                'webhookData' => [
+                    'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
+                    'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),
+                    'events' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getEvents()),
+                    'webhookUrl' => $this->webhookSettings->getSandboxWebhookData()->getUrl()
+                ]
+            ];
+        }
+
+        return [];
     }
 }

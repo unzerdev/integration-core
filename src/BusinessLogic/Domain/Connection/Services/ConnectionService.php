@@ -15,7 +15,8 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\Webhook;
@@ -35,8 +36,8 @@ class ConnectionService
     /** @var ConnectionSettingsRepositoryInterface */
     private ConnectionSettingsRepositoryInterface $connectionSettingsRepository;
 
-    /** @var WebhookDataRepositoryInterface */
-    private WebhookDataRepositoryInterface $webhookDataRepository;
+    /** @var WebhookSettingsRepositoryInterface */
+    private WebhookSettingsRepositoryInterface $webhookDataRepository;
 
     /** @var EncryptorInterface */
     private EncryptorInterface $encryptor;
@@ -46,14 +47,14 @@ class ConnectionService
     /**
      * @param UnzerFactory $unzerFactory
      * @param ConnectionSettingsRepositoryInterface $connectionSettingsRepository
-     * @param WebhookDataRepositoryInterface $webhookDataRepository
+     * @param WebhookSettingsRepositoryInterface $webhookDataRepository
      * @param EncryptorInterface $encryptor
      * @param WebhookUrlServiceInterface $webhookUrlService
      */
     public function __construct(
         UnzerFactory $unzerFactory,
         ConnectionSettingsRepositoryInterface $connectionSettingsRepository,
-        WebhookDataRepositoryInterface $webhookDataRepository,
+        WebhookSettingsRepositoryInterface $webhookDataRepository,
         EncryptorInterface $encryptor,
         WebhookUrlServiceInterface $webhookUrlService
     ) {
@@ -85,7 +86,7 @@ class ConnectionService
         $webhookUrl = $this->webhookUrlService->getWebhookUrl();
         $unregisteredEvents = $this->getUnregisteredEvents($unzer, $webhookUrl);
         if (!empty($unregisteredEvents)) {
-            $this->registerWebhooks($unzer, $unregisteredEvents, $webhookUrl);
+            $this->registerWebhooks($unzer, $unregisteredEvents, $webhookUrl, $connectionSettings->getMode());
         }
 
         $this->saveConnectionSettings($connectionSettings);
@@ -102,20 +103,20 @@ class ConnectionService
     }
 
     /**
-     * @return WebhookData|null
+     * @return WebhookSettings|null
      */
-    public function getWebhookData(): ?WebhookData
+    public function getWebhookSettings(): ?WebhookSettings
     {
-        return $this->webhookDataRepository->getWebhookData();
+        return $this->webhookDataRepository->getWebhookSettings();
     }
 
     /**
-     * @return ?WebhookData
+     * @return ?WebhookSettings
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function reRegisterWebhooks(): ?WebhookData
+    public function reRegisterWebhooks(): ?WebhookSettings
     {
         $connectionSettings = $this->getConnectionSettings();
 
@@ -131,10 +132,11 @@ class ConnectionService
         $this->registerWebhooks(
             $unzer,
             SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS,
-            $this->webhookUrlService->getWebhookUrl()
+            $this->webhookUrlService->getWebhookUrl(),
+            $connectionSettings->getMode()
         );
 
-        return $this->getWebhookData();
+        return $this->getWebhookSettings();
     }
 
     /**
@@ -144,19 +146,32 @@ class ConnectionService
      */
     public function deleteWebhooks(): void
     {
-        if (!($webhookData = $this->getWebhookData())) {
+        if (!($webhookSettings = $this->getWebhookSettings()) ||
+            !($connectionSettings = $this->getConnectionSettings())) {
             return;
         }
 
-        foreach ($webhookData->getIds() as $webhookId) {
-            try {
-                $this->unzerFactory->makeUnzerAPI()->deleteWebhook($webhookId);
-            } catch (UnzerApiException $e) {
-                // if webhook id does not exist on API continue
+        if ($webhookSettings->getLiveWebhookData()) {
+            foreach ($webhookSettings->getLiveWebhookData()->getIds() as $webhookId) {
+                try {
+                    $this->unzerFactory->makeUnzerAPI($connectionSettings)->deleteWebhook($webhookId);
+                } catch (UnzerApiException $e) {
+                    // if webhook id does not exist on API continue
+                }
             }
         }
 
-        $this->webhookDataRepository->deleteWebhookData();
+        if ($webhookSettings->getSandboxWebhookData()) {
+            foreach ($webhookSettings->getSandboxWebhookData()->getIds() as $webhookId) {
+                try {
+                    $this->unzerFactory->makeUnzerAPI($connectionSettings)->deleteWebhook($webhookId);
+                } catch (UnzerApiException $e) {
+                    // if webhook id does not exist on API continue
+                }
+            }
+        }
+
+        $this->webhookDataRepository->deleteWebhookSettings();
     }
 
     /**
@@ -216,39 +231,56 @@ class ConnectionService
      * @param Unzer $unzer
      * @param array $events
      * @param string $webhookUrl
+     * @param Mode $mode
      *
      * @return void
      *
      * @throws UnzerApiException
      */
-    private function registerWebhooks(Unzer $unzer, array $events, string $webhookUrl): void
+    private function registerWebhooks(Unzer $unzer, array $events, string $webhookUrl, Mode $mode): void
     {
         $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, $events);
 
         if (!empty($webhooks)) {
             $webhookData = WebhookData::fromBatch($webhooks);
-            $this->saveWebhookData($webhookData);
+            $this->saveWebhookSettings($webhookData, $mode);
         }
     }
 
     /**
      * @param WebhookData $webhookData
+     * @param Mode $mode
      *
      * @return void
      */
-    private function saveWebhookData(WebhookData $webhookData): void
+    private function saveWebhookSettings(WebhookData $webhookData, Mode $mode): void
     {
-        $existingData = $this->webhookDataRepository->getWebhookData();
+        $existingSettings = $this->webhookDataRepository->getWebhookSettings();
 
-        if (!$existingData) {
-            $this->webhookDataRepository->setWebhookData($webhookData);
+        if (!$existingSettings) {
+            $webhookSettings = new WebhookSettings(
+                $mode,
+                $mode->equal(Mode::live()) ? $webhookData : null,
+                $mode->equal(Mode::sandbox()) ? $webhookData : null);
+            $this->webhookDataRepository->setWebhookSettings($webhookSettings);
 
             return;
         }
 
-        $webhookData->setIds(array_merge($webhookData->getIds(), $existingData->getIds()));
-        $webhookData->setEvents(array_merge($webhookData->getEvents(), $existingData->getEvents()));
-        $this->webhookDataRepository->setWebhookData($webhookData);
+        $existingWebhookData = $mode->equal(Mode::live()) ?
+            $existingSettings->getLiveWebhookData() :
+            $existingSettings->getSandboxWebhookData();
+
+        if ($existingWebhookData) {
+            $existingWebhookData->setIds(array_merge($existingWebhookData->getIds(), $webhookData->getIds()));
+            $existingWebhookData->setEvents(array_merge($webhookData->getEvents(), $existingWebhookData->getEvents()));
+        }
+
+        $mode->equal(Mode::live()) ?
+            $existingSettings->setLiveWebhookData($existingWebhookData) :
+            $existingSettings->setSandboxWebhookData($existingWebhookData);
+
+        $this->webhookDataRepository->setWebhookSettings($existingSettings);
     }
 
     /**

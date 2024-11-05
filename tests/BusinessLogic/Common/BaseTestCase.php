@@ -25,7 +25,7 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusM
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
 use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Entities\TransactionHistory;
 use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Repositories\TransactionHistoryRepository;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookSettingsRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
@@ -58,7 +58,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapSe
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
@@ -101,7 +101,7 @@ use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Utility\TestGuidProvid
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Utility\TestTimeProvider;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookDataEntity;
 use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 
 /**
@@ -144,7 +144,7 @@ class BaseTestCase extends TestCase
                 return new ConnectionService(
                     (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
                     TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                    TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(EncryptorInterface::class),
                     TestServiceRegister::getService(WebhookUrlServiceInterface::class)
                 );
@@ -159,8 +159,8 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(UnzerFactory::class),
                 );
             },
-            WebhookDataRepositoryInterface::class => function () {
-                return new WebhookDataRepository(
+            WebhookSettingsRepositoryInterface::class => function () {
+                return new WebhookSettingsRepository(
                     TestRepositoryRegistry::getRepository(WebhookDataEntity::getClassName()),
                     StoreContext::getInstance()
                 );

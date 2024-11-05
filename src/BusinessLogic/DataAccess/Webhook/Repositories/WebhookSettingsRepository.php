@@ -3,9 +3,9 @@
 namespace Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories;
 
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData as WebhookDataEntity;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookSettingsEntity;
 use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\QueryFilter\Operators;
@@ -16,7 +16,7 @@ use Unzer\Core\Infrastructure\ORM\QueryFilter\QueryFilter;
  *
  * @package Unzer\Core\BusinessLogic\DataAccess\Webkhook\Repositories
  */
-class WebhookDataRepository implements WebhookDataRepositoryInterface
+class WebhookSettingsRepository implements WebhookSettingsRepositoryInterface
 {
     /**
      * @var RepositoryInterface
@@ -45,11 +45,11 @@ class WebhookDataRepository implements WebhookDataRepositoryInterface
      *
      * @throws QueryFilterInvalidParamException
      */
-    public function getWebhookData(): ?WebhookData
+    public function getWebhookSettings(): ?WebhookSettings
     {
-        $entity = $this->getWebhookDataEntity();
+        $entity = $this->getWebhookSettingsEntity();
 
-        return $entity ? $entity->getWebhookData() : null;
+        return $entity ? $entity->getWebhookSettings() : null;
     }
 
     /**
@@ -57,20 +57,20 @@ class WebhookDataRepository implements WebhookDataRepositoryInterface
      *
      * @throws QueryFilterInvalidParamException
      */
-    public function setWebhookData(WebhookData $webhookData): void
+    public function setWebhookSettings(WebhookSettings $webhookData): void
     {
-        $existingData = $this->getWebhookDataEntity();
+        $existingData = $this->getWebhookSettingsEntity();
 
         if ($existingData) {
-            $existingData->setWebhookData($webhookData);
+            $existingData->setWebhookSettings($webhookData);
             $existingData->setStoreId($this->storeContext->getStoreId());
             $this->repository->update($existingData);
 
             return;
         }
 
-        $entity = new WebhookDataEntity();
-        $entity->setWebhookData($webhookData);
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings($webhookData);
         $entity->setStoreId($this->storeContext->getStoreId());
         $this->repository->save($entity);
     }
@@ -80,9 +80,9 @@ class WebhookDataRepository implements WebhookDataRepositoryInterface
      *
      * @throws QueryFilterInvalidParamException
      */
-    public function deleteWebhookData(): void
+    public function deleteWebhookSettings(): void
     {
-        $webhookDataEntity = $this->getWebhookDataEntity();
+        $webhookDataEntity = $this->getWebhookSettingsEntity();
 
         if (!$webhookDataEntity) {
             return;
@@ -92,11 +92,11 @@ class WebhookDataRepository implements WebhookDataRepositoryInterface
     }
 
     /**
-     * @return WebhookDataEntity|null
+     * @return WebhookSettingsEntity|null
      *
      * @throws QueryFilterInvalidParamException
      */
-    protected function getWebhookDataEntity(): ?WebhookDataEntity
+    protected function getWebhookSettingsEntity(): ?WebhookSettingsEntity
     {
         $queryFilter = new QueryFilter();
         $queryFilter->where('storeId', Operators::EQUALS, $this->storeContext->getStoreId());

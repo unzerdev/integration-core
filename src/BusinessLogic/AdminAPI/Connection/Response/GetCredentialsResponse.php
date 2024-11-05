@@ -5,7 +5,9 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\Connection\Response;
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
 
 /**
  * Class GetCredentialsResponse.
@@ -15,23 +17,23 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 class GetCredentialsResponse extends Response
 {
     /**
-     * @var ConnectionData|null
+     * @var ConnectionSettings|null
      */
-    private ?ConnectionData $connectionData;
+    private ?ConnectionSettings $connectionSettings;
 
     /**
-     * @var WebhookData|null
+     * @var WebhookSettings|null
      */
-    private ?WebhookData $webhookData;
+    private ?WebhookSettings $webhookSettings;
 
     /**
-     * @param ?ConnectionData $connectionData
-     * @param ?WebhookData $webhookData
+     * @param ?ConnectionSettings $connectionSettings
+     * @param ?WebhookSettings $webhookData
      */
-    public function __construct(?ConnectionData $connectionData = null, ?WebhookData $webhookData = null)
+    public function __construct(?ConnectionSettings $connectionSettings = null, ?WebhookSettings $webhookData = null)
     {
-        $this->connectionData = $connectionData;
-        $this->webhookData = $webhookData;
+        $this->connectionSettings = $connectionSettings;
+        $this->webhookSettings = $webhookData;
     }
 
     /**
@@ -41,20 +43,42 @@ class GetCredentialsResponse extends Response
     {
         $returnArray = [];
 
-        if ($this->connectionData) {
-            $returnArray['connectionData'] = [
-                'privateKey' => $this->connectionData->getPrivateKey(),
-                'publicKey' => $this->connectionData->getPublicKey(),
-            ];
+        if(!$this->connectionSettings || !$this->webhookSettings) {
+            return $returnArray;
         }
 
-        if ($this->webhookData) {
-            $returnArray['webhookData'] = [
-                'registrationDate' => $this->webhookData->getCreateAt(),
-                'webhookID' => implode(', ', $this->webhookData->getIds()),
-                'events' => implode(', ', $this->webhookData->getEvents()),
-                'webhookUrl' => $this->webhookData->getUrl(),
+        if ($this->connectionSettings->getLiveConnectionData()) {
+            $returnArray['live']['connectionData'] = [
+                'privateKey' => $this->connectionSettings->getLiveConnectionData()->getPrivateKey(),
+                'publicKey' => $this->connectionSettings->getLiveConnectionData()->getPublicKey()
             ];
+
+
+            if ($this->webhookSettings->getLiveWebhookData()) {
+                $returnArray['live']['webhookData'] = [
+                    'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
+                    'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
+                    'events' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getEvents()),
+                    'webhookUrl' => $this->webhookSettings->getLiveWebhookData()->getUrl(),
+                ];
+            }
+        }
+
+        if ($this->connectionSettings->getSandboxConnectionData()) {
+            $returnArray['sandbox']['connectionData'] = [
+                'privateKey' => $this->connectionSettings->getSandboxConnectionData()->getPrivateKey(),
+                'publicKey' => $this->connectionSettings->getSandboxConnectionData()->getPublicKey()
+            ];
+
+
+            if ($this->webhookSettings->getSandboxWebhookData()) {
+                $returnArray['sandbox']['webhookData'] = [
+                    'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
+                    'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),
+                    'events' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getEvents()),
+                    'webhookUrl' => $this->webhookSettings->getSandboxWebhookData()->getUrl(),
+                ];
+            }
         }
 
         return $returnArray;

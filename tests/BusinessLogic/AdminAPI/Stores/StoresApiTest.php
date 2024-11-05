@@ -17,7 +17,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterfa
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\Store;
 use Unzer\Core\BusinessLogic\Domain\Stores\Models\StoreOrderStatus;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
@@ -59,7 +59,7 @@ class StoresApiTest extends BaseTestCase
         $this->connectionService = new ConnectionServiceMock(
             new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-            TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+            TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),
             TestServiceRegister::getService(WebhookUrlServiceInterface::class)
         );

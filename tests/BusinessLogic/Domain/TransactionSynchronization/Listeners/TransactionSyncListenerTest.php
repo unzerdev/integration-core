@@ -10,7 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Listeners\TransactionSyncListener;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Tasks\TransactionSynchronizer;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\QueueItemRepository;
@@ -74,7 +74,7 @@ class TransactionSyncListenerTest extends BaseTestCase
         $this->connectionServiceMock = new ConnectionServiceMock(
             new UnzerFactoryMock(),
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-            TestServiceRegister::getService(WebhookDataRepositoryInterface::class),
+            TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
             TestServiceRegister::getService(EncryptorInterface::class),
             TestServiceRegister::getService(WebhookUrlServiceInterface::class)
         );

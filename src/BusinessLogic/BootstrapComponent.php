@@ -25,8 +25,8 @@ use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Entities\PaymentStatusM
 use Unzer\Core\BusinessLogic\DataAccess\PaymentStatusMap\Repositories\PaymentStatusMapRepository;
 use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Entities\TransactionHistory;
 use Unzer\Core\BusinessLogic\DataAccess\TransactionHistory\Repositories\TransactionHistoryRepository;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookData;
-use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookDataRepository;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings;
+use Unzer\Core\BusinessLogic\DataAccess\Webhook\Repositories\WebhookSettingsRepository;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
@@ -64,7 +64,7 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHis
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Listeners\TransactionSyncListener;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Service\TransactionSynchronizerService;
-use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookDataRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
@@ -114,7 +114,7 @@ class BootstrapComponent extends BaseBootstrapComponent
                 return new ConnectionService(
                     ServiceRegister::getService(UnzerFactory::class),
                     ServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
-                    ServiceRegister::getService(WebhookDataRepositoryInterface::class),
+                    ServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
                     ServiceRegister::getService(EncryptorInterface::class),
                     ServiceRegister::getService(WebhookUrlServiceInterface::class)
                 );
@@ -250,10 +250,10 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
 
         ServiceRegister::registerService(
-            WebhookDataRepositoryInterface::class,
+            WebhookSettingsRepositoryInterface::class,
             new SingleInstance(static function () {
-                return new WebhookDataRepository(
-                    RepositoryRegistry::getRepository(WebhookData::getClassName()),
+                return new WebhookSettingsRepository(
+                    RepositoryRegistry::getRepository(WebhookSettings::getClassName()),
                     ServiceRegister::getService(StoreContext::class)
                 );
             })
