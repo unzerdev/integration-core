@@ -271,14 +271,21 @@ class ConnectionService
             $existingSettings->getLiveWebhookData() :
             $existingSettings->getSandboxWebhookData();
 
+        $webhookDataToInsert = null;
+
         if ($existingWebhookData) {
             $existingWebhookData->setIds(array_merge($existingWebhookData->getIds(), $webhookData->getIds()));
             $existingWebhookData->setEvents(array_merge($webhookData->getEvents(), $existingWebhookData->getEvents()));
+            $webhookDataToInsert = $existingWebhookData;
+        }
+
+        if(!$existingWebhookData) {
+            $webhookDataToInsert = $webhookData;
         }
 
         $mode->equal(Mode::live()) ?
-            $existingSettings->setLiveWebhookData($existingWebhookData) :
-            $existingSettings->setSandboxWebhookData($existingWebhookData);
+            $existingSettings->setLiveWebhookData($webhookDataToInsert) :
+            $existingSettings->setSandboxWebhookData($webhookDataToInsert);
 
         $this->webhookDataRepository->setWebhookSettings($existingSettings);
     }
