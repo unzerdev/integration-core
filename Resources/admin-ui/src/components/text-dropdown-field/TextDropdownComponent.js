@@ -16,13 +16,11 @@ const TextDropdownComponent = (dropdownProps, textFieldProps, values = [], onCha
     dropdownProps.options = [
         {label: Unzer.imagesProvider.languageIcon, value: "default"},
         ...dropdownProps.options.map(x => {
-            const imageUrl = x.value !== "default"
-                ? `${Unzer.config.flagsUrl}/${x.label}.svg`
-                : `${Unzer.config.imagesUrl}`;
+            const imageUrl = `${Unzer.config.flagsUrl}/${x.label}.svg`;
             return {
                 label: `<img src="${imageUrl}" alt="${x.value}"/>`,
                 value: x.value,
-                title: x.value
+                title: x.title
             };
         })
     ];

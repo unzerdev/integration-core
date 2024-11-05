@@ -1,6 +1,8 @@
 @mixin adl-money-input {
   display: flex;
+  width: 100%;
   column-gap: 20px;
+  position: relative;
 
   @include adl-screen--narrow {
     flex-direction: column;
@@ -12,13 +14,64 @@
       @include adl-text-ellipsis(1);
     }
   }
+}
 
-  .adl-text-input {
-    width: 100%;
+.surcharge-wrapper{
+  @include adl-field-wrapper;
+  flex-grow: 1;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.input-wrapper, .dropdown-wrapper
+{
+  @include adl-field-wrapper;
+  flex-grow: 1;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.adl-text-input {
+  position: relative;
+
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
+}
 
-  .adl-single-select-dropdown {
-    max-width: 300px;
-    width: 100%;
+.arrow-up, .arrow-down {
+  background: none;
+  border: none;
+  position: absolute;
+  color: $adl-color--grey-40;
+  cursor: pointer;
+  display: flex;
+  right: 5px;
+  padding-right: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow-up{
+  top: 7px;
+  &::before {
+    @include adl-font-icon(arrow-ios-down);
+    transform: rotate(180deg);
+    font-size: 12px;
+  }
+}
+.arrow-down{
+  top: 30px;
+  &::after {
+    @include adl-font-icon(arrow-ios-down);
+    font-size: 12px;
   }
 }

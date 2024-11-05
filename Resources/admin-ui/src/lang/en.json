@@ -164,7 +164,9 @@
       "paymentMethodTitle": "Payment Methods",
       "paymentMethodDescription": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
       "settings" : "Payment page settings",
-      "configurationSaved" : "Configuration is saved successfully"
+      "configurationSaved" : "Configuration is saved successfully",
+      "enabled": "Payment method %s is enabled!",
+      "disabled": "Payment method %s is disabled!"
     },
     "modal": {
       "method": "Booking method",

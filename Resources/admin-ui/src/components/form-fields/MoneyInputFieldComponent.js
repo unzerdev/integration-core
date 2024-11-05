@@ -44,6 +44,23 @@ const MoneyInputFieldComponent = ({
         onChange?.(value);
     };
 
+  const handleArrowClick = (direction, targetWrapper) => {
+    const amountInput = targetWrapper === 'input-wrapper'
+        ? wrapper.querySelector(`[name=${name}_amount]`)
+        : wrapper.querySelector(`[name=${name}_currency]`);
+
+    let currentValue = parseFloat(amountInput.value) || 0;
+
+    if (direction === 'up') {
+      currentValue += step;
+    } else if (direction === 'down') {
+      currentValue = Math.max(0, currentValue - step);
+    }
+
+    amountInput.value = currentValue;
+    handleChange();
+  };
+
     const input = Unzer.components.TextField.create({
         value: value?.minAmount || 0,
         className: 'adl-text-input',
@@ -57,9 +74,10 @@ const MoneyInputFieldComponent = ({
         title: minAmountTitle,
         onChange: handleChange
     })
-    
+
     const dropdown = Unzer.components.TextField.create({
         value: value?.maxAmount || 0,
+        className: 'adl-text-input',
         name: name + '_currency',
         type: 'number',
         min: 0,
@@ -70,11 +88,25 @@ const MoneyInputFieldComponent = ({
         onChange: handleChange,
     })
 
-    const wrapper = generator.createElement('div', 'adl-money-input', '', null, [
+  const inputWrapper = generator.createElement('div', 'input-wrapper', '', null, [
+    input,
+    generator.createElement('button', 'arrow-up', '', { type: 'button', onclick: () => handleArrowClick('up', 'input-wrapper') }),
+    generator.createElement('button', 'arrow-down', '', { type: 'button', onclick: () => handleArrowClick('down', 'input-wrapper'), })
+  ]);
+
+  const dropdownWrapper = generator.createElement('div', 'dropdown-wrapper', '', null, [
+    dropdown,
+    generator.createElement('button', 'arrow-up', '', { type: 'button', onclick: () => handleArrowClick('up', 'dropdown-wrapper') }),
+    generator.createElement('button', 'arrow-down', '', { type: 'button', onclick: () => handleArrowClick('down', 'dropdown-wrapper') })
+  ])
+
+
+  const wrapper = generator.createElement('div', 'adl-money-input', '', null, [
         generator.createElement('input', '', '', { type: 'hidden', name: name, value: JSON.stringify(value) }),
-        input,
-        dropdown
+        inputWrapper,
+        dropdownWrapper
     ]);
+
 
     return generator.createFieldWrapper(wrapper, label, description, error);
 };

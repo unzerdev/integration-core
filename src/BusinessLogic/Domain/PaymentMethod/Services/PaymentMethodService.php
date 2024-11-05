@@ -103,7 +103,7 @@ class PaymentMethodService
                     in_array($type, BasketRequired::BASKET_REQUIRED)
                 );
         }
-
+        $paymentMethodConfig->setEnabled($isEnabled);
         $this->paymentMethodConfigRepository->savePaymentMethodConfig($paymentMethodConfig);
     }
 

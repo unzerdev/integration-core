@@ -30,12 +30,12 @@
     ],
     logoImageUrl: null,
     logoFile: null,
-    headerColor: null,
-    shopTaglineBackgroundColor: null,
-    shopNameColor: null,
-    headerFontColor: null,
-    shopTaglineColor: null,
-    shopNameBackground: null,
+    headerColor: '#ffffff',
+    shopTaglineBackgroundColor: '#ffffff',
+    shopNameColor: '#000000',
+    headerFontColor: '#ffffff',
+    shopTaglineColor: '#000000',
+    shopNameBackground: '#ffffff',
   };
 
   let current_name = "";
@@ -67,15 +67,15 @@
           if (result) {
             selectedValues.name = result?.shopName?.map(x => ({
               locale: x.locale,
-              value: x.value
-            })) || [{ locale: 'default', value: '' }];
+              value: x.value,
+            })) || [{ locale: 'default', value: ''}];
 
             current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
 
             selectedValues.tagline = result?.shopTagline?.map(x => ({
               locale: x.locale,
-              value: x.value
-            })) || [{ locale: 'default', value: '' }];
+              value: x.value,
+            })) || [{ locale: 'default', value: ''}];
 
             current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
 
@@ -128,14 +128,14 @@
               Unzer.components.TextDropdownComponent.create({
                     isIcon: true,
                     value: "default",
-                    options: languages?.map(x => ({ value: x.code, label: x.flag })),
+                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name})),
                   }, {
                     maxWidth: false,
                     title: "design.translations.shopName",
                     subtitle: "design.translations.shopNameDescription",
                     value: selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '',
                   },
-                  selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value })),
+                  selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value})),
                   (value) => {
                     selectedValues.name = value;
                     current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
@@ -166,14 +166,14 @@
               Unzer.components.TextDropdownComponent.create({
                     isIcon: true,
                     value: "default",
-                    options: languages?.map(x => ({ value: x.code, label: x.flag })),
+                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name})),
                   }, {
                     maxWidth: false,
                     title: "design.translations.shopTagline",
                     subtitle: "design.translations.shopTaglineDescription",
                     value: selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '',
                   },
-                  selectedValues?.tagline?.map(x => ({ locale: x.locale, value: x.value })),
+                  selectedValues?.tagline?.map(x => ({ locale: x.locale, value: x.value})),
                   (value) => {
                     selectedValues.tagline = value;
                     current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
@@ -181,7 +181,7 @@
                   'unzer-text-dropdown-max-width',
                   selectedValues?.tagline?.find(x => x.locale === 'default') ?? {
                     locale: 'default',
-                    value: ''
+                    value: '',
                   }
               ),
             ]),

@@ -36,6 +36,7 @@ class GetLanguagesResponse extends Response
             $array[] = [
                 'code' => $language->getCode(),
                 'flag' => $language->getFlag(),
+                'name' => $language->getName(),
             ];
         }
 

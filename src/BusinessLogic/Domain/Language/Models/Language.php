@@ -20,13 +20,20 @@ class Language
     private string $flag;
 
     /**
+     * @var string $name
+     */
+    private string $name;
+
+    /**
      * @param string $code
      * @param string $flag
+     * @param string $name
      */
-    public function __construct(string $code, string $flag = '')
+    public function __construct(string $code, string $flag = '', string $name = '')
     {
         $this->code = $code;
         $this->flag = $flag;
+        $this->name = $name;
     }
 
     /**
@@ -43,5 +50,13 @@ class Language
     public function getFlag(): string
     {
         return $this->flag;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 }

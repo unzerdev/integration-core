@@ -54,11 +54,13 @@ const DropdownComponent = ({
     const renderOptions = (options) => {
         list.innerHTML = '';
         options.forEach((option) => {
+            const attributes = option.title ? { title: option.title } : {};
+
             const listItem = generator.createElement(
                 'li',
                 'unzer-dropdown-list-item' + (option === selectedItem ? ' adls--selected' : ''),
                 option.label,
-                { title: option.title}
+                attributes
             );
             list.append(listItem);
 
