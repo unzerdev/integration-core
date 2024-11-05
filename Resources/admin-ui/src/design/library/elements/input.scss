@@ -21,12 +21,12 @@
   &.adls--read-only, &:read-only {
     background-color: $adl-color--background-read-only-input;
   }
-  
+
   &:disabled {
     background-color: $unzer-color-disabled-grey;
     color: $unzer-color-grey;
   }
-  
+
   &::placeholder {
     color: $adl-color--grey-50;
   }
@@ -126,7 +126,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: $adl-color--grey-30;
+    background-color: $unzer-color-black;
     transition: .4s;
     border-radius: 24px;
 

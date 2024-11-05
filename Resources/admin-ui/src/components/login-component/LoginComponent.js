@@ -86,6 +86,22 @@ const LoginComponent = ({ onLogin }) => {
         ]
     );
 
+    const needHelp = generator.createElement(
+        'div',
+        'unzer-footer-support',
+        '',
+        [],
+        [
+            generator.createElementFromHTML(Unzer.imagesProvider.supportIcon),
+            generator.createElement('span', '', 'footer.support', [], [])
+        ]
+    );
+
+    needHelp.addEventListener('click', () => {
+        const supportUrl = Unzer.translationService.translate('footer.supportLink');
+        window.open(supportUrl, '_blank');
+    })
+
     const leftWrapper = generator.createElement(
         'div',
         'unzer-login-left-wrapper',
@@ -99,16 +115,7 @@ const LoginComponent = ({ onLogin }) => {
                 '',
                 [],
                 [
-                    generator.createElement(
-                        'div',
-                        'unzer-footer-support',
-                        '',
-                        [],
-                        [
-                            generator.createElementFromHTML(Unzer.imagesProvider.supportIcon),
-                            generator.createElement('span', '', 'footer.support', [], [])
-                        ]
-                    )
+                    needHelp
                 ]
             )
         ]
