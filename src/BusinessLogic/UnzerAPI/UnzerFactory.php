@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\UnzerAPI;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
@@ -20,16 +21,16 @@ class UnzerFactory
     private ?ConnectionSettings $connectionSettings = null;
 
     /**
-     * @param ConnectionSettings|null $connectionSettings
+     * @param ConnectionData|null $connectionData
      *
      * @return Unzer
      *
      * @throws ConnectionSettingsNotFoundException
      */
-    public function makeUnzerAPI(?ConnectionSettings $connectionSettings = null): Unzer
+    public function makeUnzerAPI(?ConnectionData $connectionData = null): Unzer
     {
-        if ($connectionSettings) {
-            return $this->create($connectionSettings->getActiveConnectionData()->getPrivateKey());
+        if ($connectionData) {
+            return $this->create($connectionData->getPrivateKey());
         }
 
         if (!$this->connectionSettings) {

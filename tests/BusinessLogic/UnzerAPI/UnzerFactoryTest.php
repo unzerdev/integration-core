@@ -59,7 +59,7 @@ class UnzerFactoryTest extends BaseTestCase
      *
      * @throws ConnectionSettingsNotFoundException
      */
-    public function testMakeUnzerWithConnectionSettings(): void
+    public function testMakeUnzerWithConnectionData(): void
     {
         // arrange
         $connectionSettings = new ConnectionSettings(
@@ -69,7 +69,7 @@ class UnzerFactoryTest extends BaseTestCase
         $expectedUnzer = new Unzer($connectionSettings->getLiveConnectionData()->getPrivateKey());
 
         // act
-        $unzer = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
+        $unzer = (new UnzerFactory())->makeUnzerAPI($connectionSettings->getLiveConnectionData());
         // assert
         self::assertEquals($expectedUnzer, $unzer);
     }
@@ -89,8 +89,8 @@ class UnzerFactoryTest extends BaseTestCase
         $expectedUnzer = new Unzer($connectionSettings->getLiveConnectionData()->getPrivateKey());
 
         // act
-        $unzer1 = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
-        $unzer2 = (new UnzerFactory())->makeUnzerAPI($connectionSettings);
+        $unzer1 = (new UnzerFactory())->makeUnzerAPI($connectionSettings->getLiveConnectionData());
+        $unzer2 = (new UnzerFactory())->makeUnzerAPI($connectionSettings->getLiveConnectionData());
         // assert
         self::assertEquals($expectedUnzer, $unzer1);
         self::assertEquals($expectedUnzer, $unzer2);

@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
-use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\Singleton;
 use UnzerSDK\Unzer;
@@ -22,11 +22,11 @@ class UnzerFactoryMock extends UnzerFactory
     private ?UnzerMock $unzerMock = null;
 
     /**
-     * @param ConnectionSettings|null $connectionSettings
+     * @param ConnectionData|null $connectionData
      *
      * @return Unzer
      */
-    public function makeUnzerAPI(?ConnectionSettings $connectionSettings = null): Unzer
+    public function makeUnzerAPI(?ConnectionData $connectionData = null): Unzer
     {
         return $this->unzerMock;
     }

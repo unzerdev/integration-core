@@ -81,7 +81,7 @@ class ConnectionService
     public function initializeConnection(ConnectionSettings $connectionSettings): void
     {
         $this->validateKeys($connectionSettings);
-        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
+        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings->getActiveConnectionData());
         $this->validateKeypair($unzer, $connectionSettings);
         $webhookUrl = $this->webhookUrlService->getWebhookUrl();
         $unregisteredEvents = $this->getUnregisteredEvents($unzer, $webhookUrl);
@@ -127,7 +127,7 @@ class ConnectionService
             );
         }
 
-        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings);
+        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings->getActiveConnectionData());
         $this->deleteWebhooks();
         $this->registerWebhooks(
             $unzer,
@@ -154,7 +154,7 @@ class ConnectionService
         if ($webhookSettings->getLiveWebhookData()) {
             foreach ($webhookSettings->getLiveWebhookData()->getIds() as $webhookId) {
                 try {
-                    $this->unzerFactory->makeUnzerAPI($connectionSettings)->deleteWebhook($webhookId);
+                    $this->unzerFactory->makeUnzerAPI($connectionSettings->getLiveConnectionData())->deleteWebhook($webhookId);
                 } catch (UnzerApiException $e) {
                     // if webhook id does not exist on API continue
                 }
@@ -164,7 +164,7 @@ class ConnectionService
         if ($webhookSettings->getSandboxWebhookData()) {
             foreach ($webhookSettings->getSandboxWebhookData()->getIds() as $webhookId) {
                 try {
-                    $this->unzerFactory->makeUnzerAPI($connectionSettings)->deleteWebhook($webhookId);
+                    $this->unzerFactory->makeUnzerAPI($connectionSettings->getSandboxConnectionData())->deleteWebhook($webhookId);
                 } catch (UnzerApiException $e) {
                     // if webhook id does not exist on API continue
                 }
