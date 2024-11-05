@@ -9,8 +9,8 @@
    */
   const values = {
     environment: Unzer.config.store.mode,
-    privateKey: Unzer.connectionData.privateKey,
-    publicKey: Unzer.connectionData.publicKey,
+    privateKey: '',
+    publicKey: '',
     deleteConfig: false
   };
 
@@ -324,6 +324,8 @@
   function saveChanges(modal) {
     Unzer.utilities.showLoader();
 
+    values.privateKey = environmentValues.connectionData.privateKey;
+    values.publicKey = environmentValues.connectionData.publicKey;
     Unzer.LoginService.reconnect(values)
         .then(() => {
           Unzer.utilities.createToasterMessage("general.changesSaved", false);
