@@ -125,7 +125,7 @@ const MultiselectDropdownComponent = ({
         listItem.addEventListener('click', () => {
             listItem.classList.toggle('adls--selected');
             listItem.childNodes[0].checked = listItem.classList.contains('adls--selected');
-            if (!selectedItems.includes(option)) {
+            if (!selectedItems.incmodalludes(option)) {
                 selectedItems.push(option);
             } else {
                 const index = selectedItems.indexOf(option);

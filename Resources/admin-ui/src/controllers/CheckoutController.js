@@ -286,7 +286,7 @@
           options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag, title: x.name}))
         }, {
           maxWidth: false,
-          value: paymentMethodConfig?.name?.find(x => x.locale == 'default')?.value ?? '',
+          value: paymentMethodConfig?.name?.find(x => x.locale == 'default')?.value ?? paymentMethod.name,
           title: "checkout.fields.paymentMethodName.label",
           subtitle: "checkout.fields.paymentMethodName.description"
         },
@@ -398,7 +398,7 @@
       generator.createElement('button', 'arrow-down', '', {
         type: 'button',
         onclick: () => {
-          paymentMethodConfig.surcharge -= 1;
+          paymentMethodConfig.surcharge = Math.max(0, paymentMethodConfig.surcharge-1);
           handleSurchargeChange(paymentMethodConfig.surcharge);
         }
       })
@@ -410,6 +410,7 @@
         Unzer.components.MultiselectDropdownField.create({
           title: 'checkout.modal.restrictCountries',
           useAny: false,
+          orientation: "top",
           options: countries.map(x => ({ value: x.code, label: x.name })),
           values: paymentMethodConfig.restrictedCountries?.map(x => x.code),
           onChange: (values) => {

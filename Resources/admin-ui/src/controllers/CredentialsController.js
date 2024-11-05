@@ -44,7 +44,9 @@
             return;
         }
 
-        getData();
+      Unzer.components.PageHeader.updateEnvironment(false);
+
+      getData();
     };
 
     /**
@@ -112,7 +114,6 @@
                 onChange: (value) => {
                     openEnvModal = value !== Unzer.config.store.mode;
                     values.environment = value;
-                    Unzer.components.PageHeader.updateEnvironment(value === "sandbox")
                 },
                 value: Unzer.config.store.mode
             }),

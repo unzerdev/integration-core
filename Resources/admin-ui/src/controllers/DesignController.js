@@ -79,14 +79,13 @@
 
             current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
 
-            selectedValues.logoImageUrl = result.logoImageUrl;
-            selectedValues.headerColor = result.headerBackgroundColor;
-            selectedValues.headerFontColor = result.headerFontColor;
-            selectedValues.shopNameColor = result.shopNameFontColor;
-            selectedValues.shopTaglineColor = result.shopTaglineFontColor;
-            selectedValues.shopTaglineBackgroundColor = result.shopTaglineBackgroundColor;
-            selectedValues.shopNameBackground = result.shopNameBackgroundColor;
-
+            selectedValues.logoImageUrl = result.logoImageUrl || selectedValues.logoImageUrl;
+            selectedValues.headerColor = result.headerBackgroundColor || selectedValues.headerColor;
+            selectedValues.headerFontColor = result.headerFontColor || selectedValues.headerFontColor
+            selectedValues.shopNameColor = result.shopNameFontColor || selectedValues.shopNameColor;
+            selectedValues.shopTaglineColor = result.shopTaglineFontColor || selectedValues.shopTaglineColor;
+            selectedValues.shopTaglineBackgroundColor = result.shopTaglineBackgroundColor || selectedValues.shopTaglineBackgroundColor;
+            selectedValues.shopNameBackground = result.shopNameBackgroundColor || selectedValues.shopNameBackground;
           }
 
           render();
