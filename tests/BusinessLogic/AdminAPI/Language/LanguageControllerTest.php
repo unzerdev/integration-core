@@ -62,7 +62,7 @@ class LanguageControllerTest extends BaseTestCase
         $this->languageService->setLanguages([
                 new Language('en'),
                 new Language('fr'),
-                new Language('es')
+                new Language('es','es','es')
             ]
         );
 
@@ -71,9 +71,9 @@ class LanguageControllerTest extends BaseTestCase
 
         // Assert
         self::assertEquals([
-            ['code' => 'en', 'flag' => ''],
-            ['code' => 'fr', 'flag' => ''],
-            ['code' => 'es', 'flag' => ''],
+            ['code' => 'en', 'flag' => '', 'name'=>''],
+            ['code' => 'fr', 'flag' => '', 'name'=>''],
+            ['code' => 'es', 'flag' => 'es', 'name'=>'es'],
         ], $response->toArray());
     }
 }
