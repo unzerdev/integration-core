@@ -37,27 +37,23 @@ class ReRegisterWebhooksResponse extends Response
         }
 
         if ($this->webhookSettings->getMode()->equal(Mode::live()) && $this->webhookSettings->getLiveWebhookData()) {
-            return [
-                'webhookData' => [
-                    'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
-                    'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
-                    'events' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getEvents()),
-                    'webhookUrl' => $this->webhookSettings->getLiveWebhookData()->getUrl()
-                ]
+            $returnArray['live']['webhookData'] = [
+                'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
+                'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
+                'events' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getEvents()),
+                'webhookUrl' => $this->webhookSettings->getLiveWebhookData()->getUrl()
             ];
         }
 
         if ($this->webhookSettings->getMode()->equal(Mode::sandbox()) && $this->webhookSettings->getSandboxWebhookData()) {
-            return [
-                'webhookData' => [
-                    'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
-                    'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),
-                    'events' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getEvents()),
-                    'webhookUrl' => $this->webhookSettings->getSandboxWebhookData()->getUrl()
-                ]
+            $returnArray['sandbox']['webhookData'] = [
+                'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
+                'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),
+                'events' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getEvents()),
+                'webhookUrl' => $this->webhookSettings->getSandboxWebhookData()->getUrl()
             ];
         }
 
-        return [];
+        return $returnArray;
     }
 }

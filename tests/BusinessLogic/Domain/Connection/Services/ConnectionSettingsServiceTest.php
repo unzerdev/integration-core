@@ -5,6 +5,7 @@ namespace BusinessLogic\Domain\Connection\Services;
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookSettingsEntity;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
@@ -409,7 +410,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $this->expectException(ConnectionSettingsNotFoundException::class);
 
         // act
-        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
+        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks'], [Mode::live()]);
 
         // assert
     }
@@ -442,7 +443,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
-        $webhookSettingsSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
+        $webhookSettingsSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks'], [Mode::live()]);
 
         // assert
         /** @var WebhookSettings $webhookSettings */
@@ -452,6 +453,40 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         self::assertEquals('https://test.com', $webhookSettings->getLiveWebhookData()->getUrl());
         self::assertCount(2, $webhookSettings->getLiveWebhookData()->getEvents());
         self::assertEquals($webhookSettings, $webhookSettingsSaved);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testReRegistringWebhooksNoConnectionDataForMode(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            null
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+        $webhook1 = new Webhook();
+        $webhook1->setId('1');
+        $webhook1->setUrl('https://test.com');
+        $webhook1->setEvent(WebhookEvents::PAYMENT);
+        $webhook2 = new Webhook();
+        $webhook2->setId('2');
+        $webhook2->setUrl('https://test.com');
+        $webhook2->setEvent(WebhookEvents::CHARGE);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
+        $this->expectException(ConnectionDataNotFound::class);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks'], [Mode::sandbox()]);
+
+        // assert
     }
 
     /**
@@ -534,7 +569,7 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
 
         // act
-        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks']);
+        StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks'], [Mode::live()]);
 
         // assert
         /** @var WebhookSettingsEntity $connectionSettings */

@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReRegisterWebhookRequest;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
@@ -273,6 +274,7 @@ class ConnectionControllerTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidModeException
      * @throws UnzerApiException
      */
     public function testReRegistringWebhooksSuccess(): void
@@ -280,7 +282,7 @@ class ConnectionControllerTest extends BaseTestCase
         // Arrange
 
         // Act
-        $response = AdminAPI::get()->connection('1')->reRegisterWebhooks();
+        $response = AdminAPI::get()->connection('1')->reRegisterWebhooks(new ReRegisterWebhookRequest('live'));
 
         // Assert
         self::assertTrue($response->isSuccessful());
@@ -290,6 +292,7 @@ class ConnectionControllerTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidModeException
      * @throws UnzerApiException
      */
     public function testReRegistringWebhooksToArray(): void
@@ -304,15 +307,13 @@ class ConnectionControllerTest extends BaseTestCase
         $this->connectionService->setWebhookSettings($settings);
 
         // Act
-        $response = AdminAPI::get()->connection('1')->reRegisterWebhooks();
+        $response = AdminAPI::get()->connection('1')->reRegisterWebhooks(new ReRegisterWebhookRequest('live'));
 
         // Assert
-        self::assertArrayHasKey('webhookData', $response->toArray());
-        self::assertArrayNotHasKey('connectionData', $response->toArray());
-        self::assertEquals('1, 2', $response->toArray()['webhookData']['webhookID']);
-        self::assertEquals('test.com', $response->toArray()['webhookData']['webhookUrl']);
-        self::assertEquals('test, test2', $response->toArray()['webhookData']['events']);
-        self::assertEquals('October 03, 2024 14:30', $response->toArray()['webhookData']['registrationDate']);
+        self::assertEquals('1, 2', $response->toArray()['live']['webhookData']['webhookID']);
+        self::assertEquals('test.com', $response->toArray()['live']['webhookData']['webhookUrl']);
+        self::assertEquals('test, test2', $response->toArray()['live']['webhookData']['events']);
+        self::assertEquals('October 03, 2024 14:30', $response->toArray()['live']['webhookData']['registrationDate']);
     }
 
     /**

@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetCredentialsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReRegisterWebhookRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ConnectionResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetConnectionDataResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetCredentialsResponse;
@@ -84,7 +85,7 @@ class ConnectionController
     {
         $this->connectionService->initializeConnection($reconnectRequest->toDomainModel());
 
-        if($reconnectRequest->isDeleteConfig()) {
+        if ($reconnectRequest->isDeleteConfig()) {
             $this->disconnectService->deleteAdditionalSettings();
         }
 
@@ -103,18 +104,22 @@ class ConnectionController
         $mode = Mode::parse($connectionRequest->getMode());
         $connectionSettings = $this->connectionService->getConnectionSettings();
 
-        return new GetConnectionDataResponse($this->getConnectionDataFromConnectionSettings($mode, $connectionSettings));
+        return new GetConnectionDataResponse($this->getConnectionDataFromConnectionSettings($mode,
+            $connectionSettings));
     }
 
     /**
+     * @param ReRegisterWebhookRequest $request
+     *
      * @return ReRegisterWebhooksResponse
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidModeException
      * @throws UnzerApiException
      */
-    public function reRegisterWebhooks(): ReRegisterWebhooksResponse
+    public function reRegisterWebhooks(ReRegisterWebhookRequest $request): ReRegisterWebhooksResponse
     {
-        $webhookSettings = $this->connectionService->reRegisterWebhooks();
+        $webhookSettings = $this->connectionService->reRegisterWebhooks(Mode::parse($request->getMode()));
 
         return new ReRegisterWebhooksResponse($webhookSettings);
     }

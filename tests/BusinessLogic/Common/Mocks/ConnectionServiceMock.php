@@ -3,6 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
@@ -55,9 +56,11 @@ class ConnectionServiceMock extends ConnectionService
     }
 
     /**
+     * @param Mode $mode
+     *
      * @return void
      */
-    public function reRegisterWebhooks(): ?WebhookSettings
+    public function reRegisterWebhooks(Mode $mode): ?WebhookSettings
     {
         return $this->getWebhookSettings();
     }

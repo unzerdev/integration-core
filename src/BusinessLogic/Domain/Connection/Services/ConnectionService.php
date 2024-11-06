@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\Connection\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Enums\SupportedWebhookEvents;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
@@ -83,7 +84,7 @@ class ConnectionService
         $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings->getActiveConnectionData());
         $this->validateKeypair($unzer, $connectionSettings);
 
-        if(!$this->isWebhookRegistrationNecessary($connectionSettings->getMode())) {
+        if (!$this->isWebhookRegistrationNecessary($connectionSettings->getMode())) {
             $this->registerWebhooks(
                 $unzer,
                 $this->webhookUrlService->getWebhookUrl(),
@@ -113,12 +114,15 @@ class ConnectionService
     }
 
     /**
+     * @param Mode $mode
+     *
      * @return ?WebhookSettings
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
+     * @throws ConnectionDataNotFound
      */
-    public function reRegisterWebhooks(): ?WebhookSettings
+    public function reRegisterWebhooks(Mode $mode): ?WebhookSettings
     {
         $connectionSettings = $this->getConnectionSettings();
 
@@ -129,8 +133,19 @@ class ConnectionService
             );
         }
 
-        $unzer = $this->unzerFactory->makeUnzerAPI($connectionSettings->getActiveConnectionData());
-        $this->deleteWebhooksForMode($connectionSettings->getMode());
+        $connectionData = $mode->equal(Mode::live()) ?
+            $connectionSettings->getLiveConnectionData() :
+            $connectionSettings->getSandboxConnectionData();
+
+        if (!$connectionData) {
+            throw new ConnectionDataNotFound(
+                new TranslatableLabel('Connection data for mode: ' . $mode->getMode() .  'not found.',
+                    'connectionData.notFound')
+            );
+        }
+
+        $unzer = $this->unzerFactory->makeUnzerAPI($connectionData);
+        $this->deleteWebhooksForMode($mode);
         $this->registerWebhooks(
             $unzer,
             $this->webhookUrlService->getWebhookUrl(),
