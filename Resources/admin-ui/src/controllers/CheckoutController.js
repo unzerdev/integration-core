@@ -303,7 +303,7 @@
     let descriptionField = Unzer.components.TextDropdownComponent.create({
           isIcon: true,
           value: "default",
-          options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag }))
+          options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag, title: x.name}))
         }, {
           maxWidth: false,
           title: "checkout.fields.paymentMethodDescription.label",

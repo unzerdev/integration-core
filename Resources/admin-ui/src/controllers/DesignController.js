@@ -18,8 +18,8 @@
   let selectedValues = {
     name: [
       {
-        locale: "defaul",
-        value: ""
+        locale: "default",
+        value: Unzer.config.store.storeName
       }
     ],
     tagline: [
@@ -38,7 +38,7 @@
     shopNameBackground: '#ffffff',
   };
 
-  let current_name = "";
+  let current_name = Unzer.config.store.storeName;
   let current_tagline = "";
   /**
    * display design page
@@ -68,9 +68,14 @@
             selectedValues.name = result?.shopName?.map(x => ({
               locale: x.locale,
               value: x.value,
-            })) || [{ locale: 'default', value: ''}];
+            })) || [{ locale: 'default', value: Unzer.config.store.storeName}];
 
-            current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
+            if(selectedValues.name.length == 0){
+              selectedValues.name = [{ locale: 'default', value: Unzer.config.store.storeName}];
+            }
+
+            current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName;
+
 
             selectedValues.tagline = result?.shopTagline?.map(x => ({
               locale: x.locale,
@@ -132,17 +137,17 @@
                     maxWidth: false,
                     title: "design.translations.shopName",
                     subtitle: "design.translations.shopNameDescription",
-                    value: selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '',
+                    value: selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName,
                   },
                   selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value})),
                   (value) => {
                     selectedValues.name = value;
-                    current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? '';
+                    current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName;
                   },
                   'unzer-text-dropdown-max-width',
                   selectedValues?.name?.find(x => x.locale === 'default') ?? {
                     locale: 'default',
-                    value: ''
+                    value: Unzer.config.store.storeName
                   }
               ),
               Unzer.components.FileUploadComponent.create({
@@ -268,8 +273,10 @@
     formData.append('tagline', JSON.stringify(taglineArray));
 
     Unzer.DesignService.saveDesign(formData)
-        .then(() => {
+        .then((result) => {
+          selectedValues.logoImageUrl = result.logoImageUrl || selectedValues.logoImageUrl;
           Unzer.utilities.createToasterMessage("general.changesSaved",false);
+          render();
         })
         .catch((ex) => {
           Unzer.utilities.createToasterMessage(ex.errorMessage, true);
