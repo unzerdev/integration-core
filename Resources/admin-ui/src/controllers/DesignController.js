@@ -250,6 +250,10 @@
     )
   }
 
+  const validateColorFields = () => {
+
+  };
+
   /**
    * Save changes of payment page
    */

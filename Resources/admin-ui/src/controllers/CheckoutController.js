@@ -367,10 +367,17 @@
       }
     });
 
+    const handleArrowClick = (step) => {
+
+      let surcharge = surchargeField.querySelector(`[name=${'surcharge'}]`);
+      let currentValue = parseFloat(surcharge.value) || 0;
+
+      let input = Math.max(0, currentValue + step);
+      surchargeField.querySelector(`[name=${'surcharge'}]`).value = JSON.stringify(input);
+    }
+
     const handleSurchargeChange = (value) => {
       paymentMethodConfig.surcharge = value;
-      surchargeField.querySelector(`[name=${'surcharge'}]`).value = JSON.stringify(value);
-
     };
 
     const surchargeField = Unzer.components.TextField.create({
@@ -394,15 +401,13 @@
       generator.createElement('button', 'arrow-up', '', {
         type: 'button',
         onclick: () => {
-          paymentMethodConfig.surcharge += 1;
-          handleSurchargeChange(paymentMethodConfig.surcharge);
+          handleArrowClick(1);
         }
       }),
       generator.createElement('button', 'arrow-down', '', {
         type: 'button',
         onclick: () => {
-          paymentMethodConfig.surcharge = Math.max(0, paymentMethodConfig.surcharge-1);
-          handleSurchargeChange(paymentMethodConfig.surcharge);
+          handleArrowClick(-1);
         }
       })
     ]);

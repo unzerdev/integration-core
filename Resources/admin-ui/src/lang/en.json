@@ -84,7 +84,7 @@
     "sandbox": "You’re currently in the Sandbox environment. Switch to live mode <a href='%s'>here</a>.",
     "heading": {
       "title": "UnzerOne: </br>One platform for all channels and the ideal customer experience.",
-      "subtitle": "Make sure that you’re logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href='https://www.unzer.com/en/sales-team-contact/'>here</a>."
+      "subtitle": "Make sure that you’re logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href='https://www.unzer.com/en/sales-team-contact/' target='_blank'>here</a>."
     },
     "environment": {
       "title": "Environment",

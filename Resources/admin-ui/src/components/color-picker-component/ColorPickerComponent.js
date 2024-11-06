@@ -28,6 +28,19 @@ const ColorPickerComponent = ({ defaultColor, className, onColorChange, label = 
         onColorChange && onColorChange(selectedColor);
     });
 
+  function isValidHexColor(value) {
+    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+    return hexPattern.test(value);
+  }
+
+  inputElement.addEventListener('input', () => {
+    const enteredColor = inputElement.value;
+    if (isValidHexColor(enteredColor)) {
+      colorPickerElement.value = enteredColor;
+      onColorChange && onColorChange(enteredColor);
+    }
+  });
+
     const wrapper = generator.createElement('span', 'unzer-color-picker', "", [], [])
     const descriptionSpan = generator.createElement('span', 'unzer-color-description', description, [], [])
 
