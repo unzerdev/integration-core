@@ -119,7 +119,6 @@ class ConnectionService
      * @return ?WebhookSettings
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      * @throws ConnectionDataNotFound
      */
     public function reRegisterWebhooks(Mode $mode): ?WebhookSettings
@@ -149,7 +148,7 @@ class ConnectionService
         $this->registerWebhooks(
             $unzer,
             $this->webhookUrlService->getWebhookUrl(),
-            $connectionSettings->getMode()
+            $mode
         );
 
         return $this->getWebhookSettings();
