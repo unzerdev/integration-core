@@ -371,43 +371,6 @@ class ConnectionSettingsServiceTest extends BaseTestCase
      * @throws InvalidModeException
      * @throws Exception
      */
-    public function testNoWebhookDataSaved(): void
-    {
-        // arrange
-        $settings = new ConnectionSettings(
-            Mode::parse('live'),
-            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
-            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
-        );
-        $webhook1 = new Webhook();
-        $webhook1->setUrl('https://test.com');
-        $webhook1->setEvent(WebhookEvents::PAYMENT);
-        $webhook2 = new Webhook();
-        $webhook2->setUrl('https://test.com');
-        $webhook2->setEvent(WebhookEvents::CHARGE);
-        $webhook3 = new Webhook();
-        $webhook3->setUrl('https://test.com');
-        $webhook3->setEvent(WebhookEvents::AUTHORIZE);
-        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2, $webhook3]);
-
-        // act
-        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
-
-        // assert
-        /** @var WebhookSettingsEntity $connectionSettings */
-        $webhookData = $this->webhookDataRepository->selectOne();
-
-        self::assertNull($webhookData);
-    }
-
-    /**
-     * @return void
-     *
-     * @throws EntityClassException
-     * @throws QueryFilterInvalidParamException
-     * @throws InvalidModeException
-     * @throws Exception
-     */
     public function testWebhookDataSaved(): void
     {
         // arrange
@@ -433,55 +396,6 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         $webhookData = $this->webhookDataRepository->selectOne()->getWebhookSettings();
 
         self::assertNotNull($webhookData);
-    }
-
-    /**
-     * @return void
-     *
-     * @throws EntityClassException
-     * @throws QueryFilterInvalidParamException
-     * @throws InvalidModeException
-     * @throws Exception
-     */
-    public function testWebhookDataUpdate(): void
-    {
-        // arrange
-        $settings = new ConnectionSettings(
-            Mode::parse('live'),
-            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
-            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
-        );
-        $webhook1 = new Webhook();
-        $webhook1->setUrl('https://test.com');
-        $webhook1->setId('4');
-        $webhook1->setEvent(WebhookEvents::PAYMENT);
-        $webhook2 = new Webhook();
-        $webhook2->setUrl('https://test.com');
-        $webhook2->setId('5');
-        $webhook2->setEvent(WebhookEvents::CHARGE);
-        $oldData = new WebhookSettingsEntity();
-        $webhookData = new WebhookData('https://test2.com', ['1', '2', '3'], ['2', '3', '3'], 'test');
-        $webhookSettings = new WebhookSettings(
-            Mode::live(),
-            $webhookData
-        );
-        $oldData->setWebhookSettings($webhookSettings);
-        $oldData->setStoreId('1');
-        $this->webhookDataRepository->save($oldData);
-        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook1, $webhook2]);
-
-        // act
-        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
-
-        // assert
-        /** @var WebhookSettings $settings */
-        $settings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
-
-        self::assertNotNull($settings);
-        self::assertCount(5, $settings->getLiveWebhookData()->getEvents());
-        self::assertCount(5, $settings->getLiveWebhookData()->getIds());
-        self::assertTrue(in_array(WebhookEvents::PAYMENT, $settings->getLiveWebhookData()->getEvents()));
-        self::assertTrue(in_array(WebhookEvents::CHARGE, $settings->getLiveWebhookData()->getEvents()));
     }
 
     /**
