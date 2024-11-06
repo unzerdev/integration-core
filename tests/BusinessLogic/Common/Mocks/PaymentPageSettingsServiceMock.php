@@ -25,8 +25,9 @@ class PaymentPageSettingsServiceMock extends PaymentPageSettingsService
      *
      * @return void
      */
-    public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): void
+    public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
+        return $paymentPageSettings;
     }
 
     /**

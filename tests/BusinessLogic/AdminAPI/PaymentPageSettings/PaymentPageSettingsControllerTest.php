@@ -95,8 +95,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $this->paymentPageSettingsService->setPaymentPageSettings(
             new PaymentPageSettingsModel(
                 new UploadedFile('file'),
-                TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-                new TranslationCollection(new Translation('en_us',"description")),
+                TranslationCollection::fromArray([
+                    ['locale' => 'default', 'value' => 'shop'],
+                    ['locale' => 'en_us', 'value' => 'shop']
+                ]),
+                new TranslationCollection(new Translation('en_us', "description")),
                 '#FFFFFF',
                 '#666666',
                 '#111111',
@@ -122,8 +125,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('file'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new TranslationCollection(new Translation('en_us', "description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -152,7 +158,10 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('file'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
             TranslationCollection::fromArray([]),
             '#FFFFFF',
             '#666666',
@@ -166,8 +175,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
         $expectedResponse = new PaymentPageSettingsModel(
             new UploadedFile('file'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -191,15 +203,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPageSettings();
 
-        $expectedResponse = ['shopName' => [],
-                'shopTagline' => [],
-                'logoImageUrl' => null,
-                'headerBackgroundColor' => null,
-                'headerFontColor' => null,
-                'shopNameBackgroundColor' => null,
-                'shopNameFontColor' => null,
-                'shopTaglineBackgroundColor' => null,
-                'shopTaglineFontColor' => null ];
+        $expectedResponse = [
+            'shopName' => [],
+            'shopTagline' => [],
+            'logoImageUrl' => null,
+            'headerBackgroundColor' => null,
+            'headerFontColor' => null,
+            'shopNameBackgroundColor' => null,
+            'shopNameFontColor' => null,
+            'shopTaglineBackgroundColor' => null,
+            'shopTaglineFontColor' => null
+        ];
         // Assert
         self::assertEquals($response->toArray(), $expectedResponse);
     }
@@ -212,8 +226,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             'path',
             null,
             '#FFFFFF',
@@ -239,8 +256,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             new \SplFileInfo('path'),
             null,
             '#FFFFFF',
@@ -256,8 +276,12 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->savePaymentPageSettings($settingsRequest);
 
+
         // Assert
-        self::assertEquals(['success' => true], $response->toArray());
+        self::assertEquals(
+            $this->expectedToArrayResponse($settingsRequest->transformToDomainModel()),
+            $response->toArray()
+        );
     }
 
     /**
@@ -290,8 +314,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             'path',
             null,
             '#FFFFFF',
@@ -302,7 +329,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#222222',
         );
 
-        $this->paymentPageSettingsService->setPaypage(new Paypage(100,"EUR","return"));
+        $this->paymentPageSettingsService->setPaypage(new Paypage(100, "EUR", "return"));
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPagePreview($settingsRequest);
 
@@ -319,8 +346,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settingsRequest = new PaymentPageSettingsRequest(
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             'path',
             null,
             '#FFFFFF',
@@ -332,7 +362,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         );
 
         $id = "Id";
-        $paypage = new Paypage(100,"EUR","return");
+        $paypage = new Paypage(100, "EUR", "return");
         $paypage->setId($id);
         $this->paymentPageSettingsService->setPaypage($paypage);
 

@@ -54,13 +54,15 @@ class PaymentPageSettingsService
      *
      * @return void
      */
-    public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): void
+    public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
         if ($paymentPageSettings->getFile()->isFileInfo()) {
             $url = $this->uploaderService->uploadImage($paymentPageSettings->getFile()->getFileInfo());
             $paymentPageSettings->getFile()->setUrl($url);
         }
         $this->repository->setPaymentPageSettings($paymentPageSettings);
+
+        return $paymentPageSettings;
     }
 
     /**

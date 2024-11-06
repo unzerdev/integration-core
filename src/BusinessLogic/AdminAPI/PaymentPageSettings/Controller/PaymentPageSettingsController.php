@@ -35,17 +35,15 @@ class PaymentPageSettingsController
      * @param PaymentPageSettingsRequest $paymentPageSettingsRequest
      *
      * @return PaymentPageSettingsPutResponse
-     *
-     * @throws InvalidTranslatableArrayException
      */
     public function savePaymentPageSettings(
         PaymentPageSettingsRequest $paymentPageSettingsRequest
     ): PaymentPageSettingsPutResponse {
-        $this->paymentPageSettingsService->savePaymentPageSettings(
+        $paymentPageSettings = $this->paymentPageSettingsService->savePaymentPageSettings(
             $paymentPageSettingsRequest->transformToDomainModel()
         );
 
-        return new PaymentPageSettingsPutResponse();
+        return new PaymentPageSettingsPutResponse($paymentPageSettings);
     }
 
     /**
@@ -60,7 +58,6 @@ class PaymentPageSettingsController
      * @param PaymentPageSettingsRequest $pageSettingsRequest
      *
      * @return PaymentPagePreviewResponse
-     * @throws InvalidTranslatableArrayException
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
      */
