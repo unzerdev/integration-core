@@ -22,6 +22,7 @@
 
   let liveData = {
     webhookData: {
+      exists: false,
       registrationDate: '',
       webhookID: '',
       events: '',
@@ -33,8 +34,10 @@
     }
   };
 
+
   let sandboxData = {
     webhookData: {
+      exists: false,
       registrationDate: '',
       webhookID: '',
       events: '',
@@ -47,23 +50,6 @@
   };
 
   let environmentValues = values.environment === 'live' ? liveData : sandboxData;
-
-
-
-  let webhookData = {
-    registrationDate: '',
-    webhookID: '',
-    events: '',
-    webhookUrl: '',
-  }
-
-  /**
-   * @type {{privateKey: string, publicKey: string}}
-   */
-  let connectionData = {
-    publicKey: '',
-    privateKey: '',
-  }
 
   /**
    * renders credentials page
@@ -92,14 +78,17 @@
         .then((result) => {
 
           if (result.live) {
-            liveData.webhookData = result.live.webhookData || liveData.webhookData;
+
+            liveData.webhookData = result.live.webhookData ? { ...result.live.webhookData, exists: true } : liveData.webhookData;
             liveData.connectionData = result.live.connectionData || liveData.connectionData;
           }
 
           if (result.sandbox) {
-            sandboxData.webhookData = result.sandbox.webhookData || sandboxData.webhookData;
+
+            sandboxData.webhookData = result.sandbox.webhookData ? { ...result.sandbox.webhookData, exists: true } : sandboxData.webhookData;
             sandboxData.connectionData = result.sandbox.connectionData || sandboxData.connectionData;
           }
+
           render();
         })
         .catch((ex) => {
@@ -169,39 +158,51 @@
           onChange: (value) => {
             environmentValues.connectionData.privateKey = value;
           }
-        }),
-        Unzer.components.TextField.create({
-          label: 'credentials.notifications',
-          description: 'credentials.notificationsDescription',
-          disabled: true,
-          title: 'credentials.registrationDate',
-          fieldClasses: 'unzer-input-wrapper-padding',
-          value: environmentValues.webhookData.registrationDate
-        }),
-        Unzer.components.TextField.create({
+        })
+    );
+
+    let notifications = Unzer.components.TextField.create({
+      label: 'credentials.notifications',
+      description: 'credentials.notificationsDescription',
+      disabled: true,
+      title: 'credentials.registrationDate',
+      fieldClasses: 'unzer-input-wrapper-padding',
+      value: environmentValues.webhookData.registrationDate
+    });
+    let webhookId = Unzer.components.TextField.create({
           title: 'credentials.webhook',
           disabled: true,
           fieldClasses: 'unzer-input-wrapper-padding',
           value: environmentValues.webhookData.webhookID
-        }),
+        });
+    let webhookUrl =
         Unzer.components.TextField.create({
           title: 'credentials.webhookUrl',
           disabled: true,
           fieldClasses: 'unzer-input-wrapper-padding',
           value: environmentValues.webhookData.webhookUrl
-        }),
+        });
+    let events =
         Unzer.components.TextField.create({
           title: 'credentials.event',
           disabled: true,
           fieldClasses: 'unzer-input-wrapper-padding',
           value: environmentValues.webhookData.events
-        }),
-        Unzer.components.Button.create({
+        });
+
+    let reregisterButton = Unzer.components.Button.create({
           type: 'primary',
           label: 'credentials.reRegister',
           onClick: reRegisterWebhooks
-        })
-    );
+        });
+
+    let webhookWrapper = Unzer.elementGenerator.createElement('div', 'webhook-wrapper', '', null, [
+      notifications, webhookId, webhookUrl, events, reregisterButton
+    ]);
+
+    webhookWrapper.style.visibility = environmentValues.webhookData.exists ? 'visible' : 'hidden';
+
+    page.append(webhookWrapper);
   }
 
   const openDisconnectModal = () => {
@@ -296,19 +297,29 @@
 
   function reRegisterWebhooks() {
     Unzer.utilities.showLoader();
-    Unzer.LoginService.reRegisterWebhooks()
+
+    value = {
+      environment : values.environment
+    }
+    Unzer.LoginService.reRegisterWebhooks(value)
         .then((response) => {
-          if (response.webhookData) {
-            webhookData = response.webhookData;
-            Unzer.utilities.createToasterMessage("credentials.webhookRegistered", false);
-          } else {
-            webhookData = {
-              registrationDate: '',
-              webhookID: '',
-              events: '',
-              webhookUrl: '',
-            };
-            Unzer.utilities.createToasterMessage("credentials.webhookUnsuccessful", true);
+
+          console.log(response);
+          let success = false;
+          if(values.environment === "live"){
+            liveData.webhookData = response.live.webhookData ? { ...response.live.webhookData, exists: true } : liveData.webhookData;
+            Unzer.utilities.createToasterMessage('credentials.webhookRegistered', false);
+            success = true;
+          }
+
+          if(values.environment === "sandbox"){
+            sandboxData.webhookData = response.sandbox.webhookData ? { ...response.sandbox.webhookData, exists: true } : sandboxData.webhookData;
+            Unzer.utilities.createToasterMessage('credentials.webhookRegistered', false);
+            success = true;
+          }
+
+          if(!success) {
+            Unzer.utilities.createToasterMessage('credentials.webhookUnsuccessful', true);
           }
           render();
         })
@@ -328,6 +339,7 @@
     values.publicKey = environmentValues.connectionData.publicKey;
     Unzer.LoginService.reconnect(values)
         .then(() => {
+          getData();
           Unzer.utilities.createToasterMessage("general.changesSaved", false);
         })
         .catch((ex) => {

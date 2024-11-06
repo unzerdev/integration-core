@@ -38,10 +38,10 @@
   /**
    * @returns {Promise<*>}
    */
-  const reRegisterWebhooks = () => {
+  const reRegisterWebhooks = (data) => {
     return Unzer.ajaxService.post(
         `${Unzer.config.credentialUrl}/reregister?storeId=${Unzer.config.store.storeId}`,
-        {},
+        data,
         null,
         (exception) => {
           return Promise.reject(exception);
