@@ -43,7 +43,7 @@ class GetCredentialsResponse extends Response
     {
         $returnArray = [];
 
-        if(!$this->connectionSettings || !$this->webhookSettings) {
+        if(!$this->connectionSettings) {
             return $returnArray;
         }
 
@@ -54,7 +54,7 @@ class GetCredentialsResponse extends Response
             ];
 
 
-            if ($this->webhookSettings->getLiveWebhookData()) {
+            if ($this->webhookSettings && $this->webhookSettings->getLiveWebhookData()) {
                 $returnArray['live']['webhookData'] = [
                     'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
                     'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
@@ -71,7 +71,7 @@ class GetCredentialsResponse extends Response
             ];
 
 
-            if ($this->webhookSettings->getSandboxWebhookData()) {
+            if ($this->webhookSettings && $this->webhookSettings->getSandboxWebhookData()) {
                 $returnArray['sandbox']['webhookData'] = [
                     'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
                     'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),

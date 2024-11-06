@@ -139,7 +139,7 @@ class ConnectionService
 
         if (!$connectionData) {
             throw new ConnectionDataNotFound(
-                new TranslatableLabel('Connection data for mode: ' . $mode->getMode() .  'not found.',
+                new TranslatableLabel('Connection data for mode: ' . $mode->getMode() . 'not found.',
                     'connectionData.notFound')
             );
         }
@@ -242,12 +242,15 @@ class ConnectionService
      * @param Mode $mode
      *
      * @return void
-     *
-     * @throws UnzerApiException
      */
     private function registerWebhooks(Unzer $unzer, string $webhookUrl, Mode $mode): void
     {
-        $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
+        try {
+            $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
+        } catch (UnzerApiException $e) {
+            // if webhook registration fails continue
+            $webhooks = [];
+        }
 
         if (!empty($webhooks)) {
             $webhookData = WebhookData::fromBatch($webhooks);
