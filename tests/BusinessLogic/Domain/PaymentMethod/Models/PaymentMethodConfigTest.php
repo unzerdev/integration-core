@@ -10,6 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsExcep
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 
 /**
@@ -34,8 +35,8 @@ class PaymentMethodConfigTest extends BaseTestCase
             true,
             BookingMethod::authorize(),
             false,
-            [new TranslatableLabel('KLARNA eng', 'en'), new TranslatableLabel('KLARNA De', 'de')],
-            [],
+            null,
+            null,
             '2',
             null,
             Amount::fromFloat(2.2, Currency::getDefault()),
@@ -60,8 +61,8 @@ class PaymentMethodConfigTest extends BaseTestCase
             true,
             BookingMethod::authorize(),
             false,
-            [new TranslatableLabel('KLARNA eng', 'en'), new TranslatableLabel('KLARNA De', 'de')],
-            [],
+            null,
+            null,
             '2',
             Amount::fromFloat(2.2, Currency::getDefault()),
             null,
@@ -86,8 +87,8 @@ class PaymentMethodConfigTest extends BaseTestCase
             true,
             BookingMethod::authorize(),
             false,
-            [new TranslatableLabel('KLARNA eng', 'en'), new TranslatableLabel('KLARNA De', 'de')],
-            [],
+            null,
+            null,
             '2',
             Amount::fromFloat(2.2, Currency::getDefault()),
             Amount::fromFloat(1.2, Currency::getDefault()),

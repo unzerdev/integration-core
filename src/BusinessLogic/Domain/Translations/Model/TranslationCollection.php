@@ -124,7 +124,7 @@ class TranslationCollection
             }
         }
 
-        if (!isset($inputArray[0])) {
+        if (!isset($inputArray[0]) || !isset($inputArray[0]['locale']) || !isset($inputArray[0]['value'])) {
             throw new InvalidTranslatableArrayException(
                 new TranslatableLabel('Input array cannot be empty', 'translatableLabel.emptyArray')
             );

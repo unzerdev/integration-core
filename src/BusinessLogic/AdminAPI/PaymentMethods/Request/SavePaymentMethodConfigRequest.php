@@ -12,7 +12,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMetho
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class SavePaymentMethodConfigRequest.
@@ -104,8 +104,8 @@ class SavePaymentMethodConfigRequest extends Request
             true,
             BookingMethod::parse($this->bookingMethod),
             $this->sendBasketData,
-            TranslatableLabel::fromArrayToBatch($this->name),
-            TranslatableLabel::fromArrayToBatch($this->description),
+            TranslationCollection::fromArray($this->name),
+            TranslationCollection::fromArray($this->description),
             $this->statusIdToCharge,
             $this->minOrderAmount !== null ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
             $this->maxOrderAmount !== null ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,

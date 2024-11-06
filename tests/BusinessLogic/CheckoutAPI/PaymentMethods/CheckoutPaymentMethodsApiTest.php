@@ -6,13 +6,17 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodsRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
@@ -99,10 +103,21 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
      * @return void
      *
      * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetPaymentMethodsToArray(): void
     {
         // Arrange
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
         $this->paymentMethodServiceMock->setMockPaymentMethods(
             [
                 new PaymentMethodConfig(
@@ -110,8 +125,8 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                     true,
                     BookingMethod::authorize(),
                     true,
-                    [new TranslatableLabel('Eps eng', 'en'), new TranslatableLabel('Eps De', 'de')],
-                    [new TranslatableLabel('Eps eng desc', 'en'), new TranslatableLabel('Eps De desc', 'de')],
+                    $name,
+                    $description,
                     '2',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -148,11 +163,22 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
     /**
      * @return void
      *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
      * @throws UnzerApiException
      */
     public function testGetPaymentMethodsToArrayDefaultNameAndDescription(): void
     {
         // Arrange
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
         $this->paymentMethodServiceMock->setMockPaymentMethods(
             [
                 new PaymentMethodConfig(
@@ -160,8 +186,8 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                     true,
                     BookingMethod::authorize(),
                     true,
-                    [new TranslatableLabel('Eps eng', 'default'), new TranslatableLabel('Eps De', 'de')],
-                    [new TranslatableLabel('Eps eng desc', 'default'), new TranslatableLabel('Eps De desc', 'de')],
+                    $name,
+                    $description,
                     '2',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -198,6 +224,8 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
     /**
      * @return void
      *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidAmountsException
      * @throws UnzerApiException
      */
     public function testGetPaymentMethodsToArrayNoDefaultNameAndDescription(): void
@@ -210,8 +238,8 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
                     true,
                     BookingMethod::authorize(),
                     true,
-                    [],
-                    [],
+                    null,
+                    null,
                     '2',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),

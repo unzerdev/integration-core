@@ -13,6 +13,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfig
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\Interfaces\RepositoryInterface;
@@ -252,13 +253,22 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testSaveConfigNoConfig(): void
     {
         // arrange
+
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
         $config = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::authorize(),
             true,
-            [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
-            [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            $name,
+            $description,
             '1',
             Amount::fromFloat(1.1, Currency::getDefault()),
             Amount::fromFloat(2.2, Currency::getDefault()),
@@ -283,13 +293,21 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
     public function testSaveConfigUpdate(): void
     {
         // arrange
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
         $config = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::authorize(),
             true,
-            [new TranslatableLabel('Eps', 'eng'), new TranslatableLabel('Eps 2', 'de')],
-            [new TranslatableLabel('Eps description', 'eng'), new TranslatableLabel('Eps 2', 'de')],
+            $name,
+            $description,
             '1',
             Amount::fromFloat(1.1, Currency::getDefault()),
             Amount::fromFloat(2.2, Currency::getDefault()),
@@ -303,13 +321,21 @@ class PaymentMethodConfigRepositoryTest extends BaseTestCase
         $configEntity->setStoreId('1');
         $this->repository->save($configEntity);
 
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
         $newConfig = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            $name,
+            $description,
             '1',
             Amount::fromFloat(1.1, Currency::getDefault()),
             Amount::fromFloat(2.2, Currency::getDefault()),

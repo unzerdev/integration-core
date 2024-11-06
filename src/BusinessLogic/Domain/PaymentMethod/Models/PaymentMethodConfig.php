@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class PaymentMethod.
@@ -40,14 +41,14 @@ class PaymentMethodConfig
     private bool $sendBasketData = false;
 
     /**
-     * @var TranslatableLabel[]
+     * @var ?TranslationCollection
      */
-    private array $name = [];
+    private ?TranslationCollection $name;
 
     /**
-     * @var TranslatableLabel[]
+     * @var ?TranslationCollection
      */
-    private array $description = [];
+    private ?TranslationCollection $description;
 
     /**
      * Shop status ID. When order changes to this status, charge action is triggered.
@@ -79,8 +80,8 @@ class PaymentMethodConfig
     /**
      * @param string $type
      * @param bool $enabled
-     * @param array $name
-     * @param array $description
+     * @param ?TranslationCollection $name
+     * @param ?TranslationCollection $description
      * @param BookingMethod $bookingMethod
      * @param string|null $statusIdToCharge
      * @param Amount|null $minOrderAmount
@@ -96,8 +97,8 @@ class PaymentMethodConfig
         bool $enabled,
         BookingMethod $bookingMethod,
         bool $sendBasketData = false,
-        array $name = [],
-        array $description = [],
+        ?TranslationCollection $name = null,
+        ?TranslationCollection $description = null,
         ?string $statusIdToCharge = null,
         ?Amount $minOrderAmount = null,
         ?Amount $maxOrderAmount = null,
@@ -146,17 +147,17 @@ class PaymentMethodConfig
     }
 
     /**
-     * @return TranslatableLabel[]
+     * @return ?TranslationCollection
      */
-    public function getName(): array
+    public function getName(): ?TranslationCollection
     {
         return $this->name;
     }
 
     /**
-     * @return TranslatableLabel[]
+     * @return ?TranslationCollection
      */
-    public function getDescription(): array
+    public function getDescription(): ?TranslationCollection
     {
         return $this->description;
     }
@@ -234,42 +235,12 @@ class PaymentMethodConfig
      */
     public function getNameByLocale(string $locale): string
     {
-        foreach ($this->name as $name) {
-            if ($name->getCode() === $locale) {
-                return $name->getMessage();
-            }
+        if (!$this->name || empty($this->name->getTranslationMessage($locale))) {
+            return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type] ??
+                PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' ' . $this->type;
         }
 
-        foreach ($this->name as $name) {
-            if ($name->getCode() === 'default') {
-                return $name->getMessage();
-            }
-        }
-
-        return PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->type] ??
-            PaymentMethodNames::DEFAULT_PAYMENT_METHOD_NAME . ' ' . $this->type;
-    }
-
-    /**
-     * @param string $locale
-     *
-     * @return ?string
-     */
-    public function getDescriptionByLocale(string $locale): ?string
-    {
-        foreach ($this->description as $name) {
-            if ($name->getCode() === $locale) {
-                return $name->getMessage();
-            }
-        }
-
-        foreach ($this->description as $name) {
-            if ($name->getCode() === 'default') {
-                return $name->getMessage();
-            }
-        }
-
-        return null;
+        return $this->name->getTranslationMessage($locale);
     }
 
     /**

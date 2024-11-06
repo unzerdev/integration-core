@@ -2,8 +2,6 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Translations\Model;
 
-use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-
 /**
  * Class TranslatableLabel
  *
@@ -60,48 +58,5 @@ class TranslatableLabel
     public function getParams(): array
     {
         return $this->params;
-    }
-
-    /**
-     * @param array $input
-     *
-     * @return self[]
-     *
-     * @throws InvalidTranslatableArrayException
-     */
-    public static function fromArrayToBatch(array $input): array
-    {
-        self::validateTranslatableArray($input);
-
-        return array_map(fn($value) => new self($value['value'], $value['locale']), $input);
-    }
-
-    /**
-     * @param self[] $batch
-     *
-     * @return array
-     */
-    public static function fromBatchToArray(array $batch): array
-    {
-        return array_map(fn($value) => ['value' => $value->getMessage(), 'locale' => $value->getCode()], $batch);
-    }
-
-    /**
-     * @param array $input
-     *
-     * @return void
-     *
-     * @throws InvalidTranslatableArrayException
-     */
-    private static function validateTranslatableArray(array $input): void
-    {
-        foreach ($input as $element) {
-            if (!is_array($element) || !isset($element['locale']) || !isset($element['value'])) {
-                throw new InvalidTranslatableArrayException(
-                    new TranslatableLabel('Translatable array is invalid',
-                        'translatableLabel.invalidArray')
-                );
-            }
-        }
     }
 }

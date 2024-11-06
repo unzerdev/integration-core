@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
@@ -22,7 +23,9 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -227,7 +230,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
         self::assertEquals(
             new DomainPaymentState(PaymentState::STATE_COMPLETED,
-            PaymentState::STATE_NAME_COMPLETED), $response->getPaymentState()
+                PaymentState::STATE_NAME_COMPLETED), $response->getPaymentState()
         );
     }
 
@@ -243,8 +246,32 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertEquals($expected, $transactionHistory);
     }
 
+    /**
+     * @return void
+     *
+     * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
+     */
     private function setMockPaymentMethods(): void
     {
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+
         $this->paymentMethodService->setMockPaymentMethods(
             [
                 new PaymentMethodConfig(
@@ -252,8 +279,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                     true,
                     BookingMethod::authorize(),
                     false,
-                    [new TranslatableLabel('Eps eng', 'en'), new TranslatableLabel('Eps De', 'de')],
-                    [new TranslatableLabel('Eps eng desc', 'en'), new TranslatableLabel('Eps De desc', 'de')],
+                    $nameEps,
+                    $descriptionEps,
                     '2',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -265,8 +292,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     true,
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    $nameCard,
+                    $descriptionCard,
                     '1',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),

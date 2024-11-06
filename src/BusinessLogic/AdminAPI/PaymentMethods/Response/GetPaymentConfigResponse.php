@@ -9,7 +9,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingChargeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class GetPaymentConfigResponse.
@@ -40,8 +40,10 @@ class GetPaymentConfigResponse extends Response
 
         $array['type'] = $this->paymentMethodConfig->getType();
         $array['typeName'] = PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->paymentMethodConfig->getType()];
-        $array['name'] = $this->translatableLabelsToArray($this->paymentMethodConfig->getName());
-        $array['description'] = $this->translatableLabelsToArray($this->paymentMethodConfig->getDescription());
+        $array['name'] = $this->paymentMethodConfig->getName() ? TranslationCollection::translationsToArray
+        ($this->paymentMethodConfig->getName()) : [];
+        $array['description'] = $this->paymentMethodConfig->getDescription()
+            ? TranslationCollection::translationsToArray($this->paymentMethodConfig->getDescription()) : [];
         $array['bookingAvailable'] =
             in_array($this->paymentMethodConfig->getType(), BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
             in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);
@@ -51,33 +53,15 @@ class GetPaymentConfigResponse extends Response
             in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);
 
         $array['statusIdToCharge'] = $this->paymentMethodConfig->getStatusIdToCharge();
-        $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount(
-        ) ? $this->paymentMethodConfig->getMinOrderAmount()->getPriceInCurrencyUnits() : 0.0;
-        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount(
-        ) ? $this->paymentMethodConfig->getMaxOrderAmount()->getPriceInCurrencyUnits() : 0.0;
-        $array['surcharge'] = $this->paymentMethodConfig->getSurcharge() ? $this->paymentMethodConfig->getSurcharge(
-        )->getPriceInCurrencyUnits() : 0.0;
+        $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount() ? $this->paymentMethodConfig->getMinOrderAmount()->getPriceInCurrencyUnits() : 0.0;
+        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->getPriceInCurrencyUnits() : 0.0;
+        $array['surcharge'] = $this->paymentMethodConfig->getSurcharge() ? $this->paymentMethodConfig->getSurcharge()->getPriceInCurrencyUnits() : 0.0;
         $array['restrictedCountries'] = $this->countriesToArray($this->paymentMethodConfig->getRestrictedCountries());
         $array['displaySendBasketData'] =
             !in_array($this->paymentMethodConfig->getType(), BasketRequired::BASKET_REQUIRED);
         $array['sendBasketData'] = $this->paymentMethodConfig->isSendBasketData();
 
         return $array;
-    }
-
-    /**
-     * @param TranslatableLabel[] $labels
-     *
-     * @return array
-     */
-    private function translatableLabelsToArray(array $labels): array
-    {
-        return array_map(function ($label) {
-            return [
-                'locale' => $label->getCode(),
-                'value' => $label->getMessage()
-            ];
-        }, $labels);
     }
 
     /**

@@ -17,6 +17,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -335,6 +336,23 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutEmptyRestrictedCountries(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
         $this->setEntities(
             [
                 new PaymentMethodConfig(
@@ -342,8 +360,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    $nameEps,
+                    $descriptionEps,
                     '1',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -355,8 +373,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    $nameCard,
+                    $descriptionCard,
                     '1',
                     Amount::fromFloat(1.1, Currency::getDefault()),
                     Amount::fromFloat(2.2, Currency::getDefault()),
@@ -385,6 +403,23 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutEmptyMinOrderAmount(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
         $this->setEntities(
             [
                 new PaymentMethodConfig(
@@ -392,8 +427,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    $nameEps,
+                    $descriptionEps,
                     '1',
                     Amount::fromFloat(2, Currency::getDefault()),
                     Amount::fromFloat(3, Currency::getDefault()),
@@ -405,8 +440,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    $nameCard,
+                    $descriptionCard,
                     '1',
                     Amount::fromFloat(4, Currency::getDefault()),
                     Amount::fromFloat(5, Currency::getDefault()),
@@ -436,6 +471,23 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutEmptyMaxOrderAmount(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
         $this->setEntities(
             [
                 new PaymentMethodConfig(
@@ -443,8 +495,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-                    [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+                    $nameEps,
+                    $descriptionEps,
                     '1',
                     Amount::fromFloat(2, Currency::getDefault()),
                     Amount::fromFloat(3, Currency::getDefault()),
@@ -456,8 +508,8 @@ class PaymentMethodServiceTest extends BaseTestCase
                     true,
                     BookingMethod::charge(),
                     false,
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-                    [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+                    $nameCard,
+                    $descriptionCard,
                     '1',
                     Amount::fromFloat(4, Currency::getDefault()),
                     Amount::fromFloat(5, Currency::getDefault()),
@@ -486,13 +538,30 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutInvalidUnzerAPIResponse(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
         $method1 = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            $nameEps,
+            $descriptionEps,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(30, Currency::getDefault()),
@@ -504,8 +573,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),
@@ -517,8 +586,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             false,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),
@@ -531,8 +600,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             false,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),
@@ -568,13 +637,22 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutInvalidCurrency(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
         $method1 = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            $nameEps,
+            $descriptionEps,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(30, Currency::getDefault()),
@@ -605,13 +683,21 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckoutInvalidCountry(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
         $method1 = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            $nameEps,
+            $descriptionEps,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(30, Currency::getDefault()),
@@ -656,13 +742,30 @@ class PaymentMethodServiceTest extends BaseTestCase
     public function testGetPaymentMethodsForCheckout(): void
     {
         // arrange
+        $nameEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+        $descriptionEps = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps description test'],
+            ['locale' => 'de', 'value' => 'Eps 2 test']
+        ]);
+
+        $nameCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
+        $descriptionCard = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Card'],
+            ['locale' => 'de', 'value' => 'Card']
+        ]);
         $method1 = new PaymentMethodConfig(
             PaymentMethodTypes::EPS,
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Eps test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
-            [new TranslatableLabel('Eps description test', 'eng'), new TranslatableLabel('Eps 2 test', 'de')],
+            $nameEps,
+            $descriptionEps,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(30, Currency::getDefault()),
@@ -674,8 +777,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             true,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),
@@ -687,8 +790,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             false,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),
@@ -701,8 +804,8 @@ class PaymentMethodServiceTest extends BaseTestCase
             false,
             BookingMethod::charge(),
             false,
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
-            [new TranslatableLabel('Card', 'eng'), new TranslatableLabel('Card', 'de')],
+            $nameCard,
+            $descriptionCard,
             '1',
             Amount::fromFloat(1, Currency::getDefault()),
             Amount::fromFloat(222, Currency::getDefault()),

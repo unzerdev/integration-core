@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMetho
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
 use Unzer\Core\Infrastructure\ORM\Entity;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
@@ -78,8 +79,8 @@ class PaymentMethodConfig extends Entity
             $paymentMethodConfig['enabled'],
             BookingMethod::parse($paymentMethodConfig['bookingMethod']),
             $paymentMethodConfig['sendBasketData'],
-            TranslatableLabel::fromArrayToBatch($paymentMethodConfig['name']),
-            TranslatableLabel::fromArrayToBatch($paymentMethodConfig['description']),
+            !empty($paymentMethodConfig['name']) ? TranslationCollection::fromArray($paymentMethodConfig['name']) : null,
+            !empty($paymentMethodConfig['description']) ? TranslationCollection::fromArray($paymentMethodConfig['description']) : null,
             $paymentMethodConfig['statusIdToCharge'],
             !empty($paymentMethodConfig['minOrderAmount']) ? Amount::fromArray($paymentMethodConfig['minOrderAmount']) : null,
             !empty($paymentMethodConfig['maxOrderAmount']) ? Amount::fromArray($paymentMethodConfig['maxOrderAmount']) : null,
@@ -99,10 +100,12 @@ class PaymentMethodConfig extends Entity
         $data['paymentMethodConfig'] = [
             'type' => $this->paymentMethodConfig->getType(),
             'enabled' => $this->paymentMethodConfig->isEnabled(),
-            'name' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getName()),
+            'name' => $this->paymentMethodConfig->getName() ? TranslationCollection::translationsToArray
+            ($this->paymentMethodConfig->getName()) : [],
             'bookingMethod' => $this->paymentMethodConfig->getBookingMethod() ?
                 $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null,
-            'description' => TranslatableLabel::fromBatchToArray($this->paymentMethodConfig->getDescription()),
+            'description' => $this->paymentMethodConfig->getDescription() ?
+                TranslationCollection::translationsToArray($this->paymentMethodConfig->getDescription()) : [],
             'statusIdToCharge' => $this->paymentMethodConfig->getStatusIdToCharge(),
             'minOrderAmount' => $this->paymentMethodConfig->getMinOrderAmount() ? $this->paymentMethodConfig->getMinOrderAmount()->toArray() : [],
             'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->toArray() : [],

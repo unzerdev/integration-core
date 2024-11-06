@@ -21,6 +21,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
@@ -174,19 +175,24 @@ class PaymentMethodsApiTest extends BaseTestCase
      * @return void
      *
      * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetPaymentMethodEpsToArray(): void
     {
         // Arrange
         $request = new GetPaymentMethodConfigRequest(PaymentMethodTypes::EPS);
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
         $this->paymentMethodServiceMock->setMockPaymentMethod(
             new PaymentMethodConfig(
                 PaymentMethodTypes::EPS,
                 true,
                 BookingMethod::authorize(),
                 false,
-                [new TranslatableLabel('Eps eng', 'en'), new TranslatableLabel('Eps De', 'de')],
-                [],
+                $name,
+                null,
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -221,19 +227,24 @@ class PaymentMethodsApiTest extends BaseTestCase
      * @return void
      *
      * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetPaymentMethodApplePayToArray(): void
     {
         // Arrange
         $request = new GetPaymentMethodConfigRequest(PaymentMethodTypes::APPLE_PAY);
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Apple pay eng'],
+            ['locale' => 'de', 'value' => 'Apple pay De']
+        ]);
         $this->paymentMethodServiceMock->setMockPaymentMethod(
             new PaymentMethodConfig(
                 PaymentMethodTypes::APPLE_PAY,
                 true,
                 BookingMethod::charge(),
                 false,
-                [new TranslatableLabel('Apple pay eng', 'en'), new TranslatableLabel('Apple pay De', 'de')],
-                [],
+                $name,
+                null,
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -268,19 +279,24 @@ class PaymentMethodsApiTest extends BaseTestCase
      * @return void
      *
      * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
      */
     public function testGetPaymentMethodKlarnaToArray(): void
     {
         // Arrange
         $request = new GetPaymentMethodConfigRequest(PaymentMethodTypes::KLARNA);
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'KLARNA eng'],
+            ['locale' => 'de', 'value' => 'KLARNA De']
+        ]);
         $this->paymentMethodServiceMock->setMockPaymentMethod(
             new PaymentMethodConfig(
                 PaymentMethodTypes::KLARNA,
                 true,
                 BookingMethod::authorize(),
                 false,
-                [new TranslatableLabel('KLARNA eng', 'en'), new TranslatableLabel('KLARNA De', 'de')],
-                [],
+                $name,
+                null,
                 '2',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 Amount::fromFloat(2.2, Currency::getDefault()),
@@ -314,9 +330,10 @@ class PaymentMethodsApiTest extends BaseTestCase
     /**
      * @return void
      *
-     * @throws InvalidTranslatableArrayException
-     * @throws InvalidCountryArrayException
+     * @throws InvalidAmountsException
      * @throws InvalidBookingMethodException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidTranslatableArrayException
      */
     public function testSavePaymentMethodConfigSuccess(): void
     {
@@ -333,9 +350,10 @@ class PaymentMethodsApiTest extends BaseTestCase
     /**
      * @return void
      *
-     * @throws InvalidTranslatableArrayException
-     * @throws InvalidCountryArrayException
+     * @throws InvalidAmountsException
      * @throws InvalidBookingMethodException
+     * @throws InvalidCountryArrayException
+     * @throws InvalidTranslatableArrayException
      */
     public function testSavePaymentMethodConfigToArray(): void
     {
@@ -371,13 +389,14 @@ class PaymentMethodsApiTest extends BaseTestCase
     public function testSavePaymentMethodConfigInvalidTranslatableLabel(): void
     {
         // Arrange
+
         $request = new SavePaymentMethodConfigRequest(
             'eps',
             BookingMethod::authorize()->getBookingMethod(),
             [
                 'test',
                 ''
-            ], []
+            ],
         );
         $this->expectException(InvalidTranslatableArrayException::class);
 
