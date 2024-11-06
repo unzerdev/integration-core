@@ -11,6 +11,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ConnectionResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetConnectionDataResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetCredentialsResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ReRegisterWebhooksResponse;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
@@ -73,7 +74,8 @@ class ConnectionController
     /**
      * @param ReconnectRequest $reconnectRequest
      *
-     * @return ConnectionResponse
+     * @return GetCredentialsResponse
+     *
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidKeypairException
      * @throws PrivateKeyInvalidException
@@ -81,7 +83,7 @@ class ConnectionController
      * @throws UnzerApiException
      * @throws InvalidModeException|QueryFilterInvalidParamException
      */
-    public function reconnect(ReconnectRequest $reconnectRequest): ConnectionResponse
+    public function reconnect(ReconnectRequest $reconnectRequest): GetCredentialsResponse
     {
         $this->connectionService->initializeConnection($reconnectRequest->toDomainModel());
 
@@ -89,7 +91,10 @@ class ConnectionController
             $this->disconnectService->deleteAdditionalSettings();
         }
 
-        return new ConnectionResponse();
+        $connectionSettings = $this->connectionService->getConnectionSettings();
+        $webhookSettings = $this->connectionService->getWebhookSettings();
+
+        return new GetCredentialsResponse($connectionSettings, $webhookSettings);
     }
 
     /**
@@ -115,7 +120,7 @@ class ConnectionController
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidModeException
-     * @throws UnzerApiException
+     * @throws ConnectionDataNotFound
      */
     public function reRegisterWebhooks(ReRegisterWebhookRequest $request): ReRegisterWebhooksResponse
     {
