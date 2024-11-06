@@ -36,7 +36,7 @@ class ReRegisterWebhooksResponse extends Response
             return $returnArray;
         }
 
-        if ($this->webhookSettings->getMode()->equal(Mode::live()) && $this->webhookSettings->getLiveWebhookData()) {
+        if ($this->webhookSettings->getLiveWebhookData()) {
             $returnArray['live']['webhookData'] = [
                 'registrationDate' => $this->webhookSettings->getLiveWebhookData()->getCreateAt(),
                 'webhookID' => implode(', ', $this->webhookSettings->getLiveWebhookData()->getIds()),
@@ -45,7 +45,7 @@ class ReRegisterWebhooksResponse extends Response
             ];
         }
 
-        if ($this->webhookSettings->getMode()->equal(Mode::sandbox()) && $this->webhookSettings->getSandboxWebhookData()) {
+        if ($this->webhookSettings->getSandboxWebhookData()) {
             $returnArray['sandbox']['webhookData'] = [
                 'registrationDate' => $this->webhookSettings->getSandboxWebhookData()->getCreateAt(),
                 'webhookID' => implode(', ', $this->webhookSettings->getSandboxWebhookData()->getIds()),
