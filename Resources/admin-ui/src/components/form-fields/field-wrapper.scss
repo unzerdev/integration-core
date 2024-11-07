@@ -106,7 +106,7 @@
   }
 
   .unzer-field-subtitle {
-    @include field-description
+    @include field-description;
   }
 
   .unzer-field-component:invalid {

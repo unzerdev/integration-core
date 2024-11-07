@@ -27,22 +27,22 @@
    * restrictedCountries: [string],
    * sendBasketData: boolean,
    * minOrderAmount: number,
-   * name: [{language: string, text: string}],
-   * description: [{language: string, text: string}],
+   * name: [{locale: string, value: string}],
+   * description: [{locale: string, value: string}],
    * statusIdToCharge: null,
    * maxOrderAmount: null}}
    */
   let paymentMethodConfig = {
     name: [
       {
-        language: "",
-        text: ""
+        locale: "",
+        value: ""
       }
     ],
     description: [
       {
-        language: "",
-        text: ""
+        locale: "",
+        value: ""
       }
     ],
     bookingMethod: null,
@@ -92,7 +92,7 @@
         .then((result) => {
           Object.assign(paymentMethodConfig, {
             bookingMethod: result.bookingMethod,
-            name: result.name,
+            name: (result.name && result.name.length > 0) ? result.name : [{ locale: 'default', value: paymentMethod.name}],
             sendBasketData: result.sendBasketData,
             surcharge: result.surcharge,
             description: result.description,
@@ -101,6 +101,9 @@
             maxOrderAmount: result.maxOrderAmount,
             statusIdToCharge: result.statusIdToCharge
           });
+
+          console.log(paymentMethodConfig);
+
           openSettingModal(result, paymentMethod)
         })
         .catch((ex) => {
@@ -286,7 +289,7 @@
           options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag, title: x.name}))
         }, {
           maxWidth: false,
-          value: paymentMethodConfig?.name?.find(x => x.locale == 'default')?.value ?? paymentMethod.name,
+          value: paymentMethodConfig?.name?.find(x => x.locale == 'default')?.value ?? '',
           title: "checkout.fields.paymentMethodName.label",
           subtitle: "checkout.fields.paymentMethodName.description"
         },
@@ -374,6 +377,7 @@
 
       let input = Math.max(0, currentValue + step);
       surchargeField.querySelector(`[name=${'surcharge'}]`).value = JSON.stringify(input);
+      handleSurchargeChange(input);
     }
 
     const handleSurchargeChange = (value) => {
@@ -461,22 +465,22 @@
             let isValid = true;
             isValid &= Unzer.validationService.validateField(
                 minMaxField,
-                paymentMethodConfig?.minOrderAmount && paymentMethodConfig.maxOrderAmount &&
-                paymentMethodConfig.minOrderAmount > paymentMethodConfig.maxOrderAmount,
+                paymentMethodConfig?.minOrderAmount != null && paymentMethodConfig.maxOrderAmount != null &&
+                parseInt(paymentMethodConfig.minOrderAmount, 10) > parseInt(paymentMethodConfig.maxOrderAmount, 10),
                 'validation.minGreaterThanMax'
             );
             if (isValid) {
               isValid &= Unzer.validationService.validateField(
                   minMaxField,
-                  paymentMethodConfig?.minOrderAmount && paymentMethodConfig.maxOrderAmount &&
-                  (paymentMethodConfig.minOrderAmount < 0 || paymentMethodConfig.maxOrderAmount < 0),
+                  paymentMethodConfig?.minOrderAmount != null && paymentMethodConfig.maxOrderAmount != null &&
+                  (parseInt(paymentMethodConfig.minOrderAmount, 10) < 0 || parseInt(paymentMethodConfig.maxOrderAmount, 10) < 0),
                   'validation.greaterThanZero'
               );
             }
             isValid &= Unzer.validationService.validateField(
                 surchargeField,
-                paymentMethodConfig?.surcharge &&
-                paymentMethodConfig.surcharge < 0,
+                paymentMethodConfig?.surcharge != null &&
+                (parseInt(paymentMethodConfig?.surcharge, 10) < 0),
                 'validation.greaterThanZero'
             );
             isValid &= Unzer.validationService.validateField(

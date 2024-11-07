@@ -1,9 +1,20 @@
 ﻿.unzer-color-picker-container {
   padding-bottom: 20px;
+
   .unzer-color-description {
     padding-top: 10px;
     font-size: 12px;
     color: $unzer-color-grey;
+  }
+
+  .unzer-color-description.hidden{
+    display: none;
+  }
+
+  .unzer-input-error {
+      margin-top: 4px;
+      font-size: $adl-font-size--input-error;
+      color: $adl-color--red-40;
   }
 
   .unzer-color-picker {
@@ -23,7 +34,6 @@
       width: 100px;
       padding-top: 20px;
     }
-
 
     .unzer-color-picker-circle {
       appearance: none;
@@ -53,6 +63,10 @@
       border: none;
       border-radius: 50%;
     }
+  }
+
+  .unzer-error {
+    border: solid 1px $adl-color--red-40;;
   }
 }
 

@@ -58,6 +58,9 @@
     -webkit-appearance: none;
     margin: 0;
   }
+  & {
+    appearance: textfield;
+  }
 }
 
 .arrow-up, .arrow-down {

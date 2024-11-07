@@ -257,6 +257,7 @@
     "passwordNumber": "Password must contain at least one number.",
     "passwordSpecial": "Password must contain at least one special character.",
     "passwordConfirm": "Passwords do not match.",
-    "minGreaterThanMax": "The min order value is greater than max order value."
+    "minGreaterThanMax": "The min order value is greater than max order value.",
+    "invalidColorFormat" : "Invalid color format."
   }
 }

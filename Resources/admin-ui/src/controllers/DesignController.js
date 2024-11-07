@@ -40,6 +40,15 @@
 
   let current_name = Unzer.config.store.storeName;
   let current_tagline = "";
+
+  let headerColor,
+      shopTaglineBackgroundColor,
+      shopNameColor,
+      headerFontColor,
+      shopTaglineColor,
+      shopNameBackground;
+
+  let colorFields;
   /**
    * display design page
    */
@@ -68,10 +77,10 @@
             selectedValues.name = result?.shopName?.map(x => ({
               locale: x.locale,
               value: x.value,
-            })) || [{ locale: 'default', value: Unzer.config.store.storeName}];
+            })) || [{ locale: 'default', value: Unzer.config.store.storeName }];
 
-            if(selectedValues.name.length == 0){
-              selectedValues.name = [{ locale: 'default', value: Unzer.config.store.storeName}];
+            if (selectedValues.name.length == 0) {
+              selectedValues.name = [{ locale: 'default', value: Unzer.config.store.storeName }];
             }
 
             current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName;
@@ -80,7 +89,7 @@
             selectedValues.tagline = result?.shopTagline?.map(x => ({
               locale: x.locale,
               value: x.value,
-            })) || [{ locale: 'default', value: ''}];
+            })) || [{ locale: 'default', value: '' }];
 
             current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
 
@@ -118,12 +127,20 @@
               label: "design.heading.previewLabel",
               type: "primary",
               className: "adlt--export",
-              onClick: createPreviewPage
+              onClick: () => {
+                if (validateColorFields()) {
+                  createPreviewPage();
+                }
+              }
             },
             {
               label: "design.heading.saveLabel",
               type: "secondary",
-              onClick: saveChanges
+              onClick: () => {
+                if (validateColorFields()) {
+                  saveChanges();
+                }
+              }
             },
           ])
         }),
@@ -132,14 +149,14 @@
               Unzer.components.TextDropdownComponent.create({
                     isIcon: true,
                     value: "default",
-                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name})),
+                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name })),
                   }, {
                     maxWidth: false,
                     title: "design.translations.shopName",
                     subtitle: "design.translations.shopNameDescription",
                     value: selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName,
                   },
-                  selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value})),
+                  selectedValues?.name?.map(x => ({ locale: x.locale, value: x.value })),
                   (value) => {
                     selectedValues.name = value;
                     current_name = selectedValues?.name?.find(x => x.locale == 'default')?.value ?? Unzer.config.store.storeName;
@@ -170,14 +187,14 @@
               Unzer.components.TextDropdownComponent.create({
                     isIcon: true,
                     value: "default",
-                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name})),
+                    options: languages?.map(x => ({ value: x.code, label: x.flag, title: x.name })),
                   }, {
                     maxWidth: false,
                     title: "design.translations.shopTagline",
                     subtitle: "design.translations.shopTaglineDescription",
                     value: selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '',
                   },
-                  selectedValues?.tagline?.map(x => ({ locale: x.locale, value: x.value})),
+                  selectedValues?.tagline?.map(x => ({ locale: x.locale, value: x.value })),
                   (value) => {
                     selectedValues.tagline = value;
                     current_tagline = selectedValues?.tagline?.find(x => x.locale == 'default')?.value ?? '';
@@ -192,67 +209,103 @@
         Unzer.components.PageHeading.create({
           title: "design.translations.title",
           className: "unzer-page-heading-padding-top",
-        }),
+        })
+    );
 
+    headerColor = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.headerColor",
+      description: "design.translations.headerColorDescription",
+      defaultColor: selectedValues.headerColor,
+      onColorChange: (color) => {
+        selectedValues.headerColor = color;
+      }
+    });
+
+    shopTaglineBackgroundColor = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.shopTaglineBackgroundColor",
+      description: "design.translations.shopTaglineBackgroundColorDescription",
+      defaultColor: selectedValues.shopTaglineBackgroundColor,
+      onColorChange: (color) => {
+        selectedValues.shopTaglineBackgroundColor = color;
+      }
+    });
+
+    shopNameColor = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.shopNameColor",
+      description: "design.translations.shopNameColorDescription",
+      defaultColor: selectedValues.shopNameColor,
+      onColorChange: (color) => {
+        selectedValues.shopNameColor = color;
+      }
+    });
+
+    headerFontColor = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.headerFontColor",
+      description: "design.translations.headerFontColorDescription",
+      defaultColor: selectedValues.headerFontColor,
+      onColorChange: (color) => {
+        selectedValues.headerFontColor = color;
+      }
+    });
+
+    shopTaglineColor = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.shopTaglineColor",
+      description: "design.translations.shopTaglineColor",
+      defaultColor: selectedValues.shopTaglineColor,
+      onColorChange: (color) => {
+        selectedValues.shopTaglineColor = color;
+      }
+    });
+
+    shopNameBackground = Unzer.components.ColorPickerComponent.create({
+      label: "design.translations.shopNameBackground",
+      description: "design.translations.shopNameBackgroundDescription",
+      defaultColor: selectedValues.shopNameBackground,
+      onColorChange: (color) => {
+        selectedValues.shopNameBackground = color;
+      }
+    });
+
+
+    page.append(
         Unzer.components.TwoColumnLayout.create([
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.headerColor",
-            description: "design.translations.headerColorDescription",
-            defaultColor: selectedValues.headerColor,
-            onColorChange: (color) => {
-              selectedValues.headerColor = color;
-            }
-          }),
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.shopTaglineBackgroundColor",
-            description: "design.translations.shopTaglineBackgroundColorDescription",
-            defaultColor: selectedValues.shopTaglineBackgroundColor,
-            onColorChange: (color) => {
-              selectedValues.shopTaglineBackgroundColor = color;
-            }
-          }),
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.shopNameColor",
-            description: "design.translations.shopNameColorDescription",
-            defaultColor: selectedValues.shopNameColor,
-            onColorChange: (color) => {
-              selectedValues.shopNameColor = color;
-            }
-          }),
-
+          headerColor,
+          shopTaglineBackgroundColor,
+          shopNameColor,
         ], [
+          headerFontColor,
+          shopTaglineColor,
+          shopNameBackground,
+        ]));
+    colorFields = [
+      { name: 'headerColor', component: headerColor },
+      { name: 'shopTaglineBackgroundColor', component: shopTaglineBackgroundColor },
+      { name: 'shopNameColor', component: shopNameColor },
+      { name: 'headerFontColor', component: headerFontColor },
+      { name: 'shopTaglineColor', component: shopTaglineColor },
+      { name: 'shopNameBackground', component: shopNameBackground }
+    ];
 
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.headerFontColor",
-            description: "design.translations.headerFontColorDescription",
-            defaultColor: selectedValues.headerFontColor,
-            onColorChange: (color) => {
-              selectedValues.headerFontColor = color;
-            }
-          }),
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.shopTaglineColor",
-            description: "design.translations.shopTaglineColor",
-            defaultColor: selectedValues.shopTaglineColor,
-            onColorChange: (color) => {
-              selectedValues.shopTaglineColor = color;
-            }
-          }),
-          Unzer.components.ColorPickerComponent.create({
-            label: "design.translations.shopNameBackground",
-            description: "design.translations.shopNameBackgroundDescription",
-            defaultColor: selectedValues.shopNameBackground,
-            onColorChange: (color) => {
-              selectedValues.shopNameBackground = color;
-            }
-          })
-        ])
-    )
   }
 
   const validateColorFields = () => {
+    let isValid = true;
 
-  };
+    colorFields.forEach(field => {
+      const fieldName = field.name;
+      const isFieldValid = Unzer.validationService.validateColorComponent(
+          field.component,
+          selectedValues[fieldName],
+          "validation.invalidColorFormat"
+      );
+
+      if (!isFieldValid) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
+  }
 
   /**
    * Save changes of payment page
@@ -279,7 +332,7 @@
     Unzer.DesignService.saveDesign(formData)
         .then((result) => {
           selectedValues.logoImageUrl = result.logoImageUrl || selectedValues.logoImageUrl;
-          Unzer.utilities.createToasterMessage("general.changesSaved",false);
+          Unzer.utilities.createToasterMessage("general.changesSaved", false);
           render();
         })
         .catch((ex) => {
@@ -302,7 +355,7 @@
       }
     }
 
-    formData.append('name', JSON.stringify([["default",current_name]]));
+    formData.append('name', JSON.stringify([["default", current_name]]));
     formData.append('tagline', JSON.stringify([["default", current_tagline]]));
 
     Unzer.DesignService.createPreviewPage(formData)

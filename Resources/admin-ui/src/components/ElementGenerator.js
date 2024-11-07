@@ -91,6 +91,7 @@ const createLoader = ({type, variation, fullPage}) => {
  * @param {HTMLElement} input The input element.
  * @param {string?} label Label translation key.
  * @param {string?} description Description translation key.
+ * @param {bool?}  descriptionPositionUp Position for display description.
  * @param {string?} error Error translation key.
  * @param {string?} className Error translation key.
  * @param {boolean?} horizontal Indicates horizontal layout.

@@ -5,7 +5,7 @@
  *
  * @constructor
  */
-const ColorPickerComponent = ({ defaultColor, className, onColorChange, label = '', description = '' }) => {
+const ColorPickerComponent = ({ defaultColor, className, onColorChange, label = '', description = '' , error = ''}) => {
     const { elementGenerator: generator } = Unzer;
     const cssClass = ['unzer-color-picker'];
     className && cssClass.push(className);
@@ -28,26 +28,21 @@ const ColorPickerComponent = ({ defaultColor, className, onColorChange, label = 
         onColorChange && onColorChange(selectedColor);
     });
 
-  function isValidHexColor(value) {
-    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
-    return hexPattern.test(value);
-  }
 
   inputElement.addEventListener('input', () => {
     const enteredColor = inputElement.value;
-    if (isValidHexColor(enteredColor)) {
-      colorPickerElement.value = enteredColor;
-      onColorChange && onColorChange(enteredColor);
-    }
+    colorPickerElement.value = enteredColor;
+    onColorChange && onColorChange(enteredColor);
   });
 
     const wrapper = generator.createElement('span', 'unzer-color-picker', "", [], [])
     const descriptionSpan = generator.createElement('span', 'unzer-color-description', description, [], [])
 
+
     wrapper.append(
         inputElement,
         inputLabel,
-        colorPickerElement
+        colorPickerElement,
     )
 
     return generator.createElement('div', 'unzer-color-picker-container', '', null, [wrapper, descriptionSpan]);
