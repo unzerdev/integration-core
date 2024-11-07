@@ -240,7 +240,8 @@ class PaymentMethodService
                 fn($country) => $country->getCode(),
                 $paymentMethod->getRestrictedCountries()
             );
-            if (in_array($billingCountryIso, $restrictedCountriesCodes)) {
+
+            if (!empty($restrictedCountriesCodes) && !in_array($billingCountryIso, $restrictedCountriesCodes)) {
                 return false;
             }
 

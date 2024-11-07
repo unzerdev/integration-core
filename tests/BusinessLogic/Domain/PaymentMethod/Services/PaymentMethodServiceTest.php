@@ -819,7 +819,7 @@ class PaymentMethodServiceTest extends BaseTestCase
         $paymentMethods = StoreContext::doWithStore(
             '1',
             [$this->service, 'getPaymentMethodsForCheckout'],
-            [Amount::fromInt(200, Currency::fromIsoCode('EUR')), 'ch']
+            [Amount::fromInt(200, Currency::fromIsoCode('EUR')), 'gb']
         );
 
         // assert
