@@ -95,7 +95,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('url'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
@@ -118,7 +118,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('url'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
@@ -143,7 +143,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('url'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
@@ -165,17 +165,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile(null, new \SplFileInfo('path')),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
-        $uploadedPath = 'new path';
+        $uploadedPath = 'https://www.test.com/';
 
         $this->uploaderService->setPath($uploadedPath);
 
         $newSettings = new PaymentPageSettingsModel(
-            new UploadedFile($uploadedPath),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
@@ -292,7 +292,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     public function testCreateMockPaypageWithSettings() : void
     {
         //arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile("url",null),
+        $settings = new PaymentPageSettingsModel(new UploadedFile("https://www.test.com/",null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',

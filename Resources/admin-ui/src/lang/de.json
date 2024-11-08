@@ -105,6 +105,7 @@
     }
   },
   "design": {
+    "invalidUrl" : "Image URL is not valid.",
     "heading": {
       "title": "Payment Page Design Settings",
       "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",

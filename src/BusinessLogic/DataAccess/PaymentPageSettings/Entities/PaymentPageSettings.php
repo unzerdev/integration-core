@@ -2,9 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Configuration\EntityConfiguration;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as DomainPaymentPageSettings;
@@ -48,6 +48,7 @@ class PaymentPageSettings extends Entity
     /**
      * @inheritDoc
      * @throws InvalidTranslatableArrayException
+     * @throws InvalidImageUrlException
      */
     public function inflate(array $data): void
     {

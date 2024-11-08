@@ -7,12 +7,12 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSet
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -94,7 +94,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $this->paymentPageSettingsService->setPaymentPageSettings(
             new PaymentPageSettingsModel(
-                new UploadedFile('file'),
+                new UploadedFile('https://www.test.com/'),
                 TranslationCollection::fromArray([
                     ['locale' => 'default', 'value' => 'shop'],
                     ['locale' => 'en_us', 'value' => 'shop']
@@ -124,7 +124,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('file'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
@@ -157,7 +157,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         // Arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('file'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
@@ -174,7 +174,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $this->paymentPageSettingsService->setPaymentPageSettings($settings);
 
         $expectedResponse = new PaymentPageSettingsModel(
-            new UploadedFile('file'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
@@ -220,7 +220,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidTranslatableArrayException
+     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
      */
     public function testIsPutResponseSuccessful(): void
     {
@@ -231,7 +231,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
             TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
-            'path',
+            'https://www.test.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -250,7 +250,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidTranslatableArrayException
+     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
      */
     public function testPutResponseToArray(): void
     {
@@ -261,7 +261,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
             TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
-            new \SplFileInfo('path'),
+            new \SplFileInfo('https://www.test.com/'),
             null,
             '#FFFFFF',
             '#666666',
@@ -308,7 +308,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
      * @return void
      * @throws InvalidTranslatableArrayException
      * @throws UnzerApiException
-     * @throws ConnectionSettingsNotFoundException
+     * @throws ConnectionSettingsNotFoundException|InvalidImageUrlException
      */
     public function testIsCreatePreviewPageResponseSuccessful(): void
     {
@@ -319,7 +319,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
             TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
-            'path',
+            'https://www.test.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -340,7 +340,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     /**
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
-     * @throws InvalidTranslatableArrayException
+     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
      */
     public function testPaymentPagePreviewResponseToArray(): void
     {
@@ -351,7 +351,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
             TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
-            'path',
+            'https://www.test.com/',
             null,
             '#FFFFFF',
             '#666666',

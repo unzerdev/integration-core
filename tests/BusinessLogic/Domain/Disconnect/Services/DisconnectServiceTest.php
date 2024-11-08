@@ -236,7 +236,7 @@ class DisconnectServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettings(
-            new UploadedFile('url'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             new TranslationCollection(new Translation('en_us',"description")),
         );

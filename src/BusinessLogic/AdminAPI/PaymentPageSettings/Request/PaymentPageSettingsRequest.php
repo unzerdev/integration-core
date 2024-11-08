@@ -3,10 +3,9 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request;
 
 use SplFileInfo;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
-use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
@@ -106,12 +105,14 @@ class PaymentPageSettingsRequest
      * Transform to Domain model
      *
      * @return PaymentPageSettings
+     *
+     * @throws InvalidImageUrlException
      */
 
     public function transformToDomainModel(): object
     {
         return new PaymentPageSettings(
-            new UploadedFile($this->logoImageUrl,$this->file),
+            new UploadedFile($this->logoImageUrl, $this->file),
             $this->shopNames,
             $this->shopTaglines,
             $this->headerBackgroundColor,

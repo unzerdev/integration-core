@@ -7,8 +7,8 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPagePr
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsPutResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
-use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
@@ -35,6 +35,8 @@ class PaymentPageSettingsController
      * @param PaymentPageSettingsRequest $paymentPageSettingsRequest
      *
      * @return PaymentPageSettingsPutResponse
+     *
+     * @throws InvalidImageUrlException
      */
     public function savePaymentPageSettings(
         PaymentPageSettingsRequest $paymentPageSettingsRequest
@@ -58,8 +60,10 @@ class PaymentPageSettingsController
      * @param PaymentPageSettingsRequest $pageSettingsRequest
      *
      * @return PaymentPagePreviewResponse
+     *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidImageUrlException
      */
     public function getPaymentPagePreview(PaymentPageSettingsRequest $pageSettingsRequest): PaymentPagePreviewResponse
     {

@@ -331,6 +331,12 @@
 
     Unzer.DesignService.saveDesign(formData)
         .then((result) => {
+            if(result.statusCode  === 400) {
+                Unzer.utilities.createToasterMessage("design.invalidUrl", true);
+
+                return
+            }
+
           selectedValues.logoImageUrl = result.logoImageUrl || selectedValues.logoImageUrl;
           Unzer.utilities.createToasterMessage("general.changesSaved", false);
           render();
@@ -360,6 +366,13 @@
 
     Unzer.DesignService.createPreviewPage(formData)
         .then((response) => {
+
+            if(response.statusCode  === 400) {
+                Unzer.utilities.createToasterMessage("design.invalidUrl", true);
+
+                return
+            }
+
           if (typeof response.id === 'undefined') {
             Unzer.utilities.createToasterMessage("general.errors.general.unhandled", true);
             return;
