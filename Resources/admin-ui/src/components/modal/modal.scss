@@ -26,7 +26,6 @@
     margin: 0 auto;
     box-shadow: $adl-shadow-20;
     border-radius: 12px;
-    transform: scale(0.9);
 
     .unzer-close-button {
       position: absolute;
@@ -140,6 +139,15 @@
       }
     }
 
+    .unzer-body-wrapper.no-padding {
+      padding: 0px;
+
+      .unzer-body{
+        padding-top: 10px;
+
+      }
+    }
+
 
     .unzer-footer {
       padding: 24px;
@@ -164,5 +172,19 @@
 
   .unzer-modal-max-height {
     height: 100%;
+  }
+
+  .dialog {
+    width: 30%;
+
+    @media (max-width: 1200px) {
+      width: 50%;
+    }
+    @media (max-width: 768px) {
+      width: 80%;
+    }
+    @media (max-width: 480px) {
+      width: 90%;
+    }
   }
 }

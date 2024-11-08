@@ -66,8 +66,10 @@ const ModalComponent = (configuration) => {
         const imageUrl = configuration.image != '' && configuration.image != null ? `${Unzer.config.imagesUrl}/${configuration.image}.svg` : '';
         configuration.image = imageUrl !== '' ? `<img src="${imageUrl}"/>` : '';
 
-        const contentClass = configuration.fullHeight ? "unzer-modal-content unzer-modal-max-height" : "unzer-modal-content";
+        let contentClass = configuration.fullHeight ? "unzer-modal-content unzer-modal-max-height" : "unzer-modal-content";
+        contentClass = configuration.dialog ? "unzer-modal-content dialog" : contentClass;
         const paymentMethodClass = !configuration.paymentMethod ? "unzer-payment-method-info" : "";
+        const bodyWrapper = configuration.noPadding ? "unzer-body-wrapper no-padding" : "unzer-body-wrapper";
         const titleClass = configuration.paymentMethod ? "unzer-title unzer-title-no-padding" : "unzer-title";
         const header =
             `<div class="${paymentMethodClass}">\n` +
@@ -86,7 +88,8 @@ const ModalComponent = (configuration) => {
             `        <div class="${titleClass}">` +
             header +
             '        </div>' +
-            '        <div class="unzer-body-wrapper"><div class="unzer-body"></div></div>' +
+            `        <div class="${bodyWrapper}">` +
+            '<div class="unzer-body"></div></div>' +
             '        <div class="unzer-footer"></div>' +
             '    </div>' +
             '</div>';
@@ -122,7 +125,8 @@ const ModalComponent = (configuration) => {
         }
 
         if (config.description) {
-            description.innerHTML = translationService.translate(config.description)
+            let params = config.description.split('|');
+            description.innerHTML = translationService.translate(params[0], params.slice(1))
         } else {
             utilities.hideElement(description);
         }

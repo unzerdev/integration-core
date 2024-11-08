@@ -211,6 +211,8 @@
       title: 'general.disconnect',
       canClose: true,
       description: '',
+      dialog: true,
+      noPadding: true,
       content: [
         Unzer.components.PageHeading.create({
           title: "credentials.disconnectWarning"
@@ -239,7 +241,8 @@
       title: 'general.saveChanges',
       canClose: true,
       description: '',
-      paymentMethod: true,
+      dialog: true,
+      noPadding: true,
       content: [
         Unzer.components.PageHeading.create({
           title: "credentials.saveChangesWarning"

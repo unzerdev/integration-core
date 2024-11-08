@@ -446,10 +446,11 @@
       )
     }
 
+
     const modal = Unzer.components.Modal.create({
       title: config.typeName,
       canClose: true,
-      description: `paymentMethods.${config.type}`,
+      description: `paymentMethods.${config.type}|${getPaynmentMethodUrl(paymentMethod.type)}`,
       content: content,
       image: config.type,
       buttons: [

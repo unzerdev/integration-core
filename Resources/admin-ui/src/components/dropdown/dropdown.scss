@@ -23,7 +23,6 @@
     justify-content: space-between;
     align-items: center;
     border-radius: 8px;
-    height: 48px;
     border: 1px solid $adl-color--grey-20;
     background-color: $adl-color--white;
 
@@ -74,6 +73,9 @@
         background-color: #15273C33;
         border-radius: 5px;
         padding: 0 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+        white-space: nowrap;
         width: 100%;
         font-size: 12px;
         justify-content: space-between;
