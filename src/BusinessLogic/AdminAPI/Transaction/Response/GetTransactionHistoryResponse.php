@@ -59,7 +59,7 @@ class GetTransactionHistoryResponse extends Response
                 'date' => $historyItem->getDate(),
                 'type' => $historyItem->getType(),
                 'amount' => $this->amountToArray($historyItem->getAmount()),
-                'status' => $historyItem->getStatus() ? 'Success' : 'Failed',
+                'status' => $historyItem->getStatus(),
                 'paymentType' => $historyItem->getPaymentType(),
                 'paymentId' => $historyItem->getPaymentId()
             ];

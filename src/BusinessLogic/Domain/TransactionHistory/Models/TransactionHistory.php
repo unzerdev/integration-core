@@ -7,10 +7,12 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\SdkPaymentTypes;
+use UnzerSDK\Constants\TransactionStatus;
 use UnzerSDK\Constants\TransactionTypes;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\Payment;
 use UnzerSDK\Constants\PaymentState as SdkPaymentState;
+use UnzerSDK\Resources\TransactionTypes\AbstractTransactionType;
 
 /**
  * Class TransactionHistory.
@@ -359,7 +361,7 @@ class TransactionHistory
                 $authorization->getId(),
                 $authorization->getDate(),
                 Amount::fromFloat($authorization->getAmount() ?? 0, $currency),
-                $authorization->isSuccess(),
+                self::getStatusLabelFromTransaction($authorization),
                 Amount::fromFloat($authorization->getCancelledAmount() ?? 0, $currency),
                 $paymentType,
                 $payment->getId()
@@ -371,7 +373,7 @@ class TransactionHistory
                 $charge->getId() ?? '',
                 $charge->getDate() ?? '',
                 Amount::fromFloat($charge->getAmount() ?? 0, $currency),
-                $charge->isSuccess(),
+                self::getStatusLabelFromTransaction($charge),
                 Amount::fromFloat($charge->getCancelledAmount() ?? 0, $currency),
                 $paymentType,
                 $payment->getId()
@@ -384,7 +386,7 @@ class TransactionHistory
                 TransactionTypes::REFUND,
                 $refund->getDate() ?? '',
                 Amount::fromFloat($refund->getAmount() ?? 0, $currency),
-                $refund->isSuccess(),
+                self::getStatusLabelFromTransaction($refund),
                 $paymentType,
                 $payment->getId()
             );
@@ -396,7 +398,7 @@ class TransactionHistory
                 TransactionTypes::REVERSAL,
                 $reversal->getDate() ?? '',
                 Amount::fromFloat($reversal->getAmount() ?? 0, $currency),
-                $reversal->isSuccess(),
+                self::getStatusLabelFromTransaction($reversal),
                 $paymentType,
                 $payment->getId()
             );
@@ -408,7 +410,7 @@ class TransactionHistory
                 TransactionTypes::REFUND,
                 $refund->getDate() ?? '',
                 Amount::fromFloat($refund->getAmount() ?? 0, $currency),
-                $refund->isSuccess(),
+                self::getStatusLabelFromTransaction($refund),
                 $paymentType,
                 $payment->getId()
             );
@@ -420,7 +422,7 @@ class TransactionHistory
                 TransactionTypes::SHIPMENT,
                 $shipment->getDate() ?? '',
                 Amount::fromFloat($shipment->getAmount() ?? 0, $currency),
-                $shipment->isSuccess(),
+                self::getStatusLabelFromTransaction($shipment),
                 $paymentType,
                 $payment->getId()
             );
@@ -432,7 +434,7 @@ class TransactionHistory
                 TransactionTypes::PAYOUT,
                 $payout->getDate() ?? '',
                 Amount::fromFloat($payout->getAmount() ?? 0, $currency),
-                $payout->isSuccess(),
+                self::getStatusLabelFromTransaction($payout),
                 $paymentType,
                 $payment->getId()
             );
@@ -444,7 +446,7 @@ class TransactionHistory
                 TransactionTypes::CHARGEBACK,
                 $chargeback->getDate() ?? '',
                 Amount::fromFloat($chargeback->getAmount() ?? 0, $currency),
-                $chargeback->isSuccess(),
+                self::getStatusLabelFromTransaction($chargeback),
                 $paymentType,
                 $payment->getId()
             );
@@ -506,5 +508,26 @@ class TransactionHistory
     private function setHistoryItemCollection(HistoryItemCollection $historyItemCollection): void
     {
         $this->historyItemCollection = $historyItemCollection;
+    }
+
+    /**
+     * @param AbstractTransactionType $transactionType
+     *
+     * @return string
+     */
+    private static function getStatusLabelFromTransaction(AbstractTransactionType $transactionType): string
+    {
+        if ($transactionType->isSuccess()) {
+            return ucfirst(TransactionStatus::STATUS_SUCCESS);
+        }
+
+        if ($transactionType->isError()) {
+            return ucfirst(TransactionStatus::STATUS_ERROR);
+        }
+        if ($transactionType->isPending()) {
+            return ucfirst(TransactionStatus::STATUS_PENDING);
+        }
+
+        return ucfirst(TransactionStatus::STATUS_RESUMED);
     }
 }

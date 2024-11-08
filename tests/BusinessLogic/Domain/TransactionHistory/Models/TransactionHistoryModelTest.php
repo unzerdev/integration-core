@@ -76,9 +76,12 @@ class TransactionHistoryModelTest extends BaseTestCase
     {
         // arrange
         $items = [
-            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
@@ -98,7 +101,7 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         // assert
         self::assertEquals(new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()),
-            'status3','type', 'id'), $firstItem);
+            'status3', 'type', 'id'), $firstItem);
     }
 
     /**
@@ -109,9 +112,12 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
 
         $items = [
-            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
@@ -152,13 +158,17 @@ class TransactionHistoryModelTest extends BaseTestCase
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-                new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-                new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    'type', 'id'),
+                new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    'type', 'id'),
+                new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    'type', 'id')
             ]
         );
 
-        $item = new HistoryItem('id4', 'type4', 'date4', Amount::fromFloat(1, Currency::getDefault()), 'status4','type', 'id');
+        $item = new HistoryItem('id4', 'type4', 'date4', Amount::fromFloat(1, Currency::getDefault()), 'status4',
+            'type', 'id');
 
         // act
         $transactionHistory->collection()->add($item);
@@ -177,12 +187,18 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
 
         $items = [
-            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id'),
-            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
 
         $transactionHistory = new TransactionHistory(
@@ -204,9 +220,12 @@ class TransactionHistoryModelTest extends BaseTestCase
         // assert
         self::assertCount(3, $filteredItems->getAll());
         self::assertEquals([
-            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ], $filteredItems->getAll()
         );
     }
@@ -218,23 +237,29 @@ class TransactionHistoryModelTest extends BaseTestCase
     {
         // arrange
         $items = [
-            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id'),
-            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
 
         $chargeItems = [
             new ChargeHistoryItem('id11', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
+                Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'),
             new ChargeHistoryItem('id22', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
+                Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'),
             new ChargeHistoryItem('id33', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
+                Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'),
             new ChargeHistoryItem('id44', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
+                Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'),
         ];
 
         $transactionHistory = new TransactionHistory(
@@ -354,55 +379,55 @@ class TransactionHistoryModelTest extends BaseTestCase
         self::assertEquals('authId', $authorizationItems->first()->getId());
         self::assertEquals('2024-10-21 15:58:08', $authorizationItems->first()->getDate());
         self::assertEquals(TransactionTypes::AUTHORIZATION, $authorizationItems->first()->getType());
-        self::assertFalse($authorizationItems->first()->getStatus());
+        self::assertEquals('Resumed', $authorizationItems->first()->getStatus());
         self::assertCount(2, $chargeItems->getAll());
         self::assertEquals(Amount::fromFloat(50, Currency::fromIsoCode('EUR')),
             $chargeItems->first()->getAmount());
         self::assertEquals('chargeId1', $chargeItems->first()->getId());
         self::assertEquals('2024-10-21 16:58:08', $chargeItems->first()->getDate());
         self::assertEquals(TransactionTypes::CHARGE, $chargeItems->first()->getType());
-        self::assertFalse($chargeItems->first()->getStatus());
+        self::assertEquals('Resumed', $chargeItems->first()->getStatus());
         self::assertEquals(Amount::fromFloat(60, Currency::fromIsoCode('EUR')),
             $chargeItems->last()->getAmount());
         self::assertEquals('chargeId2', $chargeItems->last()->getId());
         self::assertEquals('2024-10-21 17:58:08', $chargeItems->last()->getDate());
         self::assertEquals(TransactionTypes::CHARGE, $chargeItems->last()->getType());
-        self::assertFalse($chargeItems->last()->getStatus());
+        self::assertEquals('Resumed', $chargeItems->last()->getStatus());
         self::assertCount(1, $reversalItems->getAll());
         self::assertEquals(Amount::fromFloat(20, Currency::fromIsoCode('EUR')),
             $reversalItems->last()->getAmount());
         self::assertEquals('reversalId', $reversalItems->last()->getId());
         self::assertEquals('2024-10-22 17:58:08', $reversalItems->last()->getDate());
         self::assertEquals(TransactionTypes::REVERSAL, $reversalItems->last()->getType());
-        self::assertFalse($reversalItems->last()->getStatus());
+        self::assertEquals('Resumed', $reversalItems->last()->getStatus());
         self::assertCount(3, $refundItems->getAll());
         self::assertEquals(Amount::fromFloat(44, Currency::fromIsoCode('EUR')),
             $refundItems->last()->getAmount());
         self::assertEquals('refundId', $refundItems->last()->getId());
         self::assertEquals('2024-10-23 17:58:08', $refundItems->last()->getDate());
         self::assertEquals(TransactionTypes::REFUND, $refundItems->last()->getType());
-        self::assertFalse($refundItems->last()->getStatus());
+        self::assertEquals('Resumed', $refundItems->last()->getStatus());
         self::assertCount(1, $shipmentItems->getAll());
         self::assertEquals(Amount::fromFloat(11, Currency::fromIsoCode('EUR')),
             $shipmentItems->last()->getAmount());
         self::assertEquals('shipmentId', $shipmentItems->last()->getId());
         self::assertEquals('2024-10-24 17:58:08', $shipmentItems->last()->getDate());
         self::assertEquals(TransactionTypes::SHIPMENT, $shipmentItems->last()->getType());
-        self::assertFalse($shipmentItems->last()->getStatus());
+        self::assertEquals('Resumed', $shipmentItems->last()->getStatus());
         self::assertCount(1, $payoutItems->getAll());
         self::assertEquals(Amount::fromFloat(21, Currency::fromIsoCode('EUR')),
             $payoutItems->last()->getAmount());
         self::assertEquals('payoutId', $payoutItems->last()->getId());
         self::assertEquals('2024-10-25 17:58:08', $payoutItems->last()->getDate());
         self::assertEquals(TransactionTypes::PAYOUT, $payoutItems->last()->getType());
-        self::assertFalse($payoutItems->last()->getStatus());
+        self::assertEquals('Resumed', $payoutItems->last()->getStatus());
         self::assertCount(1, $chargebackItems->getAll());
         self::assertEquals(Amount::fromFloat(60, Currency::fromIsoCode('EUR')),
             $chargebackItems->last()->getAmount());
         self::assertEquals('chargeBackId', $chargebackItems->last()->getId());
         self::assertEquals('2024-10-26 17:58:08', $chargebackItems->last()->getDate());
         self::assertEquals(TransactionTypes::CHARGEBACK, $chargebackItems->last()->getType());
-        self::assertFalse($chargebackItems->last()->getStatus());
+        self::assertEquals('Resumed', $chargebackItems->last()->getStatus());
     }
 
     /**
@@ -488,15 +513,20 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $authorizedItem = new AuthorizeHistoryItem('id1', 'type1', Amount::fromFloat(1, Currency::getDefault()),
             'status1',
-            Amount::fromFloat(1, Currency::getDefault()),'type', 'id');
+            Amount::fromFloat(1, Currency::getDefault()), 'type', 'id');
 
         $items = [
             $authorizedItem,
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id'),
-            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
 
         $transactionHistory = new TransactionHistory(
@@ -527,11 +557,16 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
 
         $items = [
-            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id'),
-            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1','type', 'id'),
-            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2','type', 'id'),
-            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3','type', 'id')
+            new HistoryItem('id2', 'type2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id'),
+            new HistoryItem('id1', 'type5', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1', 'type',
+                'id'),
+            new HistoryItem('id2', 'type5', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2', 'type',
+                'id'),
+            new HistoryItem('id3', 'type5', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3', 'type',
+                'id')
         ];
 
         $transactionHistory = new TransactionHistory(
@@ -564,20 +599,20 @@ class TransactionHistoryModelTest extends BaseTestCase
         $authorizedItem = new AuthorizeHistoryItem('id1', '2024-10-28 09:11:43',
             Amount::fromFloat(1, Currency::getDefault()),
             'status1',
-            Amount::fromFloat(1, Currency::getDefault()),'type', 'id');
+            Amount::fromFloat(1, Currency::getDefault()), 'type', 'id');
 
         $items = [
             $authorizedItem,
             new HistoryItem('id2', 'type2', '2024-10-28 09:11:44', Amount::fromFloat(1, Currency::getDefault()),
-                'status2','type', 'id'),
+                'status2', 'type', 'id'),
             new HistoryItem('id3', 'type3', '2024-10-28 09:11:45', Amount::fromFloat(1, Currency::getDefault()),
-                'status3','type', 'id'),
+                'status3', 'type', 'id'),
             new HistoryItem('id4', 'type5', '2024-10-28 09:11:46', Amount::fromFloat(1, Currency::getDefault()),
-                'status1','type', 'id'),
+                'status1', 'type', 'id'),
             new HistoryItem('id5', 'type5', '2024-10-28 09:11:47', Amount::fromFloat(1, Currency::getDefault()),
-                'status2','type', 'id'),
+                'status2', 'type', 'id'),
             new HistoryItem('id6', 'type5', '2024-10-28 09:11:48', Amount::fromFloat(1, Currency::getDefault()),
-                'status3','type', 'id')
+                'status3', 'type', 'id')
         ];
 
         $transactionHistory = new TransactionHistory(

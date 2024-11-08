@@ -25,8 +25,8 @@ class HistoryItem
     /** @var Amount $amount */
     private Amount $amount;
 
-    /** @var bool $status */
-    private bool $status;
+    /** @var string $status */
+    private string $status;
 
     /** @var string $paymentType */
     private string $paymentType;
@@ -39,7 +39,7 @@ class HistoryItem
      * @param string $type
      * @param string $date
      * @param Amount $amount
-     * @param bool $status
+     * @param string $status
      * @param string $paymentType
      * @param string $paymentId
      */
@@ -48,7 +48,7 @@ class HistoryItem
         string $type,
         string $date,
         Amount $amount,
-        bool $status,
+        string $status,
         string $paymentType,
         string $paymentId
     ) {
@@ -134,19 +134,19 @@ class HistoryItem
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    public function getStatus(): bool
+    public function getStatus(): string
     {
         return $this->status;
     }
 
     /**
-     * @param bool $status
+     * @param string $status
      *
      * @return void
      */
-    public function setStatus(bool $status): void
+    public function setStatus(string $status): void
     {
         $this->status = $status;
     }
@@ -230,7 +230,7 @@ class HistoryItem
             $historyItem['type'] ?? '',
             $historyItem['date'] ?? '',
             $historyItem['amount'] ? Amount::fromArray($historyItem['amount']) : [],
-            $historyItem['status'] ?? false,
+            $historyItem['status'] ?? '',
                 $historyItem['paymentType'] ?? '',
                 $historyItem['paymentId'] ?? ''
         );
