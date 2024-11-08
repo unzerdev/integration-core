@@ -23,10 +23,19 @@ class AuthorizeHistoryItem extends HistoryItem
      * @param Amount $amount
      * @param string $status
      * @param Amount $cancelledAmount
+     * @param string $paymentType
+     * @param string $paymentId
      */
-    public function __construct(string $id, string $date, Amount $amount, string $status, Amount $cancelledAmount)
-    {
-        parent::__construct($id, TransactionTypes::AUTHORIZATION, $date, $amount, $status);
+    public function __construct(
+        string $id,
+        string $date,
+        Amount $amount,
+        string $status,
+        Amount $cancelledAmount,
+        string $paymentType,
+        string $paymentId
+    ) {
+        parent::__construct($id, TransactionTypes::AUTHORIZATION, $date, $amount, $status, $paymentType, $paymentId);
 
         $this->cancelledAmount = $cancelledAmount;
     }
@@ -64,6 +73,8 @@ class AuthorizeHistoryItem extends HistoryItem
             $historyItem['amount'] ? Amount::fromArray($historyItem['amount']) : [],
             $historyItem['status'] ?? '',
             $historyItem['cancelledAmount'] ? Amount::fromArray($historyItem['cancelledAmount']) : [],
+            $historyItem['paymentType'] ?? '',
+            $historyItem['paymentId'] ?? '',
         );
     }
 
@@ -79,6 +90,8 @@ class AuthorizeHistoryItem extends HistoryItem
             'amount' => $this->getAmount()->toArray(),
             'status' => $this->getStatus(),
             'cancelledAmount' => $this->getCancelledAmount()->toArray(),
+            'paymentType' => $this->getPaymentType(),
+            'paymentId' => $this->getPaymentId()
         ];
     }
 }

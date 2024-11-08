@@ -38,6 +38,7 @@ class PaymentPageService
 
     /**
      * PaymentPageService constructor.
+     *
      * @param UnzerFactory $unzerFactory
      * @param PaymentMethodService $paymentMethodService
      * @param TransactionHistoryService $transactionHistoryService
@@ -102,9 +103,17 @@ class PaymentPageService
             );
         }
 
-        $this->transactionHistoryService->saveTransactionHistory(
-            new TransactionHistory($context->getPaymentMethodType(), $payPageResponse->getPaymentId(), $context->getOrderId())
-        );
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
+            ?? new TransactionHistory(
+                $context->getPaymentMethodType(),
+                $payPageResponse->getPaymentId(),
+                $context->getOrderId(),
+                $context->getAmount()->getCurrency()->getIsoCode()
+            );
+
+        $transactionHistory->setType($context->getPaymentMethodType());
+        $transactionHistory->setPaymentId($payPageResponse->getPaymentId());
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         return $payPageResponse;
     }
@@ -129,7 +138,8 @@ class PaymentPageService
 
         $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
         $newTransactionHistory = TransactionHistory::fromUnzerPayment($payment);
-        if(!$newTransactionHistory->isEqual($transactionHistory)) {
+        if (!$newTransactionHistory->isEqual($transactionHistory)) {
+            $newTransactionHistory->synchronizeHistoryItems($transactionHistory);
             $this->transactionHistoryService->saveTransactionHistory($newTransactionHistory);
         }
 

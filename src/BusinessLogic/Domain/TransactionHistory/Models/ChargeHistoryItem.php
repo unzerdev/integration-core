@@ -23,10 +23,19 @@ class ChargeHistoryItem extends HistoryItem
      * @param Amount $amount
      * @param string $status
      * @param Amount $cancelledAmount
+     * @param string $paymentType
+     * @param string $paymentId
      */
-    public function __construct(string $id, string $date, Amount $amount, string $status, Amount $cancelledAmount)
-    {
-        parent::__construct($id, TransactionTypes::CHARGE, $date, $amount, $status);
+    public function __construct(
+        string $id,
+        string $date,
+        Amount $amount,
+        string $status,
+        Amount $cancelledAmount,
+        string $paymentType,
+        string $paymentId
+    ) {
+        parent::__construct($id, TransactionTypes::CHARGE, $date, $amount, $status, $paymentType, $paymentId);
 
         $this->cancelledAmount = $cancelledAmount;
     }
@@ -60,10 +69,12 @@ class ChargeHistoryItem extends HistoryItem
     {
         return new self(
             $historyItems['id'] ?? '',
-                $historyItems['date'] ?? '',
-                $historyItems['amount'] ? Amount::fromArray($historyItems['amount']) : [],
+            $historyItems['date'] ?? '',
+            $historyItems['amount'] ? Amount::fromArray($historyItems['amount']) : [],
             $historyItems['status'] ?? '',
-                $historyItems['cancelledAmount'] ? Amount::fromArray($historyItems['cancelledAmount']) : [],
+            $historyItems['cancelledAmount'] ? Amount::fromArray($historyItems['cancelledAmount']) : [],
+            $historyItems['paymentType'] ?? '',
+            $historyItems['paymentId'] ?? '',
         );
     }
 
@@ -79,6 +90,8 @@ class ChargeHistoryItem extends HistoryItem
             'amount' => $this->getAmount()->toArray(),
             'status' => $this->getStatus(),
             'cancelledAmount' => $this->getCancelledAmount()->toArray(),
+            'paymentType' => $this->getPaymentType(),
+            'paymentId' => $this->getPaymentId()
         ];
     }
 }

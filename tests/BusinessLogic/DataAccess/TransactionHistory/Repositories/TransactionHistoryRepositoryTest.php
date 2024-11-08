@@ -74,15 +74,19 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
-                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
-                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    PaymentMethodTypes::APPLE_PAY, '1'),
+                new AuthorizeHistoryItem('id2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
+                new ChargeHistoryItem('id3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
         $configEntity = new TransactionHistoryEntity();
@@ -113,15 +117,19 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
-                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
-                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    PaymentMethodTypes::APPLE_PAY, '1'),
+                new AuthorizeHistoryItem('id2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
+                new ChargeHistoryItem('id3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
         $configEntity = new TransactionHistoryEntity();
@@ -152,15 +160,19 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
-                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
-                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    PaymentMethodTypes::APPLE_PAY, '1'),
+                new AuthorizeHistoryItem('id2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
+                new ChargeHistoryItem('id3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
         $configEntity = new TransactionHistoryEntity();
@@ -191,15 +203,19 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
-                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
-                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    PaymentMethodTypes::APPLE_PAY, '1'),
+                new AuthorizeHistoryItem('id2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
+                new ChargeHistoryItem('id3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
 
@@ -225,15 +241,19 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
             null,
             [
-                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1'),
-                new AuthorizeHistoryItem('id2',  'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',  Amount::fromFloat(1, Currency::getDefault())),
-                new ChargeHistoryItem('id3', 'date3',  Amount::fromFloat(1, Currency::getDefault()), 'status3',  Amount::fromFloat(1, Currency::getDefault()))
+                new HistoryItem('id1', 'type1', 'date1', Amount::fromFloat(1, Currency::getDefault()), 'status1',
+                    PaymentMethodTypes::APPLE_PAY, '1'),
+                new AuthorizeHistoryItem('id2', 'date2', Amount::fromFloat(1, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
+                new ChargeHistoryItem('id3', 'date3', Amount::fromFloat(1, Currency::getDefault()), 'status3',
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
 
@@ -248,6 +268,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(2, 'paid2'),
             Amount::fromFloat(12.11, Currency::getDefault()),
             Amount::fromFloat(12.11, Currency::getDefault()),
@@ -278,6 +299,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -289,6 +311,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -348,6 +371,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -359,6 +383,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -370,6 +395,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -381,6 +407,7 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),

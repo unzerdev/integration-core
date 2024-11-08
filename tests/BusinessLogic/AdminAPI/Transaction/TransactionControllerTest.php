@@ -5,6 +5,7 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Transaction;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Request\GetTransactionHistoryRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
@@ -85,6 +86,7 @@ class TransactionControllerTest extends BaseTestCase
      * @return void
      *
      * @throws CurrencyMismatchException
+     * @throws InvalidCurrencyCode
      */
     public function testToArrayWithTransactionHistory(): void
     {
@@ -93,6 +95,7 @@ class TransactionControllerTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),
@@ -100,13 +103,13 @@ class TransactionControllerTest extends BaseTestCase
             Amount::fromFloat(3.11, Currency::getDefault()),
             [
                 new HistoryItem('id1', 'type1', '2024-10-28 09:11:48', Amount::fromFloat(3, Currency::getDefault()),
-                    'status1'),
+                    'status1', PaymentMethodTypes::APPLE_PAY, '1'),
                 new AuthorizeHistoryItem('id2', '2024-10-28 09:11:49', Amount::fromFloat(2, Currency::getDefault()),
                     'status2',
-                    Amount::fromFloat(1, Currency::getDefault())),
+                    Amount::fromFloat(1, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1'),
                 new ChargeHistoryItem('id3', '2024-10-28 09:11:50', Amount::fromFloat(1, Currency::getDefault()),
                     'status3',
-                    Amount::fromFloat(50, Currency::getDefault()))
+                    Amount::fromFloat(50, Currency::getDefault()), PaymentMethodTypes::APPLE_PAY, '1')
             ]
         );
 

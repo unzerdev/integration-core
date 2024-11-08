@@ -41,6 +41,11 @@ class TransactionHistory
     private string $orderId;
 
     /**
+     * @var string $currency
+     */
+    private string $currency;
+
+    /**
      * @var ?PaymentState $paymentState
      */
     private ?PaymentState $paymentState;
@@ -76,6 +81,7 @@ class TransactionHistory
      * @param string $type
      * @param string $paymentId
      * @param string $orderId
+     * @param string $currency
      * @param PaymentState|null $paymentState
      * @param Amount|null $totalAmount
      * @param Amount|null $chargedAmount
@@ -87,6 +93,7 @@ class TransactionHistory
         string $type,
         string $paymentId,
         string $orderId,
+        string $currency,
         ?PaymentState $paymentState = null,
         ?Amount $totalAmount = null,
         ?Amount $chargedAmount = null,
@@ -97,6 +104,7 @@ class TransactionHistory
         $this->type = $type;
         $this->paymentId = $paymentId;
         $this->orderId = $orderId;
+        $this->currency = $currency;
         $this->paymentState = $paymentState;
         $this->totalAmount = $totalAmount;
         $this->chargedAmount = $chargedAmount;
@@ -254,6 +262,24 @@ class TransactionHistory
     }
 
     /**
+     * @return string
+     */
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param string $currency
+     *
+     * @return void
+     */
+    public function setCurrency(string $currency): void
+    {
+        $this->currency = $currency;
+    }
+
+    /**
      * @return array
      */
     public function historyItemCollectionToArray(): array
@@ -271,13 +297,14 @@ class TransactionHistory
      * @return Amount
      *
      * @throws CurrencyMismatchException
+     * @throws InvalidCurrencyCode
      */
     public function getRefundedAmount(): Amount
     {
         $chargedItems = $this->collection()->chargeItems();
 
         if ($chargedItems->isEmpty()) {
-            return Amount::fromInt(0, $this->getTotalAmount()->getCurrency());
+            return Amount::fromInt(0, Currency::fromIsoCode($this->currency));
         }
 
         return array_reduce($this->collection()->chargeItems()->getAll(), static function (
@@ -306,11 +333,14 @@ class TransactionHistory
      */
     public static function fromUnzerPayment(Payment $payment): self
     {
+        $paymentType = $payment->getPaymentType() ?
+            (SdkPaymentTypes::PAYMENT_TYPES[get_class($payment->getPaymentType())] ?? '') : '';
+
         $transactionHistory = new self(
-            $payment->getPaymentType() ?
-                (SdkPaymentTypes::PAYMENT_TYPES[get_class($payment->getPaymentType())] ?? '') : '',
+            $paymentType,
             $payment->getId() ?? '',
-            $payment->getOrderId() ?? ''
+            $payment->getOrderId() ?? '',
+            $payment->getCurrency() ?? '',
         );
 
         $currency = Currency::fromIsoCode($payment->getCurrency());
@@ -330,7 +360,9 @@ class TransactionHistory
                 $authorization->getDate(),
                 Amount::fromFloat($authorization->getAmount() ?? 0, $currency),
                 $authorization->isSuccess(),
-                Amount::fromFloat($authorization->getCancelledAmount() ?? 0, $currency)
+                Amount::fromFloat($authorization->getCancelledAmount() ?? 0, $currency),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -340,7 +372,9 @@ class TransactionHistory
                 $charge->getDate() ?? '',
                 Amount::fromFloat($charge->getAmount() ?? 0, $currency),
                 $charge->isSuccess(),
-                Amount::fromFloat($charge->getCancelledAmount() ?? 0, $currency)
+                Amount::fromFloat($charge->getCancelledAmount() ?? 0, $currency),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -350,7 +384,9 @@ class TransactionHistory
                 TransactionTypes::REFUND,
                 $refund->getDate() ?? '',
                 Amount::fromFloat($refund->getAmount() ?? 0, $currency),
-                'success'
+                $refund->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -360,7 +396,9 @@ class TransactionHistory
                 TransactionTypes::REVERSAL,
                 $reversal->getDate() ?? '',
                 Amount::fromFloat($reversal->getAmount() ?? 0, $currency),
-                $reversal->isSuccess()
+                $reversal->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -370,7 +408,9 @@ class TransactionHistory
                 TransactionTypes::REFUND,
                 $refund->getDate() ?? '',
                 Amount::fromFloat($refund->getAmount() ?? 0, $currency),
-                $refund->isSuccess()
+                $refund->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -380,7 +420,9 @@ class TransactionHistory
                 TransactionTypes::SHIPMENT,
                 $shipment->getDate() ?? '',
                 Amount::fromFloat($shipment->getAmount() ?? 0, $currency),
-                $shipment->isSuccess()
+                $shipment->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -390,7 +432,9 @@ class TransactionHistory
                 TransactionTypes::PAYOUT,
                 $payout->getDate() ?? '',
                 Amount::fromFloat($payout->getAmount() ?? 0, $currency),
-                $payout->isSuccess()
+                $payout->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -400,7 +444,9 @@ class TransactionHistory
                 TransactionTypes::CHARGEBACK,
                 $chargeback->getDate() ?? '',
                 Amount::fromFloat($chargeback->getAmount() ?? 0, $currency),
-                $chargeback->isSuccess()
+                $chargeback->isSuccess(),
+                $paymentType,
+                $payment->getId()
             );
         }
 
@@ -429,6 +475,27 @@ class TransactionHistory
                 $this->remainingAmount->getValue() == $transactionHistory->remainingAmount->getValue()) &&
             count($this->collection()->getAll()) === count($transactionHistory->collection()->getAll()) &&
             $this->getPaymentState()->getId() === $transactionHistory->getPaymentState()->getId();
+    }
+
+    /**
+     * @param TransactionHistory $transactionHistory
+     *
+     * @return void
+     */
+    public function synchronizeHistoryItems(TransactionHistory $transactionHistory): void
+    {
+        $existingItems = [];
+        foreach ($this->collection()->getAll() as $item) {
+            $key = $item->getId() . '_' . $item->getPaymentType() . '_' . $item->getPaymentId();
+            $existingItems[] = $key;
+        }
+
+        foreach ($transactionHistory->collection()->getAll() as $item) {
+            $key = $item->getId() . '_' . $item->getPaymentType() . '_' . $item->getPaymentId();
+            if (!in_array($key, $existingItems)) {
+                $this->collection()->add($item);
+            }
+        }
     }
 
     /**

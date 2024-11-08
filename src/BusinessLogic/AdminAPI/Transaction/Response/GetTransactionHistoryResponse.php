@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\Transaction\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 
@@ -31,6 +32,7 @@ class GetTransactionHistoryResponse extends Response
      * @inheritDoc
      *
      * @throws CurrencyMismatchException
+     * @throws InvalidCurrencyCode
      */
     public function toArray(): array
     {
@@ -57,7 +59,9 @@ class GetTransactionHistoryResponse extends Response
                 'date' => $historyItem->getDate(),
                 'type' => $historyItem->getType(),
                 'amount' => $this->amountToArray($historyItem->getAmount()),
-                'status' => $historyItem->getStatus() ? 'Success' : 'Failed'
+                'status' => $historyItem->getStatus() ? 'Success' : 'Failed',
+                'paymentType' => $historyItem->getPaymentType(),
+                'paymentId' => $historyItem->getPaymentId()
             ];
         }
 

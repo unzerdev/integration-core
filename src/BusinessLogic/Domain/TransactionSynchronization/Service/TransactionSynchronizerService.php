@@ -106,6 +106,7 @@ class TransactionSynchronizerService
         }
 
         if (!$transactionHistory->isEqual($existingTransactionHistory)) {
+            $transactionHistory->synchronizeHistoryItems($existingTransactionHistory);
             $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
         }
 

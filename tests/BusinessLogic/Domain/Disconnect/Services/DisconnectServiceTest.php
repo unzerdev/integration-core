@@ -302,6 +302,7 @@ class DisconnectServiceTest extends BaseTestCase
             PaymentMethodTypes::APPLE_PAY,
             'payment1',
             'order1',
+            'EUR',
             new PaymentState(1, 'paid'),
             Amount::fromFloat(11.11, Currency::getDefault()),
             Amount::fromFloat(1.11, Currency::getDefault()),

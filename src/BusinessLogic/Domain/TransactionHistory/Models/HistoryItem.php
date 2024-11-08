@@ -28,20 +28,37 @@ class HistoryItem
     /** @var bool $status */
     private bool $status;
 
+    /** @var string $paymentType */
+    private string $paymentType;
+
+    /** @var string $paymentId */
+    private string $paymentId;
+
     /**
      * @param string $id
      * @param string $type
      * @param string $date
      * @param Amount $amount
      * @param bool $status
+     * @param string $paymentType
+     * @param string $paymentId
      */
-    public function __construct(string $id, string $type, string $date, Amount $amount, bool $status)
-    {
+    public function __construct(
+        string $id,
+        string $type,
+        string $date,
+        Amount $amount,
+        bool $status,
+        string $paymentType,
+        string $paymentId
+    ) {
         $this->id = $id;
         $this->type = $type;
         $this->date = $date;
         $this->amount = $amount;
         $this->status = $status;
+        $this->paymentType = $paymentType;
+        $this->paymentId = $paymentId;
     }
 
     /**
@@ -135,6 +152,42 @@ class HistoryItem
     }
 
     /**
+     * @return string
+     */
+    public function getPaymentType(): string
+    {
+        return $this->paymentType;
+    }
+
+    /**
+     * @param string $paymentType
+     *
+     * @return void
+     */
+    public function setPaymentType(string $paymentType): void
+    {
+        $this->paymentType = $paymentType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentId(): string
+    {
+        return $this->paymentId;
+    }
+
+    /**
+     * @param string $paymentId
+     *
+     * @return void
+     */
+    public function setPaymentId(string $paymentId): void
+    {
+        $this->paymentId = $paymentId;
+    }
+
+    /**
      * @param array $historyItemData
      *
      * @return self[]
@@ -145,13 +198,13 @@ class HistoryItem
         $historyItems = [];
 
         foreach ($historyItemData as $itemData) {
-            if($itemData['type'] === TransactionTypes::CHARGE) {
+            if ($itemData['type'] === TransactionTypes::CHARGE) {
                 $historyItems[] = ChargeHistoryItem::fromArray($itemData);
 
                 continue;
             }
 
-            if($itemData['type'] === TransactionTypes::AUTHORIZATION) {
+            if ($itemData['type'] === TransactionTypes::AUTHORIZATION) {
                 $historyItems[] = AuthorizeHistoryItem::fromArray($itemData);
 
                 continue;
@@ -177,7 +230,9 @@ class HistoryItem
             $historyItem['type'] ?? '',
             $historyItem['date'] ?? '',
             $historyItem['amount'] ? Amount::fromArray($historyItem['amount']) : [],
-            $historyItem['status'] ?? false
+            $historyItem['status'] ?? false,
+                $historyItem['paymentType'] ?? '',
+                $historyItem['paymentId'] ?? ''
         );
     }
 
@@ -191,7 +246,9 @@ class HistoryItem
             'type' => $this->getType(),
             'date' => $this->getDate(),
             'amount' => $this->getAmount()->toArray(),
-            'status' => $this->getStatus()
+            'status' => $this->getStatus(),
+            'paymentType' => $this->getPaymentType(),
+            'paymentId' => $this->getPaymentId()
         ];
     }
 }

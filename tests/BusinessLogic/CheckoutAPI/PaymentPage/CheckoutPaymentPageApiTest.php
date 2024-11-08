@@ -24,7 +24,6 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ServiceRegister;
@@ -145,7 +144,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::EPS, 'test-payment-123', 'test-order-123')
+            new TransactionHistory(PaymentMethodTypes::EPS, 'test-payment-123', 'test-order-123', 'EUR')
         );
     }
 
@@ -180,7 +179,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-payment-123', 'test-order-123')
+            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-payment-123', 'test-order-123', 'EUR')
         );
     }
 
