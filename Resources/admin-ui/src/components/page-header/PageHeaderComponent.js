@@ -135,7 +135,8 @@ const render = (stores, onStoreSelect) => {
         wrapper.append(createConnection());
     }
 
-    const sandbox = generator.createElement('div', 'unzer-header-sandbox', `login.sandbox|credentials?store=${Unzer.config.store.storeId}`, [], []);
+    const sandboxLabel = !Unzer.config.store.isLoggedIn  ? "login.sandbox" : "login.sandboxWithLink";
+    const sandbox = generator.createElement('div', 'unzer-header-sandbox', `${sandboxLabel}|credentials?store=${Unzer.config.store.storeId}`, [], []);
 
     container.append(wrapper);
     container.append(sandbox);
@@ -159,14 +160,19 @@ const updateCredentials = () => {
 /**
  *
  * @param isSandbox
+ * @param hasLink
  */
-const updateEnvironment = (isSandbox) => {
+const updateEnvironment = (isSandbox, hasLink = false) => {
     const environment = document.querySelector('.unzer-header-sandbox');
 
     if (isSandbox) {
         environment.classList.remove('unzer-header-sandbox-none');
     } else {
         environment.classList.add('unzer-header-sandbox-none');
+    }
+
+    if(hasLink){
+       environment.innerHTML = Unzer.translationService.translate('login.sandbox');
     }
 };
 

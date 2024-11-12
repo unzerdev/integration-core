@@ -61,7 +61,6 @@
       return;
     }
 
-    Unzer.components.PageHeader.updateEnvironment(false);
 
     getData();
   };
@@ -202,6 +201,8 @@
     ]);
 
     webhookWrapper.style.visibility = environmentValues.webhookData.exists ? 'visible' : 'hidden';
+
+    Unzer.components.PageHeader.updateEnvironment(Unzer.config.store.mode !== 'live', true);
 
     page.append(webhookWrapper);
   }
