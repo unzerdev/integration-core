@@ -58,7 +58,7 @@
     "login": "Login"
   },
   "credentials": {
-    "title": "Credentials",
+    "title": "Credentials!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
     "notificationsDescription": "You can find registrated webhook for your store here.",
     "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
     "saveChanges": "Save changes",
@@ -78,13 +78,13 @@
     "support": "Need help?",
     "version": "Version: %s",
     "update": "(New version is available <a href = ''>here</a>)",
-    "supportLink": "https://help.unzer.com/kb/de/"
+    "supportLink": "https://help.unzer.com/kb/en/"
   },
   "login": {
     "sandbox": "You’re currently in the Sandbox environment. Switch to live mode <a href='%s'>here</a>.",
     "heading": {
       "title": "UnzerOne: </br>One platform for all channels and the ideal customer experience.",
-      "subtitle": "Make sure that you’re logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href=''>here</a>."
+      "subtitle": "Make sure that you’re logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href='https://www.unzer.com/en/sales-team-contact/' target='_blank'>here</a>."
     },
     "environment": {
       "title": "Environment",
@@ -105,7 +105,7 @@
     }
   },
   "design": {
-    "invalidUrl" : "Image URL is not valid.",
+    "invalidUrl": "Image URL is not valid.",
     "heading": {
       "title": "Payment Page Design Settings",
       "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
@@ -164,8 +164,8 @@
       "description": "In this section, you can set up and customize the Unzer payment method for use during the checkout process. This allows you to offer a seamless and secure payment option for your customers.",
       "paymentMethodTitle": "Payment Methods",
       "paymentMethodDescription": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
-      "settings" : "Payment page settings",
-      "configurationSaved" : "Configuration is saved successfully",
+      "settings": "Payment page settings",
+      "configurationSaved": "Configuration is saved successfully",
       "enabled": "Payment method %s is enabled!",
       "disabled": "Payment method %s is disabled!"
     },
@@ -211,28 +211,28 @@
     }
   },
   "paymentMethods": {
-    "alipay": "Alipay, the payment method from China’s Alibaba, is the most used online payment method in China. When your customer chooses to pay with Alipay, they are redirected to an Alipay payment page where they can sign in to their account or conveniently pay by scanning a unique QR code.",
-    "applepay": "Apple Pay is a mobile wallet solution available to all users of Apple devices.",
-    "bancontact": "Bancontact is the most popular online payment method in Belgium, with over 15 million cards in circulation. Customers use a Bancontact card or mobile app linked to a Belgian bank account to pay online. Once they select Bancontact as a payment method, they are redirected to their bank portal to enter their credentials and make the payment. The result of the payment is reflected immediately because the money is debited immediately.",
-    "card": "Cards can be differentiated in credit and debit cards. In most cases they are issued by banks (Issuers) in cooperation with card organizations (schemes) such as Mastercard, VISA, Diners, or American Express. Based on those schemes, payment acceptance is possible almost worldwide online and offline.",
-    "eps": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. As with other redirect payment methods, when the customer selects their bank or specifies a BIC, they are redirected to their bank payment site to make the payment. Once the authentication and payment is done, they can be redirected back to your online shop.",
-    "giropay": "Giropay is one of the most popular online payment methods available in Germany. As with other redirect payment methods, when the customer selects their bank or specifies a BIC, they are redirected to their bank payment site to make the payment. Once the authentication and payment is done, they can be redirected back to your online shop.",
-    "ideal": "iDEAL is one of the most popular online payment methods in the Netherlands. It generates a SEPA Credit Transfer from within the consumer’s trusted online banking portal. By using iDEAL, consumers are able to pay for their online purchases in a user-friendly, cost-efficient, and safe way. iDEAL supports the SEPA transfers mainly through Dutch banks.",
-    "klarna": "Klarna is a payment method that provides an easy to use pay later payment option. Your customers can buy the goods now and choose to pay at a later date. Once the customer selects Klarna for making the payment, they are redirected to a Klarna payment page, where they need to login to confirm their details and finalize the purchase.",
-    "twint": "With TWINT, you can make convenient and secure payments with your smartphone – at the cash register in a supermarket, in an online shop, when shopping at a farm shop, on public transport, when parking, or when transferring money to your friends. With more than 5 million active users, TWINT is the leading payment app in Switzerland.",
-    "googlepay": "Google Pay™ is a mobile wallet solution available to all the customers who have a Google account. To use this payment method, you must adhere to the Google Pay APIs Acceptable Use Policy and accept the terms that Google Pay API Terms of Service defines.",
-    "paypal": "PayPal is globally one of the most popular online payment methods. Your customers are redirected to PayPal’s site to log in with their PayPal credentials and approve the payment. Once the authentication and payment is done, they can be redirected back to your online shop.",
-    "payu": "PayU is an online bank transfer. It is one of the most popular payment methods amongst Polish consumers. Offering real-time bank transfer payments, PayU allows consumers to make payments for e-commerce purchases directly from their bank account. The consumer selects their preferred online bank and logs into their account to confirm the payment.",
-    "post-finance-card": "PostFinance is an online direct payment method used by the Swiss customers for online payments. The currency is Swiss Franc (CHF).",
-    "post-finance-efinance": "PostFinance is an online direct payment method used by the Swiss customers for online payments. The transaction currency is Swiss Franc (CHF).",
-    "przelewy24": "Przelewy24 (P24) is one of the most popular online payment methods available in Poland. After selecting P24 the customer will be redirected to P24 to initiate an online transfer. P24 is acting as a payment initiation service and will enable the costumer to securely log in to their banks to authorize the payment. Once the authentication and payment are done, the customer can continue shopping in your online shop.",
-    "sofort": "Sofort is a popular online payment method available in Germany and Austria. After selecting Sofort, the customer will be redirected to Sofort, a Klarna service, to initiate an online transfer. Sofort is acting as a payment initiation service and will enable the customer to securely log in to their bank to authorize the payment.",
-    "paylater-direct-debit": "SEPA Direct Debit is a payment method available in the European SEPA region and based on the EU SEPA rule book. The customer only needs their IBAN for making a payment. Unzer will debit the amount from the customer’s account and transfer it to the merchant.",
-    "direct-debit-secured": "Direct Debit Secured is a part of our Buy Now, Pay Later (BNPL) offering and it’s a very convenient payment option. This payment option offers customers an easy and secure way to shop online or in-store without having to manually perform payments. For merchants the BNPL payment options drive conversion and customer satisfaction.",
-    "paylater-installment": "Unzer Installment is a part of our Buy Now, Pay Later (BNPL) offering and it’s a very convenient payment option. This payment option offers customers a flexible and secure way to shop online or in-store without having to pay upfront which limits the risks for customers. For merchants the BNPL payment options drive conversion and customer satisfaction.",
-    "paylater-invoice": "Unzer Invoice is a part of our Buy Now Pay Later (BNPL) offering and it’s a convenient payment option. This payment option offers customers a flexible and secure way to shop online or in-store without having to pay upfront which limits the risks for customers.",
-    "prepayment": "Prepayment is a safe and convenient payment method for merchants. The merchant ships their goods not until customers paid their order via bank transfer. Unzer offers to check for received funds and commence matching.",
-    "wechatpay": "WeChat pay is a Chinese payment method tied to the most popular messaging service in China. Your customer pays via QR code using either the balance from their WeChat wallet or a bank account linked to the wallet."
+    "alipay": "Alipay, the payment method from China’s Alibaba, is the most used online payment method in China. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "applepay": "Apple Pay is a mobile wallet solution available to all users of Apple devices. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "bancontact": "Bancontact is the most popular online payment method in Belgium, with over 15 million cards in circulation. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "card": "Cards can be differentiated in credit and debit cards. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "eps": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "giropay": "Giropay is one of the most popular online payment methods available in Germany. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "ideal": "iDEAL is one of the most popular online payment methods in the Netherlands. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "klarna": "Klarna is a payment method that provides an easy to use pay later payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "twint": "With TWINT, you can make convenient and secure payments with your smartphone – at the cash register in a supermarket, in an online shop, when shopping at a farm shop, on public transport, when parking, or when transferring money to your friends. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "googlepay": "Google Pay™ is a mobile wallet solution available to all the customers who have a Google account. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "paypal": "PayPal is globally one of the most popular online payment methods. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "payu": "PayU is an online bank transfer. It is one of the most popular payment methods amongst Polish consumers. <a href='https://docs.unzer.com/payment-methods/https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "post-finance-card": "PostFinance is an online direct payment method used by the Swiss customers for online payments. The currency is Swiss Franc (CHF). <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "post-finance-efinance": "PostFinance is an online direct payment method used by the Swiss customers for online payments. The transaction currency is Swiss Franc (CHF). <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "przelewy24": "Przelewy24 (P24) is one of the most popular online payment methods available in Poland. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'target='_blank' class='learn-more-href'> Learn more </a>",
+    "sofort": "Sofort is a popular online payment method available in Germany and Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "paylater-direct-debit": "SEPA Direct Debit is a payment method available in the European SEPA region and based on the EU SEPA rule book. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "direct-debit-secured": "Direct Debit Secured is a part of our Buy Now, Pay Later (BNPL) offering and it’s a very convenient payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "paylater-installment": "Unzer Installment is a part of our Buy Now, Pay Later (BNPL) offering and it’s a very convenient payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "paylater-invoice": "Unzer Invoice is a part of our Buy Now Pay Later (BNPL) offering and it’s a convenient payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "prepayment": "Prepayment is a safe and convenient payment method for merchants. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "wechatpay": "WeChat pay is a Chinese payment method tied to the most popular messaging service in China. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>"
   },
   "validation": {
     "requiredField": "This field is required.",
@@ -258,6 +258,8 @@
     "passwordNumber": "Password must contain at least one number.",
     "passwordSpecial": "Password must contain at least one special character.",
     "passwordConfirm": "Passwords do not match.",
-    "minGreaterThanMax": "The min order value is greater than max order value."
+    "minGreaterThanMax": "The min order value is greater than max order value.",
+    "invalidColorFormat": "Invalid color format.",
+    "invalidUrl": "Invalid URL. Please enter a valid URL in the format: http://example.com or https://example.com, optionally followed by a path, query parameters, or fragment"
   }
 }

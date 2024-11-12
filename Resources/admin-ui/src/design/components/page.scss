@@ -9,7 +9,7 @@
   background-color: $adl-color--white;
   width: 100%;
   max-height: 100%;
-  min-height: 100%;
+  min-height: 97vh;
 
   @include adl-screen--wide {
     flex-direction: row;
