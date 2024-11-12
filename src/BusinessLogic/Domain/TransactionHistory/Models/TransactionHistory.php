@@ -475,7 +475,7 @@ class TransactionHistory
                 $transactionHistory->cancelledAmount->getValue()) &&
             ($this->remainingAmount && $transactionHistory->remainingAmount &&
                 $this->remainingAmount->getValue() == $transactionHistory->remainingAmount->getValue()) &&
-            count($this->collection()->getAll()) === count($transactionHistory->collection()->getAll()) &&
+            $this->collection()->isEqual($transactionHistory->collection()) &&
             $this->getPaymentState()->getId() === $transactionHistory->getPaymentState()->getId();
     }
 

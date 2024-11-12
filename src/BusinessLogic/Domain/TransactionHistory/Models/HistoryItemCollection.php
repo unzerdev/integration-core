@@ -121,4 +121,37 @@ class HistoryItemCollection
     {
         return !$this->isEmpty() ? current($this->historyItems) : null;
     }
+
+    /**
+     * @param HistoryItemCollection $historyItemCollection
+     *
+     * @return bool
+     */
+    public function isEqual(HistoryItemCollection $historyItemCollection): bool {
+
+        if (count($this->getAll()) !== count($historyItemCollection->getAll())) {
+            return false;
+        }
+
+        foreach ($this->getAll() as $index => $item1) {
+            $item2 = $historyItemCollection->getAll()[$index];
+
+            if (
+                $item1->getId() !== $item2->getId() ||
+                $item1->getType() !== $item2->getType() ||
+                $item1->getDate() !== $item2->getDate() ||
+                $item1->getStatus() !== $item2->getStatus() ||
+                $item1->getPaymentType() !== $item2->getPaymentType() ||
+                $item1->getPaymentId() !== $item2->getPaymentId()
+            ) {
+                return false;
+            }
+
+            if ($item1->getAmount()->toArray() !== $item2->getAmount()->toArray()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
