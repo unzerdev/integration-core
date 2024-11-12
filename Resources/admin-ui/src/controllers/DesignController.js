@@ -122,6 +122,7 @@
         Unzer.components.PageHeading.create({
           title: "design.heading.title",
           description: "design.heading.description",
+          backIcon: true,
           button: Unzer.components.Button.createList([
             {
               label: "design.heading.previewLabel",

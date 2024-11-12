@@ -125,6 +125,10 @@ const render = (stores, onStoreSelect) => {
         [createHeader(), verticalLine, dropdownWrapper]
     );
 
+    logoWrapper.addEventListener('click', () => {
+        window.history.back()
+    })
+
     const wrapper = generator.createElement('div', 'unzer-header-wrapper', '', [], [logoWrapper]);
 
     if (Unzer.config.store.isLoggedIn) {

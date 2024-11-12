@@ -5,6 +5,16 @@
 
   .unzer-title {
     margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+
+    .unzer-title-back {
+      max-width: 40px;
+      max-height: 30px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
   }
 
   .unzer-description {
