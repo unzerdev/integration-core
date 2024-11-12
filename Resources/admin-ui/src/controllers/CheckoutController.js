@@ -381,12 +381,16 @@
     }
 
     const handleSurchargeChange = (value) => {
-      paymentMethodConfig.surcharge = value;
+      const numericValue = String(value).replace(/[^0-9.]/g, '');
+
+      surchargeField.querySelector(`[name=${'surcharge'}]`).value = numericValue;
+
+      paymentMethodConfig.surcharge = numericValue;
     };
 
     const surchargeField = Unzer.components.TextField.create({
       title: 'checkout.modal.surcharge',
-      type: 'number',
+      type: 'text',
       class: 'adl-text-input',
       name: 'surcharge',
       min: 0,

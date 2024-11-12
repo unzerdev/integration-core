@@ -48,19 +48,6 @@
 
 .adl-text-input {
   position: relative;
-
-  -moz-appearance: textfield;
-  -webkit-appearance: none;
-  appearance: none;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  & {
-    appearance: textfield;
-  }
 }
 
 .arrow-up, .arrow-down {

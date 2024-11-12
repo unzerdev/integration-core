@@ -35,7 +35,13 @@ const MoneyInputFieldComponent = ({
         let amountVal = wrapper.querySelector(`[name=${name}_amount]`).value;
         let currencyVal = wrapper.querySelector(`[name=${name}_currency]`).value;
 
-        const value = {
+      amountVal = amountVal.replace(/[^0-9.]/g, '');
+      currencyVal = currencyVal.replace(/[^0-9.]/g, '');
+
+      wrapper.querySelector(`[name=${name}_amount]`).value = amountVal;
+      wrapper.querySelector(`[name=${name}_currency]`).value = currencyVal;
+
+      const value = {
             minAmount: amountVal || null,
             maxAmount: currencyVal || null
         };
@@ -64,7 +70,8 @@ const MoneyInputFieldComponent = ({
     const input = Unzer.components.TextField.create({
         value: value?.minAmount || 0,
         className: 'adl-text-input',
-        type: 'number',
+        type: 'text',
+        inputmode: 'numeric',
         dataset: {
             validationRule: 'nonNegative'
         },
@@ -79,7 +86,7 @@ const MoneyInputFieldComponent = ({
         value: value?.maxAmount || 0,
         className: 'adl-text-input',
         name: name + '_currency',
-        type: 'number',
+        type: 'text',
         min: 0,
         dataset: {
             validationRule: 'nonNegative'
