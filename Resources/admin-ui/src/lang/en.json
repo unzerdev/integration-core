@@ -172,7 +172,7 @@
     },
     "modal": {
       "method": "Booking method",
-      "methodDescription": "You can initialize the payment page to support either charge or authorize transactions. Most of the <a href=''>payment methods support charge transaction</a>.",
+      "methodDescription": "You can initialize the payment page to support either charge or authorize transactions. Most of the <a href='https://docs.unzer.com/payment-methods/#supported-booking-modes-for-various-payment-methods' target='_blank'>payment methods support charge transaction</a>.",
       "minAmount": "Min order amount",
       "maxAmount": "Max order amount",
       "surcharge": "Surcharge",
