@@ -149,14 +149,17 @@
   /**
    * Validates if the input is a valid URL. If not, adds an error class to the input element.
    *
-   * @param {HTMLInputElement} input
+   * @param {HTMLInputElement} element
+   * @param {string} input
    * @param {string?} message
+   * @param {string?} childId
+   * @param {string?} descriptionId
    * @return {boolean}
    */
-  const validateUrl = (input, message) => {
+  const validateUrl = (element, input, message, childId, descriptionId ) => {
     let regex = /(https?:\/\/)([\w\-])+\.([a-zA-Z]{2,63})([\/\w-]*)*\/?\??([^#\n\r]*)?#?([^\n\r]*)/m;
 
-    return validateField(input, !regex.test(String(input.value).toLowerCase()), message);
+    return validateFieldGeneric(element, !regex.test(String(input).toLowerCase()), message, childId, descriptionId);
   };
 
   /**
@@ -196,6 +199,49 @@
 
     const inputEl = parent.querySelector(fieldSelector);
     inputEl && setError(inputEl, message);
+  };
+
+
+  /**
+   * Sets error for an input.
+   *
+   * @param {HTMLElement} element
+   * @param {string?} message
+   * @param {string} childId
+   * @param {string?} descriptionSpanId
+   */
+  const setErrorGeneric = (element, message, childId,  descriptionSpanId) => {
+
+    if (!element) {
+      return;
+    }
+
+    if(!childId) {
+      return;
+    }
+
+    const descriptionSpan = element.querySelector(descriptionSpanId);
+
+    if (descriptionSpan) {
+      descriptionSpan.classList.add('hidden');
+    }
+
+    const child = element.querySelectorAll(childId);
+    if (child) {
+      child.forEach(x => x.classList.add("unzer-error"));
+    }
+
+
+    element.classList.add('adls--error');
+    if (message) {
+      let errorField = element.querySelector('.unzer-input-error');
+      if (!errorField) {
+        errorField = Unzer.elementGenerator.createElement('span', 'unzer-input-error', message);
+        element.append(errorField);
+      }
+
+      errorField.innerHTML = translationService.translate(message);
+    }
   };
 
   /**
@@ -244,90 +290,40 @@
    * @param element
    * @param errorCondition
    * @param message
-   *
+   * @param {string?} childId
+   * @param {string?} descriptionId
    * @returns {boolean}
    */
 
-  const validateColorComponent = (element, value, message) => {
+  const validateColorComponent = (element, value, message, childId, descriptionId) => {
     const hexPattern = /^#[0-9A-Fa-f]{6}$/;
 
-    return validateColorField(element,!hexPattern.test(value),message);
-  }
-
-  const validateColorField = (element, errorCondition, message) => {
-    if(errorCondition) {
-      setErrorColor(element,message);
-      return false;
-    }
-
-    removeErrorColor(element);
-    return true;
-  }
-
-  /**
-   * Sets error for color picker field
-   *
-   * @param element
-   * @param message
-   */
-
-  const setErrorColor = (element, message) => {
-    const parent = element;
-
-    if (!parent) {
-      return;
-    }
-
-    const child = element.querySelectorAll('.unzer-color-input');
-
-
-    const field = element.querySelectorAll('.unzer-color-picker');
-
-    if (field) {
-      field.forEach(x => x.classList.add("unzer-error"));
-    }
-
-
-    const descriptionSpan = parent.querySelector('.unzer-color-description');
-
-    if (descriptionSpan) {
-      descriptionSpan.classList.add('hidden');
-    }
-
-    if (message) {
-      let errorField = parent.querySelector('.unzer-input-error');
-      if (!errorField) {
-        errorField = Unzer.elementGenerator.createElement('span', 'unzer-input-error', message);
-        parent.append(errorField);
-      }
-
-      errorField.innerHTML = translationService.translate(message);
-    }
+    return validateFieldGeneric(element,!hexPattern.test(value),message, childId, descriptionId);
   }
 
   /**
    * Removes error from color picker field
    *
    * @param element
+   * @param {string} childId
+   * @param {string?} descriptionId
    */
-  const removeErrorColor = (element) => {
-    const parent = element;
-
-    if (!parent) {
+  const removeErrorGeneric = (element, childId, descriptionId) => {
+    if (!element) {
       return;
     }
 
-    const field = parent.querySelectorAll('.unzer-color-picker');
-    if (field) {
-      field.forEach(x => x.classList.remove("unzer-error"));
-    }
-
-    let descriptionSpan = parent.querySelector('.unzer-color-description');
+    let descriptionSpan = element.querySelector(descriptionId);
     if (descriptionSpan) {
       descriptionSpan.classList.remove('hidden');
     }
 
-    const errorField = parent.querySelector('.unzer-input-error');
+    const field = element.querySelectorAll(childId);
+    if (field) {
+      field.forEach(x => x.classList.remove("unzer-error"));
+    }
+
+    const errorField = element.querySelector('.unzer-input-error');
     if (errorField) {
       errorField.remove();
     }
@@ -339,6 +335,7 @@
    * @param {HTMLElement} element
    * @param {boolean} errorCondition Error condition.
    * @param {string?} message
+   *
    * @return {boolean}
    */
   const validateField = (element, errorCondition, message) => {
@@ -349,6 +346,28 @@
     }
 
     removeError(element);
+
+    return true;
+  };
+
+  /**
+   * Validates the condition against the input field and marks field invalid if the error condition is met.
+   *
+   * @param {HTMLElement} element
+   * @param {boolean} errorCondition Error condition.
+   * @param {string?} message
+   * @param {string?} childId
+   * @param {string?} descriptionId
+   * @return {boolean}
+   */
+  const validateFieldGeneric = (element, errorCondition, message, childId, descriptionId) => {
+    if (errorCondition) {
+      setErrorGeneric(element, message, childId, descriptionId);
+
+      return false;
+    }
+
+    removeErrorGeneric(element, childId, descriptionId);
 
     return true;
   };

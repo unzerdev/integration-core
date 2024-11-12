@@ -128,7 +128,13 @@
               type: "primary",
               className: "adlt--export",
               onClick: () => {
-                if (validateColorFields()) {
+                if (validateColorFields() && (!selectedValues.logoImageUrl || Unzer.validationService.validateUrl(
+                    urlField,
+                    selectedValues.logoImageUrl,
+                    "validation.invalidUrl",
+                    '.unzer-file-upload-input',
+                    '.unzer-dropdown-description'
+                ))) {
                   createPreviewPage();
                 }
               }
@@ -137,13 +143,37 @@
               label: "design.heading.saveLabel",
               type: "secondary",
               onClick: () => {
-                if (validateColorFields()) {
+                if (validateColorFields()  && (!selectedValues.logoImageUrl || Unzer.validationService.validateUrl(
+                    urlField,
+                    selectedValues.logoImageUrl,
+                    "validation.invalidUrl",
+                    '.unzer-file-upload-input',
+                    '.unzer-dropdown-description'
+                ))) {
                   saveChanges();
                 }
               }
             },
           ])
-        }),
+        }));
+
+    const urlField = Unzer.components.FileUploadComponent.create({
+      label: "design.translations.logoImageUrl",
+      description: "design.translations.logoImageUrlDescription",
+      value: selectedValues.logoImageUrl,
+      onFileSelect: (file) => {
+        if (file instanceof File) {
+          selectedValues.logoFile = file;
+          selectedValues.logoImageUrl = null;
+        }
+      },
+      onChange: (value) => {
+        selectedValues.logoImageUrl = value;
+        selectedValues.logoFile = null;
+      }
+    });
+
+    page.append(
         Unzer.components.TwoColumnLayout.create(
             [
               Unzer.components.TextDropdownComponent.create({
@@ -167,21 +197,7 @@
                     value: Unzer.config.store.storeName
                   }
               ),
-              Unzer.components.FileUploadComponent.create({
-                label: "design.translations.logoImageUrl",
-                description: "design.translations.logoImageUrlDescription",
-                value: selectedValues.logoImageUrl,
-                onFileSelect: (file) => {
-                  if (file instanceof File) {
-                    selectedValues.logoFile = file;
-                    selectedValues.logoImageUrl = '';
-                  }
-                },
-                onChange: (value) => {
-                  selectedValues.logoImageUrl = value;
-                  selectedValues.logoFile = null;
-                }
-              }),
+              urlField
 
             ], [
               Unzer.components.TextDropdownComponent.create({
@@ -296,7 +312,9 @@
       const isFieldValid = Unzer.validationService.validateColorComponent(
           field.component,
           selectedValues[fieldName],
-          "validation.invalidColorFormat"
+          "validation.invalidColorFormat",
+          '.unzer-color-picker',
+          '.unzer-color-description'
       );
 
       if (!isFieldValid) {
@@ -331,11 +349,11 @@
 
     Unzer.DesignService.saveDesign(formData)
         .then((result) => {
-            if(result.statusCode  === 400) {
-                Unzer.utilities.createToasterMessage("design.invalidUrl", true);
+          if (result.statusCode === 400) {
+            Unzer.utilities.createToasterMessage("design.invalidUrl", true);
 
-                return
-            }
+            return
+          }
 
           selectedValues.logoImageUrl = result.logoImageUrl || selectedValues.logoImageUrl;
           Unzer.utilities.createToasterMessage("general.changesSaved", false);
@@ -367,11 +385,11 @@
     Unzer.DesignService.createPreviewPage(formData)
         .then((response) => {
 
-            if(response.statusCode  === 400) {
-                Unzer.utilities.createToasterMessage("design.invalidUrl", true);
+          if (response.statusCode === 400) {
+            Unzer.utilities.createToasterMessage("design.invalidUrl", true);
 
-                return
-            }
+            return
+          }
 
           if (typeof response.id === 'undefined') {
             Unzer.utilities.createToasterMessage("general.errors.general.unhandled", true);

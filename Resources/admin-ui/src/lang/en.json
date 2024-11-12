@@ -105,7 +105,7 @@
     }
   },
   "design": {
-    "invalidUrl" : "Image URL is not valid.",
+    "invalidUrl": "Image URL is not valid.",
     "heading": {
       "title": "Payment Page Design Settings",
       "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
@@ -164,8 +164,8 @@
       "description": "In this section, you can set up and customize the Unzer payment method for use during the checkout process. This allows you to offer a seamless and secure payment option for your customers.",
       "paymentMethodTitle": "Payment Methods",
       "paymentMethodDescription": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
-      "settings" : "Payment page settings",
-      "configurationSaved" : "Configuration is saved successfully",
+      "settings": "Payment page settings",
+      "configurationSaved": "Configuration is saved successfully",
       "enabled": "Payment method %s is enabled!",
       "disabled": "Payment method %s is disabled!"
     },
@@ -259,6 +259,7 @@
     "passwordSpecial": "Password must contain at least one special character.",
     "passwordConfirm": "Passwords do not match.",
     "minGreaterThanMax": "The min order value is greater than max order value.",
-    "invalidColorFormat" : "Invalid color format."
+    "invalidColorFormat": "Invalid color format.",
+    "invalidUrl": "Invalid URL. Please enter a valid URL in the format: http://example.com or https://example.com, optionally followed by a path, query parameters, or fragment"
   }
 }
