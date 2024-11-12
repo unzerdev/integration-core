@@ -18,11 +18,13 @@
 
   .unzer-dropdown-button {
     width: 100%;
-    padding: 0px 24px 0px 8px;
+    padding: 0px 24px 5px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-radius: 8px;
+    min-height: 48px;
+    height: auto;
     border: 1px solid $adl-color--grey-20;
     background-color: $adl-color--white;
 
@@ -31,7 +33,6 @@
       display: flex;
       flex-direction: column;
       gap: 3px;
-
       .unzer-dropdown-title {
         color: $unzer-color-grey;
         font-size: 14px;
@@ -57,7 +58,9 @@
       color: $adl-color--unzer-black;
       display: flex;
       gap: 10px;
-      max-width: 150px;
+      max-width: 550px;
+      flex-wrap: wrap;
+
 
       svg {
         width: 26px;
@@ -76,8 +79,9 @@
         padding-left: 5px;
         padding-right: 5px;
         white-space: nowrap;
-        width: 100%;
         font-size: 12px;
+        max-width: 150px;
+        width: auto;
         justify-content: space-between;
       }
     }
