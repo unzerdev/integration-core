@@ -103,6 +103,7 @@
         Unzer.components.PageHeading.create({
           title: 'credentials.title',
           description: 'credentials.description',
+          backIcon: true,
           button: Unzer.components.Button.createList([
             {
               label: 'credentials.disconnect',
