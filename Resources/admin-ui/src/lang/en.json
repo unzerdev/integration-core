@@ -60,7 +60,7 @@
   "credentials": {
     "title": "Credentials",
     "notificationsDescription": "You can find registrated webhook for your store here.",
-    "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
+    "description": "Here you can change the environment, update the credentials, or re-register the webhooks.",
     "saveChanges": "Save changes",
     "disconnect": "Disconnect",
     "notifications": "Notifications",
@@ -109,7 +109,7 @@
     "invalidUrl": "Image URL is not valid.",
     "heading": {
       "title": "Payment Page Design Settings",
-      "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
+      "description": "Here you can style your payment page.",
       "saveLabel": "Save changes",
       "previewLabel": "Preview"
     },
