@@ -3,7 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Interface PaymentPageProcessor
