@@ -6,7 +6,6 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
@@ -19,7 +18,8 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHisto
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageService
@@ -87,32 +87,27 @@ class PaymentPageService
             $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
         }
 
-        if ($paymentMethodSettings->getBookingMethod()->equal(BookingMethod::authorize())) {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageAuthorize(
-                $this->paymentPageFactory->create($context),
-                $customer,
-                $this->basketFactory->create($context),
-                $this->metadataProvider->get($context)
-            );
-        } else {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageCharge(
-                $this->paymentPageFactory->create($context),
-                $customer,
-                $this->basketFactory->create($context),
-                $this->metadataProvider->get($context)
-            );
-        }
+        $basket = $this->basketFactory->create($context);
+        $metaData = $this->metadataProvider->get($context);
+
+        $resources = new Resources($customer->getId(), $basket->getId(), $metaData->getId());
+
+        $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage(
+            $this->paymentPageFactory->create($context, $paymentMethodSettings->getBookingMethod()->getBookingMethod(),
+                $resources
+            ),
+        );
 
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
                 $context->getPaymentMethodType(),
-                $payPageResponse->getPaymentId(),
+                $payPageResponse->getId(),
                 $context->getOrderId(),
                 $context->getAmount()->getCurrency()->getIsoCode()
             );
 
         $transactionHistory->setType($context->getPaymentMethodType());
-        $transactionHistory->setPaymentId($payPageResponse->getPaymentId());
+        $transactionHistory->setPaymentId($payPageResponse->getId());
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         return $payPageResponse;

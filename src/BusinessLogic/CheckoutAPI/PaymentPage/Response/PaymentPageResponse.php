@@ -3,7 +3,7 @@
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageResponse
@@ -16,6 +16,7 @@ class PaymentPageResponse extends Response
 
     /**
      * PaymentPageResponse constructor.
+     *
      * @param Paypage $payPage
      */
     public function __construct(Paypage $payPage)
