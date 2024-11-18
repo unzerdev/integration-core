@@ -53,8 +53,8 @@ class PaymentPageSettingsGetResponse extends Response
     private function transformPaymentPageSettings(): array
     {
         return [
-            'shopName' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopNames()),
-            'shopTagline' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopTaglines()),
+            'shopName' => $this->paymentPageSettings->getShopNames()->toArray(),
+            'shopTagline' => $this->paymentPageSettings->getShopTaglines()->toArray(),
             'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),

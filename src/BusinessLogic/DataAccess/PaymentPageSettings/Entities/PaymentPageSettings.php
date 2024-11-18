@@ -78,8 +78,8 @@ class PaymentPageSettings extends Entity
         $data = parent::toArray();
         $data['storeId'] = $this->storeId;
         $data['paymentPageSettings'] = [
-            'shopNames' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopNames()),
-            'shopTaglines' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopTaglines()),
+            'shopNames' => $this->paymentPageSettings->getShopNames()->toArray(),
+            'shopTaglines' => $this->paymentPageSettings->getShopTaglines()->toArray(),
             'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),

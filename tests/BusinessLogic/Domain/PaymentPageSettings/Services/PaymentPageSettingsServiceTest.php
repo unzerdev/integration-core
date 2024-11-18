@@ -149,7 +149,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         );
 
         // act
-        $result = StoreContext::doWithStore('1', [$this->service, 'savePaymentPageSettings'], [$settings]);
+        StoreContext::doWithStore('1', [$this->service, 'savePaymentPageSettings'], [$settings]);
 
         // assert
         $savedEntity = $this->repository->select();
@@ -165,7 +165,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null, new \SplFileInfo('file')),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );

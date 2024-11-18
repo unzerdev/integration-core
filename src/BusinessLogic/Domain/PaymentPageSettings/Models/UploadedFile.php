@@ -64,7 +64,7 @@ class UploadedFile
     /**
      * @return bool
      */
-    public function isFileInfo(): bool
+    public function hasFileInfo(): bool
     {
         return $this->fileInfo !== null;
     }

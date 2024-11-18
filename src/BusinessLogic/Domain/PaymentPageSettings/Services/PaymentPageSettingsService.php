@@ -56,7 +56,7 @@ class PaymentPageSettingsService
      */
     public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
-        if ($paymentPageSettings->getFile()->isFileInfo()) {
+        if ($paymentPageSettings->getFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage($paymentPageSettings->getFile()->getFileInfo());
             $paymentPageSettings->getFile()->setUrl($url);
         }
@@ -85,7 +85,7 @@ class PaymentPageSettingsService
     {
         $unzerApi = $this->unzerFactory->makeUnzerAPI();
 
-        if ($paymentPageSettings->getFile()->isFileInfo()) {
+        if ($paymentPageSettings->getFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getFile()->getFileInfo(),
                 self::LOGO_IMAGE_PREVIEW_NAME

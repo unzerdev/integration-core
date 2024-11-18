@@ -292,8 +292,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     private function expectedToArrayResponse(?PaymentPageSettingsModel $paymentPageSettings): array
     {
         return [
-            'shopName' => TranslationCollection::translationsToArray($paymentPageSettings->getShopNames()),
-            'shopTagline' => TranslationCollection::translationsToArray($paymentPageSettings->getShopTaglines()),
+            'shopName' => $paymentPageSettings->getShopNames()->toArray(),
+            'shopTagline' => $paymentPageSettings->getShopTaglines()->toArray(),
             'logoImageUrl' => $paymentPageSettings->getFile()->getUrl(),
             'headerBackgroundColor' => $paymentPageSettings->getHeaderBackgroundColor(),
             'headerFontColor' => $paymentPageSettings->getHeaderFontColor(),
