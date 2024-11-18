@@ -69,8 +69,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
+            new UploadedFile(null),
             new TranslationCollection(new Translation('default',"shop")),
-            new TranslationCollection(new Translation('default',"description")),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -92,8 +92,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
-            new TranslationCollection(new Translation('default',"shop")),
-            new TranslationCollection(new Translation('default',"description")),
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('default',"shop"))
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -117,7 +117,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
-            new TranslationCollection(new Translation('default',"shop")),
+            new UploadedFile('https://www.test.com/'),
             new TranslationCollection(new Translation('default',"description")),
         );
 
@@ -138,8 +138,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -148,8 +148,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop']]),
-            new TranslationCollection(new Translation('default',"description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -173,8 +173,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -184,8 +184,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -211,8 +211,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -250,8 +250,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('en_us',"description"))
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();

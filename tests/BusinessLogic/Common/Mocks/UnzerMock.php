@@ -269,4 +269,15 @@ class UnzerMock extends Unzer
     {
         $this->payment = $payment;
     }
+
+    /**
+     * @param \UnzerSDK\Resources\V2\Paypage $paypage
+     *
+     * @return \UnzerSDK\Resources\V2\Paypage
+     */
+    public function createPaypage(\UnzerSDK\Resources\V2\Paypage $paypage): \UnzerSDK\Resources\V2\Paypage
+    {
+        $paypage->setId($this->payPageData['id']);
+        return $paypage;
+    }
 }

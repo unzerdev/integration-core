@@ -3,7 +3,8 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Style;
 
 /**
  * Class PaymentPageSettings
@@ -12,50 +13,78 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaymentPageSettings
 {
+
+    const EMBEDDED_PAYPAGE_TYPE = "embedded";
+
     /**
      * @var TranslationCollection $shopNames
      */
     private TranslationCollection $shopNames;
 
     /**
-     * @var TranslationCollection $shopTaglines
+     * @var null|string $headerColor
      */
-    private TranslationCollection $shopTaglines;
+    private ?string $headerColor;
 
     /**
-     * @var ?string $headerBackgroundColor
+     * @var null|string $brandColor
      */
-    private ?string $headerBackgroundColor;
+    private ?string $brandColor;
 
     /**
-     * @var ?string $headerFontColor
+     * @var null|string $textColor
      */
-    private ?string $headerFontColor;
+    private ?string $textColor;
 
     /**
-     * @var ?string $shopNameBackgroundColor
+     * @var null|string $linkColor
      */
-    private ?string $shopNameBackgroundColor;
+    private ?string $linkColor;
 
     /**
-     * @var ?string $shopNameFontColor
+     * @var null|string $backgroundColor
      */
-    private ?string $shopNameFontColor;
+    private ?string $backgroundColor;
 
     /**
-     * @var ?string $shopTaglineBackgroundColor
+     * @var null|string $footerColor
      */
-    private ?string $shopTaglineBackgroundColor;
-
-    /**
-     * @var ?string $shopTaglineFontColor
-     */
-    private ?string $shopTaglineFontColor;
+    private ?string $footerColor;
 
     /**
      * @var UploadedFile
      */
-    private UploadedFile $file;
+    private UploadedFile $logoFile;
+
+    /**
+     * @var UploadedFile
+     */
+    private UploadedFile $backgroundFile;
+
+    /**
+     * @var null|string $font
+     */
+    private ?string $font;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $shadows = false;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $hideUnzerLogo = false;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $hideBasket = false;
+
+    /**
+     * @var null|string
+     */
+    private ?string $cornerRadius;
 
     /**
      * @var Paypage
@@ -63,36 +92,51 @@ class PaymentPageSettings
     private Paypage $paypage;
 
     /**
+     * @param UploadedFile $logoFile
+     * @param UploadedFile $backgroundFile
      * @param TranslationCollection $shopNames
-     * @param TranslationCollection $shopTaglines
-     * @param UploadedFile $file
-     * @param string|null $headerBackgroundColor
-     * @param string|null $headerFontColor
-     * @param string|null $shopNameBackgroundColor
-     * @param string|null $shopNameFontColor
-     * @param string|null $shopTaglineBackgroundColor
-     * @param string|null $shopTaglineFontColor
+     * @param string|null $headerColor
+     * @param string|null $brandColor
+     * @param string|null $textColor
+     * @param string|null $linkColor
+     * @param string|null $backgroundColor
+     * @param string|null $footerColor
+     * @param string|null $font
+     * @param bool|null $shadows
+     * @param bool|null $hideUnzerLogo
+     * @param bool|null $hideBasket
+     * @param string|null $cornerRadius
      */
     public function __construct(
-        UploadedFile $file,
+        UploadedFile $logoFile,
+        UploadedFile $backgroundFile,
         TranslationCollection $shopNames,
-        TranslationCollection $shopTaglines,
-        ?string $headerBackgroundColor = null,
-        ?string $headerFontColor = null,
-        ?string $shopNameBackgroundColor = null,
-        ?string $shopNameFontColor = null,
-        ?string $shopTaglineBackgroundColor = null,
-        ?string $shopTaglineFontColor = null
+        ?string $headerColor = null,
+        ?string $brandColor = null,
+        ?string $textColor = null,
+        ?string $linkColor = null,
+        ?string $backgroundColor = null,
+        ?string $footerColor = null,
+        ?string $font = null,
+        ?bool $shadows = false,
+        ?bool $hideUnzerLogo = false,
+        ?bool $hideBasket = false,
+        ?string $cornerRadius = null
     ) {
         $this->shopNames = $shopNames;
-        $this->shopTaglines = $shopTaglines;
-        $this->file = $file;
-        $this->headerBackgroundColor = $headerBackgroundColor;
-        $this->headerFontColor = $headerFontColor;
-        $this->shopNameBackgroundColor = $shopNameBackgroundColor;
-        $this->shopNameFontColor = $shopNameFontColor;
-        $this->shopTaglineBackgroundColor = $shopTaglineBackgroundColor;
-        $this->shopTaglineFontColor = $shopTaglineFontColor;
+        $this->logoFile = $logoFile;
+        $this->backgroundFile = $backgroundFile;
+        $this->headerColor = $headerColor;
+        $this->brandColor = $brandColor;
+        $this->textColor = $textColor;
+        $this->linkColor = $linkColor;
+        $this->backgroundColor = $backgroundColor;
+        $this->footerColor = $footerColor;
+        $this->font = $font;
+        $this->shadows = $shadows;
+        $this->hideUnzerLogo = $hideUnzerLogo;
+        $this->hideBasket = $hideBasket;
+        $this->cornerRadius = $cornerRadius;
     }
 
     /**
@@ -104,79 +148,35 @@ class PaymentPageSettings
     {
         $this->paypage = $paypage;
 
+        $this->paypage->setType(self::EMBEDDED_PAYPAGE_TYPE);
+
         $shopName = $this->shopNames->getTranslationMessage($locale);
-        $tagline = $this->shopTaglines->getTranslationMessage($locale);
 
         $this->paypage->setShopName($shopName);
-        $this->paypage->setTagline($tagline);
 
-        if ($this->getFile()->getUrl()) {
-            $this->paypage->setLogoImage($this->getFile()->getUrl());
+        $style = new Style();
+        $style
+            ->setHeaderColor($this->headerColor)
+            ->setBrandColor($this->brandColor)
+            ->setTextColor($this->textColor)
+            ->setLinkColor($this->linkColor)
+            ->setBackgroundColor($this->backgroundColor)
+            ->setFooterColor($this->footerColor)
+            ->setFont($this->font)
+            ->setShadows($this->shadows)
+            ->setHideUnzerLogo($this->hideUnzerLogo)
+            ->setCornerRadius($this->cornerRadius)
+            ->setHideBasket($this->hideBasket)
+            ->setLogoImage($this->logoFile->getUrl())
+            ->setBackgroundImage($this->backgroundFile->getUrl());
+
+        if(!$this->backgroundFile->getUrl()) {
+            $style->setBackgroundImage($this->backgroundColor);
         }
 
-        $css = $this->getCss();
-
-        if (!empty($css)) {
-            $this->paypage->setCss($css);
-        }
+        $this->paypage->setStyle($style);
 
         return $this->paypage;
-    }
-
-    /**
-     * @return UploadedFile
-     */
-    public function getFile(): UploadedFile
-    {
-        return $this->file;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getHeaderBackgroundColor(): ?string
-    {
-        return $this->headerBackgroundColor;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getHeaderFontColor(): ?string
-    {
-        return $this->headerFontColor;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getShopNameBackgroundColor(): ?string
-    {
-        return $this->shopNameBackgroundColor;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getShopNameFontColor(): ?string
-    {
-        return $this->shopNameFontColor;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getShopTaglineFontColor(): ?string
-    {
-        return $this->shopTaglineFontColor;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getShopTaglineBackgroundColor(): ?string
-    {
-        return $this->shopTaglineBackgroundColor;
     }
 
     /**
@@ -188,35 +188,114 @@ class PaymentPageSettings
     }
 
     /**
-     * @return TranslationCollection
+     * @return string|null
      */
-    public function getShopTaglines(): TranslationCollection
+    public function getHeaderColor(): ?string
     {
-        return $this->shopTaglines;
+        return $this->headerColor;
     }
 
     /**
-     * @return array
+     * @return string|null
      */
-    private function getCss(): array
+    public function getBrandColor(): ?string
     {
-        return array_filter([
-            "shopDescription" => $this->getHeaderFontColor()
-                ? "color:" . $this->getHeaderFontColor()
-                : null,
-            "header" => $this->getHeaderBackgroundColor()
-                ? "background-color:" . $this->getHeaderBackgroundColor()
-                : null,
-            "shopName" => ($this->getShopNameFontColor()
-                && $this->getShopNameBackgroundColor())
-                ? "color:" . $this->getShopNameFontColor()
-                . "; background-color:" . $this->getShopNameBackgroundColor()
-                : null,
-            "tagline" => ($this->getShopTaglineFontColor()
-                && $this->getShopTaglineBackgroundColor())
-                ? "color:" . $this->getShopTaglineFontColor()
-                . "; background-color:" . $this->getShopTaglineBackgroundColor()
-                : null,
-        ]);
+        return $this->brandColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getLinkColor(): ?string
+    {
+        return $this->linkColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBackgroundColor(): ?string
+    {
+        return $this->backgroundColor;
+    }
+
+    /**
+     * @return UploadedFile
+     */
+    public function getLogoFile(): UploadedFile
+    {
+        return $this->logoFile;
+    }
+
+    /**
+     * @return UploadedFile
+     */
+    public function getBackgroundFile(): UploadedFile
+    {
+        return $this->backgroundFile;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFont(): ?string
+    {
+        return $this->font;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getShadows(): ?bool
+    {
+        return $this->shadows;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getHideUnzerLogo(): ?bool
+    {
+        return $this->hideUnzerLogo;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getHideBasket(): ?bool
+    {
+        return $this->hideBasket;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCornerRadius(): ?string
+    {
+        return $this->cornerRadius;
+    }
+
+    /**
+     * @return Paypage
+     */
+    public function getPaypage(): Paypage
+    {
+        return $this->paypage;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFooterColor(): ?string
+    {
+        return $this->footerColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTextColor(): ?string
+    {
+        return $this->textColor;
     }
 }

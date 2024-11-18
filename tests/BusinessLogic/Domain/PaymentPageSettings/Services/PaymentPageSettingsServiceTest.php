@@ -5,9 +5,9 @@ namespace BusinessLogic\Domain\PaymentPageSettings\Services;
 use Exception;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -96,8 +96,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']])
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -119,8 +119,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']])
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -144,8 +144,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         // act
@@ -165,9 +165,9 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://www.test.com/', new \SplFileInfo('path')),
+            new UploadedFile(null, new \SplFileInfo('path')),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         $uploadedPath = 'https://www.test.com/';
@@ -176,8 +176,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://www.test.com/'),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         // act
@@ -189,6 +189,25 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     }
 
     /**
+     * @return void
+     * @throws InvalidImageUrlException
+     *
+     * @throws \Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException
+     */
+    public function testInvalidFileUrl(): void
+    {
+        $this->expectException(InvalidImageUrlException::class);
+        $this->expectExceptionMessage('Url is not valid');
+
+        // arrange
+        $settings = new PaymentPageSettingsModel(
+            new UploadedFile('www.test.com'),
+            new UploadedFile(null, new \SplFileInfo('path')),
+            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+        );
+    }
+
+    /**
      * @throws Exception
      */
     public function testSaveSettingsAlreadyExists(): void
@@ -196,8 +215,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null, new \SplFileInfo('path')),
+            new UploadedFile(null, new \SplFileInfo('path2')),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFFF',
             '#666666',
         );
@@ -208,7 +227,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $this->repository->save($settingsEntity);
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
@@ -232,8 +251,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -243,8 +262,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -269,13 +288,15 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,null),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]));
+        );
 
 
         $id = "123";
-        $url = "url";
-        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+        $this->unzerService->getMockUnzer()->setPayPageData([
+            "id" => $id
+        ]);
 
         //act
         $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
@@ -293,7 +314,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile("https://www.test.com/",null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
@@ -323,8 +344,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
+            new UploadedFile(null, new \SplFileInfo('path2')),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -356,7 +377,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         //arrange
         $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, new \SplFileInfo('path2')),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
             '#FFFFFF',
             '#666666',

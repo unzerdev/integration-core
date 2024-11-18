@@ -21,84 +21,133 @@ class PaymentPageSettingsRequest
     private TranslationCollection $shopNames;
 
     /**
-     * @var TranslationCollection $shopTaglines
-     */
-    private TranslationCollection $shopTaglines;
-
-    /**
      * @var null|string $logoImageUrl
      */
     private ?string $logoImageUrl;
 
     /**
-     * @var null|string $headerBackgroundColor
+     * @var SplFileInfo|null
      */
-    private ?string $headerBackgroundColor;
+    private ?SplFileInfo $logoFile;
 
     /**
-     * @var null|string $headerFontColor
+     * @var null|string $backgroundImageUrl
      */
-    private ?string $headerFontColor;
-
-    /**
-     * @var null|string $shopNameBackgroundColor
-     */
-    private ?string $shopNameBackgroundColor;
-
-    /**
-     * @var null|string $shopNameFontColor
-     */
-    private ?string $shopNameFontColor;
-
-    /**
-     * @var null|string $shopTaglineBackgroundColor
-     */
-    private ?string $shopTaglineBackgroundColor;
-
-    /**
-     * @var null|string $shopTaglineFontColor
-     */
-    private ?string $shopTaglineFontColor;
+    private ?string $backgroundImageUrl;
 
     /**
      * @var SplFileInfo|null
      */
-    private ?SplFileInfo $file;
+    private ?SplFileInfo $backgroundFile;
+
+    /**
+     * @var null|string $headerColor
+     */
+    private ?string $headerColor;
+
+    /**
+     * @var null|string $brandColor
+     */
+    private ?string $brandColor;
+
+    /**
+     * @var null|string $textColor
+     */
+    private ?string $textColor;
+
+    /**
+     * @var null|string $linkColor
+     */
+    private ?string $linkColor;
+
+    /**
+     * @var null|string $backgroundColor
+     */
+    private ?string $backgroundColor;
+
+    /**
+     * @var null|string $footerColor
+     */
+    private ?string $footerColor;
+
+    /**
+     * @var null|string $font
+     */
+    private ?string $font;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $shadows = false;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $hideUnzerLogo = false;
+
+    /**
+     * @var null|bool
+     */
+    private ?bool $hideBasket = false;
+
+    /**
+     * @var null|string
+     */
+    private ?string $cornerRadius;
+
 
     /**
      * @param TranslationCollection $shopNames
-     * @param TranslationCollection $shopTaglines
      * @param string|null $logoImageUrl
-     * @param SplFileInfo|null $file
-     * @param string|null $headerBackgroundColor
-     * @param string|null $headerFontColor
-     * @param string|null $shopNameBackgroundColor
-     * @param string|null $shopNameFontColor
-     * @param string|null $shopTaglineBackgroundColor
-     * @param string|null $shopTaglineFontColor
+     * @param SplFileInfo|null $logoFile
+     * @param string|null $backgroundImageUrl
+     * @param SplFileInfo|null $backgroundFile
+     * @param string|null $headerColor
+     * @param string|null $brandColor
+     * @param string|null $textColor
+     * @param string|null $linkColor
+     * @param string|null $backgroundColor
+     * @param string|null $footerColor
+     * @param string|null $font
+     * @param bool|null $shadows
+     * @param bool|null $hideUnzerLogo
+     * @param bool|null $hideBasket
+     * @param string|null $cornerRadius
      */
     public function __construct(
         TranslationCollection $shopNames,
-        TranslationCollection $shopTaglines,
         ?string $logoImageUrl = null,
-        ?SplFileInfo $file = null,
-        ?string $headerBackgroundColor = null,
-        ?string $headerFontColor = null,
-        ?string $shopNameBackgroundColor = null,
-        ?string $shopNameFontColor = null,
-        ?string $shopTaglineBackgroundColor = null,
-        ?string $shopTaglineFontColor = null
+        ?SplFileInfo $logoFile = null,
+        ?string $backgroundImageUrl = null,
+        ?SplFileInfo $backgroundFile = null,
+        ?string $headerColor = null,
+        ?string $brandColor = null,
+        ?string $textColor = null,
+        ?string $linkColor = null,
+        ?string $backgroundColor = null,
+        ?string $footerColor = null,
+        ?string $font = null,
+        ?bool $shadows = false,
+        ?bool $hideUnzerLogo = false,
+        ?bool $hideBasket = false,
+        ?string $cornerRadius = null
     ) {
         $this->shopNames = $shopNames;
-        $this->shopTaglines = $shopTaglines;
         $this->logoImageUrl = $logoImageUrl;
-        $this->file = $file;
-        $this->headerBackgroundColor = $headerBackgroundColor;
-        $this->headerFontColor = $headerFontColor;
-        $this->shopNameBackgroundColor = $shopNameBackgroundColor;
-        $this->shopNameFontColor = $shopNameFontColor;
-        $this->shopTaglineBackgroundColor = $shopTaglineBackgroundColor;
-        $this->shopTaglineFontColor = $shopTaglineFontColor;
+        $this->logoFile = $logoFile;
+        $this->backgroundImageUrl = $backgroundImageUrl;
+        $this->backgroundFile = $backgroundFile;
+        $this->headerColor = $headerColor;
+        $this->brandColor = $brandColor;
+        $this->textColor = $textColor;
+        $this->linkColor = $linkColor;
+        $this->backgroundColor = $backgroundColor;
+        $this->footerColor = $footerColor;
+        $this->font = $font;
+        $this->shadows = $shadows;
+        $this->hideUnzerLogo = $hideUnzerLogo;
+        $this->hideBasket = $hideBasket;
+        $this->cornerRadius = $cornerRadius;
     }
 
     /**
@@ -112,15 +161,20 @@ class PaymentPageSettingsRequest
     public function transformToDomainModel(): object
     {
         return new PaymentPageSettings(
-            new UploadedFile($this->logoImageUrl, $this->file),
+            new UploadedFile($this->logoImageUrl, $this->logoFile),
+            new UploadedFile($this->backgroundImageUrl, $this->backgroundFile),
             $this->shopNames,
-            $this->shopTaglines,
-            $this->headerBackgroundColor,
-            $this->headerFontColor,
-            $this->shopNameBackgroundColor,
-            $this->shopNameFontColor,
-            $this->shopTaglineBackgroundColor,
-            $this->shopTaglineFontColor,
+            $this->headerColor,
+            $this->brandColor,
+            $this->textColor,
+            $this->linkColor,
+            $this->backgroundColor,
+            $this->footerColor,
+            $this->font,
+            $this->shadows,
+            $this->hideUnzerLogo,
+            $this->hideBasket,
+            $this->cornerRadius
         );
     }
 
