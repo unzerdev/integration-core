@@ -216,7 +216,7 @@
     "applepay": "Apple Pay is a mobile wallet solution available to all users of Apple devices. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "bancontact": "Bancontact is the most popular online payment method in Belgium, with over 15 million cards in circulation. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "card": "Cards can be differentiated in credit and debit cards. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
-    "eps": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "EPS": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "giropay": "Giropay is one of the most popular online payment methods available in Germany. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "ideal": "iDEAL is one of the most popular online payment methods in the Netherlands. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "klarna": "Klarna is a payment method that provides an easy to use pay later payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
