@@ -3,7 +3,6 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 
@@ -46,6 +45,7 @@ class PaymentMethodServiceMock extends PaymentMethodService
         $result = array_filter($this->paymentMethods, function (PaymentMethodConfig $paymentMethod) use ($type): bool {
             return $paymentMethod->getType() === $type;
         });
+
         return !empty($result) ? current($result) : null;
     }
 

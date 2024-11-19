@@ -34,13 +34,13 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
      */
     public function process(Paypage $payPageRequest, PaymentPageCreateContext $context): void
     {
-        $this->excludePaymentTypes(
-            $payPageRequest->getPaymentMethodsConfigs(),
+        $paymentMethodConfig = $this->setExcludedMethodConfigs(
             $this->getExcludePaymentTypesList(
                 $this->unzerFactory->makeUnzerAPI()->fetchKeypair()->getAvailablePaymentTypes(),
                 $context->getPaymentMethodType()
-            )
-        );
+            ));
+
+        $payPageRequest->setPaymentMethodsConfigs($paymentMethodConfig);
     }
 
     private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
@@ -56,19 +56,17 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
     }
 
     /**
-     * @param PaymentMethodsConfigs $paymentMethodsConfigs
-     * @param array $excludedPaymentMethods
+     * @param array $availablePaymentTypes
      *
-     * @return void
+     * @return PaymentMethodsConfigs
      */
-    private function excludePaymentTypes(
-        PaymentMethodsConfigs $paymentMethodsConfigs,
-        array $excludedPaymentMethods
-    ): void {
-        foreach ($paymentMethodsConfigs as $method => $config) {
-            if (in_array($method, $excludedPaymentMethods)) {
-                $config->setEnabled(false);
-            }
+    private function setExcludedMethodConfigs(array $availablePaymentTypes) : PaymentMethodsConfigs
+    {
+        $paymentMethodConfigs = new PaymentMethodsConfigs();
+        foreach ($availablePaymentTypes as $method) {
+            $paymentMethodConfigs->addMethodConfig($method, new PaymentMethodConfig(false));
         }
+
+        return $paymentMethodConfigs;
     }
 }

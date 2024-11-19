@@ -15,7 +15,6 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
@@ -37,9 +36,14 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Constants\PaymentState;
+use UnzerSDK\Constants\TransactionTypes;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig as EmbeddedPaymentMethodConfig;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\PaymentTypes\Card;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
@@ -47,6 +51,7 @@ use UnzerSDK\Resources\TransactionTypes\Charge;
 use UnzerSDK\Resources\TransactionTypes\Chargeback;
 use UnzerSDK\Resources\TransactionTypes\Payout;
 use UnzerSDK\Resources\TransactionTypes\Shipment;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class CheckoutPaymentPageAPITest
@@ -117,10 +122,29 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
     {
         // Arrange
         $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
-        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), 'test.my.shop.com');
+
+
+        $paymentMethodsConfigs = new PaymentMethodsConfigs();
+        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('card', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('test', new EmbeddedPaymentMethodConfig(false));
+
+
+        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
-            ->setExcludeTypes(['googlepay', 'card', 'test'])
-            ->setOrderId('test-order-123');
+            ->setOrderId('test-order-123')
+            ->setPaymentMethodsConfigs($paymentMethodsConfigs);
+
+        $urls = new Urls();
+
+        $urls->setReturnSuccess('test.my.shop.com')
+            ->setReturnFailure('test.my.shop.com')
+            ->setReturnPending('test.my.shop.com')
+            ->setReturnCancel('test.my.shop.com');
+
+        $expectedPayPageRequest->setUrls($urls);
+
+        $expectedPayPageRequest->setResources(new Resources());
 
         $this->unzerFactory->getMockUnzer()->setPayPageData(
             ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
@@ -137,14 +161,14 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $response = CheckoutAPI::get()->paymentPage('1')->create($request);
 
         // Assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('initPayPageAuthorize');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals($expectedPayPageRequest, $methodCallHistory[0]['paypage']);
         self::assertTrue($response->isSuccessful());
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::EPS, 'test-payment-123', 'test-order-123', 'EUR')
+            new TransactionHistory(PaymentMethodTypes::EPS, null, 'test-order-123', 'EUR')
         );
     }
 
@@ -152,10 +176,29 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
     {
         // Arrange
         $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
-        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), 'test.my.shop.com');
+
+
+        $paymentMethodsConfigs = new PaymentMethodsConfigs();
+        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('EPS', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('test', new EmbeddedPaymentMethodConfig(false));
+
+
+        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::CHARGE);
         $expectedPayPageRequest
-            ->setExcludeTypes(['EPS', 'googlepay', 'test'])
-            ->setOrderId('test-order-123');
+            ->setOrderId('test-order-123')
+            ->setPaymentMethodsConfigs($paymentMethodsConfigs);
+
+        $urls = new Urls();
+
+        $urls->setReturnSuccess('test.my.shop.com')
+            ->setReturnFailure('test.my.shop.com')
+            ->setReturnPending('test.my.shop.com')
+            ->setReturnCancel('test.my.shop.com');
+
+        $expectedPayPageRequest->setUrls($urls);
+
+        $expectedPayPageRequest->setResources(new Resources());
 
         $this->unzerFactory->getMockUnzer()->setPayPageData(
             ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
@@ -172,14 +215,14 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $response = CheckoutAPI::get()->paymentPage('1')->create($request);
 
         // Assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('initPayPageCharge');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals($expectedPayPageRequest, $methodCallHistory[0]['paypage']);
         self::assertTrue($response->isSuccessful());
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-payment-123', 'test-order-123', 'EUR')
+            new TransactionHistory(PaymentMethodTypes::CARDS, null, 'test-order-123', 'EUR')
         );
     }
 

@@ -6,8 +6,11 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRe
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
+use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
  * Class CheckoutPaymentPageController
@@ -27,6 +30,11 @@ class CheckoutPaymentPageController
         $this->paymentPageService = $paymentPageService;
     }
 
+    /**
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     * @throws PaymentConfigNotFoundException
+     */
     public function create(PaymentPageCreateRequest $request): PaymentPageResponse
     {
         return new PaymentPageResponse(

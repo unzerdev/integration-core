@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**
@@ -48,10 +49,13 @@ class PaymentPageFactory
         ))->setOrderId($context->getOrderId())
         ->setResources($resources);
 
-        $result->getUrls()->setReturnSuccess($url)
+        $urls = new Urls();
+        $urls->setReturnSuccess($url)
         ->setReturnFailure($url)
         ->setReturnPending($url)
         ->setReturnCancel($url);
+
+        $result->setUrls($urls);
 
         return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
     }
