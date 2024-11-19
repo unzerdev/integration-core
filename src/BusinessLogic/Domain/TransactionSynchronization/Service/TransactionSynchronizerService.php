@@ -25,6 +25,14 @@ use UnzerSDK\Resources\Payment;
  */
 class TransactionSynchronizerService
 {
+    /** @var array */
+    private const STATE_TO_STATUS_MAP = [
+        PaymentState::STATE_CANCELED => PaymentStatus::CANCELLED,
+        PaymentState::STATE_COMPLETED => PaymentStatus::PAID,
+        PaymentState::STATE_PENDING => PaymentStatus::UNPAID,
+        PaymentState::STATE_CHARGEBACK => PaymentStatus::CHARGEBACK,
+    ];
+
     /**
      * @var UnzerFactory $unzerFactory
      */
@@ -121,23 +129,12 @@ class TransactionSynchronizerService
     public function handleOrderStatusChange(TransactionHistory $transactionHistory): void
     {
         $statusMap = $this->paymentStatusMapService->getPaymentStatusMap();
-
+        $paymentStateId = $transactionHistory->getPaymentState()->getId();
         $newStatus = '';
 
-        if ($transactionHistory->getPaymentState()->getId() === PaymentState::STATE_CANCELED) {
-            $newStatus = $statusMap[PaymentStatus::CANCELLED] ?? '';
-        }
-
-        if ($transactionHistory->getPaymentState()->getId() === PaymentState::STATE_COMPLETED) {
-            $newStatus = $statusMap[PaymentStatus::PAID] ?? '';
-        }
-
-        if ($transactionHistory->getPaymentState()->getId() === PaymentState::STATE_PENDING) {
-            $newStatus = $statusMap[PaymentStatus::UNPAID] ?? '';
-        }
-
-        if ($transactionHistory->getPaymentState()->getId() === PaymentState::STATE_CHARGEBACK) {
-            $newStatus = $statusMap[PaymentStatus::CHARGEBACK] ?? '';
+        if (array_key_exists($paymentStateId, self::STATE_TO_STATUS_MAP)) {
+            $mappedStatus = self::STATE_TO_STATUS_MAP[$paymentStateId];
+            $newStatus = $statusMap[$mappedStatus] ?? '';
         }
 
         if ($transactionHistory->getCancelledAmount()->getValue() === $transactionHistory->getChargedAmount()->getValue()

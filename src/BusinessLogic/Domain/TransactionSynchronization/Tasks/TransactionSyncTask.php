@@ -100,17 +100,18 @@ class TransactionSyncTask extends Task
      * @return void
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidCurrencyCode
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      * @throws CurrencyMismatchException
      */
     protected function doExecute(): void
     {
-        $totalOrders = count($this->orderIds);
-        foreach ($this->orderIds as $index => $orderId) {
-            $this->getTransactionSynchronizerService()->synchronizeTransactions($orderId);
+        foreach ($this->orderIds as $orderId) {
+            try {
+                $this->getTransactionSynchronizerService()->synchronizeTransactions($orderId);
+            }catch (TransactionHistoryNotFoundException $exception) {
+            }
 
-            $this->reportProgress((($index + 1) / $totalOrders) * 100);
+            $this->reportAlive(true);
         }
 
         $this->reportProgress(100);
