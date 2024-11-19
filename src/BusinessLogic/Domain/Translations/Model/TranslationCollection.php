@@ -90,7 +90,7 @@ class TranslationCollection
         $result = [];
 
         foreach ($this->translations as $translation) {
-            $result[] = Translation::toArray($translation);
+            $result[] = $translation->toArray();
         }
 
         return $result;
@@ -139,15 +139,5 @@ class TranslationCollection
         }
 
         return $collection;
-    }
-
-    /**
-     * Retrieves all translations in the collection.
-     *
-     * @return Translation[]
-     */
-    public function getTranslations(): array
-    {
-        return $this->translations;
     }
 }
