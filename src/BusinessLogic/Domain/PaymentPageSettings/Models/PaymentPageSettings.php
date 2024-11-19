@@ -170,10 +170,6 @@ class PaymentPageSettings
             ->setLogoImage($this->logoFile->getUrl())
             ->setBackgroundImage($this->backgroundFile->getUrl());
 
-        if(!$this->backgroundFile->getUrl()) {
-            $style->setBackgroundImage($this->backgroundColor);
-        }
-
         $this->paypage->setStyle($style);
 
         return $this->paypage;

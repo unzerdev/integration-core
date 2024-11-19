@@ -44,6 +44,16 @@ class UnzerMock extends Unzer
      */
     private ?Payment $payment = null;
 
+    /**
+     * @var Basket|null
+     */
+    private ?Basket $basket = null;
+
+    /**
+     * @var Metadata|null
+     */
+    private ?Metadata $metadata = null;
+
     public function getMethodCallHistory($methodName)
     {
         return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
@@ -158,6 +168,20 @@ class UnzerMock extends Unzer
         $this->callHistory['createOrUpdateCustomer'][] = ['customer' => $customer];
 
         return $customer;
+    }
+
+    public function createBasket(Basket $basket): Basket
+    {
+        $this->callHistory['createBasket'][] = ['basket' => $this->basket];
+
+        return $basket;
+    }
+
+    public function createMetadata(Metadata $metadata): Metadata
+    {
+        $this->callHistory['createMetadata'][] = ['metadata' => $this->metadata];
+
+        return $metadata;
     }
 
     /**
@@ -277,7 +301,16 @@ class UnzerMock extends Unzer
      */
     public function createPaypage(\UnzerSDK\Resources\V2\Paypage $paypage): \UnzerSDK\Resources\V2\Paypage
     {
-        $paypage->setId($this->payPageData['id']);
-        return $paypage;
+        $this->callHistory['createPaypage'][] = ['paypage' => $paypage];
+
+        $mockPaypage = new \UnzerSDK\Resources\V2\Paypage(
+            $paypage->getAmount(),
+            $paypage->getCurrency(),
+            $paypage->getMode()
+        );
+        $mockPaypage->setId($this->payPageData['id'] ?? null);
+        $mockPaypage->setRedirectUrl($this->payPageData['redirectUrl']);
+
+        return $mockPaypage;
     }
 }

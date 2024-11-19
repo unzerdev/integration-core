@@ -295,7 +295,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $id = "123";
         $this->unzerService->getMockUnzer()->setPayPageData([
-            "id" => $id
+            "id" => $id,
+            "redirectUrl" => "url"
         ]);
 
         //act

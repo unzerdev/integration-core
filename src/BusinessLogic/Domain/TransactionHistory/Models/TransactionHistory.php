@@ -31,9 +31,9 @@ class TransactionHistory
     /**
      * Unzer payment ID.
      *
-     * @var string $paymentId
+     * @var ?string $paymentId
      */
-    private string $paymentId;
+    private ?string $paymentId;
 
     /**
      * Shop order ID.
@@ -81,7 +81,7 @@ class TransactionHistory
 
     /**
      * @param string $type
-     * @param string $paymentId
+     * @param string|null $paymentId
      * @param string $orderId
      * @param string $currency
      * @param PaymentState|null $paymentState
@@ -93,7 +93,7 @@ class TransactionHistory
      */
     public function __construct(
         string $type,
-        string $paymentId,
+        ?string $paymentId,
         string $orderId,
         string $currency,
         ?PaymentState $paymentState = null,
@@ -138,9 +138,9 @@ class TransactionHistory
     }
 
     /**
-     * @return string
+     * @return ?string
      */
-    public function getPaymentId(): string
+    public function getPaymentId(): ?string
     {
         return $this->paymentId;
     }
