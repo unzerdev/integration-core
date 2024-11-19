@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
@@ -72,25 +73,9 @@ class PaymentPageService
      */
     public function create(PaymentPageCreateContext $context): Paypage
     {
-        $paymentMethodSettings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
-        if (!$paymentMethodSettings || !$paymentMethodSettings->isEnabled()) {
-            throw new PaymentConfigNotFoundException(
-                new TranslatableLabel(
-                    "Enabled payment method config for type: {$context->getPaymentMethodType()} not found",
-                    'paymentMethod.configNotFound'
-                ),
-            );
-        }
+        $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
 
-        $customer = $this->customerFactory->create($context);
-        if ($customer !== null) {
-            $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
-        }
-
-        $basket = $this->basketFactory->create($context);
-        $metaData = $this->metadataProvider->get($context);
-
-        $resources = new Resources($customer->getId(), $basket->getId(), $metaData->getId());
+        $resources = $this->buildResources($context);
 
         $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage(
             $this->paymentPageFactory->create($context, $paymentMethodSettings->getBookingMethod()->getBookingMethod(),
@@ -98,19 +83,78 @@ class PaymentPageService
             ),
         );
 
+        $this->updateTransactionHistory($context);
+
+        return $payPageResponse;
+    }
+
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return void
+     */
+    private function updateTransactionHistory(PaymentPageCreateContext $context) : void
+    {
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
                 $context->getPaymentMethodType(),
-                $payPageResponse->getId(),
+                null,
                 $context->getOrderId(),
                 $context->getAmount()->getCurrency()->getIsoCode()
             );
 
         $transactionHistory->setType($context->getPaymentMethodType());
-        $transactionHistory->setPaymentId($payPageResponse->getId());
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+    }
 
-        return $payPageResponse;
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return PaymentMethodConfig|null
+     * @throws PaymentConfigNotFoundException
+     */
+    private function getEnabledPaymentMethodSettings(PaymentPageCreateContext $context): ?PaymentMethodConfig
+    {
+        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
+        if (!$settings || !$settings->isEnabled()) {
+            throw new PaymentConfigNotFoundException(
+                new TranslatableLabel(
+                    "Enabled payment method config for type: {$context->getPaymentMethodType()} not found",
+                    'paymentMethod.configNotFound'
+                ),
+            );
+        }
+        return $settings;
+    }
+
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return Resources
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    private function buildResources(PaymentPageCreateContext $context) : Resources
+    {
+        $customer = $this->customerFactory->create($context);
+        if ($customer !== null) {
+            $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+        }
+
+        $basket = $this->basketFactory->create($context);
+        if($basket !== null) {
+            $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
+        }
+
+        $metaData = $this->metadataProvider->get($context);
+        $metaData = $this->unzerFactory->makeUnzerAPI()->createMetadata($metaData);
+
+        return new Resources(
+            $customer !== null ? $customer->getId() : null,
+            $basket !== null ? $basket->getId() : null,
+            $metaData->getId()
+        );
     }
 
     /**
