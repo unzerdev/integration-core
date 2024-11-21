@@ -4,12 +4,10 @@ namespace Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Tasks;
 
 use Exception;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\Infrastructure\Serializer\Serializer;
 use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Infrastructure\Serializer\Interfaces\Serializable;
-use Unzer\Core\Infrastructure\TaskExecution\Exceptions\QueueStorageUnavailableException;
 use Unzer\Core\Infrastructure\TaskExecution\QueueService;
 use Unzer\Core\Infrastructure\TaskExecution\Task;
 
@@ -23,12 +21,6 @@ class TransactionSynchronizer extends Task
     /** @var int */
     private const TRANSACTIONS_COUNT_TO_SYNC = 100;
 
-    /**
-     * @var string[] $orderIds
-     */
-    private array $orderIds = [];
-
-
     /** @var string $storeId */
     private string $storeId;
 
@@ -38,7 +30,6 @@ class TransactionSynchronizer extends Task
     public function __construct(string $storeId)
     {
         $this->storeId = $storeId;
-        $this->orderIds = $this->getOrderIdsToSynchronize();
     }
 
     /**
@@ -90,12 +81,24 @@ class TransactionSynchronizer extends Task
     public function execute(): void
     {
         StoreContext::doWithStore($this->storeId, function () {
-            while (count($orderIdsToSynchronize = array_splice($this->orderIds, 0,
-                    self::TRANSACTIONS_COUNT_TO_SYNC)) > 0) {
+            $orderIDs = $this->getTransactionHistoryService()->getOrderIdsForSynchronization();
+
+            $totalOrders = count($orderIDs);
+            $offset = 0;
+
+            while ($offset < $totalOrders) {
+                $orderIdsToSynchronize = array_slice($orderIDs, $offset, self::TRANSACTIONS_COUNT_TO_SYNC);
+
+                if (empty($orderIdsToSynchronize)) {
+                    break;
+                }
+
                 $this->getQueueService()->enqueue(
-                    'transaction-sync-' . $this->storeId,
+                    'transaction-sync-' . $this->storeId . '-' . ($offset % 3),
                     new TransactionSyncTask($orderIdsToSynchronize)
                 );
+
+                $offset += self::TRANSACTIONS_COUNT_TO_SYNC;
             }
         });
 
@@ -110,19 +113,6 @@ class TransactionSynchronizer extends Task
     protected function getTransactionHistoryService(): TransactionHistoryService
     {
         return ServiceRegister::getService(TransactionHistoryService::class);
-    }
-
-    /**
-     * @return TransactionHistory[]
-     *
-     * @throws Exception
-     */
-    private function getOrderIdsToSynchronize(): array
-    {
-        return StoreContext::doWithStore(
-            $this->storeId,
-            [$this->getTransactionHistoryService(), 'getOrderIdsForSynchronization']
-        );
     }
 
     /**
