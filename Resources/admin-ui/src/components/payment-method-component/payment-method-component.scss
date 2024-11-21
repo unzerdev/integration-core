@@ -16,7 +16,7 @@
       flex-direction: column;
 
       .unzer-payment-method-title {
-        font-size: 22px;
+        font-size: 18px;
       }
 
       .unzer-payment-method-description {
@@ -27,13 +27,13 @@
 
     .unzer-payment-method-logo {
       width: 92px;
-      height: 57px;
+      height: 40px;
       display: flex;
       justify-content: center;
       align-items: center;
 
       img{
-        width: 100px;
+        width: 80px;
         height: 62px;
       }
     }
@@ -76,11 +76,11 @@
 
       .unzer-payment-method-logo {
         width: 62px;
-        height: 37px;
+        height: 30px;
 
         img{
           width: 62px;
-          height: 37px;
+          height: 30px;
         }
       }
     }

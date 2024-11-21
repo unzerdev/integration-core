@@ -42,8 +42,16 @@
     padding: 55px 40px 0 65px;
     max-width: 583px;
     background-color: #F1F7FB;
-    height: 102%;
+    height: 100%;
     width: 45%;
+
+    .unzer-title{
+      font-size: 27px;
+    }
+
+    .unzer-description{
+      font-size: 17px;
+    }
   }
 
   @media (max-width: 1000px) {
