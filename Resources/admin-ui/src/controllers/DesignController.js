@@ -26,7 +26,7 @@
     logoFile: null,
     backgroundImageUrl: null,
     backgroundFile: null,
-    font: '',
+    font: null,
     brandColor: '#FFFFFF',
     headerColor: '#FFFFFF',
     textColor: '#0C1332',

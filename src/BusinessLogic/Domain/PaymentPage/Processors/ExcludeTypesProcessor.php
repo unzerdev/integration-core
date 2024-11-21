@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\ExcludedTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -56,15 +57,17 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
     }
 
     /**
-     * @param array $availablePaymentTypes
-     *
+     * @param array $excludedTypes
      * @return PaymentMethodsConfigs
      */
-    private function setExcludedMethodConfigs(array $availablePaymentTypes) : PaymentMethodsConfigs
+    private function setExcludedMethodConfigs(array $excludedTypes): PaymentMethodsConfigs
     {
         $paymentMethodConfigs = new PaymentMethodsConfigs();
-        foreach ($availablePaymentTypes as $method) {
-            $paymentMethodConfigs->addMethodConfig($method, new PaymentMethodConfig(false));
+        foreach ($excludedTypes as $method) {
+            $paymentMethodConfigs->addMethodConfig(
+                ExcludedTypes::EXCLUDED_METHOD_NAMES[$method] ?? $method,
+                new PaymentMethodConfig(false)
+            );
         }
 
         return $paymentMethodConfigs;

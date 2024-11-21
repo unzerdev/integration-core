@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**
