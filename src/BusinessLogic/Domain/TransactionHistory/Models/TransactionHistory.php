@@ -469,12 +469,12 @@ class TransactionHistory
             $this->orderId === $transactionHistory->orderId &&
             ($this->totalAmount && $transactionHistory->totalAmount &&
                 $this->totalAmount->getValue() === $transactionHistory->totalAmount->getValue()) &&
-            ($this->chargedAmount && $transactionHistory->chargedAmount && $this->chargedAmount->getValue() ==
+            ($this->chargedAmount && $transactionHistory->chargedAmount && $this->chargedAmount->getValue() ===
                 $transactionHistory->chargedAmount->getValue()) &&
-            ($this->cancelledAmount && $transactionHistory->cancelledAmount && $this->cancelledAmount->getValue() ==
+            ($this->cancelledAmount && $transactionHistory->cancelledAmount && $this->cancelledAmount->getValue() ===
                 $transactionHistory->cancelledAmount->getValue()) &&
             ($this->remainingAmount && $transactionHistory->remainingAmount &&
-                $this->remainingAmount->getValue() == $transactionHistory->remainingAmount->getValue()) &&
+                $this->remainingAmount->getValue() === $transactionHistory->remainingAmount->getValue()) &&
             $this->collection()->isEqual($transactionHistory->collection()) &&
             $this->getPaymentState()->getId() === $transactionHistory->getPaymentState()->getId();
     }

@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Domain\TransactionSynchronization\Tasks;
 
+use Exception;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Tasks\TransactionSynchronizer;
@@ -96,13 +97,13 @@ class TransactionSynchronizerTest extends BaseTestCase
 
     /**
      * @return void
+     * @throws Exception
      */
     public function testOneSubTasksCreated(): void
     {
         // arrange
         $this->historyServiceMock->setOrderIdsForSynchronization(['1', '2', '3']);
         $task = new TransactionSynchronizer('1');
-
 
         // act
         $task->execute();
