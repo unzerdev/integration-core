@@ -57,13 +57,11 @@ class Translation
     }
 
     /**
-     * @param self $translation
-     *
      * @return array
      */
-    public static function toArray(self $translation): array
+    public function toArray(): array
     {
-        return ['locale' => $translation->getLocaleCode(), 'value' => $translation->getMessage()];
+        return ['locale' => $this->getLocaleCode(), 'value' => $this->getMessage()];
     }
 
     /**

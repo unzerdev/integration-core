@@ -100,12 +100,10 @@ class PaymentMethodConfig extends Entity
         $data['paymentMethodConfig'] = [
             'type' => $this->paymentMethodConfig->getType(),
             'enabled' => $this->paymentMethodConfig->isEnabled(),
-            'name' => $this->paymentMethodConfig->getName() ? TranslationCollection::translationsToArray
-            ($this->paymentMethodConfig->getName()) : [],
+            'name' => $this->paymentMethodConfig->getName() ? $this->paymentMethodConfig->getName()->toArray() : [],
             'bookingMethod' => $this->paymentMethodConfig->getBookingMethod() ?
                 $this->paymentMethodConfig->getBookingMethod()->getBookingMethod() : null,
-            'description' => $this->paymentMethodConfig->getDescription() ?
-                TranslationCollection::translationsToArray($this->paymentMethodConfig->getDescription()) : [],
+            'description' => $this->paymentMethodConfig->getDescription() ? $this->paymentMethodConfig->getDescription()->toArray() : [],
             'statusIdToCharge' => $this->paymentMethodConfig->getStatusIdToCharge(),
             'minOrderAmount' => $this->paymentMethodConfig->getMinOrderAmount() ? $this->paymentMethodConfig->getMinOrderAmount()->toArray() : [],
             'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->toArray() : [],

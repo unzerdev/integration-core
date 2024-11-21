@@ -32,7 +32,7 @@ class PaymentPageSettingsPutResponse extends Response
     public function toArray(): array
     {
         return [
-            'shopName' => TranslationCollection::translationsToArray($this->paymentPageSettings->getShopNames()),
+            'shopName' => $this->paymentPageSettings->getShopNames()->toArray(),
             'logoImageUrl' => $this->paymentPageSettings->getLogoFile()->getUrl(),
             'backgroundImageUrl' => $this->paymentPageSettings->getBackgroundFile()->getUrl(),
             'headerColor' => $this->paymentPageSettings->getHeaderColor(),

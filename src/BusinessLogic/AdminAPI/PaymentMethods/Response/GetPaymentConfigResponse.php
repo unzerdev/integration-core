@@ -40,10 +40,9 @@ class GetPaymentConfigResponse extends Response
 
         $array['type'] = $this->paymentMethodConfig->getType();
         $array['typeName'] = PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->paymentMethodConfig->getType()];
-        $array['name'] = $this->paymentMethodConfig->getName() ? TranslationCollection::translationsToArray
-        ($this->paymentMethodConfig->getName()) : [];
+        $array['name'] = $this->paymentMethodConfig->getName() ? $this->paymentMethodConfig->getName()->toArray() : [];
         $array['description'] = $this->paymentMethodConfig->getDescription()
-            ? TranslationCollection::translationsToArray($this->paymentMethodConfig->getDescription()) : [];
+            ? $this->paymentMethodConfig->getDescription()->toArray() : [];
         $array['bookingAvailable'] =
             in_array($this->paymentMethodConfig->getType(), BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
             in_array($this->paymentMethodConfig->getType(), BookingChargeSupport::SUPPORTS_CHARGE);

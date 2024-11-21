@@ -149,7 +149,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         );
 
         // act
-        $result = StoreContext::doWithStore('1', [$this->service, 'savePaymentPageSettings'], [$settings]);
+        StoreContext::doWithStore('1', [$this->service, 'savePaymentPageSettings'], [$settings]);
 
         // assert
         $savedEntity = $this->repository->select();

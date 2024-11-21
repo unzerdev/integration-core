@@ -83,16 +83,14 @@ class TranslationCollection
     /**
      * Retrieves all translations as an array.
      *
-     * @param TranslationCollection $translationCollection
-     *
      * @return array
      */
-    public static function translationsToArray(TranslationCollection $translationCollection): array
+    public function toArray(): array
     {
         $result = [];
 
-        foreach ($translationCollection->getTranslations() as $translation) {
-            $result[] = Translation::toArray($translation);
+        foreach ($this->translations as $translation) {
+            $result[] = $translation->toArray();
         }
 
         return $result;
@@ -141,15 +139,5 @@ class TranslationCollection
         }
 
         return $collection;
-    }
-
-    /**
-     * Retrieves all translations in the collection.
-     *
-     * @return Translation[]
-     */
-    public function getTranslations(): array
-    {
-        return $this->translations;
     }
 }
