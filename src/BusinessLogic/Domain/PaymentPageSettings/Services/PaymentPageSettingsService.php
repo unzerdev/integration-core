@@ -60,7 +60,7 @@ class PaymentPageSettingsService
      */
     public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
-        if ($paymentPageSettings->getLogoFile()->isFileInfo()) {
+        if ($paymentPageSettings->getLogoFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getLogoFile()->getFileInfo(),
                 self::LOGO_IMAGE_NAME
@@ -68,7 +68,7 @@ class PaymentPageSettingsService
             $paymentPageSettings->getLogoFile()->setUrl($url);
         }
 
-        if ($paymentPageSettings->getBackgroundFile()->isFileInfo()) {
+        if ($paymentPageSettings->getBackgroundFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getBackgroundFile()->getFileInfo(),
                 self::BACKGROUND_IMAGE_NAME
@@ -101,7 +101,7 @@ class PaymentPageSettingsService
     {
         $unzerApi = $this->unzerFactory->makeUnzerAPI();
 
-        if ($paymentPageSettings->getLogoFile()->isFileInfo()) {
+        if ($paymentPageSettings->getLogoFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getLogoFile()->getFileInfo(),
                 self::LOGO_IMAGE_PREVIEW_NAME
@@ -109,7 +109,7 @@ class PaymentPageSettingsService
             $paymentPageSettings->getLogoFile()->setUrl($url);
         }
 
-        if ($paymentPageSettings->getBackgroundFile()->isFileInfo()) {
+        if ($paymentPageSettings->getBackgroundFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
                 $paymentPageSettings->getBackgroundFile()->getFileInfo(),
                 self::BACKGROUND_IMAGE_PREVIEW_NAME
