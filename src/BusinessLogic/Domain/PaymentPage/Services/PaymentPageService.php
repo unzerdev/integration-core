@@ -98,7 +98,6 @@ class PaymentPageService
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
                 $context->getPaymentMethodType(),
-                null,
                 $context->getOrderId(),
                 $context->getAmount()->getCurrency()->getIsoCode()
             );
@@ -175,7 +174,7 @@ class PaymentPageService
             ));
         }
 
-        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
+        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($transactionHistory->getOrderId());
         $newTransactionHistory = TransactionHistory::fromUnzerPayment($payment);
         if (!$newTransactionHistory->isEqual($transactionHistory)) {
             $newTransactionHistory->synchronizeHistoryItems($transactionHistory);

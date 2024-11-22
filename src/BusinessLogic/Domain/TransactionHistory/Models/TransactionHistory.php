@@ -29,13 +29,6 @@ class TransactionHistory
     private string $type;
 
     /**
-     * Unzer payment ID.
-     *
-     * @var ?string $paymentId
-     */
-    private ?string $paymentId;
-
-    /**
      * Shop order ID.
      *
      * @var string $orderId
@@ -81,7 +74,6 @@ class TransactionHistory
 
     /**
      * @param string $type
-     * @param string|null $paymentId
      * @param string $orderId
      * @param string $currency
      * @param PaymentState|null $paymentState
@@ -93,7 +85,6 @@ class TransactionHistory
      */
     public function __construct(
         string $type,
-        ?string $paymentId,
         string $orderId,
         string $currency,
         ?PaymentState $paymentState = null,
@@ -104,7 +95,6 @@ class TransactionHistory
         array $historyItems = []
     ) {
         $this->type = $type;
-        $this->paymentId = $paymentId;
         $this->orderId = $orderId;
         $this->currency = $currency;
         $this->paymentState = $paymentState;
@@ -135,24 +125,6 @@ class TransactionHistory
     public function setType(string $type): void
     {
         $this->type = $type;
-    }
-
-    /**
-     * @return ?string
-     */
-    public function getPaymentId(): ?string
-    {
-        return $this->paymentId;
-    }
-
-    /**
-     * @param string $paymentId
-     *
-     * @return void
-     */
-    public function setPaymentId(string $paymentId): void
-    {
-        $this->paymentId = $paymentId;
     }
 
     /**
@@ -340,7 +312,6 @@ class TransactionHistory
 
         $transactionHistory = new self(
             $paymentType,
-            $payment->getId() ?? '',
             $payment->getOrderId() ?? '',
             $payment->getCurrency() ?? '',
         );
@@ -465,7 +436,6 @@ class TransactionHistory
     public function isEqual(TransactionHistory $transactionHistory): bool
     {
         return $this->type === $transactionHistory->type &&
-            $this->paymentId === $transactionHistory->paymentId &&
             $this->orderId === $transactionHistory->orderId &&
             ($this->totalAmount && $transactionHistory->totalAmount &&
                 $this->totalAmount->getValue() === $transactionHistory->totalAmount->getValue()) &&

@@ -285,6 +285,18 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param $orderId
+     *
+     * @return Payment
+     */
+    public function fetchPaymentByOrderId($orderId): Payment
+    {
+        $this->callHistory['fetchPayment'][] = ['paymentId' => $orderId];
+
+        return $this->payment;
+    }
+
+    /**
      * @param Payment $payment
      *
      * @return void

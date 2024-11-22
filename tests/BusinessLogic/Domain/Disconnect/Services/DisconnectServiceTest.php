@@ -300,7 +300,6 @@ class DisconnectServiceTest extends BaseTestCase
     {
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),

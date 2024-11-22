@@ -168,7 +168,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::EPS, null, 'test-order-123', 'EUR')
+            new TransactionHistory(PaymentMethodTypes::EPS,'test-order-123', 'EUR')
         );
     }
 
@@ -222,7 +222,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($response->toArray());
         self::assertEquals(['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com'], $response->toArray());
         self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::CARDS, null, 'test-order-123', 'EUR')
+            new TransactionHistory(PaymentMethodTypes::CARDS,'test-order-123', 'EUR')
         );
     }
 
@@ -265,7 +265,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         // Assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
         self::assertNotEmpty($methodCallHistory);
-        self::assertEquals('test-payment-123', $methodCallHistory[0]['paymentId']);
+        self::assertEquals('test-order-123', $methodCallHistory[0]['paymentId']);
         self::assertTrue($response->isSuccessful());
         self::assertEquals(
             ['id' => PaymentState::STATE_COMPLETED, 'name' => PaymentState::STATE_NAME_COMPLETED], $response->toArray()

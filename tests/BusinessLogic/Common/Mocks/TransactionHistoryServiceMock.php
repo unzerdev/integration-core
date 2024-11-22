@@ -42,7 +42,7 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
      */
     public function saveTransactionHistory(TransactionHistory $transactionHistory): void
     {
-        $this->callHistory['saveTransactionHistory'] = ['transactionId' => $transactionHistory->getPaymentId(), 'count' => ++$this->timeSaved];
+        $this->callHistory['saveTransactionHistory'] = ['transactionId' => $transactionHistory->getOrderId(), 'count' => ++$this->timeSaved];
 
         $this->transactionHistory = $transactionHistory;
     }

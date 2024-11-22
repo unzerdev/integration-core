@@ -59,7 +59,6 @@ class TransactionHistory extends Entity
         $transactionHistory = $data['transactionHistory'] ?? [];
         $this->transactionHistory = new DomainTransactionHistory(
             $transactionHistory['type'],
-            $transactionHistory['paymentId'],
             $transactionHistory['orderId'],
             $transactionHistory['currency'],
             !empty($transactionHistory['paymentState']) ? PaymentState::fromArray($transactionHistory['paymentState']) : null,
@@ -83,7 +82,6 @@ class TransactionHistory extends Entity
         $data['updatedAt'] = $this->updatedAt;
         $data['transactionHistory'] = [
             'type' => $this->transactionHistory->getType(),
-            'paymentId' => $this->transactionHistory->getPaymentId(),
             'orderId' => $this->transactionHistory->getOrderId(),
             'currency' => $this->transactionHistory->getCurrency(),
             'paymentState' => $this->transactionHistory->getPaymentState() ? $this->transactionHistory->getPaymentState()->toArray() : null,

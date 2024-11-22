@@ -93,7 +93,6 @@ class TransactionControllerTest extends BaseTestCase
         // Arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -121,8 +120,6 @@ class TransactionControllerTest extends BaseTestCase
         self::assertNotEmpty($response->toArray());
         self::assertEquals(PaymentMethodTypes::APPLE_PAY, $response->toArray()['type']);
         self::assertEquals('order1', $response->toArray()['orderId']);
-        self::assertEquals('payment1', $response->toArray()['paymentId']);
-        self::assertEquals('payment1', $response->toArray()['paymentId']);
         self::assertEquals(11.11, $response->toArray()['amounts']['authorized']['amount']);
         self::assertEquals('EUR', $response->toArray()['amounts']['authorized']['currency']);
         self::assertEquals(1.11, $response->toArray()['amounts']['charged']['amount']);
