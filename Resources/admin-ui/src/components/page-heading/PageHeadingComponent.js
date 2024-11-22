@@ -24,6 +24,7 @@ const PageHeadingComponent = ({ title, description, className, button, backIcon 
     if (backIcon) {
         let backArrow = generator.createElementFromHTML(Unzer.imagesProvider.backIcon);
         backArrow.addEventListener('click', () => {
+            Unzer.components.PageHeader.updateEnvironment(Unzer.config.store.mode !== 'live', false);
             window.history.back()
         });
 

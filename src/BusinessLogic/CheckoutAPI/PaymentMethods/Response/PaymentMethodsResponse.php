@@ -41,12 +41,8 @@ class PaymentMethodsResponse extends Response
             $formattedMethod = [
                 'type' => $paymentMethod->getType(),
                 'name' => $paymentMethod->getNameByLocale($this->locale),
-                'description' => ''
+                'description' => $paymentMethod->getDescriptionByLocale($this->locale),
             ];
-
-            if ($paymentMethod->getDescription()) {
-                $formattedMethod['description'] = $paymentMethod->getDescription()->getTranslationMessage($this->locale);
-            }
 
             if ($surcharge = $paymentMethod->getSurcharge()) {
                 $formattedMethod['surcharge'] = [

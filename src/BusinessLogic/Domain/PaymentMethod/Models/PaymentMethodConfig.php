@@ -244,6 +244,20 @@ class PaymentMethodConfig
     }
 
     /**
+     * @param string $locale
+     *
+     * @return string
+     */
+    public function getDescriptionByLocale(string $locale): string
+    {
+        if (!$this->description) {
+            return PaymentMethodNames::DEFAULT_PAYMENT_METHOD_DESCRIPTION;
+        }
+
+        return $this->description->getTranslationMessage($locale);
+    }
+
+    /**
      * @param Amount|null $minAmount
      * @param Amount|null $maxAmount
      *

@@ -210,15 +210,13 @@
   const openDisconnectModal = () => {
 
     const modal = Unzer.components.Modal.create({
-      title: 'general.disconnect',
+      title: 'general.disconnectModalTitle',
       canClose: true,
       description: '',
       dialog: true,
       noPadding: true,
       content: [
-        Unzer.components.PageHeading.create({
-          title: "credentials.disconnectWarning"
-        })
+          Unzer.elementGenerator.createElement('div', 'unzer-description', 'credentials.disconnectWarning')
       ],
       buttons: [
         {
@@ -246,9 +244,7 @@
       dialog: true,
       noPadding: true,
       content: [
-        Unzer.components.PageHeading.create({
-          title: "credentials.saveChangesWarning"
-        })
+          Unzer.elementGenerator.createElement('div', 'unzer-description', 'credentials.saveChangesWarning')
       ],
       buttons: [
         {

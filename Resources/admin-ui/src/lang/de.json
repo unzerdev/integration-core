@@ -18,6 +18,7 @@
     "delete": "Delete",
     "discard": "Discard",
     "disconnect": "Disconnect",
+    "disconnectModalTitle": "Disconnect account",
     "any": "ANY",
     "at": "at",
     "clear": "Clear",
@@ -58,9 +59,9 @@
     "login": "Login"
   },
   "credentials": {
-    "title": "Credentials!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+    "title": "Credentials",
     "notificationsDescription": "You can find registrated webhook for your store here.",
-    "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
+    "description": "Here you can change the environment, update the credentials, or re-register the webhooks.",
     "saveChanges": "Save changes",
     "disconnect": "Disconnect",
     "notifications": "Notifications",
@@ -85,7 +86,7 @@
     "sandboxWithLink": "You’re currently in the Sandbox environment. Switch to live mode <a class = 'sandbox-link' href='%s'>here</a>.",
     "heading": {
       "title": "UnzerOne: </br>One platform for all channels and the ideal customer experience.",
-      "subtitle": "Make sure that you’re logged in the merchant portal because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href='https://www.unzer.com/en/sales-team-contact/' target='_blank'>here</a>."
+      "subtitle": "Make sure that you’re logged in the <a href='%s' target='_blank' id='unzer-merchant-link'>merchant portal</a>  because you need to copy several settings from there to fill in the following information. If you don’t have an account, contact us <a href='https://www.unzer.com/en/sales-team-contact/' target='_blank'>here</a>."
     },
     "environment": {
       "title": "Environment",
@@ -95,7 +96,7 @@
     "credentials": {
       "header": "Credentials (%s)",
       "title": "Credentials",
-      "description": "You can find your API credentials in merchant portal.",
+      "description": "You can find your API credentials in  <a href='%s' target='_blank' id='unzer-merchant-link-description'> merchant portal </a> .",
       "label": "Credentials",
       "public": "Enter Public Key",
       "private": "Enter Private Key"
@@ -109,7 +110,7 @@
     "invalidUrl": "Image URL is not valid.",
     "heading": {
       "title": "Payment Page Design Settings",
-      "description": "Here is the list of available payment methods for your merchant account. You can enable the payment method in your store by clicking on the toggle button.",
+      "description": "Here you can style your payment page.",
       "saveLabel": "Save changes",
       "previewLabel": "Preview"
     },
@@ -180,9 +181,10 @@
       "restrictCountries": "Restrict to specific countries",
       "restrictCountriesDescription": "Select the countries where this payment method should be available.",
       "basketData": "Enable sending basket",
-      "basketDataDescription": "If enabled, the basket data will always be sent.",
+      "basketDataDescription": "If this option is enabled, the basket data will always be sent to the Unzer API. This ensures that every transaction includes complete order details, providing better transparency and enabling more accurate processing through the Unzer system.",
       "chargeTitle": "Charge on status changed",
-      "chargeDescription": "Select the status that will trigger the payment capture."
+      "chargeDescription": "Select the status that will trigger the payment capture.",
+      "defaultDescription": "When you select this payment method, a secure pop-up window will be displayed to complete the transaction."
     },
     "fields": {
       "paymentMethodName": {
@@ -216,7 +218,7 @@
     "applepay": "Apple Pay is a mobile wallet solution available to all users of Apple devices. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "bancontact": "Bancontact is the most popular online payment method in Belgium, with over 15 million cards in circulation. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "card": "Cards can be differentiated in credit and debit cards. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
-    "eps": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "EPS": "Electronic Payment Standard (EPS) is a popular online payment method available in Austria. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "giropay": "Giropay is one of the most popular online payment methods available in Germany. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "ideal": "iDEAL is one of the most popular online payment methods in the Netherlands. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "klarna": "Klarna is a payment method that provides an easy to use pay later payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
@@ -248,7 +250,6 @@
     "invalidNumberInList": "Each value must be a positive number.",
     "invalidWholeNumberInList": "Each value must be a positive whole number.",
     "duplicateNumberInList": "The list cannot contain duplicate values.",
-    "invalidUrl": "Field must be a valid URL.",
     "invalidFieldValue": "Field must be set to \"%s\".",
     "invalidMaxValue": "Maximal allowed value is %s.",
     "invalidImageType": "Please provide a file in one of the supported image types (PNG, JPG).",
