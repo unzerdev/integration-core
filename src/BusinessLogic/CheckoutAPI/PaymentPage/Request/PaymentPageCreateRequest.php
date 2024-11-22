@@ -24,6 +24,7 @@ class PaymentPageCreateRequest
      * @param string $orderId
      * @param Amount $amount
      * @param string $returnUrl
+     * @param string $mode
      * @param array $sessionData
      * @param string $locale
      */

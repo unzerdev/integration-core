@@ -520,10 +520,8 @@
             console.log("checkout -> aborted");
           });
 
-          // Subscribe to the success event
           checkout.success(function (data) {
             console.log("checkout -> success", data);
-            window.location.href = "ReturnController.php";
           });
 
           // Subscribe to the error event

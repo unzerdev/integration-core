@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageRespons
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
@@ -21,13 +22,18 @@ class CheckoutPaymentPageController
 {
     private PaymentPageService $paymentPageService;
 
+    private ConnectionService $connectionService;
+
     /**
      * CheckoutPaymentPageController constructor.
+     *
      * @param PaymentPageService $paymentPageService
+     * @param ConnectionService $connectionService
      */
-    public function __construct(PaymentPageService $paymentPageService)
+    public function __construct(PaymentPageService $paymentPageService, ConnectionService $connectionService)
     {
         $this->paymentPageService = $paymentPageService;
+        $this->connectionService = $connectionService;
     }
 
     /**
@@ -37,6 +43,8 @@ class CheckoutPaymentPageController
      */
     public function create(PaymentPageCreateRequest $request): PaymentPageResponse
     {
+        $connectionData = $this->connectionService->getConnectionSettings()->getActiveConnectionData();
+
         return new PaymentPageResponse(
             $this->paymentPageService->create(new PaymentPageCreateContext(
                 $request->getPaymentMethodType(),
@@ -45,7 +53,9 @@ class CheckoutPaymentPageController
                 $request->getReturnUrl(),
                 new DataBag($request->getSessionData()),
                 $request->getLocale()
-            ))
+            )),
+            $connectionData->getPublicKey()
+
         );
     }
 

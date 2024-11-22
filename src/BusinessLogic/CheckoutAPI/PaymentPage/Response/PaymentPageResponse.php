@@ -14,14 +14,18 @@ class PaymentPageResponse extends Response
 {
     private Paypage $payPage;
 
+    private string $publicKey;
+
     /**
      * PaymentPageResponse constructor.
      *
      * @param Paypage $payPage
+     * @param string $publicKey
      */
-    public function __construct(Paypage $payPage)
+    public function __construct(Paypage $payPage, string $publicKey)
     {
         $this->payPage = $payPage;
+        $this->publicKey = $publicKey;
     }
 
     public function toArray(): array
@@ -29,6 +33,7 @@ class PaymentPageResponse extends Response
         return [
             'id' => $this->payPage->getId(),
             'redirectUrl' => $this->payPage->getRedirectUrl(),
+            'publicKey' => $this->publicKey,
         ];
     }
 }

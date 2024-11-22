@@ -390,7 +390,8 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
-                return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class));
+                return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class),
+                ServiceRegister::getService(ConnectionService::class));
             })
         );
 
