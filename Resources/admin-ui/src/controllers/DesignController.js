@@ -219,7 +219,7 @@
                 title: 'paymentPageSettings.fonts',
                 description: "paymentPageSettings.fontsDescription",
                 options: fonts,
-                value: selectedValues.font,
+                value: selectedValues.font || '',
                 onChange: (value) => {
                   selectedValues.font = value;
                 }

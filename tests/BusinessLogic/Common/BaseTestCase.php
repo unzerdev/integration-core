@@ -281,7 +281,8 @@ class BaseTestCase extends TestCase
                 );
             },
             CheckoutPaymentPageController::class => static function () {
-                return new CheckoutPaymentPageController(TestServiceRegister::getService(PaymentPageService::class));
+                return new CheckoutPaymentPageController(TestServiceRegister::getService(PaymentPageService::class),
+                TestServiceRegister::getService(ConnectionService::class));
             },
             PaymentStatusMapRepositoryInterface::class => static function () {
                 return new PaymentStatusMapRepository(
