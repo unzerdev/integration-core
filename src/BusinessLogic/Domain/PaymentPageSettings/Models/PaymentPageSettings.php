@@ -13,9 +13,6 @@ use UnzerSDK\Resources\EmbeddedResources\Paypage\Style;
  */
 class PaymentPageSettings
 {
-
-    const EMBEDDED_PAYPAGE_TYPE = "embedded";
-
     /**
      * @var TranslationCollection $shopNames
      */
@@ -147,8 +144,6 @@ class PaymentPageSettings
     public function inflate(Paypage $paypage, ?string $locale = null): Paypage
     {
         $this->paypage = $paypage;
-
-        $this->paypage->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
         $shopName = $this->shopNames->getTranslationMessage($locale);
 
