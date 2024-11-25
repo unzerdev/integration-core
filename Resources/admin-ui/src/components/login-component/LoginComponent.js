@@ -14,6 +14,7 @@
 
 const LoginComponent = ({ onLogin }) => {
     const generator = Unzer.elementGenerator;
+    let link = Unzer.config.store.mode === 'live' ? "https://insights.unzer.com" : "https://sbx-insights.unzer.com";
     const values = {
         environment: 'live',
         privateKey: '',
@@ -24,7 +25,14 @@ const LoginComponent = ({ onLogin }) => {
         value: 'live',
         onChange: (value) => {
             values.environment = value;
+            let link = value === 'live' ? "https://insights.unzer.com" : "https://sbx-insights.unzer.com";
+            let descriptionTitleLink = document.getElementById('unzer-merchant-link');
+            descriptionTitleLink.href = link;
+            let descriptionLink = document.getElementById('unzer-merchant-link-description');
+            descriptionLink.href = link;
+
             Unzer.components.PageHeader.updateEnvironment(value === 'sandbox');
+
         },
         options: [
             { label: 'login.environment.live', value: 'live' },
@@ -34,7 +42,7 @@ const LoginComponent = ({ onLogin }) => {
     const publicKey = Unzer.components.TextField.create({
         label: 'login.credentials.title',
         title: 'login.credentials.public',
-        description: 'login.credentials.description',
+        description: `login.credentials.description|${link}`,
         onChange: (value) => {
             values.publicKey = value;
         }
@@ -48,6 +56,7 @@ const LoginComponent = ({ onLogin }) => {
         }
     });
 
+
     const left = generator.createElement(
         'div',
         'unzer-login-left',
@@ -56,7 +65,7 @@ const LoginComponent = ({ onLogin }) => {
         [
             Unzer.components.PageHeading.create({
                 title: 'login.heading.title',
-                description: 'login.heading.subtitle'
+                description: `login.heading.subtitle|${link}`
             }),
             envField,
             publicKey,

@@ -97,6 +97,13 @@
   .unzer-field-title,
   .unzer-field-subtitle {
     font-size: $adl-font-size--input-error;
+    a {
+      color: inherit;
+      text-decoration: underline;
+      margin: 0;
+      padding: 0;
+      font-size: inherit;
+    }
   }
 
   .unzer-field-title {
@@ -107,6 +114,14 @@
 
   .unzer-field-subtitle {
     @include field-description;
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+      margin: 0;
+      padding: 0;
+      font-size: inherit;
+    }
   }
 
   .unzer-field-component:invalid {
@@ -139,6 +154,8 @@
       padding-right: 40px;
       color: $unzer-color-grey;
       font-size: 12px;
+      text-wrap: wrap;
+      max-width: 750px;
     }
   }
 

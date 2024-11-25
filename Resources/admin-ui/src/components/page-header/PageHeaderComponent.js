@@ -126,6 +126,7 @@ const render = (stores, onStoreSelect) => {
     );
 
     logoWrapper.addEventListener('click', () => {
+        Unzer.components.PageHeader.updateEnvironment(Unzer.config.store.mode !== 'live', false);
         window.history.back()
     })
 
@@ -173,6 +174,10 @@ const updateEnvironment = (isSandbox, hasLink = false) => {
 
     if(hasLink){
        environment.innerHTML = Unzer.translationService.translate('login.sandbox');
+    }else {
+        let sandboxLabel = `login.sandboxWithLink|credentials?store=${Unzer.config.store.storeId}`;
+        let params = sandboxLabel.split('|');
+        environment.innerHTML = Unzer.translationService.translate(params[0], params.slice(1));
     }
 };
 

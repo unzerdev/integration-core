@@ -37,4 +37,7 @@ interface PaymentMethodNames
 
     /** @var string  */
     public const DEFAULT_PAYMENT_METHOD_NAME = 'Unzer payment';
+
+    /** @var string  */
+    public const DEFAULT_PAYMENT_METHOD_DESCRIPTION = 'When you select this payment method, a secure pop-up window will be displayed to complete the transaction.';
 }

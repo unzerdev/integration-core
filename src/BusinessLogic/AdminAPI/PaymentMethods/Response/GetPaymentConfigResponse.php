@@ -53,7 +53,7 @@ class GetPaymentConfigResponse extends Response
 
         $array['statusIdToCharge'] = $this->paymentMethodConfig->getStatusIdToCharge();
         $array['minOrderAmount'] = $this->paymentMethodConfig->getMinOrderAmount() ? $this->paymentMethodConfig->getMinOrderAmount()->getPriceInCurrencyUnits() : 0.0;
-        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->getPriceInCurrencyUnits() : 0.0;
+        $array['maxOrderAmount'] = $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->getPriceInCurrencyUnits() : 10000;
         $array['surcharge'] = $this->paymentMethodConfig->getSurcharge() ? $this->paymentMethodConfig->getSurcharge()->getPriceInCurrencyUnits() : 0.0;
         $array['restrictedCountries'] = $this->countriesToArray($this->paymentMethodConfig->getRestrictedCountries());
         $array['displaySendBasketData'] =
