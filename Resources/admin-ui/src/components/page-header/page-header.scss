@@ -16,7 +16,7 @@
       }
     }
 
-    .unzer-header-sandbox-none{
+    .unzer-header-sandbox-none {
       display: none;
     }
 
@@ -57,6 +57,7 @@
           padding: 0 10px;
           background-color: #fff;
           cursor: pointer;
+
         }
 
         .dropdown::after {
@@ -133,8 +134,25 @@
 
         .unzer-header-connection {
           padding-right: 10px;
+
           .unzer-header-connection-info {
             display: none;
+          }
+        }
+
+        .unzer-logo-wrapper {
+          .dropdown {
+            min-width: 0;
+            width: 150px;
+
+            .dropdown-label {
+              display: block;
+              width: 100%;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              box-sizing: border-box;
+            }
           }
         }
       }
