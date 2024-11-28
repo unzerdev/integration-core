@@ -99,7 +99,7 @@
                     ],
                     sendBasketData: result.sendBasketData,
                     surcharge: result.surcharge,
-                    description: result.description.length > 0 ? result.description : [
+                    description: (result.description && result.description.length > 0) ? result.description : [
                         {
                             locale: 'default',
                             value: Unzer.translationService.translate('checkout.modal.defaultDescription')
