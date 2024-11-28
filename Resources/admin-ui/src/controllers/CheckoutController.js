@@ -285,7 +285,7 @@
     const openSettingModal = (config, paymentMethod) => {
         if (!paymentMethod.enabled) {
             window.open(
-                `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type)}`,
+                `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type.toString().toLowerCase())}`,
                 '_blank'
             ).focus();
 
