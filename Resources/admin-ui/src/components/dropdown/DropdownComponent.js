@@ -104,7 +104,7 @@ const DropdownComponent = ({
 
     const titleSpan = generator.createElement(
         'span',
-        'unzer-dropdown-title' + (selectedItem ? ' adls--title-selected' : ''),
+        'unzer-dropdown-title' + (selectedItem ? ' adls--title-selected' : '') + (title.length == 0 ? ' no-top-padding' : ''),
         title
     );
 

@@ -51,6 +51,10 @@
 
   let environmentValues = values.environment === 'live' ? liveData : sandboxData;
 
+  let link = values.environment === 'live' ? Unzer.translationService.translate("credentials.linkLive")
+      : Unzer.translationService.translate(
+          "credentials.linkSandbox");
+
   /**
    * renders credentials page
    */
@@ -136,6 +140,9 @@
             openEnvModal = value !== Unzer.config.store.mode;
             values.environment = value;
             environmentValues = values.environment === 'live' ? liveData : sandboxData;
+            link = values.environment === 'live' ? Unzer.translationService.translate("credentials.linkLive")
+                : Unzer.translationService.translate(
+                    "credentials.linkSandbox");
             render();
           },
           value: values.environment
@@ -144,7 +151,7 @@
           label: 'login.credentials.title',
           title: 'login.credentials.public',
           fieldClasses: 'unzer-input-wrapper-padding',
-          description: 'login.credentials.description',
+          description: `login.credentials.description|${link}`,
           value: environmentValues.connectionData.publicKey,
           onChange: (value) => {
             environmentValues.connectionData.publicKey = value;

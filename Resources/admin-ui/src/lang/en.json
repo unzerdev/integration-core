@@ -73,7 +73,10 @@
     "disconnectWarning": "Are you sure you want to disconnect store?",
     "saveChangesWarning": "The environment change has been detected. Do you want to use the same configuration?",
     "webhookRegistered": "Webhooks are successfully registered!",
-    "webhookUnsuccessful": "Webhook registration failed!"
+    "webhookUnsuccessful": "Webhook registration failed!",
+    "linkLive":"https://insights.unzer.com",
+    "linkSandbox": "https://sbx-insights.unzer.com"
+
   },
   "footer": {
     "support": "Need help?",

@@ -99,7 +99,7 @@
                     ],
                     sendBasketData: result.sendBasketData,
                     surcharge: result.surcharge,
-                    description: result.description.length > 0 ? result.description : [
+                    description: (result.description && result.description.length > 0) ? result.description : [
                         {
                             locale: 'default',
                             value: Unzer.translationService.translate('checkout.modal.defaultDescription')
@@ -285,7 +285,7 @@
     const openSettingModal = (config, paymentMethod) => {
         if (!paymentMethod.enabled) {
             window.open(
-                `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type)}`,
+                `https://docs.unzer.com/payment-methods/${getPaynmentMethodUrl(paymentMethod.type.toString().toLowerCase())}`,
                 '_blank'
             ).focus();
 

@@ -18,7 +18,7 @@
 
   .unzer-dropdown-button {
     width: 100%;
-    padding: 0px 24px 5px 8px;
+    padding: 0px 24px 0px 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -38,9 +38,14 @@
         color: $unzer-color-grey;
         font-size: 14px;
         text-align: left;
-        padding-top: 10px;
+        padding-top: 2px;
       }
     }
+
+    .unzer-dropdown-title.no-top-padding {
+      padding-top: 0;
+    }
+
 
     &:after {
       @include adl-font-icon(arrow-ios-down, 11px);
