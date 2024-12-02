@@ -20,7 +20,7 @@ class PaymentPageSettingsService
 {
     private const AMOUNT = "100.28";
     private const CURRENCY = 'EUR';
-    private const CALLBACK_URL = "https://mockurl.com/payment-callback";
+    const EMBEDDED_PAYPAGE_TYPE = "embedded";
 
     private const LOGO_IMAGE_NAME = 'logo.png';
     private const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
@@ -125,6 +125,8 @@ class PaymentPageSettingsService
                 self::CURRENCY
             )
         );
+
+        $payPageRequest->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
         return $unzerApi->createPaypage($payPageRequest);
     }
