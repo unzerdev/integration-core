@@ -60,7 +60,7 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
     /**
      * @return array|string[]
      */
-    public function getOrderIdsForSynchronization(): array
+    public function getPaymentIdsForSynchronization(): array
     {
         return $this->orderIds;
     }
