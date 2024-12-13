@@ -25,7 +25,7 @@ class TransactionSyncTask extends Task
     /**
      * @var TransactionHistory[]
      */
-    protected array $orderIds;
+    protected array $paymentIds;
 
     /**
      * @var string
@@ -33,11 +33,11 @@ class TransactionSyncTask extends Task
     protected string $storeId;
 
     /**
-     * @param string[] $orderIDs
+     * @param string[] $paymentIDs
      */
-    public function __construct(array $orderIDs)
+    public function __construct(array $paymentIDs)
     {
-        $this->orderIds = $orderIDs;
+        $this->paymentIds = $paymentIDs;
         $this->storeId = StoreContext::getInstance()->getStoreId();
     }
 
@@ -49,7 +49,7 @@ class TransactionSyncTask extends Task
     public static function fromArray(array $array): Serializable
     {
         return StoreContext::doWithStore($array['storeId'], static function () use ($array) {
-            return new static($array['orderIds']);
+            return new static($array['paymentIds']);
         });
     }
 
@@ -60,7 +60,7 @@ class TransactionSyncTask extends Task
     {
         return [
             'storeId' => $this->storeId,
-            'orderIds' => $this->orderIds,
+            'paymentIds' => $this->paymentIds,
         ];
     }
 
@@ -77,7 +77,7 @@ class TransactionSyncTask extends Task
      */
     public function __unserialize($data): void
     {
-        $this->orderIds = $data['orderIds'] ?? [];
+        $this->paymentIds = $data['paymentIds'] ?? ($data['orderIds'] ?? []);
         $this->storeId = $data['storeId'];
     }
 
@@ -105,9 +105,9 @@ class TransactionSyncTask extends Task
      */
     protected function doExecute(): void
     {
-        foreach ($this->orderIds as $orderId) {
+        foreach ($this->paymentIds as $paymentId) {
             try {
-                $this->getTransactionSynchronizerService()->synchronizeTransactions($orderId);
+                $this->getTransactionSynchronizerService()->synchronizeTransactions($paymentId);
             }catch (TransactionHistoryNotFoundException $exception) {
             }
 

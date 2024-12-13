@@ -72,7 +72,7 @@ class TransactionSynchronizerService
     }
 
     /**
-     * @param string $orderId
+     * @param string $paymentId
      *
      * @return void
      *
@@ -82,9 +82,9 @@ class TransactionSynchronizerService
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
-    public function synchronizeTransactions(string $orderId): void
+    public function synchronizeTransactions(string $paymentId): void
     {
-        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($orderId);
+        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($paymentId);
         $transactionHistory = $this->getAndUpdateTransactionHistoryFromUnzerPayment($payment);
         $this->handleOrderStatusChange($transactionHistory);
         $this->handleCharge($transactionHistory);
