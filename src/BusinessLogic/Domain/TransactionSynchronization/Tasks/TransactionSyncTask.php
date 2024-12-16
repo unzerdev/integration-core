@@ -49,7 +49,7 @@ class TransactionSyncTask extends Task
     public static function fromArray(array $array): Serializable
     {
         return StoreContext::doWithStore($array['storeId'], static function () use ($array) {
-            return new static($array['paymentIds']);
+            return new static($array['paymentIds'] ?? ($array['orderIds'] ?? []));
         });
     }
 

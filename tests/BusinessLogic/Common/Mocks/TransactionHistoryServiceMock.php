@@ -26,6 +26,11 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
     private array $orderIds = [];
 
     /**
+     * @var array
+     */
+    private array $paymentIds = [];
+
+    /**
      * @param string $orderId
      *
      * @return TransactionHistory|null
@@ -62,7 +67,7 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
      */
     public function getPaymentIdsForSynchronization(): array
     {
-        return $this->orderIds;
+        return $this->paymentIds;
     }
 
     /**
@@ -70,8 +75,8 @@ class TransactionHistoryServiceMock extends TransactionHistoryService
      *
      * @return void
      */
-    public function setOrderIdsForSynchronization(array $orderIds): void
+    public function setPaymentIdsForSynchronization(array $paymentIds): void
     {
-        $this->orderIds = $orderIds;
+        $this->paymentIds = $paymentIds;
     }
 }

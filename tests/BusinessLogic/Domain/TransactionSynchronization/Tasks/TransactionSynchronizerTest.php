@@ -67,7 +67,7 @@ class TransactionSynchronizerTest extends BaseTestCase
             return new NativeSerializer();
         });
 
-        $this->historyServiceMock->setOrderIdsForSynchronization(['1', '2', '3']);
+        $this->historyServiceMock->setPaymentIdsForSynchronization(['1', '2', '3']);
         $task = new TransactionSynchronizer('1');
         // act
         $serialized = Serializer::serialize($task);
@@ -82,7 +82,7 @@ class TransactionSynchronizerTest extends BaseTestCase
     public function testJsonSerialization(): void
     {
         // arrange
-        $this->historyServiceMock->setOrderIdsForSynchronization(['1', '2', '3']);
+        $this->historyServiceMock->setPaymentIdsForSynchronization(['1', '2', '3']);
         $task = new TransactionSynchronizer('1');
         TestServiceRegister::registerService(Serializer::CLASS_NAME, static function () {
             return new JsonSerializer();
@@ -102,7 +102,7 @@ class TransactionSynchronizerTest extends BaseTestCase
     public function testOneSubTasksCreated(): void
     {
         // arrange
-        $this->historyServiceMock->setOrderIdsForSynchronization(['1', '2', '3']);
+        $this->historyServiceMock->setPaymentIdsForSynchronization(['1', '2', '3']);
         $task = new TransactionSynchronizer('1');
 
         // act
@@ -119,7 +119,7 @@ class TransactionSynchronizerTest extends BaseTestCase
     public function testCorrectTaskCreated(): void
     {
         // arrange
-        $this->historyServiceMock->setOrderIdsForSynchronization(['1', '2', '3']);
+        $this->historyServiceMock->setPaymentIdsForSynchronization(['1', '2', '3']);
         $task = new TransactionSynchronizer('1');
 
 
@@ -144,7 +144,7 @@ class TransactionSynchronizerTest extends BaseTestCase
         }
 
         // arrange
-        $this->historyServiceMock->setOrderIdsForSynchronization($ids);
+        $this->historyServiceMock->setPaymentIdsForSynchronization($ids);
         $task = new TransactionSynchronizer('1');
 
         // act
