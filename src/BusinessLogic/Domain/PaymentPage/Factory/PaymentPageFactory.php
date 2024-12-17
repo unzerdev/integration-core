@@ -42,7 +42,6 @@ class PaymentPageFactory
     protected function initializePayPage(PaymentPageCreateContext $context, string $bookingMethod, Resources $resources): Paypage
     {
         $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
-        $url = $context->getReturnUrl();
 
         $result = (new Paypage(
             $context->getAmount()->getPriceInCurrencyUnits(),
@@ -50,14 +49,6 @@ class PaymentPageFactory
             $bookingMethod
         ))->setOrderId($context->getOrderId())
         ->setResources($resources);
-
-        $urls = new Urls();
-        $urls->setReturnSuccess($url)
-        ->setReturnFailure($url)
-        ->setReturnPending($url)
-        ->setReturnCancel($url);
-
-        $result->setUrls($urls);
 
         $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
