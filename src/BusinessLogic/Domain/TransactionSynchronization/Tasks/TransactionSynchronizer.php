@@ -81,21 +81,21 @@ class TransactionSynchronizer extends Task
     public function execute(): void
     {
         StoreContext::doWithStore($this->storeId, function () {
-            $orderIDs = $this->getTransactionHistoryService()->getOrderIdsForSynchronization();
+            $paymentIDs = $this->getTransactionHistoryService()->getPaymentIdsForSynchronization();
 
-            $totalOrders = count($orderIDs);
+            $totalOrders = count($paymentIDs);
             $offset = 0;
 
             while ($offset < $totalOrders) {
-                $orderIdsToSynchronize = array_slice($orderIDs, $offset, self::TRANSACTIONS_COUNT_TO_SYNC);
+                $paymentIdsToSynchronize = array_slice($paymentIDs, $offset, self::TRANSACTIONS_COUNT_TO_SYNC);
 
-                if (empty($orderIdsToSynchronize)) {
+                if (empty($paymentIdsToSynchronize)) {
                     break;
                 }
 
                 $this->getQueueService()->enqueue(
                     'transaction-sync-' . $this->storeId . '-' . ($offset % 3),
-                    new TransactionSyncTask($orderIdsToSynchronize)
+                    new TransactionSyncTask($paymentIdsToSynchronize)
                 );
 
                 $offset += self::TRANSACTIONS_COUNT_TO_SYNC;
