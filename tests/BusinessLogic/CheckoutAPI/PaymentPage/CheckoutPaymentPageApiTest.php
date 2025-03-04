@@ -174,7 +174,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
             ->setOrderId('test-order-123')
-            ->setPaymentMethodsConfigs($paymentMethodsConfigs);
+            ->setPaymentMethodsConfigs($paymentMethodsConfigs)
+            ->setType("embedded");
 
         $urls = new Urls();
 
@@ -237,7 +238,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::CHARGE);
         $expectedPayPageRequest
             ->setOrderId('test-order-123')
-            ->setPaymentMethodsConfigs($paymentMethodsConfigs);
+            ->setPaymentMethodsConfigs($paymentMethodsConfigs)
+            ->setType("embedded");
 
         $urls = new Urls();
 

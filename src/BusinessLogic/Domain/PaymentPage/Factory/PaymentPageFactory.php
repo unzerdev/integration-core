@@ -50,8 +50,14 @@ class PaymentPageFactory
         ))->setOrderId($context->getOrderId())
         ->setResources($resources);
 
+        $url = $context->getReturnUrl();
+
         $urls = new Urls();
-        $urls->setReturnSuccess($context->getReturnUrl());
+        $urls->setReturnSuccess($url)
+        ->setReturnFailure($url)
+        ->setReturnPending($url)
+        ->setReturnCancel($url);
+
         $result->setUrls($urls);
 
         $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
