@@ -41,7 +41,6 @@ class GetTransactionHistoryResponse extends Response
         }
 
         $returnArray['type'] = $this->transactionHistory->getType();
-        $returnArray['paymentId'] = $this->transactionHistory->getPaymentId();
         $returnArray['orderId'] = $this->transactionHistory->getOrderId();
         $returnArray['amounts'] =
             [

@@ -9,6 +9,7 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -49,9 +50,11 @@ class OrderManagementServiceTest extends BaseTestCase
             TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
         );
         TestServiceRegister::registerService(
-            TransactionHistoryService::class, function () {
-            return $this->transactionHistoryService;
-        });
+            TransactionHistoryService::class,
+            function () {
+                return $this->transactionHistoryService;
+            }
+        );
         $this->orderManagementService = new OrderManagementService(
             $this->unzerFactory,
             $this->transactionHistoryService
@@ -74,7 +77,6 @@ class OrderManagementServiceTest extends BaseTestCase
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
         );
-
         // assert
     }
 
@@ -89,9 +91,11 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->expectException(TransactionHistoryNotFoundException::class);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]);
-
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+        );
         // assert
     }
 
@@ -111,7 +115,6 @@ class OrderManagementServiceTest extends BaseTestCase
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
         );
-
         // assert
     }
 
@@ -125,7 +128,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -157,7 +159,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -171,7 +172,10 @@ class OrderManagementServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], [
             'orderId',
             Amount::fromFloat
-            (1.1, Currency::getDefault())
+            (
+                1.1,
+                Currency::getDefault()
+            )
         ]);
 
         // assert
@@ -189,7 +193,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -221,7 +224,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -254,7 +256,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -269,7 +270,10 @@ class OrderManagementServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], [
             'orderId',
             Amount::fromFloat
-            (1.1, Currency::getDefault())
+            (
+                1.1,
+                Currency::getDefault()
+            )
         ]);
 
         // assert
@@ -287,7 +291,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -320,7 +323,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -353,7 +355,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -365,8 +366,11 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+        );
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
@@ -383,7 +387,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -416,7 +419,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -449,7 +451,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -461,8 +462,11 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+        );
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
@@ -479,7 +483,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -512,7 +515,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -545,7 +547,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -578,7 +579,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             new PaymentState(3, 'complete'),
@@ -587,6 +587,11 @@ class OrderManagementServiceTest extends BaseTestCase
             Amount::fromFloat(50, Currency::getDefault()),
             Amount::fromFloat(10, Currency::getDefault())
         );
+
+        $authorizedItem = new AuthorizeHistoryItem(
+            'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
+        'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
+        $transactionHistory->collection()->add($authorizedItem);
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
@@ -613,7 +618,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -625,8 +629,11 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+        );
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
@@ -643,7 +650,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             null,
@@ -655,8 +661,11 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(12, Currency::getDefault())]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(12, Currency::getDefault())]
+        );
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
@@ -673,7 +682,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             new PaymentState(3, 'complete'),
@@ -682,11 +690,20 @@ class OrderManagementServiceTest extends BaseTestCase
             Amount::fromFloat(0, Currency::getDefault()),
             Amount::fromFloat(100, Currency::getDefault())
         );
+
+        $authorizedItem = new AuthorizeHistoryItem(
+            'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
+            'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
+        $transactionHistory->collection()->add($authorizedItem);
+
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]);
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+        );
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
@@ -705,7 +722,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             new PaymentState(3, 'complete'),
@@ -741,7 +757,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             new PaymentState(3, 'complete'),
@@ -750,14 +765,22 @@ class OrderManagementServiceTest extends BaseTestCase
             Amount::fromFloat(20, Currency::getDefault()),
             Amount::fromFloat(0, Currency::getDefault()),
             [
-                new ChargeHistoryItem('charge1', 'date1', Amount::fromFloat(100, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'),
-                new ChargeHistoryItem('charge2', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge3', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge4', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()),'type', 'id'),
+                new ChargeHistoryItem(
+                    'charge1', 'date1', Amount::fromFloat(100, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge2', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge3', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge4', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
             ]
         );
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
@@ -775,7 +798,7 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById');
         self::assertNotEmpty($methodCallHistory);
-        self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
+        self::assertEquals('id', $methodCallHistory[0]['payment']);
         self::assertEquals('charge1', $methodCallHistory[0]['chargeId']);
         self::assertEquals(30, $methodCallHistory[0]['amount']);
     }
@@ -790,7 +813,6 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             'card',
-            'paymentId',
             'orderId',
             'EUR',
             new PaymentState(3, 'complete'),
@@ -799,16 +821,26 @@ class OrderManagementServiceTest extends BaseTestCase
             Amount::fromFloat(20, Currency::getDefault()),
             Amount::fromFloat(0, Currency::getDefault()),
             [
-                new ChargeHistoryItem('charge1', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge2', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge3', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(5, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge4', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(3, Currency::getDefault()),'type', 'id'),
-                new ChargeHistoryItem('charge5', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
-                    Amount::fromFloat(0, Currency::getDefault()),'type', 'id'),
+                new ChargeHistoryItem(
+                    'charge1', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge2', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge3', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(5, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge4', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(3, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge5', 'date1', Amount::fromFloat(10, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
             ]
         );
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
@@ -826,19 +858,19 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById');
         self::assertCount(5, $methodCallHistory);
-        self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
+        self::assertEquals('id', $methodCallHistory[0]['payment']);
         self::assertEquals('charge1', $methodCallHistory[0]['chargeId']);
         self::assertEquals(10, $methodCallHistory[0]['amount']);
-        self::assertEquals('paymentId', $methodCallHistory[1]['payment']);
+        self::assertEquals('id', $methodCallHistory[1]['payment']);
         self::assertEquals('charge2', $methodCallHistory[1]['chargeId']);
         self::assertEquals(5, $methodCallHistory[1]['amount']);
-        self::assertEquals('paymentId', $methodCallHistory[2]['payment']);
+        self::assertEquals('id', $methodCallHistory[2]['payment']);
         self::assertEquals('charge3', $methodCallHistory[2]['chargeId']);
         self::assertEquals(5, $methodCallHistory[2]['amount']);
-        self::assertEquals('paymentId', $methodCallHistory[3]['payment']);
+        self::assertEquals('id', $methodCallHistory[3]['payment']);
         self::assertEquals('charge4', $methodCallHistory[3]['chargeId']);
         self::assertEquals(7, $methodCallHistory[3]['amount']);
-        self::assertEquals('paymentId', $methodCallHistory[4]['payment']);
+        self::assertEquals('id', $methodCallHistory[4]['payment']);
         self::assertEquals('charge5', $methodCallHistory[4]['chargeId']);
         self::assertEquals(3, $methodCallHistory[4]['amount']);
     }

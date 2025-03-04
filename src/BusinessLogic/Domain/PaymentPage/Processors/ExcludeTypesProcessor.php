@@ -2,9 +2,14 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
 
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\ExcludedTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class RequiredDataProcessor
@@ -24,21 +29,47 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
         $this->unzerFactory = $unzerFactory;
     }
 
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
     public function process(Paypage $payPageRequest, PaymentPageCreateContext $context): void
     {
-        $payPageRequest->setExcludeTypes($this->getExcludePaymentTypesList(
-            $this->unzerFactory->makeUnzerAPI()->fetchKeypair()->getAvailablePaymentTypes(),
-            $context->getPaymentMethodType()
-        ));
+        $paymentMethodConfig = $this->setExcludedMethodConfigs(
+            $this->getExcludePaymentTypesList(
+                $this->unzerFactory->makeUnzerAPI()->fetchKeypair()->getAvailablePaymentTypes(),
+                $context->getPaymentMethodType()
+            ));
+
+        $payPageRequest->setPaymentMethodsConfigs($paymentMethodConfig);
     }
 
     private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
     {
-        return array_values(array_filter(
-            array_unique($availablePaymentTypes),
-            static function ($paymentMethodType) use ($selectedPaymentType) {
-                return $paymentMethodType !== $selectedPaymentType;
-            }
-        ));
+        return array_values(
+            array_filter(
+                array_unique($availablePaymentTypes),
+                static function ($paymentMethodType) use ($selectedPaymentType) {
+                    return $paymentMethodType !== $selectedPaymentType;
+                }
+            )
+        );
+    }
+
+    /**
+     * @param array $excludedTypes
+     * @return PaymentMethodsConfigs
+     */
+    private function setExcludedMethodConfigs(array $excludedTypes): PaymentMethodsConfigs
+    {
+        $paymentMethodConfigs = new PaymentMethodsConfigs();
+        foreach ($excludedTypes as $method) {
+            $paymentMethodConfigs->addMethodConfig(
+                ExcludedTypes::EXCLUDED_METHOD_NAMES[$method] ?? $method,
+                new PaymentMethodConfig(false)
+            );
+        }
+
+        return $paymentMethodConfigs;
     }
 }

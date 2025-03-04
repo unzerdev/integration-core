@@ -42,10 +42,14 @@ class BasketFactory
 
     protected function initializeBasket(PaymentPageCreateContext $context): Basket
     {
-        return new Basket(
+        $basket = new Basket(
             $context->getOrderId(),
             $context->getAmount()->getPriceInCurrencyUnits(),
             $context->getAmount()->getCurrency()->getIsoCode()
         );
+
+        $basket->setTotalValueGross($context->getAmount()->getPriceInCurrencyUnits());
+
+        return $basket;
     }
 }

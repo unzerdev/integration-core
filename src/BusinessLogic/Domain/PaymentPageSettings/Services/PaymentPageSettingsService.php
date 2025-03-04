@@ -8,7 +8,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageSettingService
@@ -17,11 +18,15 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaymentPageSettingsService
 {
-    private const AMOUNT = 100.28;
+    private const AMOUNT = "100.28";
     private const CURRENCY = 'EUR';
-    private const CALLBACK_URL = "https://mockurl.com/payment-callback";
+    const EMBEDDED_PAYPAGE_TYPE = "embedded";
 
+    private const LOGO_IMAGE_NAME = 'logo.png';
     private const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
+
+    private const BACKGROUND_IMAGE_NAME = 'background.png';
+    private const BACKGROUND_IMAGE_PREVIEW_NAME = 'background_preview.png';
 
     /**
      * @var PaymentPageSettings
@@ -56,10 +61,22 @@ class PaymentPageSettingsService
      */
     public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
-        if ($paymentPageSettings->getFile()->hasFileInfo()) {
-            $url = $this->uploaderService->uploadImage($paymentPageSettings->getFile()->getFileInfo());
-            $paymentPageSettings->getFile()->setUrl($url);
+        if ($paymentPageSettings->getLogoFile()->hasFileInfo()) {
+            $url = $this->uploaderService->uploadImage(
+                $paymentPageSettings->getLogoFile()->getFileInfo(),
+                self::LOGO_IMAGE_NAME
+            );
+            $paymentPageSettings->getLogoFile()->setUrl($url);
         }
+
+        if ($paymentPageSettings->getBackgroundFile()->hasFileInfo()) {
+            $url = $this->uploaderService->uploadImage(
+                $paymentPageSettings->getBackgroundFile()->getFileInfo(),
+                self::BACKGROUND_IMAGE_NAME
+            );
+            $paymentPageSettings->getBackgroundFile()->setUrl($url);
+        }
+
         $this->repository->setPaymentPageSettings($paymentPageSettings);
 
         return $paymentPageSettings;
@@ -85,20 +102,32 @@ class PaymentPageSettingsService
     {
         $unzerApi = $this->unzerFactory->makeUnzerAPI();
 
-        if ($paymentPageSettings->getFile()->hasFileInfo()) {
+        if ($paymentPageSettings->getLogoFile()->hasFileInfo()) {
             $url = $this->uploaderService->uploadImage(
-                $paymentPageSettings->getFile()->getFileInfo(),
+                $paymentPageSettings->getLogoFile()->getFileInfo(),
                 self::LOGO_IMAGE_PREVIEW_NAME
             );
-            $paymentPageSettings->getFile()->setUrl($url);
+            $paymentPageSettings->getLogoFile()->setUrl($url);
         }
 
-        $payPageRequest = $paymentPageSettings->inflate(new Paypage(
-            self::AMOUNT,
-            self::CURRENCY,
-            self::CALLBACK_URL,
-        ));
+        if ($paymentPageSettings->getBackgroundFile()->hasFileInfo()) {
+            $url = $this->uploaderService->uploadImage(
+                $paymentPageSettings->getBackgroundFile()->getFileInfo(),
+                self::BACKGROUND_IMAGE_PREVIEW_NAME
+            );
 
-        return $unzerApi->initPayPageCharge($payPageRequest);
+            $paymentPageSettings->getBackgroundFile()->setUrl($url);
+        }
+
+        $payPageRequest = $paymentPageSettings->inflate(
+            new Paypage(
+                self::AMOUNT,
+                self::CURRENCY
+            )
+        );
+
+        $payPageRequest->setType(self::EMBEDDED_PAYPAGE_TYPE);
+
+        return $unzerApi->createPaypage($payPageRequest);
     }
 }

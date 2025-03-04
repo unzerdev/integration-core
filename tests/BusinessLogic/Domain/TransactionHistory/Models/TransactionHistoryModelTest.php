@@ -50,7 +50,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         ];
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -85,7 +84,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         ];
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -121,7 +119,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         ];
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -149,7 +146,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -203,7 +199,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -264,7 +259,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -360,7 +354,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         $chargebackItems = $transactionHistory->collection()->filterByType(TransactionTypes::CHARGEBACK);
 
         self::assertEquals(PaymentMethodTypes::CARDS, $transactionHistory->getType());
-        self::assertEquals('payment1', $transactionHistory->getPaymentId());
         self::assertEquals('order1', $transactionHistory->getOrderId());
         self::assertEquals(Amount::fromFloat(1000, Currency::fromIsoCode('EUR')),
             $transactionHistory->getTotalAmount());
@@ -438,7 +431,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -450,7 +442,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory2 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -475,7 +466,6 @@ class TransactionHistoryModelTest extends BaseTestCase
         // arrange
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -487,7 +477,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory2 = new TransactionHistory(
             PaymentMethodTypes::CARDS,
-            'payment11',
             'order11',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -531,7 +520,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -571,7 +559,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -617,7 +604,6 @@ class TransactionHistoryModelTest extends BaseTestCase
 
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),

@@ -54,8 +54,14 @@ class OrderManagementService
             return;
         }
 
+        $authorizedItem = $transactionHistory->collection()->authorizedItem();
+
+        if(!$authorizedItem) {
+            return;
+        }
+
         $this->unzerFactory->makeUnzerAPI()->chargeAuthorization(
-            $transactionHistory->getPaymentId(),
+            $authorizedItem->getPaymentId(),
             $chargeAmount->getPriceInCurrencyUnits(),
             $transactionHistory->getOrderId()
         );
@@ -78,8 +84,14 @@ class OrderManagementService
             return;
         }
 
+        $authorizedItem = $transactionHistory->collection()->authorizedItem();
+
+        if(!$authorizedItem) {
+            return;
+        }
+
         $this->unzerFactory->makeUnzerAPI()->cancelAuthorizationByPayment(
-            $transactionHistory->getPaymentId(),
+            $authorizedItem->getPaymentId(),
             $amount->getPriceInCurrencyUnits()
         );
     }
@@ -107,7 +119,7 @@ class OrderManagementService
         foreach ($chargeItems as $chargeItem) {
             if ($refundAmount->getValue() > $chargeItem->getRefundableAmount()->getValue()) {
                 $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
-                    $transactionHistory->getPaymentId(),
+                    $chargeItem->getPaymentId(),
                     $chargeItem->getId(),
                     $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits()
                 );
@@ -117,7 +129,7 @@ class OrderManagementService
             }
 
             $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
-                $transactionHistory->getPaymentId(),
+                $chargeItem->getPaymentId(),
                 $chargeItem->getId(),
                 $refundAmount->getPriceInCurrencyUnits()
             );

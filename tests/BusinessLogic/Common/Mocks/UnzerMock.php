@@ -44,6 +44,16 @@ class UnzerMock extends Unzer
      */
     private ?Payment $payment = null;
 
+    /**
+     * @var Basket|null
+     */
+    private ?Basket $basket = null;
+
+    /**
+     * @var Metadata|null
+     */
+    private ?Metadata $metadata = null;
+
     public function getMethodCallHistory($methodName)
     {
         return !empty($this->callHistory[$methodName]) ? $this->callHistory[$methodName] : [];
@@ -160,6 +170,20 @@ class UnzerMock extends Unzer
         return $customer;
     }
 
+    public function createBasket(Basket $basket): Basket
+    {
+        $this->callHistory['createBasket'][] = ['basket' => $this->basket];
+
+        return $basket;
+    }
+
+    public function createMetadata(Metadata $metadata): Metadata
+    {
+        $this->callHistory['createMetadata'][] = ['metadata' => $this->metadata];
+
+        return $metadata;
+    }
+
     /**
      * @param $payment
      * @param float|null $amount
@@ -261,6 +285,18 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param $orderId
+     *
+     * @return Payment
+     */
+    public function fetchPaymentByOrderId($orderId): Payment
+    {
+        $this->callHistory['fetchPayment'][] = ['paymentId' => $orderId];
+
+        return $this->payment;
+    }
+
+    /**
      * @param Payment $payment
      *
      * @return void
@@ -268,5 +304,25 @@ class UnzerMock extends Unzer
     public function setPayment(Payment $payment): void
     {
         $this->payment = $payment;
+    }
+
+    /**
+     * @param \UnzerSDK\Resources\V2\Paypage $paypage
+     *
+     * @return \UnzerSDK\Resources\V2\Paypage
+     */
+    public function createPaypage(\UnzerSDK\Resources\V2\Paypage $paypage): \UnzerSDK\Resources\V2\Paypage
+    {
+        $this->callHistory['createPaypage'][] = ['paypage' => $paypage];
+
+        $mockPaypage = new \UnzerSDK\Resources\V2\Paypage(
+            $paypage->getAmount(),
+            $paypage->getCurrency(),
+            $paypage->getMode()
+        );
+        $mockPaypage->setId($this->payPageData['id'] ?? null);
+        $mockPaypage->setRedirectUrl($this->payPageData['redirectUrl']);
+
+        return $mockPaypage;
     }
 }

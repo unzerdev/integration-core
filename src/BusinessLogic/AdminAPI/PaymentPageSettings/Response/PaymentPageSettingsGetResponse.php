@@ -33,18 +33,8 @@ class PaymentPageSettingsGetResponse extends Response
      */
     public function toArray(): array
     {
-        return $this->paymentPageSettings ? $this->transformPaymentPageSettings() :
-            [
-                'shopName' => [],
-                'shopTagline' => [],
-                'logoImageUrl' => null,
-                'headerBackgroundColor' => null,
-                'headerFontColor' => null,
-                'shopNameBackgroundColor' => null,
-                'shopNameFontColor' => null,
-                'shopTaglineBackgroundColor' => null,
-                'shopTaglineFontColor' => null,
-            ];
+        return $this->transformPaymentPageSettings();
+
     }
 
     /**
@@ -52,16 +42,40 @@ class PaymentPageSettingsGetResponse extends Response
      */
     private function transformPaymentPageSettings(): array
     {
+        if($this->paymentPageSettings === null) {
+            return [
+                'shopName' => [],
+                'logoImageUrl' => null,
+                'backgroundImageUrl' => null,
+                'headerColor' => null,
+                'brandColor' => null,
+                'textColor' => null,
+                'linkColor' => null,
+                'backgroundColor' => null,
+                'footerColor' => null,
+                'font' => null,
+                'shadows' => null,
+                'hideUnzerLogo' => null,
+                'hideBasket' => null,
+                'cornerRadius' => null,
+            ];
+        }
+
         return [
             'shopName' => $this->paymentPageSettings->getShopNames()->toArray(),
-            'shopTagline' => $this->paymentPageSettings->getShopTaglines()->toArray(),
-            'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
-            'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
-            'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
-            'shopNameBackgroundColor' => $this->paymentPageSettings->getShopNameBackgroundColor(),
-            'shopNameFontColor' => $this->paymentPageSettings->getShopNameFontColor(),
-            'shopTaglineBackgroundColor' => $this->paymentPageSettings->getShopTaglineBackgroundColor(),
-            'shopTaglineFontColor' => $this->paymentPageSettings->getShopTaglineFontColor(),
+            'logoImageUrl' => $this->paymentPageSettings->getLogoFile()->getUrl(),
+            'backgroundImageUrl' => $this->paymentPageSettings->getBackgroundFile()->getUrl(),
+            'headerColor' => $this->paymentPageSettings->getHeaderColor(),
+            'brandColor' => $this->paymentPageSettings->getBrandColor(),
+            'textColor' => $this->paymentPageSettings->getTextColor(),
+            'linkColor' => $this->paymentPageSettings->getLinkColor(),
+            'backgroundColor' => $this->paymentPageSettings->getBackgroundColor(),
+            'footerColor' => $this->paymentPageSettings->getFooterColor(),
+            'font' => $this->paymentPageSettings->getFont(),
+            'shadows' => $this->paymentPageSettings->getShadows(),
+            'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
+            'hideBasket' => $this->paymentPageSettings->getHideBasket(),
+            'cornerRadius' => $this->paymentPageSettings->getCornerRadius()
         ];
     }
 }

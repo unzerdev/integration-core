@@ -157,7 +157,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $unzerMock = new UnzerMock('s-priv-test');
         $unzerMock->setPayment($this->generateValidPayment());
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card','order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -183,7 +183,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setState(PaymentState::STATE_PENDING);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -209,7 +209,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setState(PaymentState::STATE_CANCELED);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card','order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -235,7 +235,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setState(PaymentState::STATE_COMPLETED);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card','order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -261,7 +261,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setState(PaymentState::STATE_CHARGEBACK);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card','order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -295,7 +295,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card','order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -329,7 +329,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -365,7 +365,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -414,7 +414,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -453,7 +453,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -490,7 +490,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -526,7 +526,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act
@@ -560,7 +560,7 @@ class TransactionSynchronizerServiceTest extends BaseTestCase
         $payment->setAmount($amount);
         $unzerMock->setPayment($payment);
         $this->unzerFactory->setMockUnzer($unzerMock);
-        $transactionHistory = new TransactionHistory('card', 'payment1', 'order1', 'EUR');
+        $transactionHistory = new TransactionHistory('card', 'order1', 'EUR');
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // Act

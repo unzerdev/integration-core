@@ -13,7 +13,6 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -24,7 +23,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageSettingsControllerTest
@@ -95,11 +94,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $this->paymentPageSettingsService->setPaymentPageSettings(
             new PaymentPageSettingsModel(
                 new UploadedFile('https://www.test.com/'),
+                new UploadedFile('https://www.test2.com/'),
                 TranslationCollection::fromArray([
                     ['locale' => 'default', 'value' => 'shop'],
                     ['locale' => 'en_us', 'value' => 'shop']
                 ]),
-                new TranslationCollection(new Translation('en_us', "description")),
                 '#FFFFFF',
                 '#666666',
                 '#111111',
@@ -125,11 +124,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://www.test2.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            new TranslationCollection(new Translation('en_us', "description")),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -158,11 +157,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         // Arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://www.test2.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -175,11 +174,11 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
         $expectedResponse = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://www.test2.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -205,14 +204,19 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
         $expectedResponse = [
             'shopName' => [],
-            'shopTagline' => [],
             'logoImageUrl' => null,
-            'headerBackgroundColor' => null,
-            'headerFontColor' => null,
-            'shopNameBackgroundColor' => null,
-            'shopNameFontColor' => null,
-            'shopTaglineBackgroundColor' => null,
-            'shopTaglineFontColor' => null
+            'backgroundImageUrl' => null,
+            'headerColor' => null,
+            'brandColor' => null,
+            'textColor' => null,
+            'linkColor' => null,
+            'backgroundColor' => null,
+            'footerColor' => null,
+            'font' => null,
+            'shadows' => null,
+            'hideUnzerLogo' => null,
+            'hideBasket' => null,
+            'cornerRadius' => null
         ];
         // Assert
         self::assertEquals($response->toArray(), $expectedResponse);
@@ -230,8 +234,9 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             'https://www.test.com/',
+            null,
+            'https://www.test2.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -239,6 +244,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#555555',
             '#333333',
             '#222222',
+            'Ariel',
         );
 
         // Act
@@ -260,8 +266,9 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             new \SplFileInfo('https://www.test.com/'),
+            null,
+            'https://www.test.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -293,14 +300,19 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     {
         return [
             'shopName' => $paymentPageSettings->getShopNames()->toArray(),
-            'shopTagline' => $paymentPageSettings->getShopTaglines()->toArray(),
-            'logoImageUrl' => $paymentPageSettings->getFile()->getUrl(),
-            'headerBackgroundColor' => $paymentPageSettings->getHeaderBackgroundColor(),
-            'headerFontColor' => $paymentPageSettings->getHeaderFontColor(),
-            'shopNameBackgroundColor' => $paymentPageSettings->getShopNameBackgroundColor(),
-            'shopNameFontColor' => $paymentPageSettings->getShopNameFontColor(),
-            'shopTaglineBackgroundColor' => $paymentPageSettings->getShopTaglineBackgroundColor(),
-            'shopTaglineFontColor' => $paymentPageSettings->getShopTaglineFontColor(),
+            'logoImageUrl' => $paymentPageSettings->getLogoFile()->getUrl(),
+            'backgroundImageUrl' => $paymentPageSettings->getBackgroundFile()->getUrl(),
+            'headerColor' => $paymentPageSettings->getHeaderColor(),
+            'brandColor' => $paymentPageSettings->getBrandColor(),
+            'textColor' => $paymentPageSettings->getTextColor(),
+            'linkColor' => $paymentPageSettings->getLinkColor(),
+            'backgroundColor' => $paymentPageSettings->getBackgroundColor(),
+            'footerColor' => $paymentPageSettings->getFooterColor(),
+            'font' => $paymentPageSettings->getFont(),
+            'shadows' => $paymentPageSettings->getShadows(),
+            'hideUnzerLogo' => $paymentPageSettings->getHideUnzerLogo(),
+            'hideBasket' => $paymentPageSettings->getHideBasket(),
+            'cornerRadius' => $paymentPageSettings->getCornerRadius()
         ];
     }
 
@@ -318,7 +330,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
+            'https://www.test.com/',
+            null,
             'https://www.test.com/',
             null,
             '#FFFFFF',
@@ -350,8 +363,9 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
             'https://www.test.com/',
+            null,
+            null,
             null,
             '#FFFFFF',
             '#666666',
@@ -370,6 +384,6 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPagePreview($settingsRequest);
 
         // Assert
-        self::assertEquals(['id' => $id], $response->toArray());
+        self::assertEquals(['paypageId' => $id], $response->toArray());
     }
 }

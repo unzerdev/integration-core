@@ -60,14 +60,20 @@ class PaymentPageSettings extends Entity
 
         $this->paymentPageSettings = new DomainPaymentPageSettings(
             new UploadedFile($paypageData['logoImageUrl']),
+            new UploadedFile($paypageData['backgroundImageUrl']),
             TranslationCollection::fromArray($paypageData['shopNames']),
-            TranslationCollection::fromArray($paypageData['shopTaglines']),
-            $paypageData['headerBackgroundColor'],
-            $paypageData['headerFontColor'],
-            $paypageData['shopNameBackgroundColor'],
-            $paypageData['shopNameFontColor'],
-            $paypageData['shopTaglineBackgroundColor'],
-            $paypageData['shopTaglineFontColor'],);
+            $paypageData['headerColor'],
+            $paypageData['brandColor'],
+            $paypageData['textColor'],
+            $paypageData['linkColor'],
+            $paypageData['backgroundColor'],
+            $paypageData['footerColor'],
+            $paypageData['font'],
+            $paypageData['shadows'],
+            $paypageData['hideUnzerLogo'],
+            $paypageData['hideBasket'],
+            $paypageData['cornerRadius'],
+        );
     }
 
     /**
@@ -79,14 +85,19 @@ class PaymentPageSettings extends Entity
         $data['storeId'] = $this->storeId;
         $data['paymentPageSettings'] = [
             'shopNames' => $this->paymentPageSettings->getShopNames()->toArray(),
-            'shopTaglines' => $this->paymentPageSettings->getShopTaglines()->toArray(),
-            'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
-            'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
-            'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
-            'shopNameBackgroundColor' => $this->paymentPageSettings->getShopNameBackgroundColor(),
-            'shopNameFontColor' => $this->paymentPageSettings->getShopNameFontColor(),
-            'shopTaglineBackgroundColor' => $this->paymentPageSettings->getShopTaglineBackgroundColor(),
-            'shopTaglineFontColor' => $this->paymentPageSettings->getShopTaglineFontColor(),
+            'logoImageUrl' =>  $this->paymentPageSettings->getLogoFile()->getUrl(),
+            'backgroundImageUrl' => $this->paymentPageSettings->getBackgroundFile()->getUrl(),
+            'headerColor' => $this->paymentPageSettings->getHeaderColor(),
+            'brandColor' => $this->paymentPageSettings->getBrandColor(),
+            'textColor' => $this->paymentPageSettings->getTextColor(),
+            'linkColor' => $this->paymentPageSettings->getLinkColor(),
+            'backgroundColor' => $this->paymentPageSettings->getBackgroundColor(),
+            'footerColor' => $this->paymentPageSettings->getFooterColor(),
+            'font' => $this->paymentPageSettings->getFont(),
+            'shadows' => $this->paymentPageSettings->getShadows(),
+            'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
+            'hideBasket' => $this->paymentPageSettings->getHideBasket(),
+            'cornerRadius' => $this->paymentPageSettings->getCornerRadius(),
         ];
 
         return $data;
