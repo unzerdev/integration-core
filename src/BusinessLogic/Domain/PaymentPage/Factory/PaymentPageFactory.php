@@ -50,6 +50,10 @@ class PaymentPageFactory
         ))->setOrderId($context->getOrderId())
         ->setResources($resources);
 
+        $urls = new Urls();
+        $urls->setReturnSuccess($context->getReturnUrl());
+        $result->setUrls($urls);
+
         $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
         return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
