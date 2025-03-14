@@ -8,6 +8,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettin
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\Basket;
+use UnzerSDK\Resources\EmbeddedResources\BasketItem;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\V2\Paypage;
 
@@ -126,8 +128,35 @@ class PaymentPageSettingsService
             )
         );
 
+        $basket = $this->createMockBasket();
+        $basket = $unzerApi->createBasket($basket);
+
+        $payPageRequest->setResources(new Resources(null, $basket->getId()));
+
         $payPageRequest->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
         return $unzerApi->createPaypage($payPageRequest);
+    }
+
+    private function createMockBasket(): Basket
+    {
+        $basket = new Basket('1', self::AMOUNT, self::CURRENCY);
+        $basket->setTotalValueGross(self::AMOUNT);
+
+        $basket->addBasketItem($this->createMockBasketItem('Test Item 1', 'testItem1', self::AMOUNT - 40, 0));
+        $basket->addBasketItem($this->createMockBasketItem('Test Item 2', 'testItem2', 40 , 0));
+
+        return $basket;
+    }
+
+    private function createMockBasketItem(string $title, string $reference, float $amount, float $discount): BasketItem
+    {
+        $basketItem = new BasketItem($title);
+
+        $basketItem->setBasketItemReferenceId($reference);
+        $basketItem->setAmountDiscountPerUnitGross($discount);
+        $basketItem->setAmountPerUnitGross($amount);
+
+        return $basketItem;
     }
 }
