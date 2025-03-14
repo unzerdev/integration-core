@@ -42,8 +42,8 @@
   let current_name = Unzer.config.store.storeName;
 
   const fonts = [
-    { label: 'Arial', value: 'ArialMT' },
-    { label: 'Times New Roman', value: 'TimesNR' },
+    { label: 'Arial', value: 'Arial'},
+    { label: 'Times New Roman', value: 'Times New Roman' },
     { label: 'Courier New', value: 'CourierNewPS' },
     { label: 'Georgia', value: 'GeorgiaMT' },
     { label: 'Verdana', value: 'VerdanaLT' },
@@ -120,6 +120,8 @@
   }
 
 
+  const { elementGenerator: generator } = Unzer;
+
   /**
    * render design page
    */
@@ -167,7 +169,7 @@
         }
       },
       onChange: (value) => {
-        selectedValues.logoImageUrl = value;
+        selectedValues.logoImageUrl = value.trim() === "" ? null : value;
         selectedValues.logoFile = null;
       }
     });
@@ -183,10 +185,20 @@
         }
       },
       onChange: (value) => {
-        selectedValues.backgroundImageUrl = value;
+        selectedValues.backgroundImageUrl = value.trim() === "" ? null : value;
         selectedValues.backgroundFile = null;
       }
     });
+
+    const fontField = generator.createElement('div', 'unzer-input-wrapper-padding','',null,[Unzer.components.DropdownField.create({
+          title: 'paymentPageSettings.fonts',
+          description: "paymentPageSettings.fontsDescription",
+          options: fonts,
+          value: selectedValues.font || '',
+          onChange: (value) => {
+            selectedValues.font = value;
+          },
+        })]);
 
     page.append(
         Unzer.components.TwoColumnLayout.create(
@@ -211,20 +223,10 @@
                     locale: 'default',
                     value: Unzer.config.store.storeName
                   }
-              ),
-              urlField
+              )
 
             ], [
-              Unzer.components.DropdownField.create({
-                title: 'paymentPageSettings.fonts',
-                description: "paymentPageSettings.fontsDescription",
-                options: fonts,
-                value: selectedValues.font || '',
-                onChange: (value) => {
-                  selectedValues.font = value;
-                }
-              }),
-              backgroundImageField
+              urlField
             ]),
         Unzer.components.PageHeading.create({
           title: "design.translations.title",
@@ -289,13 +291,15 @@
 
     page.append(
         Unzer.components.TwoColumnLayout.create([
+          backgroundImageField,
           headerColor,
-          brandColor,
           textColor,
+          brandColor,
         ], [
+          fontField,
+          footerColor,
           linkColor,
           backgroundColor,
-          footerColor,
         ]));
 
     colorFields = [
@@ -318,7 +322,7 @@
 
     const hideUnzerLogoToggle = Unzer.components.ToggleField.create({
       label: "paymentPageSettings.hideUnzerLogo",
-      description: "paymentPageSettings.hideUnzerLogo",
+      description: "paymentPageSettings.hideUnzerLogoDescription",
       value: selectedValues.hideUnzerLogo ?? false,
       onChange: (value) => {
         selectedValues.hideUnzerLogo = value;
@@ -362,8 +366,6 @@
       onChange: handleChange
     });
 
-    const { elementGenerator: generator } = Unzer;
-
     const descriptionSpan = generator.createElement(
         'span',
         'description',
@@ -391,11 +393,11 @@
 
     page.append(
         Unzer.components.TwoColumnLayout.create([
-          cornerRadiusWrapper
-        ], [
           hideBasketToggle,
           hideUnzerLogoToggle,
-          shadowsToggle
+          shadowsToggle,
+        ], [
+          cornerRadiusWrapper
         ]));
   }
 
