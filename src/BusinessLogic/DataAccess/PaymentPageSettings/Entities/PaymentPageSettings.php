@@ -59,20 +59,20 @@ class PaymentPageSettings extends Entity
         $paypageData = $data['paymentPageSettings'] ?? [];
 
         $this->paymentPageSettings = new DomainPaymentPageSettings(
-            new UploadedFile($paypageData['logoImageUrl']),
-            new UploadedFile($paypageData['backgroundImageUrl']),
-            TranslationCollection::fromArray($paypageData['shopNames']),
-            $paypageData['headerColor'],
-            $paypageData['brandColor'],
-            $paypageData['textColor'],
-            $paypageData['linkColor'],
-            $paypageData['backgroundColor'],
-            $paypageData['footerColor'],
-            $paypageData['font'],
-            $paypageData['shadows'],
-            $paypageData['hideUnzerLogo'],
-            $paypageData['hideBasket'],
-            $paypageData['cornerRadius'],
+            new UploadedFile($paypageData['logoImageUrl'] ?? null),
+            new UploadedFile($paypageData['backgroundImageUrl'] ?? null),
+            TranslationCollection::fromArray($paypageData['shopNames'] ?? []),
+            $paypageData['headerColor'] ?? null,
+            $paypageData['brandColor'] ?? null,
+            $paypageData['textColor'] ?? null,
+            $paypageData['linkColor'] ?? null,
+            $paypageData['backgroundColor'] ?? null,
+            $paypageData['footerColor'] ?? null,
+            $paypageData['font'] ?? null,
+            $paypageData['shadows'] ?? null,
+            $paypageData['hideUnzerLogo'] ?? null,
+            $paypageData['hideBasket'] ?? null,
+            $paypageData['cornerRadius'] ?? null,
         );
     }
 

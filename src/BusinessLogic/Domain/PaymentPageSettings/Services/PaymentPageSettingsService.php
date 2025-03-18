@@ -143,8 +143,8 @@ class PaymentPageSettingsService
         $basket = new Basket('1', self::AMOUNT, self::CURRENCY);
         $basket->setTotalValueGross(self::AMOUNT);
 
-        $basket->addBasketItem($this->createMockBasketItem('Test Item 1', 'testItem1', self::AMOUNT - 40, 0));
-        $basket->addBasketItem($this->createMockBasketItem('Test Item 2', 'testItem2', 40 , 0));
+        $basket->addBasketItem($this->createMockBasketItem('Item 1', 'testItem1', self::AMOUNT - 40, 0));
+        $basket->addBasketItem($this->createMockBasketItem('Item 2', 'testItem2', 40 , 0));
 
         return $basket;
     }
