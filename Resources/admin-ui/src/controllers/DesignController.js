@@ -27,7 +27,7 @@
         backgroundImageUrl: null,
         backgroundFile: null,
         font: null,
-        brandColor: '#FFFFFF',
+        brandColor: '#0C1332',
         headerColor: '#FFFFFF',
         textColor: '#0C1332',
         linkColor: '#1B6AD7',
