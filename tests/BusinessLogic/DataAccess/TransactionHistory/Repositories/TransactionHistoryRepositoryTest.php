@@ -72,7 +72,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -115,7 +114,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -158,7 +156,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -201,7 +198,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -239,7 +235,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -266,7 +261,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
 
         $newTransactionHistory = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(2, 'paid2'),
@@ -297,7 +291,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
     {
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -309,7 +302,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
 
         $transactionHistory2 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -369,7 +361,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
         // arrange
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -381,7 +372,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
 
         $transactionHistory2 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -393,7 +383,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
 
         $transactionHistory3 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),
@@ -405,7 +394,6 @@ class TransactionHistoryRepositoryTest extends BaseTestCase
 
         $transactionHistory4 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),

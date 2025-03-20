@@ -4,7 +4,7 @@ namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageSettingsServiceMock.

@@ -469,7 +469,7 @@
         const modal = Unzer.components.Modal.create({
             title: config.typeName,
             canClose: true,
-            description: `paymentMethods.${config.type}|${getPaynmentMethodUrl(paymentMethod.type)}`,
+            description: `paymentMethods.${config.type}|${getPaynmentMethodUrl(paymentMethod.type.toString().toLowerCase())}`,
             content: content,
             image: config.type,
             buttons: [

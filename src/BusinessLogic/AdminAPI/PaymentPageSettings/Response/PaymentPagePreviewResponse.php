@@ -3,7 +3,7 @@
 namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPagePreviewResponse
@@ -28,7 +28,7 @@ class PaymentPagePreviewResponse extends Response
     public function toArray(): array
     {
         return [
-            'id' => $this->payPage->getId(),
+            'paypageId' => $this->payPage->getId(),
         ];
     }
 }

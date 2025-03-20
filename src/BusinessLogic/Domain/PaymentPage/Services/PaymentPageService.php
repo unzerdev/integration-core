@@ -6,7 +6,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
@@ -19,7 +19,8 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHisto
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageService
@@ -72,8 +73,49 @@ class PaymentPageService
      */
     public function create(PaymentPageCreateContext $context): Paypage
     {
-        $paymentMethodSettings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
-        if (!$paymentMethodSettings || !$paymentMethodSettings->isEnabled()) {
+        $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
+
+        $resources = $this->buildResources($context);
+
+        $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage(
+            $this->paymentPageFactory->create($context, $paymentMethodSettings->getBookingMethod()->getBookingMethod(),
+                $resources
+            ),
+        );
+
+        $this->updateTransactionHistory($context);
+
+        return $payPageResponse;
+    }
+
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return void
+     */
+    private function updateTransactionHistory(PaymentPageCreateContext $context) : void
+    {
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
+            ?? new TransactionHistory(
+                $context->getPaymentMethodType(),
+                $context->getOrderId(),
+                $context->getAmount()->getCurrency()->getIsoCode()
+            );
+
+        $transactionHistory->setType($context->getPaymentMethodType());
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+    }
+
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return PaymentMethodConfig|null
+     * @throws PaymentConfigNotFoundException
+     */
+    private function getEnabledPaymentMethodSettings(PaymentPageCreateContext $context): ?PaymentMethodConfig
+    {
+        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
+        if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
                 new TranslatableLabel(
                     "Enabled payment method config for type: {$context->getPaymentMethodType()} not found",
@@ -81,41 +123,37 @@ class PaymentPageService
                 ),
             );
         }
+        return $settings;
+    }
 
+    /**
+     * @param PaymentPageCreateContext $context
+     *
+     * @return Resources
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    private function buildResources(PaymentPageCreateContext $context) : Resources
+    {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
             $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
         }
 
-        if ($paymentMethodSettings->getBookingMethod()->equal(BookingMethod::authorize())) {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageAuthorize(
-                $this->paymentPageFactory->create($context),
-                $customer,
-                $this->basketFactory->create($context),
-                $this->metadataProvider->get($context)
-            );
-        } else {
-            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->initPayPageCharge(
-                $this->paymentPageFactory->create($context),
-                $customer,
-                $this->basketFactory->create($context),
-                $this->metadataProvider->get($context)
-            );
+        $basket = $this->basketFactory->create($context);
+        if($basket !== null) {
+            $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
         }
 
-        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
-            ?? new TransactionHistory(
-                $context->getPaymentMethodType(),
-                $payPageResponse->getPaymentId(),
-                $context->getOrderId(),
-                $context->getAmount()->getCurrency()->getIsoCode()
-            );
+        $metaData = $this->metadataProvider->get($context);
+        $metaData = $this->unzerFactory->makeUnzerAPI()->createMetadata($metaData);
 
-        $transactionHistory->setType($context->getPaymentMethodType());
-        $transactionHistory->setPaymentId($payPageResponse->getPaymentId());
-        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
-
-        return $payPageResponse;
+        return new Resources(
+            $customer !== null ? $customer->getId() : null,
+            $basket !== null ? $basket->getId() : null,
+            $metaData->getId()
+        );
     }
 
     /**
@@ -136,7 +174,7 @@ class PaymentPageService
             ));
         }
 
-        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPayment($transactionHistory->getPaymentId());
+        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($transactionHistory->getOrderId());
         $newTransactionHistory = TransactionHistory::fromUnzerPayment($payment);
         if (!$newTransactionHistory->isEqual($transactionHistory)) {
             $newTransactionHistory->synchronizeHistoryItems($transactionHistory);

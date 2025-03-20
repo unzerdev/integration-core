@@ -33,14 +33,19 @@ class PaymentPageSettingsPutResponse extends Response
     {
         return [
             'shopName' => $this->paymentPageSettings->getShopNames()->toArray(),
-            'shopTagline' => $this->paymentPageSettings->getShopTaglines()->toArray(),
-            'logoImageUrl' => $this->paymentPageSettings->getFile()->getUrl(),
-            'headerBackgroundColor' => $this->paymentPageSettings->getHeaderBackgroundColor(),
-            'headerFontColor' => $this->paymentPageSettings->getHeaderFontColor(),
-            'shopNameBackgroundColor' => $this->paymentPageSettings->getShopNameBackgroundColor(),
-            'shopNameFontColor' => $this->paymentPageSettings->getShopNameFontColor(),
-            'shopTaglineBackgroundColor' => $this->paymentPageSettings->getShopTaglineBackgroundColor(),
-            'shopTaglineFontColor' => $this->paymentPageSettings->getShopTaglineFontColor(),
+            'logoImageUrl' => $this->paymentPageSettings->getLogoFile()->getUrl(),
+            'backgroundImageUrl' => $this->paymentPageSettings->getBackgroundFile()->getUrl(),
+            'headerColor' => $this->paymentPageSettings->getHeaderColor(),
+            'brandColor' => $this->paymentPageSettings->getBrandColor(),
+            'textColor' => $this->paymentPageSettings->getTextColor(),
+            'linkColor' => $this->paymentPageSettings->getLinkColor(),
+            'backgroundColor' => $this->paymentPageSettings->getBackgroundColor(),
+            'footerColor' => $this->paymentPageSettings->getFooterColor(),
+            'font' => $this->paymentPageSettings->getFont(),
+            'shadows' => $this->paymentPageSettings->getShadows(),
+            'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
+            'hideBasket' => $this->paymentPageSettings->getHideBasket(),
+            'cornerRadius' => $this->paymentPageSettings->getCornerRadius(),
         ];
     }
 }

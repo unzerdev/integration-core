@@ -237,8 +237,8 @@ class DisconnectServiceTest extends BaseTestCase
         // arrange
         $settings = new PaymentPageSettings(
             new UploadedFile('https://www.test.com/'),
+            new UploadedFile(null),
             TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
-            new TranslationCollection(new Translation('en_us',"description")),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -300,7 +300,6 @@ class DisconnectServiceTest extends BaseTestCase
     {
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,
-            'payment1',
             'order1',
             'EUR',
             new PaymentState(1, 'paid'),

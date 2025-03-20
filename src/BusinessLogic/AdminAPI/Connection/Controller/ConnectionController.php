@@ -4,7 +4,6 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\Connection\Controller;
 
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ConnectionRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetConnectionDataRequest;
-use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\GetCredentialsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReconnectRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Request\ReRegisterWebhookRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ConnectionResponse;

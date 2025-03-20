@@ -5,7 +5,9 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
-use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
+use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class Factory
@@ -14,6 +16,8 @@ use UnzerSDK\Resources\PaymentTypes\Paypage;
  */
 class PaymentPageFactory
 {
+    const EMBEDDED_PAYPAGE_TYPE = "embedded";
+
     private PaymentPageSettingsService $paymentPageSettingsService;
 
     /**
@@ -25,9 +29,9 @@ class PaymentPageFactory
         $this->paymentPageSettingsService = $paymentPageSettingsService;
     }
 
-    public function create(PaymentPageCreateContext $context): Paypage
+    public function create(PaymentPageCreateContext $context, string $bookingMethod, Resources $resources): Paypage
     {
-        $payPage = $this->initializePayPage($context);
+        $payPage = $this->initializePayPage($context, $bookingMethod, $resources);
         foreach (PaymentPageProcessorsRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {
             $processor->process($payPage, $context);
         }
@@ -35,14 +39,28 @@ class PaymentPageFactory
         return $payPage;
     }
 
-    protected function initializePayPage(PaymentPageCreateContext $context): Paypage
+    protected function initializePayPage(PaymentPageCreateContext $context, string $bookingMethod, Resources $resources): Paypage
     {
         $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
+
         $result = (new Paypage(
             $context->getAmount()->getPriceInCurrencyUnits(),
             $context->getAmount()->getCurrency()->getIsoCode(),
-            $context->getReturnUrl()
-        ))->setOrderId($context->getOrderId());
+            $bookingMethod
+        ))->setOrderId($context->getOrderId())
+        ->setResources($resources);
+
+        $url = $context->getReturnUrl();
+
+        $urls = new Urls();
+        $urls->setReturnSuccess($url)
+        ->setReturnFailure($url)
+        ->setReturnPending($url)
+        ->setReturnCancel($url);
+
+        $result->setUrls($urls);
+
+        $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
 
         return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
     }
