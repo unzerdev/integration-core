@@ -141,7 +141,7 @@ class TransactionHistoryServiceTest extends BaseTestCase
         // arrange
 
         // act
-        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getPaymentIdsForSynchronization']);
+        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getOrderIdsForSynchronization']);
 
         // assert
 
@@ -227,12 +227,12 @@ class TransactionHistoryServiceTest extends BaseTestCase
         $this->repository->save($configEntity);
 
         // act
-        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getPaymentIdsForSynchronization']);
+        $transactionHistories = StoreContext::doWithStore('1', [$this->service, 'getOrderIdsForSynchronization']);
 
         // assert
         self::assertNotEmpty($transactionHistories);
         self::assertCount(2, $transactionHistories);
-        self::assertEquals(['payment1', 'payment1'], $transactionHistories);
+        self::assertEquals(['order1', 'order2'], $transactionHistories);
     }
 }
 

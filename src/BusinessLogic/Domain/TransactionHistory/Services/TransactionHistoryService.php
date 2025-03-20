@@ -48,11 +48,11 @@ class TransactionHistoryService
     /**
      * @return string[]
      */
-    public function getPaymentIdsForSynchronization(): array
+    public function getOrderIdsForSynchronization(): array
     {
         $time = TimeProvider::getInstance()->getCurrentLocalTime()->sub(new DateInterval('P1M'))->getTimestamp();
         $histories = $this->transactionHistoryRepository->getTransactionHistoriesByUpdateTime($time);
 
-        return array_map(fn(TransactionHistory $transaction) => $transaction->getPaymentId(), $histories);
+        return array_map(fn(TransactionHistory $transaction) => $transaction->getOrderId(), $histories);
     }
 }
