@@ -30,13 +30,23 @@ const PaymentMethodComponent = ({ description = '', image = null, name = '', sta
             generator.createElement('span', 'unzer-payment-method-description', description, [], [])
         ]
     );
-    const imageUrl = image !== "" ? `${Unzer.config.imagesUrl}/${image}.svg` : `${Unzer.config.imagesUrl}/default.svg` ;
+  const imageUrl = image !== "" ? `${Unzer.config.imagesUrl}/${image}.svg` : `${Unzer.config.imagesUrl}/default.svg` ;
+  const defaultImageUrl = `${Unzer.config.imagesUrl}/default.svg`;
+  const altName = Unzer.translationService.translate('paymentMethods.logo');
+  const imgElement = generator.createElementFromHTML(
+      `<img src="${imageUrl}" alt=${defaultImageUrl}>`
+  );
+
+  imgElement.onerror = function () {
+    this.src = defaultImageUrl;
+  };
+
     const logo = generator.createElement(
         'div',
         'unzer-payment-method-logo',
         '',
         [],
-        [generator.createElementFromHTML(`<img src=${imageUrl} alt="${Unzer.config.imagesUrl}/default.svg">`)]
+        [imgElement]
     );
     const paymentInfo = generator.createElement('div', 'unzer-payment-method-info', '', [], [logo, headline]);
 

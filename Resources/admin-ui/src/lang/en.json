@@ -252,7 +252,8 @@
     "paylater-installment": "Unzer Installment is a part of our Buy Now, Pay Later (BNPL) offering and it’s a very convenient payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "paylater-invoice": "Unzer Invoice is a part of our Buy Now Pay Later (BNPL) offering and it’s a convenient payment option. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
     "prepayment": "Prepayment is a safe and convenient payment method for merchants. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
-    "wechatpay": "WeChat pay is a Chinese payment method tied to the most popular messaging service in China. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>"
+    "wechatpay": "WeChat pay is a Chinese payment method tied to the most popular messaging service in China. <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>",
+    "openbanking-pis" : "Unzer Direct Bank Transfer is a payment method based on the payment initiation service.  <a href='https://docs.unzer.com/payment-methods/%s' target='_blank' class='learn-more-href'> Learn more </a>"
   },
   "validation": {
     "requiredField": "This field is required.",

@@ -67,7 +67,8 @@
         "paylater-invoice": "unzer-invoice-upl",
         "wechatpay": "wechat-pay",
         "sepa-direct-debit": "unzer-direct-debit",
-        "prepayment": "unzer-prepayment"
+        "prepayment": "unzer-prepayment",
+        "openbanking-pis": "open-banking"
     }
 
     /**
