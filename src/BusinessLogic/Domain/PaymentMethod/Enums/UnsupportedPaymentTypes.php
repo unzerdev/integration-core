@@ -14,5 +14,9 @@ interface UnsupportedPaymentTypes
         PaymentMethodTypes::APPLE_PAY,
         PaymentMethodTypes::SOFORT,
         PaymentMethodTypes::GIROPAY,
+        'installment-secured',
+        'sepa-direct-debit-secured',
+        'PIS',
+        'invoice-secured'
     ];
 }
