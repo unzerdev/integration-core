@@ -75,6 +75,7 @@ interface PaymentMethodTypes
     /** @var string */
     public const EPS = 'EPS';
 
+    /** @var string  */
     public const DIRECT_BANK_TRANSFER = 'openbanking-pis';
 
     /** @var string[] */

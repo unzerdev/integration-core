@@ -11,6 +11,7 @@ use UnzerSDK\Resources\PaymentTypes\Giropay;
 use UnzerSDK\Resources\PaymentTypes\Googlepay;
 use UnzerSDK\Resources\PaymentTypes\Ideal;
 use UnzerSDK\Resources\PaymentTypes\Klarna;
+use UnzerSDK\Resources\PaymentTypes\OpenbankingPis;
 use UnzerSDK\Resources\PaymentTypes\PaylaterDirectDebit;
 use UnzerSDK\Resources\PaymentTypes\PaylaterInstallment;
 use UnzerSDK\Resources\PaymentTypes\PaylaterInvoice;
@@ -55,6 +56,7 @@ interface SdkPaymentTypes
         PaylaterInstallment::class => PaymentMethodTypes::UNZER_INSTALLMENT,
         PaylaterInvoice::class => PaymentMethodTypes::UNZER_INVOICE,
         Prepayment::class => PaymentMethodTypes::UNZER_PREPAYMENT,
-        Wechatpay::class => PaymentMethodTypes::WECHATPAY
+        Wechatpay::class => PaymentMethodTypes::WECHATPAY,
+        OpenbankingPis::class => PaymentMethodTypes::DIRECT_BANK_TRANSFER
     ];
 }

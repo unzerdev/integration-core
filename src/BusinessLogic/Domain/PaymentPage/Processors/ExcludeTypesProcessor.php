@@ -22,6 +22,7 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
 
     /**
      * excludeTypesProcessor constructor.
+     *
      * @param UnzerFactory $unzerFactory
      */
     public function __construct(UnzerFactory $unzerFactory)
@@ -44,6 +45,12 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
         $payPageRequest->setPaymentMethodsConfigs($paymentMethodConfig);
     }
 
+    /**
+     * @param array $availablePaymentTypes
+     * @param string $selectedPaymentType
+     *
+     * @return array
+     */
     private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
     {
         return array_values(
@@ -58,16 +65,19 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
 
     /**
      * @param array $excludedTypes
+     *
      * @return PaymentMethodsConfigs
      */
     private function setExcludedMethodConfigs(array $excludedTypes): PaymentMethodsConfigs
     {
         $paymentMethodConfigs = new PaymentMethodsConfigs();
         foreach ($excludedTypes as $method) {
-            $paymentMethodConfigs->addMethodConfig(
-                ExcludedTypes::EXCLUDED_METHOD_NAMES[$method] ?? $method,
-                new PaymentMethodConfig(false)
-            );
+            if (isset(ExcludedTypes::EXCLUDED_METHOD_NAMES[$method])) {
+                $paymentMethodConfigs->addMethodConfig(
+                    ExcludedTypes::EXCLUDED_METHOD_NAMES[$method],
+                    new PaymentMethodConfig(false)
+                );
+            }
         }
 
         return $paymentMethodConfigs;
