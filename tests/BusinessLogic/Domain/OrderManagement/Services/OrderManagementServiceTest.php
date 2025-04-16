@@ -69,7 +69,6 @@ class OrderManagementServiceTest extends BaseTestCase
     public function testChargeTransactionHistoryNotFound(): void
     {
         // arrange
-        $this->expectException(TransactionHistoryNotFoundException::class);
 
         // act
         StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
@@ -78,6 +77,8 @@ class OrderManagementServiceTest extends BaseTestCase
             ]
         );
         // assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        self::assertEmpty($methodCallHistory);
     }
 
     /**
@@ -88,8 +89,6 @@ class OrderManagementServiceTest extends BaseTestCase
     public function testCancellationTransactionHistoryNotFound(): void
     {
         // arrange
-        $this->expectException(TransactionHistoryNotFoundException::class);
-
         // act
         StoreContext::doWithStore(
             '1',
@@ -97,6 +96,8 @@ class OrderManagementServiceTest extends BaseTestCase
             ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
         );
         // assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        self::assertEmpty($methodCallHistory);
     }
 
     /**
@@ -107,8 +108,6 @@ class OrderManagementServiceTest extends BaseTestCase
     public function testRefundOrderTransactionHistoryNotFound(): void
     {
         // arrange
-        $this->expectException(TransactionHistoryNotFoundException::class);
-
         // act
         StoreContext::doWithStore('1', [$this->orderManagementService, 'refundOrder'], [
                 'orderId',
@@ -116,6 +115,8 @@ class OrderManagementServiceTest extends BaseTestCase
             ]
         );
         // assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById');
+        self::assertEmpty($methodCallHistory);
     }
 
     /**

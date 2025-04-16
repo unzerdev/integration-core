@@ -5,11 +5,9 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -44,12 +42,14 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function chargeOrder(string $orderId, Amount $chargeAmount): void
     {
-        $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
+        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+            return;
+        }
+
         if (!$this->isChargeNecessary($transactionHistory, $chargeAmount)) {
             return;
         }
@@ -74,12 +74,13 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function cancelOrder(string $orderId, Amount $amount): void
     {
-        $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
+        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+            return;
+        }
         if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
             return;
         }
@@ -103,12 +104,14 @@ class OrderManagementService
      * @return void
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function refundOrder(string $orderId, Amount $refundAmount): void
     {
-        $transactionHistory = $this->getTransactionHistoryByOrderId($orderId);
+        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+            return;
+        }
+
         if (!$this->isRefundNecessary($transactionHistory, $refundAmount)) {
             return;
         }
@@ -136,26 +139,6 @@ class OrderManagementService
 
             break;
         }
-    }
-
-    /**
-     * @param string $orderId
-     *
-     * @return TransactionHistory
-     *
-     * @throws TransactionHistoryNotFoundException
-     */
-    private function getTransactionHistoryByOrderId(string $orderId): TransactionHistory
-    {
-        if (!$transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId)) {
-            throw new TransactionHistoryNotFoundException(
-                new TranslatableLabel(
-                    "Transaction history for orderID:{$orderId} not found",
-                    'transactionHistory.notFound')
-            );
-        }
-
-        return $transactionHistory;
     }
 
     /**

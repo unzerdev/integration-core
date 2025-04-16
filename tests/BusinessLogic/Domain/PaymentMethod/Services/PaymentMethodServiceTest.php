@@ -144,7 +144,6 @@ class PaymentMethodServiceTest extends BaseTestCase
         // assert
         $expectedMethods = [
             new PaymentMethod('przelewy24', PaymentMethodNames::PAYMENT_METHOD_NAMES['przelewy24'], true),
-            new PaymentMethod('giropay', PaymentMethodNames::PAYMENT_METHOD_NAMES['giropay'], false),
             new PaymentMethod('twint', PaymentMethodNames::PAYMENT_METHOD_NAMES['twint'], true),
             new PaymentMethod('wechatpay', PaymentMethodNames::PAYMENT_METHOD_NAMES['wechatpay'], true),
         ];
@@ -852,7 +851,6 @@ class PaymentMethodServiceTest extends BaseTestCase
         // assert
         $expectedMethods = [
             new PaymentMethod('przelewy24', PaymentMethodNames::PAYMENT_METHOD_NAMES['przelewy24'], true),
-            new PaymentMethod('giropay', PaymentMethodNames::PAYMENT_METHOD_NAMES['giropay'], false),
             new PaymentMethod('twint', PaymentMethodNames::PAYMENT_METHOD_NAMES['twint'], true),
             new PaymentMethod('wechatpay', PaymentMethodNames::PAYMENT_METHOD_NAMES['wechatpay'], true),
         ];

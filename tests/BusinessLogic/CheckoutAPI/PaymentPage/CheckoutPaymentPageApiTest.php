@@ -168,8 +168,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
         $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
         $paymentMethodsConfigs->addMethodConfig('card', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('test', new EmbeddedPaymentMethodConfig(false));
-
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
@@ -232,8 +230,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
         $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
         $paymentMethodsConfigs->addMethodConfig('EPS', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('test', new EmbeddedPaymentMethodConfig(false));
-
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::CHARGE);
         $expectedPayPageRequest
