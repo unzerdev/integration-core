@@ -11,7 +11,6 @@ interface UnsupportedPaymentTypes
 {
     /** @var string[] */
     public const UNSUPPORTED_METHOD_TYPES = [
-        PaymentMethodTypes::APPLE_PAY,
         PaymentMethodTypes::SOFORT,
         PaymentMethodTypes::GIROPAY,
         'installment-secured',
