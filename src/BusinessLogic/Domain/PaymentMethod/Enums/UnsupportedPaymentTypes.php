@@ -16,6 +16,8 @@ interface UnsupportedPaymentTypes
         'installment-secured',
         'sepa-direct-debit-secured',
         'PIS',
-        'invoice-secured'
+        'invoice-secured',
+        // Click to pay is merged with credit card payment method. This insures that there will be 1 configuration
+        PaymentMethodTypes::CLICK_TO_PAY
     ];
 }

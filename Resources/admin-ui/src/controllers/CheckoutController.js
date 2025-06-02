@@ -26,6 +26,7 @@
      * surcharge: number,
      * restrictedCountries: [string],
      * sendBasketData: boolean,
+     * enableClickToPay: boolean,
      * minOrderAmount: number,
      * name: [{locale: string, value: string}],
      * description: [{locale: string, value: string}],
@@ -51,7 +52,8 @@
         maxOrderAmount: null,
         surcharge: null,
         restrictedCountries: null,
-        sendBasketData: false
+        sendBasketData: false,
+        enableClickToPay: false
     }
 
     let icons = [
@@ -111,8 +113,6 @@
                     maxOrderAmount: result.maxOrderAmount,
                     statusIdToCharge: result.statusIdToCharge
                 });
-
-                console.log(paymentMethodConfig);
 
                 openSettingModal(result, paymentMethod)
             })
@@ -293,7 +293,8 @@
             return;
         }
 
-        const nameField = Unzer.components.TextDropdownComponent.create({
+        const nameField = Unzer.components.TextDropdownComponent.create(
+            {
                 isIcon: true,
                 value: "default",
                 options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag, title: x.name }))
@@ -313,7 +314,8 @@
                 value: ''
             }
         );
-        let descriptionField = Unzer.components.TextDropdownComponent.create({
+        let descriptionField = Unzer.components.TextDropdownComponent.create(
+            {
                 isIcon: true,
                 value: "default",
                 options: Unzer.config.locales?.map(x => ({ value: x.code, label: x.flag, title: x.name }))
@@ -453,6 +455,18 @@
             })
         )
 
+        if (config.displayClickToPay) {
+            content.push(
+                Unzer.components.ToggleField.create({
+                    label: "checkout.modal.clicktopay",
+                    description: "checkout.modal.clicktopayDescription",
+                    value: paymentMethodConfig.enableClickToPay ?? false,
+                    onChange: (value) => {
+                        paymentMethodConfig.enableClickToPay = value;
+                    }
+                })
+            )
+        }
         if (config.displaySendBasketData) {
             content.push(
                 Unzer.components.ToggleField.create({

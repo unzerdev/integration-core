@@ -2,7 +2,6 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums;
 
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 
 interface ExcludedTypes
 {
@@ -29,5 +28,6 @@ interface ExcludedTypes
         PaymentMethodTypes::EPS => "eps",
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => "openbankingpis",
         PaymentMethodTypes::UNZER_INVOICE => "paylaterInvoice",
+        PaymentMethodTypes::CLICK_TO_PAY => "clicktopay",
     ];
 }

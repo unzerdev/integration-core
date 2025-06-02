@@ -74,11 +74,12 @@ class PaymentPageService
     public function create(PaymentPageCreateContext $context): Paypage
     {
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
-
         $resources = $this->buildResources($context);
 
         $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage(
-            $this->paymentPageFactory->create($context, $paymentMethodSettings->getBookingMethod()->getBookingMethod(),
+            $this->paymentPageFactory->create(
+                $context,
+                $paymentMethodSettings,
                 $resources
             ),
         );
@@ -109,10 +110,10 @@ class PaymentPageService
     /**
      * @param PaymentPageCreateContext $context
      *
-     * @return PaymentMethodConfig|null
+     * @return PaymentMethodConfig
      * @throws PaymentConfigNotFoundException
      */
-    private function getEnabledPaymentMethodSettings(PaymentPageCreateContext $context): ?PaymentMethodConfig
+    private function getEnabledPaymentMethodSettings(PaymentPageCreateContext $context): PaymentMethodConfig
     {
         $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
         if (!$settings || !$settings->isEnabled()) {

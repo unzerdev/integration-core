@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use UnzerSDK\Resources\V2\Paypage;
 
@@ -12,5 +13,16 @@ use UnzerSDK\Resources\V2\Paypage;
  */
 interface PaymentPageProcessor extends RequestProcessor
 {
-    public function process(Paypage $payPageRequest, PaymentPageCreateContext $context): void;
+    /**
+     * @param Paypage $payPageRequest
+     * @param PaymentPageCreateContext $context
+     * @param PaymentMethodConfig $paymentMethodConfiguration
+     *
+     * @return void
+     */
+    public function process(
+        Paypage $payPageRequest,
+        PaymentPageCreateContext $context,
+        PaymentMethodConfig $paymentMethodConfiguration
+    ): void;
 }

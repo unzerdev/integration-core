@@ -14,7 +14,7 @@ interface PaymentMethodNames
         PaymentMethodTypes::ALI_PAY => 'Alipay',
         PaymentMethodTypes::APPLE_PAY => 'Apple Pay',
         PaymentMethodTypes::BANCONTACT => 'Bancontact',
-        PaymentMethodTypes::CARDS => 'Cards',
+        PaymentMethodTypes::CARDS => 'Cards and Click to Pay',
         PaymentMethodTypes::EPS => 'EPS',
         PaymentMethodTypes::GIROPAY => 'Giropay',
         PaymentMethodTypes::GOOGLE_PAY => 'Google Pay',

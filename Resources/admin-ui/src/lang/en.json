@@ -201,7 +201,9 @@
       "basketDataDescription": "If this option is enabled, the basket data will always be sent to the Unzer API. This ensures that every transaction includes complete order details, providing better transparency and enabling more accurate processing through the Unzer system.",
       "chargeTitle": "Charge on status changed",
       "chargeDescription": "Select the status that will trigger the payment capture.",
-      "defaultDescription": "When you select this payment method, a secure pop-up window will be displayed to complete the transaction."
+      "defaultDescription": "When you select this payment method, a secure pop-up window will be displayed to complete the transaction.",
+      "clicktopay": "Enable Click to Pay",
+      "clicktopayDescription": "If this options is enabled, customers can make secure online card payments without entering their card details each time."
     },
     "fields": {
       "paymentMethodName": {

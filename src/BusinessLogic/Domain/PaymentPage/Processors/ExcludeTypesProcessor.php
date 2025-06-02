@@ -4,6 +4,8 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\ExcludedTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig as PaymentMethodConfigModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -34,13 +36,18 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
      */
-    public function process(Paypage $payPageRequest, PaymentPageCreateContext $context): void
-    {
+    public function process(
+        Paypage $payPageRequest,
+        PaymentPageCreateContext $context,
+        PaymentMethodConfigModel $paymentMethodConfiguration
+    ): void {
         $paymentMethodConfig = $this->setExcludedMethodConfigs(
             $this->getExcludePaymentTypesList(
                 $this->unzerFactory->makeUnzerAPI()->fetchKeypair()->getAvailablePaymentTypes(),
                 $context->getPaymentMethodType()
-            ));
+            ),
+            $paymentMethodConfiguration
+        );
 
         $payPageRequest->setPaymentMethodsConfigs($paymentMethodConfig);
     }
@@ -65,13 +72,24 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
 
     /**
      * @param array $excludedTypes
+     * @param PaymentMethodConfigModel $methodConfig
      *
      * @return PaymentMethodsConfigs
      */
-    private function setExcludedMethodConfigs(array $excludedTypes): PaymentMethodsConfigs
-    {
+    private function setExcludedMethodConfigs(
+        array $excludedTypes,
+        PaymentMethodConfigModel $methodConfig
+    ): PaymentMethodsConfigs {
         $paymentMethodConfigs = new PaymentMethodsConfigs();
         foreach ($excludedTypes as $method) {
+            if ($method === PaymentMethodTypes::CLICK_TO_PAY && $methodConfig->getType() === PaymentMethodTypes::CARDS) {
+                !$methodConfig->isClickToPayEnabled() && $paymentMethodConfigs->addMethodConfig(
+                    PaymentMethodTypes::CLICK_TO_PAY,
+                    new PaymentMethodConfig(false)
+                );
+
+                continue;
+            }
             if (isset(ExcludedTypes::EXCLUDED_METHOD_NAMES[$method])) {
                 $paymentMethodConfigs->addMethodConfig(
                     ExcludedTypes::EXCLUDED_METHOD_NAMES[$method],

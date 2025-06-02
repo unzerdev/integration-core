@@ -78,17 +78,23 @@ class PaymentMethodConfig
     private array $restrictedCountries = [];
 
     /**
+     * @var bool
+     */
+    private bool $enableClickToPay = false;
+
+    /**
      * @param string $type
      * @param bool $enabled
+     * @param BookingMethod $bookingMethod
+     * @param bool $sendBasketData
      * @param ?TranslationCollection $name
      * @param ?TranslationCollection $description
-     * @param BookingMethod $bookingMethod
      * @param string|null $statusIdToCharge
      * @param Amount|null $minOrderAmount
      * @param Amount|null $maxOrderAmount
      * @param Amount|null $surcharge
      * @param array $restrictedCountries
-     * @param bool $sendBasketData
+     * @param bool $enableClickToPay
      *
      * @throws InvalidAmountsException
      */
@@ -103,7 +109,8 @@ class PaymentMethodConfig
         ?Amount $minOrderAmount = null,
         ?Amount $maxOrderAmount = null,
         ?Amount $surcharge = null,
-        array $restrictedCountries = []
+        array $restrictedCountries = [],
+        bool $enableClickToPay = false
     ) {
         $this->validateAmounts($minOrderAmount, $maxOrderAmount);
 
@@ -118,6 +125,7 @@ class PaymentMethodConfig
         $this->maxOrderAmount = $maxOrderAmount;
         $this->surcharge = $surcharge;
         $this->restrictedCountries = $restrictedCountries;
+        $this->enableClickToPay = $enableClickToPay;
     }
 
     /**
@@ -216,6 +224,14 @@ class PaymentMethodConfig
     public function isSendBasketData(): bool
     {
         return $this->sendBasketData;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isClickToPayEnabled(): bool
+    {
+        return $this->enableClickToPay;
     }
 
     /**

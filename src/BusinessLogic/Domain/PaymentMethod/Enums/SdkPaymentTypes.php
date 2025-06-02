@@ -6,6 +6,7 @@ use UnzerSDK\Resources\PaymentTypes\Alipay;
 use UnzerSDK\Resources\PaymentTypes\Applepay;
 use UnzerSDK\Resources\PaymentTypes\Bancontact;
 use UnzerSDK\Resources\PaymentTypes\Card;
+use UnzerSDK\Resources\PaymentTypes\Clicktopay;
 use UnzerSDK\Resources\PaymentTypes\EPS;
 use UnzerSDK\Resources\PaymentTypes\Giropay;
 use UnzerSDK\Resources\PaymentTypes\Googlepay;
@@ -57,6 +58,7 @@ interface SdkPaymentTypes
         PaylaterInvoice::class => PaymentMethodTypes::UNZER_INVOICE,
         Prepayment::class => PaymentMethodTypes::UNZER_PREPAYMENT,
         Wechatpay::class => PaymentMethodTypes::WECHATPAY,
-        OpenbankingPis::class => PaymentMethodTypes::DIRECT_BANK_TRANSFER
+        OpenbankingPis::class => PaymentMethodTypes::DIRECT_BANK_TRANSFER,
+        Clicktopay::class => PaymentMethodTypes::CARDS
     ];
 }

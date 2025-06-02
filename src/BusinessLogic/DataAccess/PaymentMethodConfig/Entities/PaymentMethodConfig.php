@@ -10,7 +10,6 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsExcep
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidBookingMethodException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Configuration\IndexMap;
 use Unzer\Core\Infrastructure\ORM\Entity;
@@ -86,6 +85,7 @@ class PaymentMethodConfig extends Entity
             !empty($paymentMethodConfig['maxOrderAmount']) ? Amount::fromArray($paymentMethodConfig['maxOrderAmount']) : null,
             !empty($paymentMethodConfig['surcharge']) ? Amount::fromArray($paymentMethodConfig['surcharge']) : null,
             Country::fromArrayToBatch($paymentMethodConfig['restrictedCountries']),
+            !empty($paymentMethodConfig['clickToPayEnabled']) ? $paymentMethodConfig['clickToPayEnabled'] : false
         );
     }
 
@@ -109,7 +109,8 @@ class PaymentMethodConfig extends Entity
             'maxOrderAmount' => $this->paymentMethodConfig->getMaxOrderAmount() ? $this->paymentMethodConfig->getMaxOrderAmount()->toArray() : [],
             'surcharge' => $this->paymentMethodConfig->getSurcharge() ? $this->paymentMethodConfig->getSurcharge()->toArray() : [],
             'restrictedCountries' => Country::fromBatchToArray($this->paymentMethodConfig->getRestrictedCountries()),
-            'sendBasketData' => $this->paymentMethodConfig->isSendBasketData()
+            'sendBasketData' => $this->paymentMethodConfig->isSendBasketData(),
+            'clickToPayEnabled' => $this->paymentMethodConfig->isClickToPayEnabled()
         ];
 
         return $data;

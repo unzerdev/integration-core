@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
@@ -22,6 +23,7 @@ class PaymentPageFactory
 
     /**
      * PaymentPageFactory constructor.
+     *
      * @param PaymentPageSettingsService $paymentPageSettingsService
      */
     public function __construct(PaymentPageSettingsService $paymentPageSettingsService)
@@ -29,18 +31,36 @@ class PaymentPageFactory
         $this->paymentPageSettingsService = $paymentPageSettingsService;
     }
 
-    public function create(PaymentPageCreateContext $context, string $bookingMethod, Resources $resources): Paypage
-    {
-        $payPage = $this->initializePayPage($context, $bookingMethod, $resources);
+    /**
+     * @param PaymentPageCreateContext $context
+     * @param PaymentMethodConfig $paymentMethodConfig
+     * @param Resources $resources
+     *
+     * @return Paypage
+     */
+    public function create(
+        PaymentPageCreateContext $context,
+        PaymentMethodConfig $paymentMethodConfig,
+        Resources $resources
+    ): Paypage {
+        $payPage = $this->initializePayPage(
+            $context,
+            $paymentMethodConfig->getBookingMethod()->getBookingMethod(),
+            $resources
+        );
+
         foreach (PaymentPageProcessorsRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {
-            $processor->process($payPage, $context);
+            $processor->process($payPage, $context, $paymentMethodConfig);
         }
 
         return $payPage;
     }
 
-    protected function initializePayPage(PaymentPageCreateContext $context, string $bookingMethod, Resources $resources): Paypage
-    {
+    protected function initializePayPage(
+        PaymentPageCreateContext $context,
+        string $bookingMethod,
+        Resources $resources
+    ): Paypage {
         $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
 
         $result = (new Paypage(
@@ -48,15 +68,15 @@ class PaymentPageFactory
             $context->getAmount()->getCurrency()->getIsoCode(),
             $bookingMethod
         ))->setOrderId($context->getOrderId())
-        ->setResources($resources);
+            ->setResources($resources);
 
         $url = $context->getReturnUrl();
 
         $urls = new Urls();
         $urls->setReturnSuccess($url)
-        ->setReturnFailure($url)
-        ->setReturnPending($url)
-        ->setReturnCancel($url);
+            ->setReturnFailure($url)
+            ->setReturnPending($url)
+            ->setReturnCancel($url);
 
         $result->setUrls($urls);
 

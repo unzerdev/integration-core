@@ -215,6 +215,85 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
     }
 
+    public function testAuthorizedPaymentPageForClickToPay(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['applepay', 'googlepay', 'card', 'clicktopay']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $paymentMethodsConfigs = new PaymentMethodsConfigs();
+        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('applepay', new EmbeddedPaymentMethodConfig(false));
+
+        $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
+        $expectedPayPageRequest
+            ->setOrderId('test-order-123')
+            ->setPaymentMethodsConfigs($paymentMethodsConfigs)
+            ->setType("embedded");
+
+        $urls = new Urls();
+
+        $urls->setReturnSuccess('test.my.shop.com')
+            ->setReturnFailure('test.my.shop.com')
+            ->setReturnPending('test.my.shop.com')
+            ->setReturnCancel('test.my.shop.com');
+
+        $expectedPayPageRequest->setUrls($urls);
+
+        $expectedPayPageRequest->setResources(new Resources());
+
+        $this->unzerFactory->getMockUnzer()->setPayPageData(
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
+        );
+
+        $request = new PaymentPageCreateRequest(
+            PaymentMethodTypes::CARDS,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        $this->paymentMethodService->setMockPaymentMethod(
+            new PaymentMethodConfig(
+                PaymentMethodTypes::CARDS,
+                true,
+                BookingMethod::authorize(),
+                false,
+                null,
+                null,
+                'test',
+                null,
+                null,
+                null,
+                [],
+                true
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($request);
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertEquals($expectedPayPageRequest, $methodCallHistory[0]['paypage']);
+        self::assertTrue($response->isSuccessful());
+        self::assertNotEmpty($response->toArray());
+        self::assertEquals(
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'publicKey' => 'publicKeyTest'],
+            $response->toArray()
+        );
+        self::assertTransactionHistory(
+            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-order-123', 'EUR')
+        );
+    }
+
     public function testChargePaymentPageWithMinimalRequest(): void
     {
         // Arrange

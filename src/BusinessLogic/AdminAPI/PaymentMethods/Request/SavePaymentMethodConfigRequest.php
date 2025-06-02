@@ -51,17 +51,21 @@ class SavePaymentMethodConfigRequest extends Request
     /** @var bool */
     private bool $sendBasketData;
 
+    /** @var bool  */
+    private bool $enableClickToPay;
+
     /**
      * @param string $type
+     * @param ?string $bookingMethod
      * @param array $name
      * @param array $description
-     * @param ?string $bookingMethod
      * @param ?string $statusIdToCharge
      * @param ?float $minOrderAmount
      * @param ?float $maxOrderAmount
      * @param ?float $surcharge
      * @param array $restrictedCountries
      * @param bool $sendBasketData
+     * @param bool $enableClickToPay
      */
     public function __construct(
         string $type,
@@ -73,7 +77,8 @@ class SavePaymentMethodConfigRequest extends Request
         ?float $maxOrderAmount = null,
         ?float $surcharge = null,
         array $restrictedCountries = [],
-        bool $sendBasketData = false
+        bool $sendBasketData = false,
+        bool $enableClickToPay = false
     ) {
         $this->type = $type;
         $this->name = $name;
@@ -85,6 +90,7 @@ class SavePaymentMethodConfigRequest extends Request
         $this->surcharge = $surcharge;
         $this->restrictedCountries = $restrictedCountries;
         $this->sendBasketData = $sendBasketData;
+        $this->enableClickToPay = $enableClickToPay;
     }
 
     /**
@@ -110,7 +116,8 @@ class SavePaymentMethodConfigRequest extends Request
             $this->minOrderAmount !== null ? Amount::fromFloat($this->minOrderAmount, $currency) : null,
             $this->maxOrderAmount !== null ? Amount::fromFloat($this->maxOrderAmount, $currency) : null,
             $this->surcharge ? Amount::fromFloat($this->surcharge, $currency) : null,
-            Country::fromArrayToBatch($this->restrictedCountries)
+            Country::fromArrayToBatch($this->restrictedCountries),
+            $this->enableClickToPay
         );
     }
 }

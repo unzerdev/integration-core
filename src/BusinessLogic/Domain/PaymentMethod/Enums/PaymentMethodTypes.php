@@ -78,6 +78,9 @@ interface PaymentMethodTypes
     /** @var string  */
     public const DIRECT_BANK_TRANSFER = 'openbanking-pis';
 
+    /** @var string  */
+    public const CLICK_TO_PAY = 'clicktopay';
+
     /** @var string[] */
     public const PAYMENT_TYPES = [
         PaymentMethodTypes::ALI_PAY,
@@ -96,11 +99,13 @@ interface PaymentMethodTypes
         PaymentMethodTypes::POST_FINANCE_EFINANCE,
         PaymentMethodTypes::SOFORT,
         PaymentMethodTypes::TWINT,
+        PAymentMethodTypes::DIRECT_BANK_TRANSFER,
         PaymentMethodTypes::UNZER_DIRECT_DEBIT,
         PaymentMethodTypes::DIRECT_DEBIT_SECURED,
         PaymentMethodTypes::UNZER_INSTALLMENT,
         PaymentMethodTypes::UNZER_INVOICE,
         PaymentMethodTypes::UNZER_PREPAYMENT,
-        PaymentMethodTypes::WECHATPAY
+        PaymentMethodTypes::WECHATPAY,
+        PaymentMethodTypes::CLICK_TO_PAY
     ];
 }

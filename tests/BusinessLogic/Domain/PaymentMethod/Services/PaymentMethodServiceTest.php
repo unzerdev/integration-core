@@ -843,7 +843,7 @@ class PaymentMethodServiceTest extends BaseTestCase
             ]
         );
 
-        $this->mockData('s-pub-test', 's-priv-test', ['przelewy24', 'giropay', 'twint', 'wechatpay', 'applepay']);
+        $this->mockData('s-pub-test', 's-priv-test', ['przelewy24', 'giropay', 'twint', 'wechatpay', 'invoice-secured']);
 
         // act
         $methods = StoreContext::doWithStore('1', [$this->service, 'getAllPaymentMethods']);

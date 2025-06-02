@@ -219,7 +219,9 @@ class PaymentMethodsApiTest extends BaseTestCase
             'restrictedCountries' => [['code' => 'DE', 'name' => 'Germany'], ['code' => 'FR', 'name' => 'France']],
             'displaySendBasketData' => true,
             'sendBasketData' => false,
-            'statusIdToCharge' => '2'
+            'statusIdToCharge' => '2',
+            'clickToPayEnabled' => false,
+            'displayClickToPay' => false
         ], $response->toArray());
     }
 
@@ -271,7 +273,9 @@ class PaymentMethodsApiTest extends BaseTestCase
             'restrictedCountries' => [['code' => 'DE', 'name' => 'Germany'], ['code' => 'FR', 'name' => 'France']],
             'displaySendBasketData' => true,
             'sendBasketData' => false,
-            'statusIdToCharge' => '2'
+            'statusIdToCharge' => '2',
+            'clickToPayEnabled' => false,
+            'displayClickToPay' => false
         ], $response->toArray());
     }
 
@@ -323,7 +327,9 @@ class PaymentMethodsApiTest extends BaseTestCase
             'restrictedCountries' => [['code' => 'DE', 'name' => 'Germany'], ['code' => 'FR', 'name' => 'France']],
             'displaySendBasketData' => false,
             'sendBasketData' => false,
-            'statusIdToCharge' => '2'
+            'statusIdToCharge' => '2',
+            'clickToPayEnabled' => false,
+            'displayClickToPay' => false
         ], $response->toArray());
     }
 
@@ -434,5 +440,59 @@ class PaymentMethodsApiTest extends BaseTestCase
         // Act
         $request->toDomainModel(Currency::getDefault());
         // Assert
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidAmountsException
+     * @throws InvalidTranslatableArrayException
+     */
+    public function testGetPaymentMethodClickToPayToArray(): void
+    {
+        // Arrange
+        $request = new GetPaymentMethodConfigRequest(PaymentMethodTypes::EPS);
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Cards eng'],
+            ['locale' => 'de', 'value' => 'Cards De']
+        ]);
+        $this->paymentMethodServiceMock->setMockPaymentMethod(
+            new PaymentMethodConfig(
+                PaymentMethodTypes::CARDS,
+                true,
+                BookingMethod::authorize(),
+                false,
+                $name,
+                null,
+                '2',
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                Amount::fromFloat(2.2, Currency::getDefault()),
+                Amount::fromFloat(3.3, Currency::getDefault()),
+                [new Country('DE', 'Germany'), new Country('FR', 'France')]
+            )
+        );
+
+        // Act
+        $response = AdminAPI::get()->paymentMethods('1')->getPaymentConfig($request);
+
+        // Assert
+        self::assertEquals([
+            'type' => PaymentMethodTypes::CARDS,
+            'typeName' => PaymentMethodNames::PAYMENT_METHOD_NAMES[PaymentMethodTypes::CARDS],
+            'bookingAvailable' => true,
+            'bookingMethod' => 'authorize',
+            'name' => [['locale' => 'en', 'value' => 'Cards eng'], ['locale' => 'de', 'value' => 'Cards De']],
+            'description' => [],
+            'chargeAvailable' => true,
+            'minOrderAmount' => 1.1,
+            'maxOrderAmount' => 2.2,
+            'surcharge' => 3.3,
+            'restrictedCountries' => [['code' => 'DE', 'name' => 'Germany'], ['code' => 'FR', 'name' => 'France']],
+            'displaySendBasketData' => true,
+            'sendBasketData' => false,
+            'statusIdToCharge' => '2',
+            'clickToPayEnabled' => false,
+            'displayClickToPay' => true
+        ], $response->toArray());
     }
 }

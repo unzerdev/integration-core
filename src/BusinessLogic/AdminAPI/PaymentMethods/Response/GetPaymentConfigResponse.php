@@ -8,8 +8,8 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BasketRequired;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingAuthorizeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\BookingChargeSupport;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class GetPaymentConfigResponse.
@@ -59,6 +59,8 @@ class GetPaymentConfigResponse extends Response
         $array['displaySendBasketData'] =
             !in_array($this->paymentMethodConfig->getType(), BasketRequired::BASKET_REQUIRED);
         $array['sendBasketData'] = $this->paymentMethodConfig->isSendBasketData();
+        $array['displayClickToPay'] = $this->paymentMethodConfig->getType() === PaymentMethodTypes::CARDS;
+        $array['clickToPayEnabled'] = $this->paymentMethodConfig->isClickToPayEnabled();
 
         return $array;
     }
