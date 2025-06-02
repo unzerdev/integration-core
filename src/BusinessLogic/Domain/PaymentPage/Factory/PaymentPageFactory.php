@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use UnzerSDK\Constants\PaypageCheckoutTypes;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\V2\Paypage;
@@ -79,8 +80,8 @@ class PaymentPageFactory
             ->setReturnCancel($url);
 
         $result->setUrls($urls);
-
         $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
+        $result->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
 
         return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
     }

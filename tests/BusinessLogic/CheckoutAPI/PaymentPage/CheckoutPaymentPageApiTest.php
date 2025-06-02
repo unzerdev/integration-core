@@ -45,6 +45,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
 use UnzerSDK\Constants\PaymentState;
+use UnzerSDK\Constants\PaypageCheckoutTypes;
 use UnzerSDK\Constants\TransactionTypes;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig as EmbeddedPaymentMethodConfig;
@@ -173,7 +174,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest
             ->setOrderId('test-order-123')
             ->setPaymentMethodsConfigs($paymentMethodsConfigs)
-            ->setType("embedded");
+            ->setType("embedded")
+            ->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
 
         $urls = new Urls();
 
@@ -235,7 +237,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest
             ->setOrderId('test-order-123')
             ->setPaymentMethodsConfigs($paymentMethodsConfigs)
-            ->setType("embedded");
+            ->setType("embedded")
+            ->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
 
         $urls = new Urls();
 
@@ -314,7 +317,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest
             ->setOrderId('test-order-123')
             ->setPaymentMethodsConfigs($paymentMethodsConfigs)
-            ->setType("embedded");
+            ->setType("embedded")
+            ->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
 
         $urls = new Urls();
 
