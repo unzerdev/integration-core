@@ -1,7 +1,8 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
+namespace Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors;
 
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Processors\AbstractRequestProcessorsRegistry;
 use Unzer\Core\Infrastructure\Singleton;
 
 /**

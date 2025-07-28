@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors;
 
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\CustomerProcessor as DomainCustomerProcessor;
+use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors\CustomerProcessor as DomainCustomerProcessor;
 
 /**
  * Interface CustomerProcessor

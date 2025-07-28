@@ -1,9 +1,10 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
+namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Processors\RequestProcessor;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**

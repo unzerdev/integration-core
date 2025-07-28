@@ -1,31 +1,27 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Models;
+namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 
-/**
- * Class PaymentPageCreateContext
- *
- * @package Unzer\Core\BusinessLogic\Domain\PaymentPage\Models
- */
-class PaymentPageCreateContext
+class InlinePaymentCreateRequest
 {
+
     private string $paymentMethodType;
     private string $orderId;
     private Amount $amount;
     private string $returnUrl;
-    private DataBag $checkoutSession;
+    private array $sessionData;
     private string $locale;
 
     /**
-     * PaymentPageCreateContext constructor.
+     * PaymentPageCreateRequest constructor.
      * @param string $paymentMethodType
      * @param string $orderId
      * @param Amount $amount
      * @param string $returnUrl
-     * @param DataBag $checkoutSession
+     * @param string $mode
+     * @param array $sessionData
      * @param string $locale
      */
     public function __construct(
@@ -33,14 +29,14 @@ class PaymentPageCreateContext
         string $orderId,
         Amount $amount,
         string $returnUrl,
-        DataBag $checkoutSession,
+        array $sessionData = [],
         string $locale = 'default'
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
         $this->amount = $amount;
         $this->returnUrl = $returnUrl;
-        $this->checkoutSession = $checkoutSession;
+        $this->sessionData = $sessionData;
         $this->locale = $locale;
     }
 
@@ -64,9 +60,9 @@ class PaymentPageCreateContext
         return $this->returnUrl;
     }
 
-    public function getCheckoutSession(): DataBag
+    public function getSessionData(): array
     {
-        return $this->checkoutSession;
+        return $this->sessionData;
     }
 
     public function getLocale(): string

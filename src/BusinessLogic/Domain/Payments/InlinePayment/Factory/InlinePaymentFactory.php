@@ -1,22 +1,20 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory;
+namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentRequest;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use UnzerSDK\Constants\PaypageCheckoutTypes;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\V2\Paypage;
 
-/**
- * Class Factory
- *
- * @package Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory
- */
-class PaymentPageFactory
+class InlinePaymentFactory
 {
     const EMBEDDED_PAYPAGE_TYPE = "embedded";
 
@@ -33,35 +31,35 @@ class PaymentPageFactory
     }
 
     /**
-     * @param PaymentPageCreateContext $context
+     * @param InlinePaymentCreateContext $context
      * @param PaymentMethodConfig $paymentMethodConfig
      * @param Resources $resources
      *
-     * @return Paypage
+     * @return InlinePaymentRequest
      */
     public function create(
-        PaymentPageCreateContext $context,
+        InlinePaymentCreateContext $context,
         PaymentMethodConfig $paymentMethodConfig,
         Resources $resources
-    ): Paypage {
-        $payPage = $this->initializePayPage(
+    ): InlinePaymentRequest {
+        $inlineRequest = $this->initializeRequest(
             $context,
             $paymentMethodConfig->getBookingMethod()->getBookingMethod(),
             $resources
         );
 
-        foreach (PaymentPageProcessorsRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {
-            $processor->process($payPage, $context, $paymentMethodConfig);
+        foreach (InlinePaymentProcessorRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {
+            $processor->process($inlineRequest, $context, $paymentMethodConfig);
         }
 
-        return $payPage;
+        return $inlineRequest;
     }
 
-    protected function initializePayPage(
-        PaymentPageCreateContext $context,
+    protected function initializeRequest(
+        InlinePaymentCreateContext $context,
         string $bookingMethod,
         Resources $resources
-    ): Paypage {
+    ): InlinePaymentRequest {
         $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
 
         $result = (new Paypage(

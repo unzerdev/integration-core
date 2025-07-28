@@ -7,6 +7,8 @@ use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutInlinePaymentController;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 
 /**
  * Class AdminAPI. Integrations should use this class for communicating with Admin API.
@@ -51,5 +53,13 @@ class CheckoutAPI
             ::run(new ErrorHandlingAspect())
             ->andRun(new StoreContextAspect($storeId))
             ->beforeEachMethodOfService(CheckoutPaymentPageController::class);
+    }
+
+    public function inlinePayment(string $storeId)
+    {
+        return Aspects
+            ::run(new ErrorHandlingAspect())
+            ->andRun(new StoreContextAspect($storeId))
+            ->beforeEachMethodOfService(CheckoutInlinePaymentController::class);
     }
 }

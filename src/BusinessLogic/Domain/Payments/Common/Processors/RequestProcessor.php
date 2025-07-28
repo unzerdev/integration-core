@@ -1,6 +1,6 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors;
+namespace Unzer\Core\BusinessLogic\Domain\Payments\Common\Processors;
 
 /**
  * Interface RequestProcessor

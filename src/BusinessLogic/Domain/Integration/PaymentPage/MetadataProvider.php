@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage;
 
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use UnzerSDK\Resources\Metadata;
 
 /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory;
+namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory;
 
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\BasketProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessorsRegistry;
 use UnzerSDK\Resources\Basket;
 
 /**

@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors;
 
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\BasketProcessor;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessor;
 
 /**
  * Interface CustomerProcessor
