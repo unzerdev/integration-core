@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentC
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\PaymentTypes\BasePaymentType;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Charge;
 
@@ -29,7 +30,7 @@ class AuthorizePaymentStrategy implements InlinePaymentStrategyInterface
     ): InlinePaymentResponse {
         $chargeRequest = $this->inlinePaymentFactory->create($context, $config, $resources);
         $authorize = new Authorization($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
-        $response =  $this->unzerFactory->makeUnzerAPI()->performAuthorization($authorize, $chargeRequest->getPaymentTypeId(), $resources->getCustomerId());
+        $response =  $this->unzerFactory->makeUnzerAPI()->performAuthorization($authorize, $chargeRequest->getPaymentType(), $resources->getCustomerId());
 
         return new InlinePaymentResponse($response->getReturnUrl());
     }

@@ -62,6 +62,8 @@ use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProces
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\ExcludeTypesProcessor;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Factory\PaymentTypeFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Services\PaymentTypeService;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -192,8 +194,18 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(InlinePaymentStrategyFactory::class),
                     ServiceRegister::getService(PaymentMethodService::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
-                    ServiceRegister::getService(PaymentPageFactory::class),
+                    ServiceRegister::getService(InlinePaymentFactory::class),
                     ServiceRegister::getService(CustomerFactory::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentTypeService::class,
+            new SingleInstance(static function () {
+                return new PaymentTypeService(
+                    ServiceRegister::getService(UnzerFactory::class),
+                    ServiceRegister::getService(PaymentTypeFactory::class),
                 );
             })
         );
@@ -460,9 +472,16 @@ class BootstrapComponent extends BaseBootstrapComponent
     protected static function initRequestProcessors(): void
     {
         ServiceRegister::registerService(
+            PaymentTypeFactory::class,
+            new SingleInstance(static function () {
+                return new PaymentTypeFactory();
+            })
+        );
+
+        ServiceRegister::registerService(
             InlinePaymentFactory::class,
             new SingleInstance(static function () {
-                return new InlinePaymentFactory(ServiceRegister::getService(PaymentPageSettingsService::class));
+                return new InlinePaymentFactory(ServiceRegister::getService(PaymentTypeService::class));
             })
         );
 

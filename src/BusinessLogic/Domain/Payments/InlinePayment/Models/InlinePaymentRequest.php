@@ -3,18 +3,19 @@
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use UnzerSDK\Resources\PaymentTypes\BasePaymentType;
 
 class InlinePaymentRequest
 {
     protected Amount $amount;
     protected string $returnUrl;
-    protected string $paymentTypeId;
+    protected BasePaymentType $paymentType;
 
-    public function __construct(Amount $amount, string $returnUrl, string $paymentTypeId)
+    public function __construct(Amount $amount, string $returnUrl, BasePaymentType $paymentType)
     {
         $this->amount = $amount;
         $this->returnUrl = $returnUrl;
-        $this->paymentTypeId = $paymentTypeId;
+        $this->paymentType = $paymentType;
     }
 
     public function getAmount(): Amount
@@ -27,8 +28,8 @@ class InlinePaymentRequest
         return $this->returnUrl;
     }
 
-    public function getPaymentTypeId(): string
+    public function getPaymentType(): BasePaymentType
     {
-        return $this->paymentTypeId;
+        return $this->paymentType;
     }
 }

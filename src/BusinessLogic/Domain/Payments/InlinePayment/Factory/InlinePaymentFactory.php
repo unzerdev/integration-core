@@ -7,27 +7,22 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSett
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentRequest;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorRegistry;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
-use UnzerSDK\Constants\PaypageCheckoutTypes;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Services\PaymentTypeService;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
-use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
-use UnzerSDK\Resources\V2\Paypage;
 
 class InlinePaymentFactory
 {
-    const EMBEDDED_PAYPAGE_TYPE = "embedded";
 
-    private PaymentPageSettingsService $paymentPageSettingsService;
+    private PaymentTypeService $paymentTypeService;
 
     /**
      * PaymentPageFactory constructor.
      *
-     * @param PaymentPageSettingsService $paymentPageSettingsService
+     * @param PaymentTypeService $paymentTypeService
      */
-    public function __construct(PaymentPageSettingsService $paymentPageSettingsService)
+    public function __construct(PaymentTypeService $paymentTypeService)
     {
-        $this->paymentPageSettingsService = $paymentPageSettingsService;
+        $this->paymentTypeService = $paymentTypeService;
     }
 
     /**
@@ -55,32 +50,20 @@ class InlinePaymentFactory
         return $inlineRequest;
     }
 
+    /**
+     * @param InlinePaymentCreateContext $context
+     * @param string $bookingMethod
+     * @param Resources $resources
+     * @return InlinePaymentRequest
+     */
     protected function initializeRequest(
         InlinePaymentCreateContext $context,
         string $bookingMethod,
         Resources $resources
     ): InlinePaymentRequest {
-        $paymentPageSettings = $this->paymentPageSettingsService->getPaymentPageSettings();
 
-        $result = (new Paypage(
-            $context->getAmount()->getPriceInCurrencyUnits(),
-            $context->getAmount()->getCurrency()->getIsoCode(),
-            $bookingMethod
-        ))->setOrderId($context->getOrderId())
-            ->setResources($resources);
+        $type = $this->paymentTypeService->create($context);
 
-        $url = $context->getReturnUrl();
-
-        $urls = new Urls();
-        $urls->setReturnSuccess($url)
-            ->setReturnFailure($url)
-            ->setReturnPending($url)
-            ->setReturnCancel($url);
-
-        $result->setUrls($urls);
-        $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
-        $result->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
-
-        return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;
+        return new InlinePaymentRequest($context->getAmount(), $context->getReturnUrl(), $type);
     }
 }
