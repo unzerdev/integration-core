@@ -55,6 +55,7 @@ use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors\CustomerProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessorsRegistry;
@@ -188,7 +189,7 @@ class BootstrapComponent extends BaseBootstrapComponent
             new SingleInstance(static function () {
                 return new InlinePaymentService(
                     ServiceRegister::getService(UnzerFactory::class),
-                    ServiceRegister::getService(InlinePaymentFactory::class),
+                    ServiceRegister::getService(InlinePaymentStrategyFactory::class),
                     ServiceRegister::getService(PaymentMethodService::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
                     ServiceRegister::getService(PaymentPageFactory::class),
@@ -204,6 +205,13 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
                     ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
                 );
+            })
+        );
+
+        ServiceRegister::registerService(
+            InlinePaymentStrategyFactory::class,
+            new SingleInstance(static function () {
+                return new InlinePaymentStrategyFactory();
             })
         );
 
