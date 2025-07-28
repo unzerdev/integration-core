@@ -192,9 +192,7 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(PaymentMethodService::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
                     ServiceRegister::getService(PaymentPageFactory::class),
-                    ServiceRegister::getService(CustomerFactory::class),
-                    ServiceRegister::getService(BasketFactory::class),
-                    ServiceRegister::getService(MetadataProvider::class)
+                    ServiceRegister::getService(CustomerFactory::class)
                 );
             })
         );

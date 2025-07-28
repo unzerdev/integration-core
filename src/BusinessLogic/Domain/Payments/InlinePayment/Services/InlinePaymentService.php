@@ -41,19 +41,16 @@ class InlinePaymentService
     private TransactionHistoryService $transactionHistoryService;
     private InlinePaymentFactory $inlinePaymentFactory;
     private CustomerFactory $customerFactory;
-    private BasketFactory $basketFactory;
-    private MetadataProvider $metadataProvider;
 
     /**
      * PaymentPageService constructor.
      *
      * @param UnzerFactory $unzerFactory
+     * @param InlinePaymentStrategyFactory $inlinePaymentStrategyFactory
      * @param PaymentMethodService $paymentMethodService
      * @param TransactionHistoryService $transactionHistoryService
      * @param InlinePaymentFactory $inlinePaymentFactory
      * @param CustomerFactory $customerFactory
-     * @param BasketFactory $basketFactory
-     * @param MetadataProvider $metadataProvider
      */
     public function __construct(
         UnzerFactory              $unzerFactory,
@@ -61,9 +58,7 @@ class InlinePaymentService
         PaymentMethodService      $paymentMethodService,
         TransactionHistoryService $transactionHistoryService,
         InlinePaymentFactory      $inlinePaymentFactory,
-        CustomerFactory           $customerFactory,
-        BasketFactory             $basketFactory,
-        MetadataProvider          $metadataProvider
+        CustomerFactory           $customerFactory
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->inlinePaymentStrategyFactory = $inlinePaymentStrategyFactory;
@@ -71,8 +66,6 @@ class InlinePaymentService
         $this->transactionHistoryService = $transactionHistoryService;
         $this->inlinePaymentFactory = $inlinePaymentFactory;
         $this->customerFactory = $customerFactory;
-        $this->basketFactory = $basketFactory;
-        $this->metadataProvider = $metadataProvider;
     }
 
     /**
