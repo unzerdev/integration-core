@@ -25,7 +25,7 @@ class AuthorizePaymentStrategy implements InlinePaymentStrategyInterface
 
     public function execute(
         InlinePaymentCreateContext $context,
-        PaymentMethodConfig $config,
+        ?PaymentMethodConfig $config,
         Resources $resources
     ): InlinePaymentResponse {
         $chargeRequest = $this->inlinePaymentFactory->create($context, $config, $resources);

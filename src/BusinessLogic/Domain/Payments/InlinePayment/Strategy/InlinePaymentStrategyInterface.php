@@ -11,7 +11,7 @@ interface InlinePaymentStrategyInterface
 {
     public function execute(
         InlinePaymentCreateContext $context,
-        PaymentMethodConfig $config,
+        ?PaymentMethodConfig $config,
         Resources $resources
     ): InlinePaymentResponse;
 }

@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
@@ -27,19 +28,20 @@ class InlinePaymentFactory
 
     /**
      * @param InlinePaymentCreateContext $context
-     * @param PaymentMethodConfig $paymentMethodConfig
+     * @param PaymentMethodConfig|null $paymentMethodConfig
      * @param Resources $resources
      *
      * @return InlinePaymentRequest
      */
     public function create(
         InlinePaymentCreateContext $context,
-        PaymentMethodConfig $paymentMethodConfig,
+        ?PaymentMethodConfig $paymentMethodConfig,
         Resources $resources
     ): InlinePaymentRequest {
+        $bookingMethod = $paymentMethodConfig ? $paymentMethodConfig->getBookingMethod() : BookingMethod::charge()->getBookingMethod();
         $inlineRequest = $this->initializeRequest(
             $context,
-            $paymentMethodConfig->getBookingMethod()->getBookingMethod(),
+            $bookingMethod,
             $resources
         );
 
