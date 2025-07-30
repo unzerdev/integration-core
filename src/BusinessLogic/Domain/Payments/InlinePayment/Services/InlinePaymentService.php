@@ -77,7 +77,7 @@ class InlinePaymentService
     {
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
         $resources = $this->buildResources($context);
-        $method = $paymentMethodSettings ? $paymentMethodSettings->getBookingMethod()->getBookingMethod() : 'charge';
+        $method = $paymentMethodSettings->getBookingMethod()->getBookingMethod();
 
         $response = $this->inlinePaymentStrategyFactory
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)

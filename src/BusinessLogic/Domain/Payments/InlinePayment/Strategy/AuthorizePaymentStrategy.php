@@ -23,12 +23,22 @@ class AuthorizePaymentStrategy implements InlinePaymentStrategyInterface
         $this->inlinePaymentFactory = $inlinePaymentFactory;
     }
 
+    /**
+     * @param InlinePaymentCreateContext $context
+     * @param PaymentMethodConfig|null $config
+     * @param Resources $resources
+     *
+     * @return InlinePaymentResponse
+     *
+     * @throws \UnzerSDK\Exceptions\UnzerApiException
+     * @throws \Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException
+     */
     public function execute(
         InlinePaymentCreateContext $context,
         ?PaymentMethodConfig $config,
         Resources $resources
     ): InlinePaymentResponse {
-        $chargeRequest = $this->inlinePaymentFactory->create($context, $config, $resources);
+        $chargeRequest = $this->inlinePaymentFactory->create($context, $config);
         $authorize = new Authorization($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
         $response =  $this->unzerFactory->makeUnzerAPI()->performAuthorization($authorize, $chargeRequest->getPaymentType(), $resources->getCustomerId());
 

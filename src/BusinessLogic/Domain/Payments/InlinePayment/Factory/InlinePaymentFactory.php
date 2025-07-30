@@ -29,21 +29,14 @@ class InlinePaymentFactory
     /**
      * @param InlinePaymentCreateContext $context
      * @param PaymentMethodConfig|null $paymentMethodConfig
-     * @param Resources $resources
      *
      * @return InlinePaymentRequest
      */
     public function create(
         InlinePaymentCreateContext $context,
-        ?PaymentMethodConfig $paymentMethodConfig,
-        Resources $resources
+        ?PaymentMethodConfig $paymentMethodConfig
     ): InlinePaymentRequest {
-        $bookingMethod = $paymentMethodConfig ? $paymentMethodConfig->getBookingMethod() : BookingMethod::charge()->getBookingMethod();
-        $inlineRequest = $this->initializeRequest(
-            $context,
-            $bookingMethod,
-            $resources
-        );
+        $inlineRequest = $this->initializeRequest($context,);
 
         foreach (InlinePaymentProcessorRegistry::getProcessors($context->getPaymentMethodType()) as $processor) {
             $processor->process($inlineRequest, $context, $paymentMethodConfig);
@@ -54,15 +47,9 @@ class InlinePaymentFactory
 
     /**
      * @param InlinePaymentCreateContext $context
-     * @param string $bookingMethod
-     * @param Resources $resources
      * @return InlinePaymentRequest
      */
-    protected function initializeRequest(
-        InlinePaymentCreateContext $context,
-        string $bookingMethod,
-        Resources $resources
-    ): InlinePaymentRequest {
+    protected function initializeRequest(InlinePaymentCreateContext $context,): InlinePaymentRequest {
 
         $type = $this->paymentTypeService->create($context);
 

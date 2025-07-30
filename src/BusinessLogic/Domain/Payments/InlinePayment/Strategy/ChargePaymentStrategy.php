@@ -21,12 +21,22 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
         $this->inlinePaymentFactory = $inlinePaymentFactory;
     }
 
+    /**
+     * @param InlinePaymentCreateContext $context
+     * @param PaymentMethodConfig|null $config
+     * @param Resources $resources
+     *
+     * @return InlinePaymentResponse
+     *
+     * @throws \UnzerSDK\Exceptions\UnzerApiException
+     * @throws \Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException
+     */
     public function execute(
         InlinePaymentCreateContext $context,
         ?PaymentMethodConfig $config,
         Resources $resources
     ): InlinePaymentResponse {
-        $chargeRequest = $this->inlinePaymentFactory->create($context, $config, $resources);
+        $chargeRequest = $this->inlinePaymentFactory->create($context, $config);
         $charge = new Charge($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
         $charge =  $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(), $resources->getCustomerId());
 
