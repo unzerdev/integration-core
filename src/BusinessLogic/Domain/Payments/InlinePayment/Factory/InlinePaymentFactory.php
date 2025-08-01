@@ -49,7 +49,7 @@ class InlinePaymentFactory
      * @param InlinePaymentCreateContext $context
      * @return InlinePaymentRequest
      */
-    protected function initializeRequest(InlinePaymentCreateContext $context,): InlinePaymentRequest {
+    protected function initializeRequest(InlinePaymentCreateContext $context): InlinePaymentRequest {
 
         $type = $this->paymentTypeService->create($context);
 
