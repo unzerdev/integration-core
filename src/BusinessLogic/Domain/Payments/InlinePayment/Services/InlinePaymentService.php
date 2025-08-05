@@ -2,11 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\InlinePaymentCreateRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
-use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
@@ -15,9 +12,6 @@ use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePayment
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -83,7 +77,7 @@ class InlinePaymentService
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
             ->execute($context, $paymentMethodSettings, $resources);
 
-        $this->updateTransactionHistory($context);
+        $this->updateTransactionHistory($context, $response);
 
         return $response;
     }
@@ -93,13 +87,16 @@ class InlinePaymentService
      *
      * @return void
      */
-    private function updateTransactionHistory(InlinePaymentCreateContext $context) : void
+    private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePaymentResponse $response) : void
     {
+        $payment = $response->getPayment();
+        $paymentState = $payment ? new PaymentState($payment->getId(), $payment->getStateName()) : null;
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
                 $context->getPaymentMethodType(),
                 $context->getOrderId(),
-                $context->getAmount()->getCurrency()->getIsoCode()
+                $context->getAmount()->getCurrency()->getIsoCode(),
+                $paymentState,
             );
 
         $transactionHistory->setType($context->getPaymentMethodType());
