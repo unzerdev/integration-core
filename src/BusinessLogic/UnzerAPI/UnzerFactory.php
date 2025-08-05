@@ -18,7 +18,7 @@ use UnzerSDK\Unzer;
  */
 class UnzerFactory
 {
-    private ?ConnectionSettings $connectionSettings = null;
+    private ?ConnectionData $connectionData = null;
 
     /**
      * @param ConnectionData|null $connectionData
@@ -33,18 +33,18 @@ class UnzerFactory
             return $this->create($connectionData->getPrivateKey());
         }
 
-        if (!$this->connectionSettings) {
-            $this->connectionSettings = $this->getConnectionService()->getConnectionSettings();
+        if (!$this->connectionData) {
+            $this->connectionData = $this->getConnectionService()->getActiveConnectionData();
         }
 
-        if (!$this->connectionSettings) {
+        if (!$this->connectionData) {
             throw new ConnectionSettingsNotFoundException(
                 new TranslatableLabel('Connection settings not found.',
                     'connectionSettings.notFound')
             );
         }
 
-        return $this->create($this->connectionSettings->getActiveConnectionData()->getPrivateKey());
+        return $this->create($this->connectionData->getPrivateKey());
     }
 
     protected function create(string $sdkKey): Unzer

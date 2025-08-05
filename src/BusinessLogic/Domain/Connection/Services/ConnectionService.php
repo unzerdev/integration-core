@@ -106,6 +106,30 @@ class ConnectionService
     }
 
     /**
+     * @return ConnectionData|null
+     */
+    public function getActiveConnectionData(): ?ConnectionData
+    {
+        $connectionSettings = $this->connectionSettingsRepository->getConnectionSettings();
+
+        if(!$connectionSettings) {
+            return null;
+        }
+
+        $decryptedConnectionSettings = $this->decryptConnectionSettings($connectionSettings);
+
+        return $decryptedConnectionSettings->getActiveConnectionData();
+    }
+
+    /**
+     * @return Mode|null
+     */
+    public function getActiveMode(): ?Mode
+    {
+        return $this->getConnectionSettings()->getMode();
+    }
+
+    /**
      * @return WebhookSettings|null
      */
     public function getWebhookSettings(): ?WebhookSettings
