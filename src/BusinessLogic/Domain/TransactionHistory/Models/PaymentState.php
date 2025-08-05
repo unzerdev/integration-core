@@ -10,9 +10,9 @@ namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 class PaymentState
 {
     /**
-     * @var int $id
+     * @var string $id
      */
-    private int $id;
+    private string $id;
 
     /**
      * @var string $name
@@ -30,9 +30,9 @@ class PaymentState
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getId(): int
+    public function getId(): string
     {
         return $this->id;
     }

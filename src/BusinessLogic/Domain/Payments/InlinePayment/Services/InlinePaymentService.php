@@ -84,7 +84,7 @@ class InlinePaymentService
 
     /**
      * @param InlinePaymentCreateContext $context
-     *
+     * @param InlinePaymentResponse $response
      * @return void
      */
     private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePaymentResponse $response) : void
