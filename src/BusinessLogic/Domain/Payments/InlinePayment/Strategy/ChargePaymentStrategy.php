@@ -38,8 +38,8 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
     ): InlinePaymentResponse {
         $chargeRequest = $this->inlinePaymentFactory->create($context, $config);
         $charge = new Charge($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
-        $charge =  $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(), $resources->getCustomerId());
+        $chargeResponse =  $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(), $resources->getCustomerId());
 
-        return new InlinePaymentResponse($charge->getReturnUrl());
+        return new InlinePaymentResponse($chargeResponse);
     }
 }

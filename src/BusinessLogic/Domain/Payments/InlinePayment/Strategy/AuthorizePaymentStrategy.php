@@ -42,6 +42,6 @@ class AuthorizePaymentStrategy implements InlinePaymentStrategyInterface
         $authorize = new Authorization($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
         $response =  $this->unzerFactory->makeUnzerAPI()->performAuthorization($authorize, $chargeRequest->getPaymentType(), $resources->getCustomerId());
 
-        return new InlinePaymentResponse($response->getReturnUrl());
+        return new InlinePaymentResponse(null, $response);
     }
 }

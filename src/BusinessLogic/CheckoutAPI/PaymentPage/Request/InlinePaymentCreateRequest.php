@@ -15,12 +15,10 @@ class InlinePaymentCreateRequest
     private string $locale;
 
     /**
-     * PaymentPageCreateRequest constructor.
      * @param string $paymentMethodType
      * @param string $orderId
      * @param Amount $amount
      * @param string $returnUrl
-     * @param string $mode
      * @param array $sessionData
      * @param string $locale
      */
