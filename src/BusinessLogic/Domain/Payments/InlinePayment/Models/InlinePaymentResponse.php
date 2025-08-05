@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models;
 
+use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Charge;
 
@@ -35,5 +36,13 @@ class InlinePaymentResponse
     public function getAuthorization(): ?Authorization
     {
         return $this->authorization;
+    }
+
+    /**
+     * @return Payment|null
+     */
+    public function getPayment(): ?Payment
+    {
+        return $this->charge ? $this->charge->getPayment() : ($this->authorization ? $this->authorization->getPayment() : null);
     }
 }
