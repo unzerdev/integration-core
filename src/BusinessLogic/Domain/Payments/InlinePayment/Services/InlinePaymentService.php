@@ -3,6 +3,8 @@
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
@@ -86,17 +88,27 @@ class InlinePaymentService
      * @param InlinePaymentCreateContext $context
      * @param InlinePaymentResponse $response
      * @return void
+     * @throws InvalidCurrencyCode
      */
     private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePaymentResponse $response) : void
     {
         $payment = $response->getPayment();
-        $paymentState = $payment ? new PaymentState($payment->getId(), $payment->getStateName()) : null;
+        $paymentState = $payment ? new PaymentState($payment->getState(), $payment->getStateName()) : null;
+        $totalAmount = $payment ? Amount::fromFloat($payment->getAmount()->getTotal(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
+        $chargedAmount = $payment ? Amount::fromFloat($payment->getAmount()->getCharged(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
+        $canceledAmount = $payment ? Amount::fromFloat($payment->getAmount()->getCanceled(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
+        $remainingAmount = $payment ? Amount::fromFloat($payment->getAmount()->getRemaining(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
+
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
                 $context->getPaymentMethodType(),
                 $context->getOrderId(),
                 $context->getAmount()->getCurrency()->getIsoCode(),
                 $paymentState,
+                $totalAmount,
+                $chargedAmount,
+                $canceledAmount,
+                $remainingAmount
             );
 
         $transactionHistory->setType($context->getPaymentMethodType());

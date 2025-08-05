@@ -10,9 +10,9 @@ namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 class PaymentState
 {
     /**
-     * @var string $id
+     * @var int $id
      */
-    private string $id;
+    private int $id;
 
     /**
      * @var string $name
@@ -20,19 +20,19 @@ class PaymentState
     private string $name;
 
     /**
-     * @param string $id
+     * @param int $id
      * @param string $name
      */
-    public function __construct(string $id, string $name)
+    public function __construct(int $id, string $name)
     {
         $this->id = $id;
         $this->name = $name;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }
