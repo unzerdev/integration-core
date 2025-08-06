@@ -2,9 +2,12 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller;
 
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodByTypeRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodsRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response\PaymentMethodByTypeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response\PaymentMethodsResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -44,5 +47,17 @@ class CheckoutPaymentMethodsController
                 $request->getBillingCountry()
             ), $request->getLocale()
         );
+    }
+
+    /**
+     * @param PaymentMethodByTypeRequest $request
+     *
+     * @return PaymentMethodByTypeResponse
+     */
+    public function getPaymentMethodByType(PaymentMethodByTypeRequest $request): PaymentMethodByTypeResponse
+    {
+        $config = $this->paymentMethodService->getPaymentMethodConfigByType($request->getType());
+
+        return new PaymentMethodByTypeResponse($config);
     }
 }
