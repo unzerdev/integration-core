@@ -69,20 +69,23 @@ class OrderManagementService
 
     /**
      * @param string $orderId
-     * @param Amount $amount
+     * @param Amount|null $amount
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function cancelOrder(string $orderId, Amount $amount): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null): void
     {
         if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
         if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
             return;
+        }
+        if($amount === null) {
+            $amount = $transactionHistory->getTotalAmount();
         }
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
@@ -173,12 +176,16 @@ class OrderManagementService
 
     /**
      * @param TransactionHistory $transactionHistory
-     * @param Amount $amount
+     * @param Amount|null $amount
      *
      * @return bool
      */
-    private function isCancellationNecessary(TransactionHistory $transactionHistory, Amount $amount): bool
+    private function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
     {
+        if($amount === null) {
+            return true;
+        }
+
         return $this->isTransactionHistoryValid($transactionHistory) &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
