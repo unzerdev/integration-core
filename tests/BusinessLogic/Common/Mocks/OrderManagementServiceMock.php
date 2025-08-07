@@ -24,11 +24,11 @@ class OrderManagementServiceMock extends OrderManagementService
 
     /**
      * @param string $orderId
-     * @param Amount $amount
+     * @param Amount|null $amount
      *
      * @return void
      */
-    public function cancelOrder(string $orderId, Amount $amount): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null): void
     {
     }
 

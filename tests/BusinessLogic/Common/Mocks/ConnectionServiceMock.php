@@ -48,7 +48,7 @@ class ConnectionServiceMock extends ConnectionService
 
     public function getActiveConnectionData(): ?ConnectionData
     {
-        return $this->connectionSettings->getActiveConnectionData();
+        return $this->connectionSettings ? $this->connectionSettings->getActiveConnectionData() : null;
     }
 
     /**
