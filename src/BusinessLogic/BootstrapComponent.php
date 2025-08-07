@@ -14,8 +14,8 @@ use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Controller\TransactionController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
 use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller\CheckoutInlinePaymentController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutInlinePaymentController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Repositories\ConnectionSettingsRepository;
@@ -435,8 +435,7 @@ class BootstrapComponent extends BaseBootstrapComponent
         ServiceRegister::registerService(
             CheckoutInlinePaymentController::class,
             new SingleInstance(static function () {
-                return new CheckoutInlinePaymentController(ServiceRegister::getService(InlinePaymentService::class),
-                    ServiceRegister::getService(ConnectionService::class));
+                return new CheckoutInlinePaymentController(ServiceRegister::getService(InlinePaymentService::class));
             })
         );
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
+namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 

@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
@@ -12,7 +13,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
-use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentResponse;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
@@ -75,22 +76,22 @@ class InlinePaymentService
         $resources = $this->buildResources($context);
         $method = $paymentMethodSettings->getBookingMethod()->getBookingMethod();
 
-        $response = $this->inlinePaymentStrategyFactory
+        $inlinePayment = $this->inlinePaymentStrategyFactory
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
             ->execute($context, $paymentMethodSettings, $resources);
 
-        $this->updateTransactionHistory($context, $response);
+        $this->updateTransactionHistory($context, $inlinePayment);
 
-        return $response;
+        return new InlinePaymentResponse($inlinePayment);
     }
 
     /**
      * @param InlinePaymentCreateContext $context
-     * @param InlinePaymentResponse $response
+     * @param InlinePayment $response
      * @return void
      * @throws InvalidCurrencyCode
      */
-    private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePaymentResponse $response) : void
+    private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePayment $response) : void
     {
         $payment = $response->getPayment();
         $paymentState = $payment ? new PaymentState($payment->getState(), $payment->getStateName()) : null;

@@ -6,7 +6,7 @@ use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Charge;
 
-class InlinePaymentResponse
+class InlinePayment
 {
 
     protected ?Charge $charge;

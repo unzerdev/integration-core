@@ -5,10 +5,9 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\ErrorHandlingAspect;
 use Unzer\Core\BusinessLogic\ApiFacades\Aspects\StoreContextAspect;
 use Unzer\Core\BusinessLogic\Bootstrap\Aspect\Aspects;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller\CheckoutInlinePaymentController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutInlinePaymentController;
-use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 
 /**
  * Class AdminAPI. Integrations should use this class for communicating with Admin API.
@@ -55,7 +54,12 @@ class CheckoutAPI
             ->beforeEachMethodOfService(CheckoutPaymentPageController::class);
     }
 
-    public function inlinePayment(string $storeId)
+    /**
+     * @param string $storeId
+     *
+     * @return CheckoutInlinePaymentController
+     */
+    public function inlinePayment(string $storeId): object
     {
         return Aspects
             ::run(new ErrorHandlingAspect())

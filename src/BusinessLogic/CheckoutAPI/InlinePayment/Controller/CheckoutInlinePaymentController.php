@@ -1,14 +1,13 @@
 <?php
 
-namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller;
+namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller;
 
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\InlinePaymentCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request\InlinePaymentCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
-use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -16,18 +15,14 @@ class CheckoutInlinePaymentController
 {
     private InlinePaymentService $inlinePaymentService;
 
-    private ConnectionService $connectionService;
-
     /**
      * CheckoutPaymentPageController constructor.
      *
      * @param InlinePaymentService $inlinePaymentService
-     * @param ConnectionService $connectionService
      */
-    public function __construct(InlinePaymentService $inlinePaymentService, ConnectionService $connectionService)
+    public function __construct(InlinePaymentService $inlinePaymentService)
     {
         $this->inlinePaymentService = $inlinePaymentService;
-        $this->connectionService = $connectionService;
     }
 
     /**
