@@ -18,6 +18,7 @@ interface BookingAuthorizeSupport
         PaymentMethodTypes::PAYPAL,
         PaymentMethodTypes::DIRECT_DEBIT_SECURED,
         PaymentMethodTypes::UNZER_INSTALLMENT,
-        PaymentMethodTypes::UNZER_INVOICE
+        PaymentMethodTypes::UNZER_INVOICE,
+        PaymentMethodTypes::UNZER_PAYPAGE,
     ];
 }

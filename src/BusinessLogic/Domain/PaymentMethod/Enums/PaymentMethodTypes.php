@@ -70,6 +70,9 @@ interface PaymentMethodTypes
     public const UNZER_PREPAYMENT = 'prepayment';
 
     /** @var string */
+    public const UNZER_PAYPAGE = 'unzer-paypage';
+
+    /** @var string */
     public const WECHATPAY = 'wechatpay';
 
     /** @var string */
@@ -105,6 +108,7 @@ interface PaymentMethodTypes
         PaymentMethodTypes::UNZER_INSTALLMENT,
         PaymentMethodTypes::UNZER_INVOICE,
         PaymentMethodTypes::UNZER_PREPAYMENT,
+        PaymentMethodTypes::UNZER_PAYPAGE,
         PaymentMethodTypes::WECHATPAY,
         PaymentMethodTypes::CLICK_TO_PAY
     ];

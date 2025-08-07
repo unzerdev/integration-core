@@ -32,6 +32,7 @@ interface PaymentMethodNames
         PaymentMethodTypes::UNZER_INSTALLMENT => 'Unzer Installment',
         PaymentMethodTypes::UNZER_INVOICE => 'Unzer Invoice',
         PaymentMethodTypes::UNZER_PREPAYMENT => 'Unzer Prepayment',
+        PaymentMethodTypes::UNZER_PAYPAGE => 'Unzer Paypage',
         PaymentMethodTypes::WECHATPAY => 'WeChat Pay',
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => 'Direct Bank Transfer',
     ];
