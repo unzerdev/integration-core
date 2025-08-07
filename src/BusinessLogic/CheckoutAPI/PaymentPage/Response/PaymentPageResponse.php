@@ -36,4 +36,12 @@ class PaymentPageResponse extends Response
             'publicKey' => $this->publicKey,
         ];
     }
+
+    /**
+     * @return Paypage
+     */
+    public function getPaypage(): Paypage
+    {
+        return $this->payPage;
+    }
 }
