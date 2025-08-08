@@ -15,7 +15,6 @@ use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePayment
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
@@ -23,7 +22,6 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
-use UnzerSDK\Resources\V2\Paypage;
 
 /**
  * Class PaymentPageService
@@ -154,33 +152,5 @@ class InlinePaymentService
         return new Resources(
             $customer !== null ? $customer->getId() : null,
         );
-    }
-
-    /**
-     * @param string $orderId
-     *
-     * @return PaymentState
-     * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
-     * @throws UnzerApiException
-     * @throws InvalidCurrencyCode
-     */
-    public function getPaymentState(string $orderId): PaymentState
-    {
-        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
-        if (!$transactionHistory) {
-            throw new TransactionHistoryNotFoundException(new TranslatableLabel(
-                "Transaction history for orderId: $orderId not found.", 'transactionHistory.notFound'
-            ));
-        }
-
-        $payment = $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($transactionHistory->getOrderId());
-        $newTransactionHistory = TransactionHistory::fromUnzerPayment($payment);
-        if (!$newTransactionHistory->isEqual($transactionHistory)) {
-            $newTransactionHistory->synchronizeHistoryItems($transactionHistory);
-            $this->transactionHistoryService->saveTransactionHistory($newTransactionHistory);
-        }
-
-        return new PaymentState($payment->getState(), $payment->getStateName());
     }
 }

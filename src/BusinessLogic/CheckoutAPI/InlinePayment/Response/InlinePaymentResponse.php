@@ -2,9 +2,10 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response;
 
+use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 
-class InlinePaymentResponse
+class InlinePaymentResponse extends Response
 {
 
     private InlinePayment $inlinePayment;
@@ -21,4 +22,11 @@ class InlinePaymentResponse
     {
         return $this->inlinePayment;
     }
+
+    public function toArray(): array
+    {
+        return [];
+    }
+
+
 }

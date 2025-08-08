@@ -10,6 +10,7 @@ use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\PaymentTypes\BasePaymentType;
 use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\Webhook;
 use UnzerSDK\Unzer;
 use UnzerSDK\Resources\TransactionTypes\Charge;
@@ -214,6 +215,27 @@ class UnzerMock extends Unzer
         $this->callHistory['cancelAuthorizationByPayment'][] = ['payment' => $payment, 'amount' => $amount];
 
         return new Cancellation();
+    }
+
+
+    public function performCharge(Charge $charge, $paymentType, $customer = null, Metadata $metadata = null, Basket $basket = null): Charge
+    {
+        $this->callHistory['performCharge'][] = ['charge' => $charge];
+
+        return $charge;
+    }
+
+    public function performAuthorization(
+        Authorization $authorization,
+                      $paymentType,
+                      $customer = null,
+        Metadata      $metadata = null,
+        Basket        $basket = null
+    ): Authorization
+    {
+        $this->callHistory['performAuthorization'][] = ['paymentType' => $paymentType, 'authorization' => $authorization];
+
+        return $authorization;
     }
 
     /**

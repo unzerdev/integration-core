@@ -2,7 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request;
 
-class PaymentMethodByTypeRequest
+use Unzer\Core\BusinessLogic\ApiFacades\Request\Request;
+
+class PaymentMethodByTypeRequest extends Request
 {
     private string $type;
 

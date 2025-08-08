@@ -14,6 +14,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusM
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Controller\TransactionController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller\CheckoutInlinePaymentController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
@@ -50,12 +51,17 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPage
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors\CustomerProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\ExcludeTypesProcessor;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Factory\PaymentTypeFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Services\PaymentTypeService;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -246,8 +252,26 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(PaymentMethodService::class)
                 );
             },
+            CheckoutInlinePaymentController::class => function () {
+                return new CheckoutInlinePaymentController(
+                    TestServiceRegister::getService(InlinePaymentService::class)
+                );
+            },
             PaymentPageFactory::class => static function () {
                 return new PaymentPageFactory(TestServiceRegister::getService(PaymentPageSettingsService::class));
+            },
+            PaymentTypeFactory::class => static function () {
+                return new PaymentTypeFactory();
+            },
+            PaymentTypeService::class => static function () {
+                return new PaymentTypeService(
+                    TestServiceRegister::getService(UnzerFactory::class),
+                    TestServiceRegister::getService(PaymentTypeFactory::class),
+
+                );
+            },
+            InlinePaymentFactory::class => static function () {
+                return new InlinePaymentFactory(TestServiceRegister::getService(PaymentTypeService::class));
             },
             CustomerFactory::class => static function () {
                 return new CustomerFactory();
@@ -280,6 +304,7 @@ class BaseTestCase extends TestCase
                     ServiceRegister::getService(MetadataProvider::class)
                 );
             },
+
             CheckoutPaymentPageController::class => static function () {
                 return new CheckoutPaymentPageController(TestServiceRegister::getService(PaymentPageService::class),
                 TestServiceRegister::getService(ConnectionService::class));
@@ -344,6 +369,9 @@ class BaseTestCase extends TestCase
             },
             TaskRunnerWakeup::class => function () {
                 return new TestTaskRunnerWakeupService();
+            },
+            InlinePaymentStrategyFactory::class => function () {
+                return new InlinePaymentStrategyFactory();
             },
         ]);
 
