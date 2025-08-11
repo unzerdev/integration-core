@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
 
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 
 /**
@@ -9,7 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
  *
  * @package Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request
  */
-class PaymentPageCreateRequest
+class PaymentPageCreateRequest extends CommonFlowRequest
 {
     private string $paymentMethodType;
     private string $orderId;

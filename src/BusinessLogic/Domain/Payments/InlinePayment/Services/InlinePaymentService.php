@@ -4,8 +4,6 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
-use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
@@ -15,7 +13,6 @@ use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePayment
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
@@ -48,13 +45,14 @@ class InlinePaymentService
      * @param CustomerFactory $customerFactory
      */
     public function __construct(
-        UnzerFactory              $unzerFactory,
-        InlinePaymentStrategyFactory              $inlinePaymentStrategyFactory,
-        PaymentMethodService      $paymentMethodService,
-        TransactionHistoryService $transactionHistoryService,
-        InlinePaymentFactory      $inlinePaymentFactory,
-        CustomerFactory           $customerFactory
-    ) {
+        UnzerFactory                 $unzerFactory,
+        InlinePaymentStrategyFactory $inlinePaymentStrategyFactory,
+        PaymentMethodService         $paymentMethodService,
+        TransactionHistoryService    $transactionHistoryService,
+        InlinePaymentFactory         $inlinePaymentFactory,
+        CustomerFactory              $customerFactory
+    )
+    {
         $this->unzerFactory = $unzerFactory;
         $this->inlinePaymentStrategyFactory = $inlinePaymentStrategyFactory;
         $this->paymentMethodService = $paymentMethodService;
@@ -89,26 +87,18 @@ class InlinePaymentService
      * @return void
      * @throws InvalidCurrencyCode
      */
-    private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePayment $response) : void
+    private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePayment $response): void
     {
         $payment = $response->getPayment();
-        $paymentState = $payment ? new PaymentState($payment->getState(), $payment->getStateName()) : null;
-        $totalAmount = $payment ? Amount::fromFloat($payment->getAmount()->getTotal(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
-        $chargedAmount = $payment ? Amount::fromFloat($payment->getAmount()->getCharged(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
-        $canceledAmount = $payment ? Amount::fromFloat($payment->getAmount()->getCanceled(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
-        $remainingAmount = $payment ? Amount::fromFloat($payment->getAmount()->getRemaining(), Currency::fromIsoCode($payment->getAmount()->getCurrency())) : null;
 
-        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
-            ?? new TransactionHistory(
+        $fallbackTransactionHistory = $payment ?
+            TransactionHistory::fromUnzerPayment($payment) :
+            new TransactionHistory(
                 $context->getPaymentMethodType(),
                 $context->getOrderId(),
-                $context->getAmount()->getCurrency()->getIsoCode(),
-                $paymentState,
-                $totalAmount,
-                $chargedAmount,
-                $canceledAmount,
-                $remainingAmount
-            );
+                $context->getAmount()->getCurrency()->getIsoCode(),);
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
+            ?? $fallbackTransactionHistory;
 
         $transactionHistory->setType($context->getPaymentMethodType());
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
@@ -142,7 +132,7 @@ class InlinePaymentService
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    private function buildResources(InlinePaymentCreateContext $context) : Resources
+    private function buildResources(InlinePaymentCreateContext $context): Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {

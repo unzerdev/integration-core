@@ -2,9 +2,10 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request;
 
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 
-class InlinePaymentCreateRequest
+class InlinePaymentCreateRequest extends CommonFlowRequest
 {
 
     private string $paymentMethodType;
