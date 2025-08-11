@@ -118,15 +118,21 @@ class ConnectionService
 
         $decryptedConnectionSettings = $this->decryptConnectionSettings($connectionSettings);
 
-        return $decryptedConnectionSettings->getActiveConnectionData();
+        $mode = $this->getActiveMode($decryptedConnectionSettings);
+
+        return $mode->equal(Mode::live())
+            ? $decryptedConnectionSettings->getLiveConnectionData()
+            : $decryptedConnectionSettings->getSandboxConnectionData();
     }
 
     /**
+     * @param ConnectionSettings $connectionSettings
+     *
      * @return Mode|null
      */
-    public function getActiveMode(): ?Mode
+    public function getActiveMode(ConnectionSettings $connectionSettings): ?Mode
     {
-        return $this->getConnectionSettings()->getMode();
+        return $connectionSettings->getMode();
     }
 
     /**

@@ -591,7 +591,7 @@ class OrderManagementServiceTest extends BaseTestCase
 
         $authorizedItem = new AuthorizeHistoryItem(
             'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
-        'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
+            'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
         $transactionHistory->collection()->add($authorizedItem);
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
@@ -667,6 +667,71 @@ class OrderManagementServiceTest extends BaseTestCase
             [$this->orderManagementService, 'cancelOrder'],
             ['orderId', Amount::fromFloat(12, Currency::getDefault())]
         );
+
+        // assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        self::assertEmpty($methodCallHistory);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancellationAmountNullUsesTotalAmount(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault())
+        );
+
+        $authorizedItem = new AuthorizeHistoryItem(
+            'paymentId',
+            '11.11.2011.',
+            Amount::fromFloat(100, Currency::getDefault()),
+            'authorized',
+            Amount::fromFloat(0, Currency::getDefault()),
+            'card',
+            'paymentId'
+        );
+
+        $transactionHistory->collection()->add($authorizedItem);
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], ['orderId', null]);
+
+        // assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
+        self::assertEquals(100.0, $methodCallHistory[0]['amount']);
+    }
+
+    public function testCancellationAmountNullNoAuthorizedItem(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault())
+        );
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], ['orderId', null]);
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
