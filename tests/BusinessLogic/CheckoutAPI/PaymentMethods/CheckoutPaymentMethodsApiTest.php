@@ -3,6 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\CheckoutAPI\PaymentMethods;
 
 use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodByTypeRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodsRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
@@ -271,5 +272,67 @@ class CheckoutPaymentMethodsApiTest extends BaseTestCase
         ],
             $response->toArray()
         );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws UnzerApiException
+     */
+    public function testGetPaymentMethodsByTypeExists(): void
+    {
+        // Arrange
+        $name = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng'],
+            ['locale' => 'de', 'value' => 'Eps De']
+        ]);
+        $description = TranslationCollection::fromArray([
+            ['locale' => 'en', 'value' => 'Eps eng desc'],
+            ['locale' => 'de', 'value' => 'Eps De desc']
+        ]);
+        $this->paymentMethodServiceMock->setMockPaymentMethods(
+            [
+                new PaymentMethodConfig(
+                    PaymentMethodTypes::EPS,
+                    true,
+                    BookingMethod::authorize(),
+                    true,
+                    $name,
+                    $description,
+                    '2',
+                    Amount::fromFloat(1.1, Currency::getDefault()),
+                    Amount::fromFloat(2.2, Currency::getDefault()),
+                    Amount::fromFloat(3.3, Currency::getDefault()),
+                    [new Country('DE', 'Germany'), new Country('FR', 'France')]
+                )
+            ]
+        );
+        // Act
+        $response = CheckoutAPI::get()->paymentMethods('1')->getPaymentMethodByType(
+            new PaymentMethodByTypeRequest(PaymentMethodTypes::EPS)
+        );
+
+        // Assert
+        self::assertNotNull($response->getPaymentMethodConfig());
+        self::assertEquals(BookingMethod::authorize(), $response->getPaymentMethodConfig()->getBookingMethod());
+        self::assertEquals($name, $response->getPaymentMethodConfig()->getName());
+        self::assertEquals($description, $response->getPaymentMethodConfig()->getDescription());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws UnzerApiException
+     */
+    public function testGetPaymentMethodsByTypeNotExists(): void
+    {
+
+        // Act
+        $response = CheckoutAPI::get()->paymentMethods('1')->getPaymentMethodByType(
+            new PaymentMethodByTypeRequest(PaymentMethodTypes::IDEAL)
+        );
+
+        // Assert
+        self::assertNull($response->getPaymentMethodConfig());
     }
 }

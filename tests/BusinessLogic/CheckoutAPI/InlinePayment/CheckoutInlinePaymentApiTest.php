@@ -6,7 +6,6 @@ use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request\InlinePaymentCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
@@ -27,10 +26,10 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorInterface;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Exceptions\PaymentMethodTypeClassException;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
@@ -40,37 +39,29 @@ use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\InlinePaymentProcessorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock;
-use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentSDK;
-use Unzer\Core\Tests\BusinessLogic\Common\Mocks\SdkAmount;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TestBookingMethod;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
-use UnzerSDK\Constants\PaymentState;
-use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
-use UnzerSDK\Resources\TransactionTypes\Cancellation;
 use UnzerSDK\Resources\TransactionTypes\Charge;
-use UnzerSDK\Resources\TransactionTypes\Chargeback;
-use UnzerSDK\Resources\TransactionTypes\Payout;
-use UnzerSDK\Resources\TransactionTypes\Shipment;
+
 
 class CheckoutInlinePaymentApiTest extends BaseTestCase
 {
     private ?UnzerFactoryMock $unzerFactory;
     private PaymentMethodServiceMock $paymentMethodService;
-
-    /**
-     * @var ConnectionServiceMock
-     */
     private ConnectionServiceMock $connectionService;
+    private InlinePaymentProcessorInterface $mockInlineProcessor;
 
     public function setUp(): void
     {
         parent::setUp();
 
+        $this->mockInlineProcessor = new InlinePaymentProcessorMock();
         $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
         $this->paymentMethodService = new PaymentMethodServiceMock(
             $this->unzerFactory,
@@ -80,6 +71,9 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
 
         TestServiceRegister::registerService(UnzerFactory::class, function () {
             return $this->unzerFactory;
+        });
+        TestServiceRegister::registerService(InlinePaymentProcessorInterface::class, function () {
+            return $this->mockInlineProcessor;
         });
         TestServiceRegister::registerService(PaymentMethodService::class, function () {
             return $this->paymentMethodService;
@@ -252,6 +246,65 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
         $this->assertStringContainsString("Class for payment type 'unknown' not found.", $decoded['errorMessage']);
     }
 
+    public function testForUnsupportedBookingMethod(): void
+    {
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $request = new InlinePaymentCreateRequest(
+            PaymentMethodTypes::CARDS,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($request);
+        $this->assertFalse($response->isSuccessful());
+        $decoded = $response->toArray();
+        $this->assertStringContainsString("Unsupported mode: test", $decoded['errorMessage']);
+    }
+
+    public function testWithInlinePaymentProcessor(): void
+    {
+        $mockUrl = 'https://mock-return-url.unzer.com';
+        $this->mockInlineProcessor->mockProcessorUrl = $mockUrl;
+        InlinePaymentProcessorRegistry::registerGlobal(InlinePaymentProcessorInterface::class);
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $request = new InlinePaymentCreateRequest(
+            PaymentMethodTypes::IDEAL,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($request);
+        $this->assertTrue($response->isSuccessful());
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge');
+
+        self::assertNotEmpty($methodCallHistory);
+        self::assertEquals($response->getInlinePayment()->getCharge()->getReturnUrl(), $mockUrl);
+
+        self::assertTransactionHistory(
+            new TransactionHistory(PaymentMethodTypes::IDEAL, 'test-order-123', 'EUR')
+        );
+    }
+
     private static function assertTransactionHistory(TransactionHistory $expected): void
     {
         $transactionHistory = StoreContext::doWithStore('1', static function () use ($expected) {
@@ -326,7 +379,7 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
                 new PaymentMethodConfig(
                     PaymentMethodTypes::CARDS,
                     true,
-                    BookingMethod::charge(),
+                    TestBookingMethod::test(),
                     true,
                     $nameCard,
                     $descriptionCard,
@@ -361,7 +414,7 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
                     Amount::fromFloat(2.2, Currency::getDefault()),
                     Amount::fromFloat(3.3, Currency::getDefault()),
                     [new Country('gb', 'Great Britain'), new Country('us', 'United States')]
-                )
+                ),
             ]
         );
     }

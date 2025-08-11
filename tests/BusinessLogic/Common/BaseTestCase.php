@@ -52,6 +52,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSett
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors\CustomerProcessorsRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorInterface;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
@@ -92,6 +93,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServi
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\InlinePaymentProcessorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockBasketLIneItemsProcessor;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockCustomerProcessor;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadtaProvider;
@@ -372,6 +374,9 @@ class BaseTestCase extends TestCase
             },
             InlinePaymentStrategyFactory::class => function () {
                 return new InlinePaymentStrategyFactory();
+            },
+            InlinePaymentProcessorInterface::class => static function () {
+                return new InlinePaymentProcessorMock();
             },
         ]);
 

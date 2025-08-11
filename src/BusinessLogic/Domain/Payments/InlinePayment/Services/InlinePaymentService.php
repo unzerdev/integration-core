@@ -149,8 +149,6 @@ class InlinePaymentService
             $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
         }
 
-        return new Resources(
-            $customer !== null ? $customer->getId() : null,
-        );
+        return new Resources($customer !== null ? $customer->getId() : null,);
     }
 }
