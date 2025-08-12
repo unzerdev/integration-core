@@ -71,6 +71,7 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHis
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Listeners\TransactionSyncListener;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Service\TransactionSynchronizerService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Handlers\DefaultWebhookHandler;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -510,6 +511,9 @@ class BootstrapComponent extends BaseBootstrapComponent
             );
         }));
 
+        ServiceRegister::registerService(DefaultWebhookHandler::class, static function () {
+            return new DefaultWebhookHandler();
+        });
         CustomerProcessorsRegistry::registerGlobal(CustomerProcessor::class);
         BasketProcessorsRegistry::registerGlobal(LineItemsProcessor::class);
 
