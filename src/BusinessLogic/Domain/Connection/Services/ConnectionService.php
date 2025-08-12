@@ -213,6 +213,26 @@ class ConnectionService
         return $this->connectionSettingsRepository->getAllConnectedStoreIds();
     }
 
+    /**
+     * @param Unzer $unzer
+     * @param ConnectionSettings $connectionSettings
+     *
+     * @return void
+     *
+     * @throws InvalidKeypairException
+     * @throws UnzerApiException
+     */
+    protected function validateKeypair(Unzer $unzer, ConnectionSettings $connectionSettings): void
+    {
+        $keypair = $unzer->fetchKeypair();
+
+        if ($keypair->getPublicKey() !== $connectionSettings->getActiveConnectionData()->getPublicKey()) {
+            throw new InvalidKeypairException(
+                new TranslatableLabel('Private Key does not match public key', 'connection.invalidKeypair')
+            );
+        }
+    }
+
     private function isWebhookRegistrationNecessary(Mode $mode): bool
     {
         $webhookSettings = $this->webhookDataRepository->getWebhookSettings();
@@ -327,26 +347,6 @@ class ConnectionService
         $mode = $connectionSettings->getMode();
         $this->validatePrivateKey($connectionSettings->getActiveConnectionData()->getPrivateKey(), $mode);
         $this->validatePublicKey($connectionSettings->getActiveConnectionData()->getPublicKey(), $mode);
-    }
-
-    /**
-     * @param Unzer $unzer
-     * @param ConnectionSettings $connectionSettings
-     *
-     * @return void
-     *
-     * @throws InvalidKeypairException
-     * @throws UnzerApiException
-     */
-    private function validateKeypair(Unzer $unzer, ConnectionSettings $connectionSettings): void
-    {
-        $keypair = $unzer->fetchKeypair();
-
-        if ($keypair->getPublicKey() !== $connectionSettings->getActiveConnectionData()->getPublicKey()) {
-            throw new InvalidKeypairException(
-                new TranslatableLabel('Private Key does not match public key', 'connection.invalidKeypair')
-            );
-        }
     }
 
     /**
