@@ -2,6 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller;
 
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Controller\CommonFlowControllerInterface;
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
@@ -18,7 +21,7 @@ use UnzerSDK\Exceptions\UnzerApiException;
  *
  * @package Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller
  */
-class CheckoutPaymentPageController
+class CheckoutPaymentPageController implements CommonFlowControllerInterface
 {
     private PaymentPageService $paymentPageService;
 
@@ -41,7 +44,7 @@ class CheckoutPaymentPageController
      * @throws UnzerApiException
      * @throws PaymentConfigNotFoundException
      */
-    public function create(PaymentPageCreateRequest $request): PaymentPageResponse
+    public function create(CommonFlowRequest $request): CommonFlowResponse
     {
         $connectionData = $this->connectionService->getConnectionSettings()->getActiveConnectionData();
 

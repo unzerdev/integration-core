@@ -68,6 +68,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapSe
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Handlers\DefaultWebhookHandler;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -97,6 +98,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\InlinePaymentProcessorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockBasketLIneItemsProcessor;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockCustomerProcessor;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadtaProvider;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentCompletedWebhookHandlerMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestComponents\Logger\TestShopLogger;
@@ -378,6 +380,14 @@ class BaseTestCase extends TestCase
             InlinePaymentProcessorInterface::class => static function () {
                 return new InlinePaymentProcessorMock();
             },
+
+            DefaultWebhookHandler::class => static function () {
+                return new DefaultWebhookHandler();
+            },
+
+            PaymentCompletedWebhookHandlerMock::class => static function () {
+                return new PaymentCompletedWebhookHandlerMock();
+            }
         ]);
 
         PaymentPageProcessorsRegistry::registerGlobal(ExcludeTypesProcessor::class);

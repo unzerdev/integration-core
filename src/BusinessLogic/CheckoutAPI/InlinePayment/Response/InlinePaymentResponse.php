@@ -2,10 +2,10 @@
 
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response;
 
-use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 
-class InlinePaymentResponse extends Response
+class InlinePaymentResponse extends CommonFlowResponse
 {
 
     private InlinePayment $inlinePayment;
@@ -23,10 +23,11 @@ class InlinePaymentResponse extends Response
         return $this->inlinePayment;
     }
 
-    public function toArray(): array
+    /**
+     * @return string
+     */
+    public function getRedirectUrl(): string
     {
-        return [];
+        return $this->getInlinePayment() ? $this->getInlinePayment()->getPayment()->getRedirectUrl() : '';
     }
-
-
 }

@@ -19,6 +19,7 @@ use UnzerSDK\Resources\V2\Paypage;
 class PaymentPageFactory
 {
     const EMBEDDED_PAYPAGE_TYPE = "embedded";
+    const HOSTED_PAYPAGE_TYPE = "hosted";
 
     private PaymentPageSettingsService $paymentPageSettingsService;
 
