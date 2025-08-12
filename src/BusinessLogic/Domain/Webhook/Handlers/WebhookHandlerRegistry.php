@@ -2,12 +2,12 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Webhook\Handlers;
 
-use Unzer\Core\BusinessLogic\Domain\Payments\Common\Processors\RequestProcessor;
 use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Infrastructure\Singleton;
 
 class WebhookHandlerRegistry extends Singleton
 {
+    protected static ?Singleton $instance = null;
 
     /**
      * Map of webhook event specific registered processors
