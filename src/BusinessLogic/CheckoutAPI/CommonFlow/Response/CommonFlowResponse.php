@@ -11,5 +11,8 @@ abstract class CommonFlowResponse extends Response
         return [];
     }
 
-    abstract public function getRedirectUrl(): string;
+    /**
+     * @return string|null
+     */
+    abstract public function getRedirectUrl(): ?string;
 }

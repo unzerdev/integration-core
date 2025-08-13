@@ -24,9 +24,9 @@ class InlinePaymentResponse extends CommonFlowResponse
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getRedirectUrl(): string
+    public function getRedirectUrl(): ?string
     {
         return $this->getInlinePayment() ? $this->getInlinePayment()->getPayment()->getRedirectUrl() : '';
     }

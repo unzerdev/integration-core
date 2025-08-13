@@ -47,9 +47,9 @@ class PaymentPageResponse extends CommonFlowResponse
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getRedirectUrl(): string
+    public function getRedirectUrl(): ?string
     {
         return $this->getPaypage() ? $this->getPaypage()->getRedirectUrl() : '';
     }
