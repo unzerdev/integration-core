@@ -20,6 +20,8 @@ class CommonFlowFactory
         PaymentMethodTypes::IDEAL => self::INLINE_FLOW,
         PaymentMethodTypes::UNZER_PREPAYMENT => self::INLINE_FLOW,
         PaymentMethodTypes::PAYPAL => self::INLINE_FLOW,
+        PaymentMethodTypes::WECHATPAY => self::INLINE_FLOW,
+        PaymentMethodTypes::TWINT => self::INLINE_FLOW,
     ];
 
 
