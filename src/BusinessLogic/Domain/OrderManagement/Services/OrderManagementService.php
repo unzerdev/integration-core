@@ -46,7 +46,7 @@ class OrderManagementService
      */
     public function chargeOrder(string $orderId, Amount $chargeAmount): void
     {
-        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
 
@@ -56,7 +56,7 @@ class OrderManagementService
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
 
-        if(!$authorizedItem) {
+        if (!$authorizedItem) {
             return;
         }
 
@@ -78,19 +78,19 @@ class OrderManagementService
      */
     public function cancelOrder(string $orderId, ?Amount $amount = null): void
     {
-        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
         if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
             return;
         }
-        if($amount === null) {
+        if ($amount === null) {
             $amount = $transactionHistory->getTotalAmount();
         }
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
 
-        if(!$authorizedItem) {
+        if (!$authorizedItem) {
             return;
         }
 
@@ -111,7 +111,7 @@ class OrderManagementService
      */
     public function refundOrder(string $orderId, Amount $refundAmount): void
     {
-        if(!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
+        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
 
@@ -182,7 +182,7 @@ class OrderManagementService
      */
     private function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
     {
-        if($amount === null) {
+        if ($amount === null) {
             return true;
         }
 
@@ -207,8 +207,11 @@ class OrderManagementService
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
-            $transactionHistory->getCancelledAmount()->plus($transactionHistory->getChargedAmount())->getValue() ===
-            $transactionHistory->getTotalAmount()->getValue() &&
+            (($transactionHistory->getCancelledAmount()->plus($transactionHistory->getChargedAmount())->getValue() ===
+                    $transactionHistory->getTotalAmount()->getValue()) ||
+                ($transactionHistory->getChargedAmount()->plus($transactionHistory->getRemainingAmount())->getValue() ===
+                    $transactionHistory->getTotalAmount()->getValue())
+            ) &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
     }
 }
