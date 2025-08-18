@@ -116,10 +116,6 @@ class InlinePaymentService
      */
     private function getEnabledPaymentMethodSettings(InlinePaymentCreateContext $context): PaymentMethodConfig
     {
-        if(!$this->paymentMethodService->hasPaymentMethodSettings()) {
-            return $this->paymentMethodService->getDefaultPaymentMethodConfig($context->getPaymentMethodType(), $context->getSystemBookingMethod());
-        }
-
         $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
         if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
