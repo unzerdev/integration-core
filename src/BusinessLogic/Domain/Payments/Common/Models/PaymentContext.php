@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\Common\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 
 abstract class PaymentContext
 {
@@ -13,6 +14,7 @@ abstract class PaymentContext
     private string $returnUrl;
     private DataBag $checkoutSession;
     private string $locale;
+    private ?BookingMethod $systemBookingMethod;
 
     /**
      * PaymentPageCreateContext constructor.
@@ -22,6 +24,7 @@ abstract class PaymentContext
      * @param string $returnUrl
      * @param DataBag $checkoutSession
      * @param string $locale
+     * @param BookingMethod|null $systemBookingMethod
      */
     public function __construct(
         string $paymentMethodType,
@@ -29,7 +32,8 @@ abstract class PaymentContext
         Amount $amount,
         string $returnUrl,
         DataBag $checkoutSession,
-        string $locale = 'default'
+        string $locale = 'default',
+        ?BookingMethod $systemBookingMethod = null
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
@@ -37,6 +41,7 @@ abstract class PaymentContext
         $this->returnUrl = $returnUrl;
         $this->checkoutSession = $checkoutSession;
         $this->locale = $locale;
+        $this->systemBookingMethod = $systemBookingMethod;
     }
 
     public function getPaymentMethodType(): string
@@ -67,5 +72,10 @@ abstract class PaymentContext
     public function getLocale(): string
     {
         return $this->locale;
+    }
+
+    public function getSystemBookingMethod(): ?BookingMethod
+    {
+        return $this->systemBookingMethod;
     }
 }

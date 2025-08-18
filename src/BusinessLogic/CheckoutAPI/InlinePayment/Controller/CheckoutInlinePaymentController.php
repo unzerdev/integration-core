@@ -5,6 +5,8 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Controller\CommonFlowControllerInterface;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request\InlinePaymentCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
@@ -27,9 +29,11 @@ class CheckoutInlinePaymentController implements CommonFlowControllerInterface
     }
 
     /**
+     * @param InlinePaymentCreateRequest $request
+     * @return CommonFlowResponse
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      * @throws PaymentConfigNotFoundException
+     * @throws UnzerApiException
      */
     public function create(CommonFlowRequest $request): CommonFlowResponse
     {
@@ -39,7 +43,8 @@ class CheckoutInlinePaymentController implements CommonFlowControllerInterface
             $request->getAmount(),
             $request->getReturnUrl(),
             new DataBag($request->getSessionData()),
-            $request->getLocale()
+            $request->getLocale(),
+            $request->getBookingMethod()
         ));
     }
 }

@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
@@ -70,7 +71,9 @@ class InlinePaymentService
     {
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
         $resources = $this->buildResources($context);
-        $method = $paymentMethodSettings->getBookingMethod()->getBookingMethod();
+
+        // If set, use booking method from the system checkout request, otherwise, use from the
+        $method = $context->getSystemBookingMethod() ?? $paymentMethodSettings->getBookingMethod();
 
         $inlinePayment = $this->inlinePaymentStrategyFactory
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
@@ -109,9 +112,14 @@ class InlinePaymentService
      *
      * @return PaymentMethodConfig
      * @throws PaymentConfigNotFoundException
+     * @throws InvalidAmountsException
      */
     private function getEnabledPaymentMethodSettings(InlinePaymentCreateContext $context): PaymentMethodConfig
     {
+        if(!$this->paymentMethodService->hasPaymentMethodSettings()) {
+            return $this->paymentMethodService->getDefaultPaymentMethodConfig($context->getPaymentMethodType(), $context->getSystemBookingMethod());
+        }
+
         $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
         if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
@@ -121,6 +129,7 @@ class InlinePaymentService
                 ),
             );
         }
+
         return $settings;
     }
 

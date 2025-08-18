@@ -109,6 +109,24 @@ class PaymentMethodService
 
     /**
      * @param string $type
+     * @param BookingMethod $checkoutBookingMethod
+     *
+     * @return PaymentMethodConfig
+     *
+     * @throws InvalidAmountsException
+     */
+    public function getDefaultPaymentMethodConfig(string $type, BookingMethod $checkoutBookingMethod): PaymentMethodConfig
+    {
+        return new PaymentMethodConfig(
+            $type,
+            true,
+            $this->getBookingMethodForType($type, $checkoutBookingMethod),
+            in_array($type, BasketRequired::BASKET_REQUIRED)
+        );
+    }
+
+    /**
+     * @param string $type
      *
      * @return ?PaymentMethodConfig
      *
@@ -117,6 +135,14 @@ class PaymentMethodService
     public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig
     {
         return $this->paymentMethodConfigRepository->getPaymentMethodConfigByType($type);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasPaymentMethodSettings(): bool
+    {
+        return true;
     }
 
     /**
@@ -154,14 +180,16 @@ class PaymentMethodService
 
     /**
      * @param string $type
+     * @param BookingMethod|null $checkoutBookingMethod
      *
      * @return BookingMethod
      */
-    private function getBookingMethodForType(string $type): BookingMethod
+    private function getBookingMethodForType(string $type, ?BookingMethod $checkoutBookingMethod = null): BookingMethod
     {
+        // if method supports both booking method, return one provided from the shop checkout
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
             in_array($type, BookingChargeSupport::SUPPORTS_CHARGE)) {
-            return BookingMethod::charge();
+            return $checkoutBookingMethod ?? BookingMethod::charge();
         }
 
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE)) {

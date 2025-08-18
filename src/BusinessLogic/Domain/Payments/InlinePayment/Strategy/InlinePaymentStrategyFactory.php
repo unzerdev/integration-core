@@ -10,7 +10,7 @@ use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 class InlinePaymentStrategyFactory
 {
     /**
-     * @param string $mode
+     * @param BookingMethod $mode
      * @param UnzerFactory $factory
      * @param InlinePaymentFactory $paymentFactory
      *
@@ -18,16 +18,16 @@ class InlinePaymentStrategyFactory
      *
      * @throws BookingMethodNotSupportedException
      */
-    public function makeStrategy(string $mode, UnzerFactory $factory, InlinePaymentFactory $paymentFactory): InlinePaymentStrategyInterface
+    public function makeStrategy(BookingMethod $mode, UnzerFactory $factory, InlinePaymentFactory $paymentFactory): InlinePaymentStrategyInterface
     {
-        if ($mode === BookingMethod::CHARGE) {
+        if ($mode->equal(BookingMethod::charge())) {
             return new ChargePaymentStrategy($factory, $paymentFactory);
         }
 
-        if ($mode === BookingMethod::AUTHORIZATION) {
+        if ($mode->equal(BookingMethod::authorize())) {
             return new AuthorizePaymentStrategy($factory, $paymentFactory);
         }
 
-        throw new BookingMethodNotSupportedException("Unsupported mode: $mode");
+        throw new BookingMethodNotSupportedException("Unsupported mode: {$mode->getBookingMethod()}");
     }
 }

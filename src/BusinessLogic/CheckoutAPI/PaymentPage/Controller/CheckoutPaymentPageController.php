@@ -40,9 +40,11 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
     }
 
     /**
+     * @param PaymentPageCreateRequest $request
+     * @return CommonFlowResponse
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      * @throws PaymentConfigNotFoundException
+     * @throws UnzerApiException
      */
     public function create(CommonFlowRequest $request): CommonFlowResponse
     {
@@ -55,7 +57,8 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
                 $request->getAmount(),
                 $request->getReturnUrl(),
                 new DataBag($request->getSessionData()),
-                $request->getLocale()
+                $request->getLocale(),
+                $request->getBookingMethod()
             )),
             $connectionData->getPublicKey()
 
