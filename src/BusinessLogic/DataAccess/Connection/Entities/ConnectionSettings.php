@@ -31,6 +31,7 @@ class ConnectionSettings extends Entity
      * @var string
      */
     protected string $storeId;
+    protected string $paymentMethod = '';
 
     /**
      * @inheritDoc
@@ -39,7 +40,8 @@ class ConnectionSettings extends Entity
     {
         $indexMap = new IndexMap();
 
-        $indexMap->addStringIndex('storeId');
+        $indexMap->addStringIndex('storeId')
+            ->addStringIndex('paymentMethod');
 
         return new EntityConfiguration($indexMap, 'ConnectionSettings');
     }
@@ -54,6 +56,7 @@ class ConnectionSettings extends Entity
         parent::inflate($data);
 
         $this->storeId = $data['storeId'];
+        $this->paymentMethod = $data['paymentMethod'] ?? '';
 
         $connectionSettings = $data['connectionSettings'] ?? [];
         $this->connectionSettings = new DomainConnectionSettings(
@@ -78,6 +81,7 @@ class ConnectionSettings extends Entity
     {
         $data = parent::toArray();
         $data['storeId'] = $this->storeId;
+        $data['paymentMethod'] = $this->paymentMethod;
         $data['connectionSettings'] = [
             'mode' => $this->connectionSettings->getMode() ? $this->connectionSettings->getMode()->getMode() : 'live',
             'liveData' => $this->connectionSettings->getLiveConnectionData() ? [
@@ -127,5 +131,15 @@ class ConnectionSettings extends Entity
     public function setStoreId(string $storeId): void
     {
         $this->storeId = $storeId;
+    }
+
+    public function getPaymentMethod(): string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(string $paymentMethod): void
+    {
+        $this->paymentMethod = $paymentMethod;
     }
 }
