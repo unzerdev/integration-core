@@ -109,13 +109,13 @@ class PaymentMethodService
 
     /**
      * @param string $type
-     * @param BookingMethod $systemBookingMethod
+     * @param BookingMethod|null $systemBookingMethod
      *
      * @return PaymentMethodConfig
      *
      * @throws InvalidAmountsException
      */
-    public function getDefaultPaymentMethodConfig(string $type, BookingMethod $systemBookingMethod): PaymentMethodConfig
+    public function getDefaultPaymentMethodConfig(string $type, ?BookingMethod $systemBookingMethod = null): PaymentMethodConfig
     {
         return new PaymentMethodConfig(
             $type,
