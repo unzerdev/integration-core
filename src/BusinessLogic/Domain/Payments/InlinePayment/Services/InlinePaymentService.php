@@ -72,8 +72,7 @@ class InlinePaymentService
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
         $resources = $this->buildResources($context);
 
-        // If set, use booking method from the system checkout request, otherwise, use from the
-        $method = $context->getSystemBookingMethod() ?? $paymentMethodSettings->getBookingMethod();
+        $method = $paymentMethodSettings->getBookingMethod();
 
         $inlinePayment = $this->inlinePaymentStrategyFactory
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
