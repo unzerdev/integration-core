@@ -62,6 +62,14 @@ class ErrorResponse extends Response
     }
 
     /**
+     * @return Throwable
+     */
+    public function getError(): Throwable
+    {
+        return $this->error;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
