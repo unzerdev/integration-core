@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
 
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 
 /**
  * Class PaymentPageCreateRequest
@@ -18,16 +19,16 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     private string $returnUrl;
     private array $sessionData;
     private string $locale;
+    private ?BookingMethod $bookingMethod;
 
     /**
-     * PaymentPageCreateRequest constructor.
      * @param string $paymentMethodType
      * @param string $orderId
      * @param Amount $amount
      * @param string $returnUrl
-     * @param string $mode
      * @param array $sessionData
      * @param string $locale
+     * @param BookingMethod|null $bookingMethod
      */
     public function __construct(
         string $paymentMethodType,
@@ -35,7 +36,8 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         Amount $amount,
         string $returnUrl,
         array $sessionData = [],
-        string $locale = 'default'
+        string $locale = 'default',
+        ?BookingMethod $bookingMethod = null
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
@@ -43,6 +45,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         $this->returnUrl = $returnUrl;
         $this->sessionData = $sessionData;
         $this->locale = $locale;
+        $this->bookingMethod = $bookingMethod;
     }
 
     public function getPaymentMethodType(): string
@@ -73,5 +76,10 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     public function getLocale(): string
     {
         return $this->locale;
+    }
+
+    public function getBookingMethod(): ?BookingMethod
+    {
+        return $this->bookingMethod;
     }
 }

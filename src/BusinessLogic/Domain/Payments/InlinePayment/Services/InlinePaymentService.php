@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
@@ -70,7 +71,8 @@ class InlinePaymentService
     {
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
         $resources = $this->buildResources($context);
-        $method = $paymentMethodSettings->getBookingMethod()->getBookingMethod();
+
+        $method = $paymentMethodSettings->getBookingMethod();
 
         $inlinePayment = $this->inlinePaymentStrategyFactory
             ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
@@ -109,10 +111,11 @@ class InlinePaymentService
      *
      * @return PaymentMethodConfig
      * @throws PaymentConfigNotFoundException
+     * @throws InvalidAmountsException
      */
     private function getEnabledPaymentMethodSettings(InlinePaymentCreateContext $context): PaymentMethodConfig
     {
-        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
+        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType(), $context->getSystemBookingMethod());
         if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
                 new TranslatableLabel(
@@ -121,6 +124,7 @@ class InlinePaymentService
                 ),
             );
         }
+
         return $settings;
     }
 

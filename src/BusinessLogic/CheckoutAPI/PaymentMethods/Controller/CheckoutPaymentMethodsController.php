@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Request\PaymentMethodsRe
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response\PaymentMethodByTypeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Response\PaymentMethodsResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -52,6 +53,7 @@ class CheckoutPaymentMethodsController
      * @param PaymentMethodByTypeRequest $request
      *
      * @return PaymentMethodByTypeResponse
+     * @throws InvalidAmountsException
      */
     public function getPaymentMethodByType(PaymentMethodByTypeRequest $request): PaymentMethodByTypeResponse
     {
