@@ -198,8 +198,6 @@ class OrderManagementService
      * @param Amount $amountToRefund
      *
      * @return bool
-     *
-     * @throws CurrencyMismatchException
      */
     private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
     {
@@ -207,11 +205,6 @@ class OrderManagementService
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
-            (($transactionHistory->getCancelledAmount()->plus($transactionHistory->getChargedAmount())->getValue() ===
-                    $transactionHistory->getTotalAmount()->getValue()) ||
-                ($transactionHistory->getChargedAmount()->plus($transactionHistory->getRemainingAmount())->getValue() ===
-                    $transactionHistory->getTotalAmount()->getValue())
-            ) &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
     }
 }
