@@ -11,7 +11,6 @@ interface BasketRequired
 {
     /** @var string[] */
     public const BASKET_REQUIRED = [
-        PaymentMethodTypes::DIRECT_DEBIT_SECURED,
         PaymentMethodTypes::KLARNA
     ];
 }
