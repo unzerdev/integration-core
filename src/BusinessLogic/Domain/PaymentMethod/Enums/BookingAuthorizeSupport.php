@@ -20,5 +20,6 @@ interface BookingAuthorizeSupport
         PaymentMethodTypes::UNZER_INSTALLMENT,
         PaymentMethodTypes::UNZER_INVOICE,
         PaymentMethodTypes::UNZER_PAYPAGE,
+        PaymentMethodTypes::WERO
     ];
 }

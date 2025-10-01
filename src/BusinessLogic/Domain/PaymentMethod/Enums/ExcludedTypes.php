@@ -2,7 +2,6 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums;
 
-
 interface ExcludedTypes
 {
     /** @var string[] */
@@ -29,5 +28,6 @@ interface ExcludedTypes
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => "openbankingpis",
         PaymentMethodTypes::UNZER_INVOICE => "paylaterInvoice",
         PaymentMethodTypes::CLICK_TO_PAY => "clicktopay",
+        PaymentMethodTypes::WERO => "wero"
     ];
 }

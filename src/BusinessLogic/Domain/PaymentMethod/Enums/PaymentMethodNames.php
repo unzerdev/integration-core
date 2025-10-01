@@ -35,6 +35,7 @@ interface PaymentMethodNames
         PaymentMethodTypes::UNZER_PAYPAGE => 'Unzer Paypage',
         PaymentMethodTypes::WECHATPAY => 'WeChat Pay',
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => 'Direct Bank Transfer',
+        PaymentMethodTypes::WERO => 'Wero',
     ];
 
     /** @var string  */

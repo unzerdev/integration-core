@@ -84,6 +84,9 @@ interface PaymentMethodTypes
     /** @var string  */
     public const CLICK_TO_PAY = 'clicktopay';
 
+    /** @var string  */
+    public const WERO = 'wero';
+
     /** @var string[] */
     public const PAYMENT_TYPES = [
         PaymentMethodTypes::ALI_PAY,
@@ -110,6 +113,7 @@ interface PaymentMethodTypes
         PaymentMethodTypes::UNZER_PREPAYMENT,
         PaymentMethodTypes::UNZER_PAYPAGE,
         PaymentMethodTypes::WECHATPAY,
-        PaymentMethodTypes::CLICK_TO_PAY
+        PaymentMethodTypes::CLICK_TO_PAY,
+        PaymentMethodTypes::WERO
     ];
 }
