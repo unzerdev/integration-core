@@ -23,6 +23,6 @@ class PaymentTypeFactory
             throw new PaymentMethodTypeClassException("Class for payment type '$paymentType' not found.");
         }
 
-        return new $className($paymentType);
+        return new $className();
     }
 }

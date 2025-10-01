@@ -22,6 +22,9 @@ class CommonFlowFactory
         PaymentMethodTypes::PAYPAL => self::INLINE_FLOW,
         PaymentMethodTypes::WECHATPAY => self::INLINE_FLOW,
         PaymentMethodTypes::TWINT => self::INLINE_FLOW,
+        PaymentMethodTypes::PRZELEWY24 => self::INLINE_FLOW,
+        PaymentMethodTypes::BANCONTACT => self::INLINE_FLOW,
+        PaymentMethodTypes::DIRECT_BANK_TRANSFER => self::INLINE_FLOW,
     ];
 
 
