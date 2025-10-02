@@ -189,7 +189,7 @@ class PaymentMethodService
      *
      * @return BookingMethod
      */
-    private function getBookingMethodForType(string $type, ?BookingMethod $systemBookingMethod = null): BookingMethod
+    protected function getBookingMethodForType(string $type, ?BookingMethod $systemBookingMethod = null): BookingMethod
     {
         // if method supports both booking method, return one provided from the shop checkout
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
