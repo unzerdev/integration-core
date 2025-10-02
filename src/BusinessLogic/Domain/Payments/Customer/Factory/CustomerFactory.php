@@ -14,6 +14,11 @@ use UnzerSDK\Resources\Customer;
  */
 class CustomerFactory
 {
+    /**
+     * @param PaymentContext $context
+     *
+     * @return ?Customer
+     */
     public function create(PaymentContext $context): ?Customer
     {
         $customer = $this->initializeCustomer($context);
@@ -21,9 +26,14 @@ class CustomerFactory
             $processor->process($customer, $context);
         }
 
-        return $customer->getCustomerId() ? $customer : null;
+        return $customer->getEmail() ? $customer : null;
     }
 
+    /**
+     * @param PaymentContext $context
+     *
+     * @return Customer
+     */
     protected function initializeCustomer(PaymentContext $context): Customer
     {
         return new Customer();
