@@ -268,6 +268,24 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param $payment
+     * @param Cancellation|null $cancellation
+     *
+     * @return Cancellation
+     */
+    public function cancelChargedPayment(
+        $payment,
+        Cancellation $cancellation = null
+    ): Cancellation {
+        $this->callHistory['cancelChargedPayment'][] = [
+            'payment' => $payment,
+            'cancellation' => $cancellation
+        ];
+
+        return new Cancellation();
+    }
+
+    /**
      * @param BasePaymentType $paymentType
      *
      * @return BasePaymentType

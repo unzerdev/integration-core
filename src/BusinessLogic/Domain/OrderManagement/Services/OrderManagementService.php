@@ -5,12 +5,14 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\RefundViaPayment;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\TransactionTypes\Cancellation;
 
 /**
  * Class OrderManagementService.
@@ -119,6 +121,12 @@ class OrderManagementService
             return;
         }
 
+        if (in_array($transactionHistory->getType(), RefundViaPayment::REFUND_VIA_PAYMENT, true)) {
+            $this->refundOrderByPayment($transactionHistory, $refundAmount);
+
+            return;
+        }
+
         /** @var ChargeHistoryItem[] $chargeItems */
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
 
@@ -206,5 +214,18 @@ class OrderManagementService
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function refundOrderByPayment(TransactionHistory $transactionHistory, Amount $refundAmount)
+    {
+        $paymentId = $transactionHistory->collection()->last()->getPaymentId();
+        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
+            $paymentId,
+            new Cancellation($refundAmount->getPriceInCurrencyUnits())
+        );
     }
 }

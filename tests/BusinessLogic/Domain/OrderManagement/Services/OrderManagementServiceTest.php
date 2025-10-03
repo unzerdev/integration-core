@@ -7,7 +7,6 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\AuthorizeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
@@ -20,6 +19,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionHistoryServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
+use UnzerSDK\Resources\TransactionTypes\Cancellation;
 
 /**
  * Class OrderManagementServiceTest.
@@ -868,6 +868,56 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertEquals('charge1', $methodCallHistory[0]['chargeId']);
         self::assertEquals(30, $methodCallHistory[0]['amount']);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testRefundByPayment(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            'paylater-installment',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(1000, Currency::getDefault()),
+            Amount::fromFloat(980,  Currency::getDefault()),
+            Amount::fromFloat(20,   Currency::getDefault()),
+            Amount::fromFloat(0,    Currency::getDefault()),
+            [
+                new AuthorizeHistoryItem(
+                    'authorize1', 'date1', Amount::fromFloat(100, Currency::getDefault()),
+                    'status1', Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge1', 'date2', Amount::fromFloat(100, Currency::getDefault()), 'status2',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                )
+            ]
+        );
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        // act
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'refundOrder'],
+            [
+                'orderId',
+                Amount::fromFloat(30, Currency::getDefault())
+            ]
+        );
+
+        // assert
+        $paymentCalls = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargedPayment');
+        self::assertNotEmpty($paymentCalls);
+        self::assertCount(1, $paymentCalls);
+
+        self::assertEquals('id', $paymentCalls[0]['payment']);
+        $cnl = $paymentCalls[0]['cancellation'];
+        self::assertInstanceOf(Cancellation::class, $cnl);
+        self::assertEquals(30.0, $cnl->getAmount());
+    }
+
 
     /**
      * @return void
