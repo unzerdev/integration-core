@@ -58,7 +58,7 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
      *
      * @return array
      */
-    private function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
+    protected function getExcludePaymentTypesList(array $availablePaymentTypes, string $selectedPaymentType): array
     {
         return array_values(
             array_filter(
@@ -76,7 +76,7 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
      *
      * @return PaymentMethodsConfigs
      */
-    private function setExcludedMethodConfigs(
+    protected function setExcludedMethodConfigs(
         array $excludedTypes,
         PaymentMethodConfigModel $methodConfig
     ): PaymentMethodsConfigs {
