@@ -3,7 +3,6 @@
 namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\ExcludedTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig as PaymentMethodConfigModel;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
@@ -81,21 +80,15 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
         PaymentMethodConfigModel $methodConfig
     ): PaymentMethodsConfigs {
         $paymentMethodConfigs = new PaymentMethodsConfigs();
-        foreach ($excludedTypes as $method) {
-            if ($method === PaymentMethodTypes::CLICK_TO_PAY && $methodConfig->getType() === PaymentMethodTypes::CARDS) {
-                !$methodConfig->isClickToPayEnabled() && $paymentMethodConfigs->addMethodConfig(
-                    PaymentMethodTypes::CLICK_TO_PAY,
-                    new PaymentMethodConfig(false)
-                );
+        $paymentMethodConfigs->setDefault(new PaymentMethodConfig(false));
+        $paymentMethodConfigs->addMethodConfig($methodConfig->getType(), new PaymentMethodConfig(true));
 
-                continue;
-            }
-            if (isset(ExcludedTypes::EXCLUDED_METHOD_NAMES[$method])) {
-                $paymentMethodConfigs->addMethodConfig(
-                    ExcludedTypes::EXCLUDED_METHOD_NAMES[$method],
-                    new PaymentMethodConfig(false)
-                );
-            }
+        if (in_array(PaymentMethodTypes::CLICK_TO_PAY, $excludedTypes, true)
+            && $methodConfig->getType() === PaymentMethodTypes::CARDS) {
+            $methodConfig->isClickToPayEnabled() && $paymentMethodConfigs->addMethodConfig(
+                PaymentMethodTypes::CLICK_TO_PAY,
+                new PaymentMethodConfig(true)
+            );
         }
 
         return $paymentMethodConfigs;

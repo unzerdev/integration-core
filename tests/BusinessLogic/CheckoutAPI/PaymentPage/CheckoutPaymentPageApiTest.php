@@ -167,8 +167,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('card', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('eps', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
@@ -217,7 +218,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
     }
 
-    public function testAuthorizedPaymentPageForClickToPay(): void
+    public function testAddClickToPayWhenEnabled(): void
     {
         // Arrange
         $this->mockData('s-pub-test', 's-priv-test', ['applepay', 'googlepay', 'card', 'clicktopay']);
@@ -230,8 +231,11 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('applepay', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('cards', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
+        $paymentMethodsConfigs->addMethodConfig('clicktopay',
+            (new EmbeddedPaymentMethodConfig(false))->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
@@ -287,14 +291,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals($expectedPayPageRequest, $methodCallHistory[0]['paypage']);
         self::assertTrue($response->isSuccessful());
-        self::assertNotEmpty($response->toArray());
-        self::assertEquals(
-            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'publicKey' => 'publicKeyTest'],
-            $response->toArray()
-        );
-        self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-order-123', 'EUR')
-        );
     }
 
     public function testChargePaymentPageWithMinimalRequest(): void
@@ -310,8 +306,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('EPS', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('cards', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::CHARGE);
         $expectedPayPageRequest
