@@ -25,6 +25,7 @@ class CommonFlowFactory
         PaymentMethodTypes::PRZELEWY24 => self::INLINE_FLOW,
         PaymentMethodTypes::BANCONTACT => self::INLINE_FLOW,
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => self::INLINE_FLOW,
+        PaymentMethodTypes::WERO => self::INLINE_FLOW,
     ];
 
 

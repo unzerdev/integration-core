@@ -26,6 +26,7 @@ use UnzerSDK\Resources\PaymentTypes\SepaDirectDebit;
 use UnzerSDK\Resources\PaymentTypes\Sofort;
 use UnzerSDK\Resources\PaymentTypes\Twint;
 use UnzerSDK\Resources\PaymentTypes\Wechatpay;
+use UnzerSDK\Resources\PaymentTypes\Wero;
 
 /**
  * Class SdkPaymentTypes.
@@ -59,6 +60,7 @@ interface SdkPaymentTypes
         Prepayment::class => PaymentMethodTypes::UNZER_PREPAYMENT,
         Wechatpay::class => PaymentMethodTypes::WECHATPAY,
         OpenbankingPis::class => PaymentMethodTypes::DIRECT_BANK_TRANSFER,
-        Clicktopay::class => PaymentMethodTypes::CARDS
+        Clicktopay::class => PaymentMethodTypes::CARDS,
+        Wero::class => PaymentMethodTypes::WERO,
     ];
 }
