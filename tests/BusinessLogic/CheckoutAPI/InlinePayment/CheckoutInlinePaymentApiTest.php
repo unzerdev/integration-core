@@ -14,6 +14,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Country\Models\Country;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
@@ -79,10 +80,6 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
             return $this->paymentMethodService;
         });
 
-        TestServiceRegister::registerService(PaymentMethodService::class, function () {
-            return $this->paymentMethodService;
-        });
-
         $this->connectionService = new ConnectionServiceMock(
             $this->unzerFactory,
             TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
@@ -106,6 +103,7 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
                 TestServiceRegister::getService(TransactionHistoryService::class),
                 TestServiceRegister::getService(InlinePaymentFactory::class),
                 TestServiceRegister::getService(CustomerFactory::class),
+                TestServiceRegister::getService(MetadataProvider::class),
             );
         },
         );

@@ -109,6 +109,7 @@ class CommonFlowPaymentTest extends BaseTestCase
                 TestServiceRegister::getService(TransactionHistoryService::class),
                 TestServiceRegister::getService(InlinePaymentFactory::class),
                 TestServiceRegister::getService(CustomerFactory::class),
+                TestServiceRegister::getService(MetadataProvider::class),
             );
         },
         );

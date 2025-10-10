@@ -5,11 +5,13 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Exceptions\BookingMethodNotSupportedException;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
@@ -34,6 +36,7 @@ class InlinePaymentService
     private TransactionHistoryService $transactionHistoryService;
     private InlinePaymentFactory $inlinePaymentFactory;
     private CustomerFactory $customerFactory;
+    private MetadataProvider $metadataProvider;
 
     /**
      * PaymentPageService constructor.
@@ -44,28 +47,37 @@ class InlinePaymentService
      * @param TransactionHistoryService $transactionHistoryService
      * @param InlinePaymentFactory $inlinePaymentFactory
      * @param CustomerFactory $customerFactory
+     * @param MetadataProvider $metadataProvider
      */
     public function __construct(
-        UnzerFactory                 $unzerFactory,
+        UnzerFactory $unzerFactory,
         InlinePaymentStrategyFactory $inlinePaymentStrategyFactory,
-        PaymentMethodService         $paymentMethodService,
-        TransactionHistoryService    $transactionHistoryService,
-        InlinePaymentFactory         $inlinePaymentFactory,
-        CustomerFactory              $customerFactory
-    )
-    {
+        PaymentMethodService $paymentMethodService,
+        TransactionHistoryService $transactionHistoryService,
+        InlinePaymentFactory $inlinePaymentFactory,
+        CustomerFactory $customerFactory,
+        MetadataProvider $metadataProvider
+    ) {
         $this->unzerFactory = $unzerFactory;
         $this->inlinePaymentStrategyFactory = $inlinePaymentStrategyFactory;
         $this->paymentMethodService = $paymentMethodService;
         $this->transactionHistoryService = $transactionHistoryService;
         $this->inlinePaymentFactory = $inlinePaymentFactory;
         $this->customerFactory = $customerFactory;
+        $this->metadataProvider = $metadataProvider;
     }
 
     /**
+     * @param InlinePaymentCreateContext $context
+     *
+     * @return InlinePaymentResponse
+     *
      * @throws ConnectionSettingsNotFoundException
+     * @throws InvalidAmountsException
+     * @throws InvalidCurrencyCode
      * @throws PaymentConfigNotFoundException
      * @throws UnzerApiException
+     * @throws BookingMethodNotSupportedException
      */
     public function create(InlinePaymentCreateContext $context): InlinePaymentResponse
     {
@@ -86,8 +98,11 @@ class InlinePaymentService
     /**
      * @param InlinePaymentCreateContext $context
      * @param InlinePayment $response
+     *
      * @return void
+     *
      * @throws InvalidCurrencyCode
+     * @throws UnzerApiException
      */
     private function updateTransactionHistory(InlinePaymentCreateContext $context, InlinePayment $response): void
     {
@@ -115,7 +130,8 @@ class InlinePaymentService
      */
     private function getEnabledPaymentMethodSettings(InlinePaymentCreateContext $context): PaymentMethodConfig
     {
-        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType(), $context->getSystemBookingMethod());
+        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType(),
+            $context->getSystemBookingMethod());
         if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
                 new TranslatableLabel(
@@ -142,7 +158,9 @@ class InlinePaymentService
         if ($customer !== null) {
             $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
         }
+        $metadata = $this->metadataProvider->get($context);
+        $metadata = $this->unzerFactory->makeUnzerAPI()->createMetadata($metadata);
 
-        return new Resources($customer !== null ? $customer->getId() : null,);
+        return new Resources($customer !== null ? $customer->getId() : null, null, $metadata->getId());
     }
 }

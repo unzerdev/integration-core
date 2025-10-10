@@ -6,10 +6,12 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Controller\CommonFlowControl
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Request\InlinePaymentCreateRequest;
-use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Exceptions\BookingMethodNotSupportedException;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
 use UnzerSDK\Exceptions\UnzerApiException;
@@ -34,6 +36,9 @@ class CheckoutInlinePaymentController implements CommonFlowControllerInterface
      * @throws ConnectionSettingsNotFoundException
      * @throws PaymentConfigNotFoundException
      * @throws UnzerApiException
+     * @throws InvalidCurrencyCode
+     * @throws InvalidAmountsException
+     * @throws BookingMethodNotSupportedException
      */
     public function create(CommonFlowRequest $request): CommonFlowResponse
     {

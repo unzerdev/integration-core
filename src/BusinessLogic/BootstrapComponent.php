@@ -196,7 +196,8 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(PaymentMethodService::class),
                     ServiceRegister::getService(TransactionHistoryService::class),
                     ServiceRegister::getService(InlinePaymentFactory::class),
-                    ServiceRegister::getService(CustomerFactory::class)
+                    ServiceRegister::getService(CustomerFactory::class),
+                    ServiceRegister::getService(MetadataProvider::class)
                 );
             })
         );
@@ -429,7 +430,7 @@ class BootstrapComponent extends BaseBootstrapComponent
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
                 return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class),
-                ServiceRegister::getService(ConnectionService::class));
+                    ServiceRegister::getService(ConnectionService::class));
             })
         );
 

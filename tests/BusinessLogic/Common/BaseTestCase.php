@@ -97,7 +97,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\InlinePaymentProcessorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockBasketLIneItemsProcessor;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockCustomerProcessor;
-use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadtaProvider;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\MockMetadataProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentCompletedWebhookHandlerMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
@@ -295,7 +295,7 @@ class BaseTestCase extends TestCase
                 return new MockBasketLIneItemsProcessor();
             },
             MetadataProvider::class => static function () {
-                return new MockMetadtaProvider();
+                return new MockMetadataProvider();
             },
             PaymentPageService::class => static function () {
                 return new PaymentPageService(

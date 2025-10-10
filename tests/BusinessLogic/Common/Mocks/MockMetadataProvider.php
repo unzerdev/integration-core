@@ -3,7 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Models\PaymentContext;
 use UnzerSDK\Resources\Metadata;
 
 /**
@@ -11,9 +11,9 @@ use UnzerSDK\Resources\Metadata;
  *
  * @package BusinessLogic\Common\Mocks
  */
-class MockMetadtaProvider implements MetaDataProvider
+class MockMetadataProvider implements MetadataProvider
 {
-    public function get(PaymentPageCreateContext $context): Metadata
+    public function get(PaymentContext $context): Metadata
     {
         return (new Metadata())
             ->setShopType('test-shop')

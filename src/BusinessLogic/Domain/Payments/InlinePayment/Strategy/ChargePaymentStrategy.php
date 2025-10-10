@@ -2,11 +2,13 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy;
 
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
+use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\TransactionTypes\Charge;
 
@@ -28,8 +30,8 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
      *
      * @return InlinePayment
      *
-     * @throws \UnzerSDK\Exceptions\UnzerApiException
-     * @throws \Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
      */
     public function execute(
         InlinePaymentCreateContext $context,
@@ -37,9 +39,12 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
         Resources $resources
     ): InlinePayment {
         $chargeRequest = $this->inlinePaymentFactory->create($context, $config);
-        $charge = new Charge($chargeRequest->getAmount()->getPriceInCurrencyUnits(), $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
+        $charge = new Charge($chargeRequest->getAmount()->getPriceInCurrencyUnits(),
+            $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
         $charge->setOrderId($context->getOrderId());
-        $chargeResponse =  $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(), $resources->getCustomerId());
+        $metadata = $this->unzerFactory->makeUnzerAPI()->fetchMetadata($resources->getMetadataId());
+        $chargeResponse = $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(),
+            $resources->getCustomerId(), $metadata);
 
         return new InlinePayment($chargeResponse);
     }

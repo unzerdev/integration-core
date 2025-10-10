@@ -2,7 +2,7 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage;
 
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Models\PaymentContext;
 use UnzerSDK\Resources\Metadata;
 
 /**
@@ -12,5 +12,5 @@ use UnzerSDK\Resources\Metadata;
  */
 interface MetadataProvider
 {
-    public function get(PaymentPageCreateContext $context): Metadata;
+    public function get(PaymentContext $context): Metadata;
 }

@@ -180,9 +180,17 @@ class UnzerMock extends Unzer
 
     public function createMetadata(Metadata $metadata): Metadata
     {
-        $this->callHistory['createMetadata'][] = ['metadata' => $this->metadata];
+        $this->metadata = $metadata;
+        $this->callHistory['createMetadata'][] = ['metadata' => $metadata];
 
         return $metadata;
+    }
+
+    public function fetchMetadata($metadata): Metadata
+    {
+        $this->callHistory['fetchMetadata'][] = ['id' => $metadata];
+
+        return $this->metadata;
     }
 
     /**
@@ -218,22 +226,38 @@ class UnzerMock extends Unzer
     }
 
 
-    public function performCharge(Charge $charge, $paymentType, $customer = null, Metadata $metadata = null, Basket $basket = null): Charge
-    {
-        $this->callHistory['performCharge'][] = ['charge' => $charge];
+    public function performCharge(
+        Charge $charge,
+        $paymentType,
+        $customer = null,
+        ?Metadata $metadata = null,
+        ?Basket $basket = null
+    ): Charge {
+        $this->callHistory['performCharge'][] = [
+            'charge' => $charge,
+            'paymentType' => $paymentType,
+            'customer' => $customer,
+            'metadata' => $metadata,
+            'basket' => $basket
+        ];
 
         return $charge;
     }
 
     public function performAuthorization(
         Authorization $authorization,
-                      $paymentType,
-                      $customer = null,
-        Metadata      $metadata = null,
-        Basket        $basket = null
-    ): Authorization
-    {
-        $this->callHistory['performAuthorization'][] = ['paymentType' => $paymentType, 'authorization' => $authorization];
+        $paymentType,
+        $customer = null,
+        ?Metadata $metadata = null,
+        ?Basket $basket = null
+    ): Authorization {
+        $this->callHistory['performAuthorization'][] = [
+            'paymentType' => $paymentType,
+            'authorization' => $authorization,
+            'customer' => $customer,
+            'metadata' => $metadata,
+            'basket' => $basket
+        ];
 
         return $authorization;
     }
