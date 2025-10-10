@@ -4,6 +4,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaypageMethodConfigLabels;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig as PaymentMethodConfigModel;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -81,7 +82,10 @@ class ExcludeTypesProcessor implements PaymentPageProcessor
     ): PaymentMethodsConfigs {
         $paymentMethodConfigs = new PaymentMethodsConfigs();
         $paymentMethodConfigs->setDefault(new PaymentMethodConfig(false));
-        $paymentMethodConfigs->addMethodConfig($methodConfig->getType(), new PaymentMethodConfig(true));
+        $paymentMethodConfigs->addMethodConfig(
+            PaypageMethodConfigLabels::LABELS[$methodConfig->getType()] ?? 'default',
+            new PaymentMethodConfig(true)
+        );
 
         if (in_array(PaymentMethodTypes::CLICK_TO_PAY, $excludedTypes, true)
             && $methodConfig->getType() === PaymentMethodTypes::CARDS) {
