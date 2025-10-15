@@ -440,7 +440,7 @@ class ConnectionService
      *
      * @return void
      */
-    private function saveConnectionSettings(ConnectionSettings $connectionSettings): void
+    protected function saveConnectionSettings(ConnectionSettings $connectionSettings): void
     {
         $existingConnectionSettings = $this->getConnectionSettings();
 
