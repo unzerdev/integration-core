@@ -26,6 +26,9 @@ class CommonFlowFactory
         PaymentMethodTypes::BANCONTACT => self::INLINE_FLOW,
         PaymentMethodTypes::DIRECT_BANK_TRANSFER => self::INLINE_FLOW,
         PaymentMethodTypes::WERO => self::INLINE_FLOW,
+        PaymentMethodTypes::PAYU => self::INLINE_FLOW,
+        PaymentMethodTypes::POST_FINANCE_CARD => self::INLINE_FLOW,
+        PaymentMethodTypes::POST_FINANCE_EFINANCE => self::INLINE_FLOW,
     ];
 
 
