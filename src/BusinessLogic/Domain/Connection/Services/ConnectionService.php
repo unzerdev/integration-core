@@ -34,7 +34,7 @@ class ConnectionService
     private UnzerFactory $unzerFactory;
 
     /** @var ConnectionSettingsRepositoryInterface */
-    private ConnectionSettingsRepositoryInterface $connectionSettingsRepository;
+    protected ConnectionSettingsRepositoryInterface $connectionSettingsRepository;
 
     /** @var WebhookSettingsRepositoryInterface */
     private WebhookSettingsRepositoryInterface $webhookDataRepository;
@@ -233,7 +233,7 @@ class ConnectionService
         }
     }
 
-    private function isWebhookRegistrationNecessary(Mode $mode): bool
+    protected function isWebhookRegistrationNecessary(Mode $mode): bool
     {
         $webhookSettings = $this->webhookDataRepository->getWebhookSettings();
 
@@ -255,7 +255,7 @@ class ConnectionService
      *
      * @throws ConnectionSettingsNotFoundException
      */
-    private function deleteWebhooksForMode(Mode $mode): void
+    protected function deleteWebhooksForMode(Mode $mode): void
     {
         if (!($webhookSettings = $this->getWebhookSettings()) ||
             !($connectionSettings = $this->getConnectionSettings())) {
@@ -292,7 +292,7 @@ class ConnectionService
      *
      * @return void
      */
-    private function registerWebhooks(Unzer $unzer, string $webhookUrl, Mode $mode): void
+    protected function registerWebhooks(Unzer $unzer, string $webhookUrl, Mode $mode): void
     {
         try {
             $webhooks = $unzer->registerMultipleWebhooks($webhookUrl, SupportedWebhookEvents::SUPPORTED_WEBHOOK_EVENTS);
@@ -313,7 +313,7 @@ class ConnectionService
      *
      * @return void
      */
-    private function saveWebhookSettings(WebhookData $webhookData, Mode $mode): void
+    protected function saveWebhookSettings(WebhookData $webhookData, Mode $mode): void
     {
         $existingSettings = $this->webhookDataRepository->getWebhookSettings();
 
@@ -342,7 +342,7 @@ class ConnectionService
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      */
-    private function validateKeys(ConnectionSettings $connectionSettings): void
+    protected function validateKeys(ConnectionSettings $connectionSettings): void
     {
         $mode = $connectionSettings->getMode();
         $this->validatePrivateKey($connectionSettings->getActiveConnectionData()->getPrivateKey(), $mode);
@@ -357,7 +357,7 @@ class ConnectionService
      *
      * @throws PrivateKeyInvalidException
      */
-    private function validatePrivateKey(string $privateKey, Mode $mode): void
+    protected function validatePrivateKey(string $privateKey, Mode $mode): void
     {
         if (!PrivateKeyValidator::validate($privateKey)) {
             throw new PrivateKeyInvalidException(
@@ -389,7 +389,7 @@ class ConnectionService
      *
      * @throws PublicKeyInvalidException
      */
-    private function validatePublicKey(string $publicKey, Mode $mode): void
+    protected function validatePublicKey(string $publicKey, Mode $mode): void
     {
         if (!PublicKeyValidator::validate($publicKey)) {
             throw new PublicKeyInvalidException(
@@ -470,7 +470,7 @@ class ConnectionService
      *
      * @return ConnectionSettings
      */
-    private function encryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
+    protected function encryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
     {
         if ($connectionSettings->getSandboxConnectionData()) {
             $connectionSettings->setSandboxConnectionData(
@@ -500,7 +500,7 @@ class ConnectionService
      *
      * @return ConnectionSettings
      */
-    private function decryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
+    protected function decryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
     {
         if ($connectionSettings->getSandboxConnectionData()) {
             $connectionSettings->setSandboxConnectionData(
