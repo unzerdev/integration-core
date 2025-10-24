@@ -26,7 +26,7 @@ class ChargeRequest extends Request
      * @param string $orderId
      * @param ?Amount $amount
      */
-    public function __construct(string $orderId, ?Amount $amount)
+    public function __construct(string $orderId, ?Amount $amount = null)
     {
         $this->orderId = $orderId;
         $this->amount = $amount;
