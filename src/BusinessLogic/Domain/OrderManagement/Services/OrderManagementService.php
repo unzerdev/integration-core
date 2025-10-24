@@ -172,12 +172,16 @@ class OrderManagementService
 
     /**
      * @param TransactionHistory $transactionHistory
-     * @param Amount $amountToCharge
+     * @param ?Amount $amountToCharge
      *
      * @return bool
      */
-    private function isChargeNecessary(TransactionHistory $transactionHistory, Amount $amountToCharge): bool
+    private function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
     {
+        if ($amountToCharge === null) {
+            return true;
+        }
+
         return $this->isTransactionHistoryValid($transactionHistory) &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
