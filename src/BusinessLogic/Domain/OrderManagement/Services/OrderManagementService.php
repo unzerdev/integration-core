@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\RefundViaPayment;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -92,6 +93,12 @@ class OrderManagementService
         }
         if ($amount === null) {
             $amount = $transactionHistory->getTotalAmount();
+        }
+
+        if ($transactionHistory->getType() === PaymentMethodTypes::UNZER_INVOICE) {
+            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId);
+
+            return;
         }
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();

@@ -24,12 +24,12 @@ class WebhookService
     /**
      * @var UnzerFactory $unzerFactory
      */
-    private UnzerFactory $unzerFactory;
+    protected UnzerFactory $unzerFactory;
 
     /**
      * @var TransactionSynchronizerService $transactionSynchronizerService
      */
-    private TransactionSynchronizerService $transactionSynchronizerService;
+    protected TransactionSynchronizerService $transactionSynchronizerService;
 
     /**
      * @param UnzerFactory $unzerFactory
