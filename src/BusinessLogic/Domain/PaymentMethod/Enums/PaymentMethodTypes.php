@@ -88,6 +88,13 @@ interface PaymentMethodTypes
     public const WERO = 'wero';
 
     /** @var string[] */
+    public const UPL_TYPES = [
+        PaymentMethodTypes::UNZER_INSTALLMENT,
+        PaymentMethodTypes::DIRECT_DEBIT_SECURED,
+        PaymentMethodTypes::UNZER_INVOICE
+    ];
+
+    /** @var string[] */
     public const PAYMENT_TYPES = [
         PaymentMethodTypes::ALI_PAY,
         PaymentMethodTypes::APPLE_PAY,

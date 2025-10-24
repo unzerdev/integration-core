@@ -39,14 +39,14 @@ class OrderManagementService
 
     /**
      * @param string $orderId
-     * @param Amount $chargeAmount
+     * @param ?Amount $chargeAmount
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function chargeOrder(string $orderId, Amount $chargeAmount): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
@@ -54,6 +54,10 @@ class OrderManagementService
 
         if (!$this->isChargeNecessary($transactionHistory, $chargeAmount)) {
             return;
+        }
+
+        if ($chargeAmount === null) {
+            $chargeAmount = $transactionHistory->getTotalAmount();
         }
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
