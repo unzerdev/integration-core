@@ -95,7 +95,7 @@ class OrderManagementService
             $amount = $transactionHistory->getTotalAmount();
         }
 
-        if ($transactionHistory->getType() === PaymentMethodTypes::UNZER_INVOICE) {
+        if (in_array($transactionHistory->getType() ,PaymentMethodTypes::UPL_TYPES)) {
             $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId);
 
             return;
