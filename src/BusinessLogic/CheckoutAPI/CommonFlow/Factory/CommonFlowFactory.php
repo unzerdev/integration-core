@@ -18,7 +18,6 @@ class CommonFlowFactory
     protected const METHODS_DEFAULT_FLOWS = [
         PaymentMethodTypes::EPS => self::INLINE_FLOW,
         PaymentMethodTypes::IDEAL => self::INLINE_FLOW,
-        PaymentMethodTypes::UNZER_PREPAYMENT => self::INLINE_FLOW,
         PaymentMethodTypes::PAYPAL => self::INLINE_FLOW,
         PaymentMethodTypes::WECHATPAY => self::INLINE_FLOW,
         PaymentMethodTypes::TWINT => self::INLINE_FLOW,
