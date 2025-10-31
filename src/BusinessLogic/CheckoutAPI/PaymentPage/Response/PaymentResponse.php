@@ -23,6 +23,17 @@ class PaymentResponse extends Response
         $this->payment = $payment;
     }
 
+    /**
+     * @return Payment
+     */
+    public function getPayment(): Payment
+    {
+        return $this->payment;
+    }
+
+    /**
+     * @return array
+     */
     public function toArray(): array
     {
         return [

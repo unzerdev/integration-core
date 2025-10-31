@@ -189,17 +189,9 @@ class PaymentPageService
     /**
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
-    public function getPaymentById(string $orderId): Payment
+    public function getPaymentByOrderId(string $orderId): Payment
     {
-        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
-        if (!$transactionHistory) {
-            throw new TransactionHistoryNotFoundException(new TranslatableLabel(
-                "Transaction history for orderId: $orderId not found.", 'transactionHistory.notFound'
-            ));
-        }
-
-        return $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($transactionHistory->getOrderId());
+        return $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($orderId);
     }
 }

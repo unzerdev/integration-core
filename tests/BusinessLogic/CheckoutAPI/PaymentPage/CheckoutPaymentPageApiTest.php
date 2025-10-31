@@ -31,7 +31,6 @@ use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
@@ -58,6 +57,7 @@ use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig as Embedded
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
+use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
@@ -430,7 +430,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
      * @throws PaymentConfigNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
     public function testCheckSuccessfulPayment(): void
     {
@@ -465,31 +464,13 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($methodCallHistory);
         self::assertTrue($response->isSuccessful());
         self::assertInstanceOf(PaymentResponse::class, $response);
-        self::assertEquals('payment1', $response->toArray()['id']);
-        self::assertEquals(1, $response->toArray()['state']);
-        self::assertEquals('completed', $response->toArray()['stateName']);
-        self::assertEquals('EUR', $response->toArray()['currency']);
-        self::assertEquals(1000.0, $response->toArray()['total']);
+        self::assertInstanceOf(Payment::class, $response->getPayment());
+        self::assertEquals('payment1',  $response->toArray()['id']);
+        self::assertEquals(1,  $response->toArray()['state']);
+        self::assertEquals('completed',  $response->toArray()['stateName']);
+        self::assertEquals('EUR',  $response->toArray()['currency']);
+        self::assertEquals(1000.0,  $response->toArray()['total']);
     }
-
-    /**
-     * @return void
-     * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
-     * @throws UnzerApiException
-     */
-    public function testMissingTransactionHistory(): void
-    {
-        // Act
-        $response = CheckoutAPI::get()->paymentPage('1')->getPaymentById('unknown-order');
-
-        // Assert
-        self::assertFalse($response->isSuccessful());
-        self::assertArrayHasKey('errorMessage', $response->toArray());
-        self::assertStringContainsString('Transaction history for orderId: unknown-order not found', $response->toArray()['errorMessage']);
-        self::assertEquals('transactionHistory.notFound', $response->toArray()['errorCode']);
-    }
-
 
     private static function assertTransactionHistory(TransactionHistory $expected): void
     {
