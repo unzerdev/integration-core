@@ -457,7 +457,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         // Act
-        $response = CheckoutAPI::get()->paymentPage('1')->getPaymentById('test-order-123');
+        $response = CheckoutAPI::get()->paymentPage('1')->getPaymentByOrderId('test-order-123');
 
         // Assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
