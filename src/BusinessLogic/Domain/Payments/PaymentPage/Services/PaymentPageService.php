@@ -20,6 +20,7 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**
@@ -183,5 +184,22 @@ class PaymentPageService
         }
 
         return new PaymentState($payment->getState(), $payment->getStateName());
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws TransactionHistoryNotFoundException
+     */
+    public function getPaymentById(string $orderId): Payment
+    {
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+        if (!$transactionHistory) {
+            throw new TransactionHistoryNotFoundException(new TranslatableLabel(
+                "Transaction history for orderId: $orderId not found.", 'transactionHistory.notFound'
+            ));
+        }
+
+        return $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($transactionHistory->getOrderId());
     }
 }

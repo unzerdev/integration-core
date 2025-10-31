@@ -7,13 +7,16 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
+use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use UnzerSDK\Exceptions\UnzerApiException;
 
 /**
@@ -65,8 +68,28 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
         );
     }
 
+    /**
+     * @param string $orderId
+     * @return PaymentStateResponse
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     * @throws InvalidCurrencyCode
+     * @throws TransactionHistoryNotFoundException
+     */
     public function getPaymentState(string $orderId): PaymentStateResponse
     {
         return new PaymentStateResponse($this->paymentPageService->getPaymentState($orderId));
+    }
+
+    /**
+     * @param string $orderId
+     * @return PaymentResponse
+     * @throws ConnectionSettingsNotFoundException
+     * @throws TransactionHistoryNotFoundException
+     * @throws UnzerApiException
+     */
+    public function getPaymentById(string $orderId): PaymentResponse
+    {
+        return new PaymentResponse($this->paymentPageService->getPaymentById($orderId));
     }
 }
