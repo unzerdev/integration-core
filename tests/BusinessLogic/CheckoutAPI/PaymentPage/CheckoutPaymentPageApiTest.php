@@ -6,6 +6,7 @@ use Exception;
 use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
@@ -465,11 +466,59 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertTrue($response->isSuccessful());
         self::assertInstanceOf(PaymentResponse::class, $response);
         self::assertInstanceOf(Payment::class, $response->getPayment());
-        self::assertEquals('payment1',  $response->toArray()['id']);
-        self::assertEquals(1,  $response->toArray()['state']);
-        self::assertEquals('completed',  $response->toArray()['stateName']);
-        self::assertEquals('EUR',  $response->toArray()['currency']);
-        self::assertEquals(1000.0,  $response->toArray()['total']);
+        self::assertEquals('payment1', $response->toArray()['id']);
+        self::assertEquals(1, $response->toArray()['state']);
+        self::assertEquals('completed', $response->toArray()['stateName']);
+        self::assertEquals('EUR', $response->toArray()['currency']);
+        self::assertEquals(1000.0, $response->toArray()['total']);
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testCheckSuccessfulCharge(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['cards']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $mockCharge = (new Charge())
+            ->setId('s-chg-1')
+            ->setAmount(100.00)
+            ->setCurrency('EUR')
+            ->setReturnUrl('https://shop.test/return')
+            ->setPaymentReference('ref-123');
+
+        $mockUnzer = $this->unzerFactory->getMockUnzer();
+        $mockUnzer->setPayment($this->generateValidPayment());
+        $mockUnzer->setCharge($mockCharge);
+
+        CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::CARDS,
+                'test-order-123',
+                Amount::fromFloat(123.23, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->getChargeByPaymentId('test-order-123', 's-chg-1');
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchChargeById');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertTrue($response->isSuccessful());
+        self::assertInstanceOf(ChargeResponse::class, $response);
+        self::assertInstanceOf(Charge::class, $response->getCharge());
+        self::assertEquals('s-chg-1', $response->toArray()['id']);
     }
 
     private static function assertTransactionHistory(TransactionHistory $expected): void

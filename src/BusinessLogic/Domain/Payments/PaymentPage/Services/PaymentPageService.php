@@ -21,6 +21,7 @@ use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\Payment;
+use UnzerSDK\Resources\TransactionTypes\Charge;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**
@@ -193,5 +194,14 @@ class PaymentPageService
     public function getPaymentByOrderId(string $orderId): Payment
     {
         return $this->unzerFactory->makeUnzerAPI()->fetchPaymentByOrderId($orderId);
+    }
+
+    /**
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function getChargeByPaymentId(string $orderId, string $chargeId): Charge
+    {
+        return $this->unzerFactory->makeUnzerAPI()->fetchChargeById($orderId, $chargeId);
     }
 }

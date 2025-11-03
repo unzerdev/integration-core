@@ -46,6 +46,11 @@ class UnzerMock extends Unzer
     private ?Payment $payment = null;
 
     /**
+     * @var ?Charge $charge
+     */
+    private ?Charge $charge = null;
+
+    /**
      * @var Basket|null
      */
     private ?Basket $basket = null;
@@ -361,6 +366,23 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param string $payment
+     * @param string $chargeId
+     *
+     * @return Charge
+     */
+    public function fetchChargeById($payment, string $chargeId): Charge
+    {
+        $this->callHistory['fetchChargeById'][] = [
+            'paymentId' => $payment,
+            'chargeId' => $chargeId,
+        ];
+
+        return $this->charge;
+    }
+
+
+    /**
      * @param Payment $payment
      *
      * @return void
@@ -368,6 +390,16 @@ class UnzerMock extends Unzer
     public function setPayment(Payment $payment): void
     {
         $this->payment = $payment;
+    }
+
+    /**
+     * @param Charge $charge
+     *
+     * @return void
+     */
+    public function setCharge(Charge $charge): void
+    {
+        $this->charge = $charge;
     }
 
     /**

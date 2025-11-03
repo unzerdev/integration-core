@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Controller\CommonFlowControl
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
@@ -18,6 +19,7 @@ use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreat
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\TransactionTypes\Charge;
 
 /**
  * Class CheckoutPaymentPageController
@@ -90,5 +92,17 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
     public function getPaymentByOrderId(string $orderId): PaymentResponse
     {
         return new PaymentResponse($this->paymentPageService->getPaymentByOrderId($orderId));
+    }
+
+    /**
+     * @param string $orderId
+     * @param string $chargeId
+     * @return ChargeResponse
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function getChargeByPaymentId(string $orderId, string $chargeId): ChargeResponse
+    {
+        return new ChargeResponse($this->paymentPageService->getChargeByPaymentId($orderId, $chargeId));
     }
 }
