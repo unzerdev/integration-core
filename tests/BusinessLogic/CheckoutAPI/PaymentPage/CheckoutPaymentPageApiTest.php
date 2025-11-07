@@ -510,7 +510,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         // Act
-        $response = CheckoutAPI::get()->paymentPage('1')->getChargeByPaymentId('test-order-123', 's-chg-1');
+        $response = CheckoutAPI::get()->paymentPage('1')->fetchChargeByOrderId('test-order-123');
 
         // Assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchChargeById');
@@ -520,6 +520,48 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertInstanceOf(Charge::class, $response->getCharge());
         self::assertEquals('s-chg-1', $response->toArray()['id']);
     }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testFetchChargeByOrderIdReturnsNullWhenNoChargesExist(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['cards']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $mockPayment = $this->createMock(Payment::class);
+        $mockPayment->method('getCharges')->willReturn([]);
+        $mockPayment->method('getId')->willReturn('s-pay-999');
+
+        $mockUnzer = $this->unzerFactory->getMockUnzer();
+        $mockUnzer->setPayment($mockPayment);
+
+        CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::CARDS,
+                'test-order-999',
+                Amount::fromFloat(50.00, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->fetchChargeByOrderId('test-order-999');
+
+        // Assert
+        self::assertInstanceOf(ChargeResponse::class, $response);
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchChargeById');
+        self::assertEmpty($methodCallHistory);
+    }
+
 
     private static function assertTransactionHistory(TransactionHistory $expected): void
     {

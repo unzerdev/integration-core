@@ -12,13 +12,13 @@ use UnzerSDK\Resources\TransactionTypes\Charge;
  */
 class ChargeResponse extends Response
 {
-    private Charge $charge;
+    private ?Charge $charge;
 
     /**
      * Charge constructor.
-     * @param Charge $charge
+     * @param ?Charge $charge
      */
-    public function __construct(Charge $charge)
+    public function __construct(?Charge $charge)
     {
         $this->charge = $charge;
     }
@@ -26,7 +26,7 @@ class ChargeResponse extends Response
     /**
      * @return Charge
      */
-    public function getCharge(): Charge
+    public function getCharge(): ?Charge
     {
         return $this->charge;
     }

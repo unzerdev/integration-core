@@ -96,13 +96,12 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
 
     /**
      * @param string $orderId
-     * @param string $chargeId
      * @return ChargeResponse
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function getChargeByPaymentId(string $orderId, string $chargeId): ChargeResponse
+    public function fetchChargeByOrderId(string $orderId): ChargeResponse
     {
-        return new ChargeResponse($this->paymentPageService->getChargeByPaymentId($orderId, $chargeId));
+        return new ChargeResponse($this->paymentPageService->fetchChargeByOrderId($orderId));
     }
 }

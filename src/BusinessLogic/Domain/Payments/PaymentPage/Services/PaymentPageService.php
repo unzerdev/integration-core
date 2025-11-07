@@ -200,8 +200,19 @@ class PaymentPageService
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function getChargeByPaymentId(string $orderId, string $chargeId): Charge
+    public function fetchChargeByOrderId(string $orderId): ?Charge
     {
-        return $this->unzerFactory->makeUnzerAPI()->fetchChargeById($orderId, $chargeId);
+        $payment = $this->getPaymentByOrderId($orderId);
+        $charges = $payment->getCharges() ?? [];
+
+        if (empty($charges)) {
+            return null;
+        }
+
+        /** @var Charge $lastCharge */
+        $lastCharge = end($charges);
+        $chargeId = $lastCharge->getId();
+
+        return $this->unzerFactory->makeUnzerAPI()->fetchChargeById($payment->getId(), $chargeId);
     }
 }
