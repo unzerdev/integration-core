@@ -37,7 +37,7 @@ class ChargeResponse extends Response
     public function toArray(): array
     {
         return [
-            'id' => $this->charge->getId()
+            'id' => $this->charge ? $this->charge->getId() : ''
         ];
     }
 }
