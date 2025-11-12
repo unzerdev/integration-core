@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.0.0](https://github.com/unzerdev/integration-core/releases/tag/2.0.0) - 2025-11-12
+- Add support for:
+    - [Inline payments](https://docs.unzer.com/online-payments/integrate-only-server-side/)
+
 ## [1.2.0](https://github.com/unzerdev/integration-core/releases/tag/1.2.0) - 2025-06-11
 - Add support for:
   - [Unzer Direct Bank Transfer](https://docs.unzer.com/payment-methods/open-banking/?_gl=1*4n1fg5*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3MzAwMDMkajAkbDAkaDA)
