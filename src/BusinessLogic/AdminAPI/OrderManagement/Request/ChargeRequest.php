@@ -18,15 +18,15 @@ class ChargeRequest extends Request
     private string $orderId;
 
     /**
-     * @var Amount $amount
+     * @var ?Amount $amount
      */
-    private Amount $amount;
+    private ?Amount $amount;
 
     /**
      * @param string $orderId
-     * @param Amount $amount
+     * @param ?Amount $amount
      */
-    public function __construct(string $orderId, Amount $amount)
+    public function __construct(string $orderId, ?Amount $amount = null)
     {
         $this->orderId = $orderId;
         $this->amount = $amount;
@@ -41,9 +41,9 @@ class ChargeRequest extends Request
     }
 
     /**
-     * @return Amount
+     * @return ?Amount
      */
-    public function getAmount(): Amount
+    public function getAmount(): ?Amount
     {
         return $this->amount;
     }

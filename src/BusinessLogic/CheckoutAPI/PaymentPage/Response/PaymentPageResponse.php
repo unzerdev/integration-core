@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
+use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Response\CommonFlowResponse;
 use UnzerSDK\Resources\V2\Paypage;
 
 /**
@@ -10,7 +11,7 @@ use UnzerSDK\Resources\V2\Paypage;
  *
  * @package Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response
  */
-class PaymentPageResponse extends Response
+class PaymentPageResponse extends CommonFlowResponse
 {
     private Paypage $payPage;
 
@@ -35,5 +36,21 @@ class PaymentPageResponse extends Response
             'redirectUrl' => $this->payPage->getRedirectUrl(),
             'publicKey' => $this->publicKey,
         ];
+    }
+
+    /**
+     * @return Paypage
+     */
+    public function getPaypage(): Paypage
+    {
+        return $this->payPage;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRedirectUrl(): ?string
+    {
+        return $this->getPaypage() ? $this->getPaypage()->getRedirectUrl() : '';
     }
 }

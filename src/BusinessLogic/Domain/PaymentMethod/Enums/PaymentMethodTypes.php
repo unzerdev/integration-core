@@ -70,6 +70,9 @@ interface PaymentMethodTypes
     public const UNZER_PREPAYMENT = 'prepayment';
 
     /** @var string */
+    public const UNZER_PAYPAGE = 'unzer-paypage';
+
+    /** @var string */
     public const WECHATPAY = 'wechatpay';
 
     /** @var string */
@@ -80,6 +83,16 @@ interface PaymentMethodTypes
 
     /** @var string  */
     public const CLICK_TO_PAY = 'clicktopay';
+
+    /** @var string  */
+    public const WERO = 'wero';
+
+    /** @var string[] */
+    public const UPL_TYPES = [
+        PaymentMethodTypes::UNZER_INSTALLMENT,
+        PaymentMethodTypes::DIRECT_DEBIT_SECURED,
+        PaymentMethodTypes::UNZER_INVOICE
+    ];
 
     /** @var string[] */
     public const PAYMENT_TYPES = [
@@ -105,7 +118,9 @@ interface PaymentMethodTypes
         PaymentMethodTypes::UNZER_INSTALLMENT,
         PaymentMethodTypes::UNZER_INVOICE,
         PaymentMethodTypes::UNZER_PREPAYMENT,
+        PaymentMethodTypes::UNZER_PAYPAGE,
         PaymentMethodTypes::WECHATPAY,
-        PaymentMethodTypes::CLICK_TO_PAY
+        PaymentMethodTypes::CLICK_TO_PAY,
+        PaymentMethodTypes::WERO
     ];
 }

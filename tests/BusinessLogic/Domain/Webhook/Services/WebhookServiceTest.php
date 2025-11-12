@@ -6,11 +6,13 @@ use Exception;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Handlers\WebhookHandlerRegistry;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\OrderServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentCompletedWebhookHandlerMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentSDK;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\SdkAmount;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionSynchronizerServiceMock;
@@ -44,6 +46,8 @@ class WebhookServiceTest extends BaseTestCase
      */
     public TransactionSynchronizerServiceMock $transactionSynchronizerServiceMock;
 
+    public PaymentCompletedWebhookHandlerMock $paymentCompletedWebhookHandlerMock;
+
     /**
      * @return void
      *
@@ -54,6 +58,7 @@ class WebhookServiceTest extends BaseTestCase
         parent::setUp();
 
         $this->unzerFactory = new UnzerFactoryMock();
+        $this->paymentCompletedWebhookHandlerMock = new PaymentCompletedWebhookHandlerMock();
 
         $this->transactionSynchronizerServiceMock = new TransactionSynchronizerServiceMock(
             new UnzerFactoryMock(),
@@ -66,6 +71,10 @@ class WebhookServiceTest extends BaseTestCase
             $this->unzerFactory,
             $this->transactionSynchronizerServiceMock
         );
+
+        TestServiceRegister::registerService(PaymentCompletedWebhookHandlerMock::class, function () {
+            return $this->paymentCompletedWebhookHandlerMock;
+        });
     }
 
     /**
@@ -230,6 +239,31 @@ class WebhookServiceTest extends BaseTestCase
         $methodCallHistory = $this->transactionSynchronizerServiceMock->getCallHistory('handleCharge');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals('order1', $methodCallHistory[0]['orderId']);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testHandleChargeWithCustomHandler(): void
+    {
+        // Arrange
+        WebhookHandlerRegistry::registerWebhookHandler(WebhookEvents::CHARGE_SUCCEEDED, PaymentCompletedWebhookHandlerMock::class);
+        $webhook = new Webhook('test', WebhookEvents::CHARGE_SUCCEEDED, 'p-key', 'payment1');
+        $unzerMock = new UnzerMock('s-priv-test');
+
+        $payment = $this->generateValidPayment();
+        $unzerMock->setResourceFromEvent($payment);
+        $this->unzerFactory->setMockUnzer($unzerMock);
+
+        // Act
+        StoreContext::doWithStore('1', [$this->service, 'handle'], [$webhook]);
+
+        // Assert
+        $methodCallHistory = $this->paymentCompletedWebhookHandlerMock->getCallHistory('handleEvent');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertEquals($payment, $methodCallHistory[0]['payment']);
     }
 
     /**

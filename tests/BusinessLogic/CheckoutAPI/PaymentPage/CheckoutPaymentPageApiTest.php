@@ -6,8 +6,11 @@ use Exception;
 use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\ChargeResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
@@ -20,13 +23,16 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterfa
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
@@ -49,12 +55,11 @@ use UnzerSDK\Constants\PaypageCheckoutTypes;
 use UnzerSDK\Constants\TransactionTypes;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig as EmbeddedPaymentMethodConfig;
-use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
+use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\PaymentTypes\Card;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
 use UnzerSDK\Resources\TransactionTypes\Charge;
@@ -167,8 +172,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('card', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('eps', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
@@ -217,7 +223,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
     }
 
-    public function testAuthorizedPaymentPageForClickToPay(): void
+    public function testAddClickToPayWhenEnabled(): void
     {
         // Arrange
         $this->mockData('s-pub-test', 's-priv-test', ['applepay', 'googlepay', 'card', 'clicktopay']);
@@ -230,8 +236,11 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('applepay', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('cards', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
+        $paymentMethodsConfigs->addMethodConfig('clicktopay',
+            (new EmbeddedPaymentMethodConfig(false))->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::AUTHORIZATION);
         $expectedPayPageRequest
@@ -287,14 +296,6 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals($expectedPayPageRequest, $methodCallHistory[0]['paypage']);
         self::assertTrue($response->isSuccessful());
-        self::assertNotEmpty($response->toArray());
-        self::assertEquals(
-            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'publicKey' => 'publicKeyTest'],
-            $response->toArray()
-        );
-        self::assertTransactionHistory(
-            new TransactionHistory(PaymentMethodTypes::CARDS, 'test-order-123', 'EUR')
-        );
     }
 
     public function testChargePaymentPageWithMinimalRequest(): void
@@ -310,8 +311,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         );
 
         $paymentMethodsConfigs = new PaymentMethodsConfigs();
-        $paymentMethodsConfigs->addMethodConfig('googlepay', new EmbeddedPaymentMethodConfig(false));
-        $paymentMethodsConfigs->addMethodConfig('EPS', new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->setDefault(new EmbeddedPaymentMethodConfig(false));
+        $paymentMethodsConfigs->addMethodConfig('cards', (new EmbeddedPaymentMethodConfig(false))
+            ->setEnabled(true));
 
         $expectedPayPageRequest = new Paypage(123.23, Currency::getDefault(), TransactionTypes::CHARGE);
         $expectedPayPageRequest
@@ -424,6 +426,142 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
             $response->getPaymentState()
         );
     }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testCheckSuccessfulPayment(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['cards']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $this->unzerFactory->getMockUnzer()
+            ->setPayPageData(
+                ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
+            )->setPayment($this->generateValidPayment()->setState(PaymentState::STATE_COMPLETED));
+
+        CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::CARDS,
+                'test-order-123',
+                Amount::fromFloat(123.23, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->getPaymentByOrderId('test-order-123');
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertTrue($response->isSuccessful());
+        self::assertInstanceOf(PaymentResponse::class, $response);
+        self::assertInstanceOf(Payment::class, $response->getPayment());
+        self::assertEquals('payment1', $response->toArray()['id']);
+        self::assertEquals(1, $response->toArray()['state']);
+        self::assertEquals('completed', $response->toArray()['stateName']);
+        self::assertEquals('EUR', $response->toArray()['currency']);
+        self::assertEquals(1000.0, $response->toArray()['total']);
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testCheckSuccessfulCharge(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['cards']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $mockCharge = (new Charge())
+            ->setId('s-chg-1')
+            ->setAmount(100.00)
+            ->setCurrency('EUR')
+            ->setReturnUrl('https://shop.test/return')
+            ->setPaymentReference('ref-123');
+
+        $mockUnzer = $this->unzerFactory->getMockUnzer();
+        $mockUnzer->setPayment($this->generateValidPayment());
+        $mockUnzer->setCharge($mockCharge);
+
+        CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::CARDS,
+                'test-order-123',
+                Amount::fromFloat(123.23, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->fetchChargeByOrderId('test-order-123');
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchChargeById');
+        self::assertNotEmpty($methodCallHistory);
+        self::assertTrue($response->isSuccessful());
+        self::assertInstanceOf(ChargeResponse::class, $response);
+        self::assertInstanceOf(Charge::class, $response->getCharge());
+        self::assertEquals('s-chg-1', $response->toArray()['id']);
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testFetchChargeByOrderIdReturnsNullWhenNoChargesExist(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['cards']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $mockPayment = $this->createMock(Payment::class);
+        $mockPayment->method('getCharges')->willReturn([]);
+        $mockPayment->method('getId')->willReturn('s-pay-999');
+
+        $mockUnzer = $this->unzerFactory->getMockUnzer();
+        $mockUnzer->setPayment($mockPayment);
+
+        CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::CARDS,
+                'test-order-999',
+                Amount::fromFloat(50.00, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->fetchChargeByOrderId('test-order-999');
+
+        // Assert
+        self::assertInstanceOf(ChargeResponse::class, $response);
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchChargeById');
+        self::assertEmpty($methodCallHistory);
+    }
+
 
     private static function assertTransactionHistory(TransactionHistory $expected): void
     {

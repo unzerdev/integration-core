@@ -2,6 +2,7 @@
 
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
+use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
@@ -43,6 +44,11 @@ class ConnectionServiceMock extends ConnectionService
     public function getConnectionSettings(): ?ConnectionSettings
     {
         return $this->connectionSettings;
+    }
+
+    public function getActiveConnectionData(): ?ConnectionData
+    {
+        return $this->connectionSettings ? $this->connectionSettings->getActiveConnectionData() : null;
     }
 
     /**

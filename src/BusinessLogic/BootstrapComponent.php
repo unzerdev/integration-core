@@ -13,6 +13,8 @@ use Unzer\Core\BusinessLogic\AdminAPI\PaymentStatusMap\Controller\PaymentStatusM
 use Unzer\Core\BusinessLogic\AdminAPI\Stores\Controller\StoresController;
 use Unzer\Core\BusinessLogic\AdminAPI\Transaction\Controller\TransactionController;
 use Unzer\Core\BusinessLogic\AdminAPI\Version\Controller\VersionController;
+use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
+use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Controller\CheckoutInlinePaymentController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentMethods\Controller\CheckoutPaymentMethodsController;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Controller\CheckoutPaymentPageController;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings;
@@ -38,25 +40,30 @@ use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\CustomerProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\LineItemsProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Versions\VersionService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
-use Unzer\Core\BusinessLogic\Domain\Integration\Store\StoreService as IntegrationStoreService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\BasketFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\CustomerFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Factory\PaymentPageFactory;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\BasketProcessorsRegistry;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\CustomerProcessorsRegistry;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\ExcludeTypesProcessor;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Processors\PaymentPageProcessorsRegistry;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Processors\CustomerProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
+use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\ExcludeTypesProcessor;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Factory\PaymentTypeFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentType\Services\PaymentTypeService;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Interfaces\PaymentStatusMapRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Services\PaymentStatusMapService;
 use Unzer\Core\BusinessLogic\Domain\Stores\Services\StoreService;
@@ -64,6 +71,7 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHis
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Listeners\TransactionSyncListener;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Service\TransactionSynchronizerService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Handlers\DefaultWebhookHandler;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Repositories\WebhookSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
@@ -71,7 +79,6 @@ use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerControl
 use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
 use Unzer\Core\Infrastructure\ORM\RepositoryRegistry;
 use Unzer\Core\Infrastructure\ServiceRegister;
-use Unzer\Core\BusinessLogic\Bootstrap\SingleInstance;
 use Unzer\Core\Infrastructure\TaskExecution\TaskEvents\TickEvent;
 use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 
@@ -181,12 +188,44 @@ class BootstrapComponent extends BaseBootstrapComponent
         );
 
         ServiceRegister::registerService(
+            InlinePaymentService::class,
+            new SingleInstance(static function () {
+                return new InlinePaymentService(
+                    ServiceRegister::getService(UnzerFactory::class),
+                    ServiceRegister::getService(InlinePaymentStrategyFactory::class),
+                    ServiceRegister::getService(PaymentMethodService::class),
+                    ServiceRegister::getService(TransactionHistoryService::class),
+                    ServiceRegister::getService(InlinePaymentFactory::class),
+                    ServiceRegister::getService(CustomerFactory::class),
+                    ServiceRegister::getService(MetadataProvider::class)
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
+            PaymentTypeService::class,
+            new SingleInstance(static function () {
+                return new PaymentTypeService(
+                    ServiceRegister::getService(UnzerFactory::class),
+                    ServiceRegister::getService(PaymentTypeFactory::class),
+                );
+            })
+        );
+
+        ServiceRegister::registerService(
             PaymentStatusMapService::class,
             new SingleInstance(static function () {
                 return new PaymentStatusMapService(
                     ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
                     ServiceRegister::getService(PaymentStatusMapServiceInterface::class)
                 );
+            })
+        );
+
+        ServiceRegister::registerService(
+            InlinePaymentStrategyFactory::class,
+            new SingleInstance(static function () {
+                return new InlinePaymentStrategyFactory();
             })
         );
 
@@ -391,7 +430,14 @@ class BootstrapComponent extends BaseBootstrapComponent
             CheckoutPaymentPageController::class,
             new SingleInstance(static function () {
                 return new CheckoutPaymentPageController(ServiceRegister::getService(PaymentPageService::class),
-                ServiceRegister::getService(ConnectionService::class));
+                    ServiceRegister::getService(ConnectionService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
+            CheckoutInlinePaymentController::class,
+            new SingleInstance(static function () {
+                return new CheckoutInlinePaymentController(ServiceRegister::getService(InlinePaymentService::class));
             })
         );
 
@@ -427,6 +473,20 @@ class BootstrapComponent extends BaseBootstrapComponent
     protected static function initRequestProcessors(): void
     {
         ServiceRegister::registerService(
+            PaymentTypeFactory::class,
+            new SingleInstance(static function () {
+                return new PaymentTypeFactory();
+            })
+        );
+
+        ServiceRegister::registerService(
+            InlinePaymentFactory::class,
+            new SingleInstance(static function () {
+                return new InlinePaymentFactory(ServiceRegister::getService(PaymentTypeService::class));
+            })
+        );
+
+        ServiceRegister::registerService(
             PaymentPageFactory::class,
             new SingleInstance(static function () {
                 return new PaymentPageFactory(ServiceRegister::getService(PaymentPageSettingsService::class));
@@ -452,8 +512,12 @@ class BootstrapComponent extends BaseBootstrapComponent
             );
         }));
 
+        ServiceRegister::registerService(DefaultWebhookHandler::class, static function () {
+            return new DefaultWebhookHandler();
+        });
         CustomerProcessorsRegistry::registerGlobal(CustomerProcessor::class);
         BasketProcessorsRegistry::registerGlobal(LineItemsProcessor::class);
+
     }
 
     /**

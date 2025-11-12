@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionSynchronization\Service\TransactionSynchronizerService;
+use Unzer\Core\BusinessLogic\Domain\Webhook\Handlers\WebhookHandlerRegistry;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\Webhook;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\WebhookEvents;
@@ -23,12 +24,12 @@ class WebhookService
     /**
      * @var UnzerFactory $unzerFactory
      */
-    private UnzerFactory $unzerFactory;
+    protected UnzerFactory $unzerFactory;
 
     /**
      * @var TransactionSynchronizerService $transactionSynchronizerService
      */
-    private TransactionSynchronizerService $transactionSynchronizerService;
+    protected TransactionSynchronizerService $transactionSynchronizerService;
 
     /**
      * @param UnzerFactory $unzerFactory
@@ -62,6 +63,8 @@ class WebhookService
         }
         $transactionHistory = $this->transactionSynchronizerService->getAndUpdateTransactionHistoryFromUnzerPayment($resource);
         $this->transactionSynchronizerService->handleOrderStatusChange($transactionHistory);
+
+        WebhookHandlerRegistry::getHandler($webhook->getEvent())->handleEvent($webhook, $resource);
 
         if ($webhook->getEvent() === WebhookEvents::CHARGE_CANCELED) {
             $this->transactionSynchronizerService->handleRefund($transactionHistory);

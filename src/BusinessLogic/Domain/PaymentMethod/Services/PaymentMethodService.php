@@ -109,14 +109,45 @@ class PaymentMethodService
 
     /**
      * @param string $type
+     * @param BookingMethod|null $systemBookingMethod
+     *
+     * @return PaymentMethodConfig
+     *
+     * @throws InvalidAmountsException
+     */
+    public function getDefaultPaymentMethodConfig(string $type, ?BookingMethod $systemBookingMethod = null): PaymentMethodConfig
+    {
+        return new PaymentMethodConfig(
+            $type,
+            true,
+            $this->getBookingMethodForType($type, $systemBookingMethod),
+            in_array($type, BasketRequired::BASKET_REQUIRED)
+        );
+    }
+
+    /**
+     * @param string $type
+     * @param BookingMethod|null $systemBookingMethod
      *
      * @return ?PaymentMethodConfig
      *
-     * @throws
+     * @throws InvalidAmountsException
      */
-    public function getPaymentMethodConfigByType(string $type): ?PaymentMethodConfig
+    public function getPaymentMethodConfigByType(string $type, ?BookingMethod $systemBookingMethod = null): ?PaymentMethodConfig
     {
-        return $this->paymentMethodConfigRepository->getPaymentMethodConfigByType($type);
+        if ($this->hasPaymentMethodSettings()) {
+            return $this->paymentMethodConfigRepository->getPaymentMethodConfigByType($type);
+        }
+
+        return $this->getDefaultPaymentMethodConfig($type, $systemBookingMethod);
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasPaymentMethodSettings(): bool
+    {
+        return true;
     }
 
     /**
@@ -154,14 +185,16 @@ class PaymentMethodService
 
     /**
      * @param string $type
+     * @param BookingMethod|null $systemBookingMethod
      *
      * @return BookingMethod
      */
-    private function getBookingMethodForType(string $type): BookingMethod
+    protected function getBookingMethodForType(string $type, ?BookingMethod $systemBookingMethod = null): BookingMethod
     {
+        // if method supports both booking method, return one provided from the shop checkout
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE) &&
             in_array($type, BookingChargeSupport::SUPPORTS_CHARGE)) {
-            return BookingMethod::charge();
+            return $systemBookingMethod ?? BookingMethod::charge();
         }
 
         if (in_array($type, BookingAuthorizeSupport::SUPPORTS_AUTHORIZE)) {

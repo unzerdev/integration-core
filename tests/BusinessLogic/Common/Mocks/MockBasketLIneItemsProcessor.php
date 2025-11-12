@@ -3,7 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\LineItemsProcessor;
-use Unzer\Core\BusinessLogic\Domain\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use UnzerSDK\Resources\Basket;
 use UnzerSDK\Resources\EmbeddedResources\BasketItem;
 

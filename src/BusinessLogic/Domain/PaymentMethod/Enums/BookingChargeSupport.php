@@ -28,7 +28,9 @@ interface BookingChargeSupport
         PaymentMethodTypes::TWINT,
         PaymentMethodTypes::UNZER_DIRECT_DEBIT,
         PaymentMethodTypes::UNZER_PREPAYMENT,
+        PaymentMethodTypes::UNZER_PAYPAGE,
         PaymentMethodTypes::WECHATPAY,
-        PaymentMethodTypes::DIRECT_BANK_TRANSFER
+        PaymentMethodTypes::DIRECT_BANK_TRANSFER,
+        PaymentMethodTypes::WERO
     ];
 }

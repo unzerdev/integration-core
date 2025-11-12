@@ -10,6 +10,7 @@ use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\PaymentTypes\BasePaymentType;
 use UnzerSDK\Resources\PaymentTypes\Card;
 use UnzerSDK\Resources\PaymentTypes\Paypage;
+use UnzerSDK\Resources\TransactionTypes\Authorization;
 use UnzerSDK\Resources\Webhook;
 use UnzerSDK\Unzer;
 use UnzerSDK\Resources\TransactionTypes\Charge;
@@ -43,6 +44,11 @@ class UnzerMock extends Unzer
      * @var ?Payment $payment
      */
     private ?Payment $payment = null;
+
+    /**
+     * @var ?Charge $charge
+     */
+    private ?Charge $charge = null;
 
     /**
      * @var Basket|null
@@ -179,9 +185,17 @@ class UnzerMock extends Unzer
 
     public function createMetadata(Metadata $metadata): Metadata
     {
-        $this->callHistory['createMetadata'][] = ['metadata' => $this->metadata];
+        $this->metadata = $metadata;
+        $this->callHistory['createMetadata'][] = ['metadata' => $metadata];
 
         return $metadata;
+    }
+
+    public function fetchMetadata($metadata): Metadata
+    {
+        $this->callHistory['fetchMetadata'][] = ['id' => $metadata];
+
+        return $this->metadata;
     }
 
     /**
@@ -216,6 +230,43 @@ class UnzerMock extends Unzer
         return new Cancellation();
     }
 
+
+    public function performCharge(
+        Charge $charge,
+        $paymentType,
+        $customer = null,
+        ?Metadata $metadata = null,
+        ?Basket $basket = null
+    ): Charge {
+        $this->callHistory['performCharge'][] = [
+            'charge' => $charge,
+            'paymentType' => $paymentType,
+            'customer' => $customer,
+            'metadata' => $metadata,
+            'basket' => $basket
+        ];
+
+        return $charge;
+    }
+
+    public function performAuthorization(
+        Authorization $authorization,
+        $paymentType,
+        $customer = null,
+        ?Metadata $metadata = null,
+        ?Basket $basket = null
+    ): Authorization {
+        $this->callHistory['performAuthorization'][] = [
+            'paymentType' => $paymentType,
+            'authorization' => $authorization,
+            'customer' => $customer,
+            'metadata' => $metadata,
+            'basket' => $basket
+        ];
+
+        return $authorization;
+    }
+
     /**
      * @param $payment
      * @param string $chargeId
@@ -240,6 +291,24 @@ class UnzerMock extends Unzer
             'payment' => $payment,
             'chargeId' => $chargeId,
             'amount' => $amount
+        ];
+
+        return new Cancellation();
+    }
+
+    /**
+     * @param $payment
+     * @param Cancellation|null $cancellation
+     *
+     * @return Cancellation
+     */
+    public function cancelChargedPayment(
+        $payment,
+        Cancellation $cancellation = null
+    ): Cancellation {
+        $this->callHistory['cancelChargedPayment'][] = [
+            'payment' => $payment,
+            'cancellation' => $cancellation
         ];
 
         return new Cancellation();
@@ -297,6 +366,23 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param string $payment
+     * @param string $chargeId
+     *
+     * @return Charge
+     */
+    public function fetchChargeById($payment, string $chargeId): Charge
+    {
+        $this->callHistory['fetchChargeById'][] = [
+            'paymentId' => $payment,
+            'chargeId' => $chargeId,
+        ];
+
+        return $this->charge;
+    }
+
+
+    /**
      * @param Payment $payment
      *
      * @return void
@@ -304,6 +390,16 @@ class UnzerMock extends Unzer
     public function setPayment(Payment $payment): void
     {
         $this->payment = $payment;
+    }
+
+    /**
+     * @param Charge $charge
+     *
+     * @return void
+     */
+    public function setCharge(Charge $charge): void
+    {
+        $this->charge = $charge;
     }
 
     /**

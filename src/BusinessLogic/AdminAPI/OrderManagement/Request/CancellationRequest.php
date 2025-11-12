@@ -15,14 +15,14 @@ class CancellationRequest extends Request
     /** @var string $orderId */
     private string $orderId;
 
-    /** @var Amount $amount */
-    private Amount $amount;
+    /** @var Amount|null $amount */
+    private ?Amount $amount;
 
     /**
      * @param string $orderId
-     * @param Amount $amount
+     * @param Amount|null $amount
      */
-    public function __construct(string $orderId, Amount $amount)
+    public function __construct(string $orderId, ?Amount $amount = null)
     {
         $this->orderId = $orderId;
         $this->amount = $amount;
@@ -37,9 +37,9 @@ class CancellationRequest extends Request
     }
 
     /**
-     * @return Amount
+     * @return Amount|null
      */
-    public function getAmount(): Amount
+    public function getAmount(): ?Amount
     {
         return $this->amount;
     }

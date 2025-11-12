@@ -1,6 +1,6 @@
 <?php
 
-namespace BusinessLogic\Domain\Connection\Services;
+namespace Unzer\Core\Tests\BusinessLogic\Domain\Connection\Services;
 
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings as ConnectionSettingsEntity;
@@ -580,6 +580,94 @@ class ConnectionSettingsServiceTest extends BaseTestCase
         self::assertEquals(
             'https://test.com', $webhookDataEntity[0]->getWebhookSettings()->getLiveWebhookData()->getUrl()
         );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testGetActiveConnectionDataWhenModeIsLive(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$connectionSettings]);
+
+        // act
+        $active = StoreContext::doWithStore('1', [$this->service, 'getActiveConnectionData']);
+
+        // assert
+        self::assertNotNull($active);
+        self::assertEquals('p-pub-live-test.', $connectionSettings->getLiveConnectionData()->getPublicKey());
+        self::assertEquals('p-priv-live-test.', $connectionSettings->getLiveConnectionData()->getPrivateKey());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     * @throws Exception
+     */
+    public function testGetActiveConnectionDataWhenModeIsTest(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test');
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$connectionSettings]);
+
+        // act
+        $active = StoreContext::doWithStore('1', [$this->service, 'getActiveConnectionData']);
+
+        // assert
+        self::assertNotNull($active);
+        self::assertEquals('s-pub-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPublicKey());
+        self::assertEquals('s-priv-sandbox-test.', $connectionSettings->getSandboxConnectionData()->getPrivateKey());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetActiveConnectionDataWhenNoSettings(): void
+    {
+        // arrange
+
+        // act
+        $active = StoreContext::doWithStore('1', [$this->service, 'getActiveConnectionData']);
+
+        // assert
+        self::assertNull($active);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidModeException
+     */
+    public function testGetActiveMode(): void
+    {
+        // arrange
+        $liveSettings = new ConnectionSettings(Mode::parse('live'));
+        $sandboxSettings = new ConnectionSettings(Mode::parse('sandbox'));
+
+        // act
+        $liveMode = $this->service->getActiveMode($liveSettings);
+        $sandboxMode = $this->service->getActiveMode($sandboxSettings);
+
+        // assert
+        self::assertEquals(Mode::live(), $liveMode);
+        self::assertEquals(Mode::sandbox(), $sandboxMode);
     }
 
     /**
