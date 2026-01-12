@@ -4,7 +4,6 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response;
 
 use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
  * Class PaymentPageSettingsPutResponse
@@ -35,6 +34,7 @@ class PaymentPageSettingsPutResponse extends Response
             'shopName' => $this->paymentPageSettings->getShopNames()->toArray(),
             'logoImageUrl' => $this->paymentPageSettings->getLogoFile()->getUrl(),
             'backgroundImageUrl' => $this->paymentPageSettings->getBackgroundFile()->getUrl(),
+            'faviconImageUrl' => $this->paymentPageSettings->getFavicon()->getUrl(),
             'headerColor' => $this->paymentPageSettings->getHeaderColor(),
             'brandColor' => $this->paymentPageSettings->getBrandColor(),
             'textColor' => $this->paymentPageSettings->getTextColor(),
@@ -46,6 +46,11 @@ class PaymentPageSettingsPutResponse extends Response
             'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
             'hideBasket' => $this->paymentPageSettings->getHideBasket(),
             'cornerRadius' => $this->paymentPageSettings->getCornerRadius(),
+            'helpUrl' => $this->paymentPageSettings->getUrls()->getHelpUrl(),
+            'contactUrl' => $this->paymentPageSettings->getUrls()->getContactUrl(),
+            'termsAndConditions' => $this->paymentPageSettings->getUrls()->getTermsAndConditions(),
+            'privacyPolicy' => $this->paymentPageSettings->getUrls()->getPrivacyPolicy(),
+            'imprint' => $this->paymentPageSettings->getUrls()->getImprint(),
         ];
     }
 }

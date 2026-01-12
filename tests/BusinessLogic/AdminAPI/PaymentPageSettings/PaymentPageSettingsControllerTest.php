@@ -1,13 +1,14 @@
 <?php
 
-namespace BusinessLogic\AdminAPI\PaymentPageSettings;
+namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\PaymentPageSettings;
 
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Request\PaymentPageSettingsRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\PaymentPageSettings\Response\PaymentPageSettingsGetResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
@@ -95,10 +96,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             new PaymentPageSettingsModel(
                 new UploadedFile('https://www.test.com/'),
                 new UploadedFile('https://www.test2.com/'),
+                new UploadedFile('https://www.test3.com/'),
                 TranslationCollection::fromArray([
                     ['locale' => 'default', 'value' => 'shop'],
                     ['locale' => 'en_us', 'value' => 'shop']
                 ]),
+                new DomainUrls('https://www.test.com/',
+                    'https://www.test.com/',
+                    'https://www.test.com/',
+                    'https://www.test.com/',
+                    'https://www.test.com/'
+                ),
                 '#FFFFFF',
                 '#666666',
                 '#111111',
@@ -125,11 +133,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile('https://www.test2.com/'),
+            new UploadedFile('https://www.test3.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
-            '#FFFFFF',
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),            '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
@@ -158,10 +172,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile('https://www.test2.com/'),
+            new UploadedFile('https://www.test3.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -175,10 +196,17 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         $expectedResponse = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile('https://www.test2.com/'),
+            new UploadedFile('https://www.test3.com/'),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
             ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -206,6 +234,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'shopName' => [],
             'logoImageUrl' => null,
             'backgroundImageUrl' => null,
+            'faviconImageUrl' => null,
             'headerColor' => null,
             'brandColor' => null,
             'textColor' => null,
@@ -216,7 +245,12 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'shadows' => null,
             'hideUnzerLogo' => null,
             'hideBasket' => null,
-            'cornerRadius' => null
+            'cornerRadius' => null,
+            'helpUrl' => null,
+            'contactUrl' => null,
+            'termsAndConditions' => null,
+            'privacyPolicy' => null,
+            'imprint' => null,
         ];
         // Assert
         self::assertEquals($response->toArray(), $expectedResponse);
@@ -224,7 +258,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
+     * @throws InvalidTranslatableArrayException|InvalidUrlException
      */
     public function testIsPutResponseSuccessful(): void
     {
@@ -237,6 +271,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'https://www.test.com/',
             null,
             'https://www.test2.com/',
+            null,
+            'https://www.test3.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -256,7 +292,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
+     * @throws InvalidTranslatableArrayException|InvalidUrlException
      */
     public function testPutResponseToArray(): void
     {
@@ -269,6 +305,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             new \SplFileInfo('https://www.test.com/'),
             null,
             'https://www.test.com/',
+            null,
+            'https://www.test3.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -302,6 +340,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'shopName' => $paymentPageSettings->getShopNames()->toArray(),
             'logoImageUrl' => $paymentPageSettings->getLogoFile()->getUrl(),
             'backgroundImageUrl' => $paymentPageSettings->getBackgroundFile()->getUrl(),
+            'faviconImageUrl' => $paymentPageSettings->getFavicon()->getUrl(),
             'headerColor' => $paymentPageSettings->getHeaderColor(),
             'brandColor' => $paymentPageSettings->getBrandColor(),
             'textColor' => $paymentPageSettings->getTextColor(),
@@ -312,7 +351,12 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'shadows' => $paymentPageSettings->getShadows(),
             'hideUnzerLogo' => $paymentPageSettings->getHideUnzerLogo(),
             'hideBasket' => $paymentPageSettings->getHideBasket(),
-            'cornerRadius' => $paymentPageSettings->getCornerRadius()
+            'cornerRadius' => $paymentPageSettings->getCornerRadius(),
+            'helpUrl' => $paymentPageSettings->getUrls()->getHelpUrl(),
+            'contactUrl' => $paymentPageSettings->getUrls()->getContactUrl(),
+            'termsAndConditions' => $paymentPageSettings->getUrls()->getTermsAndConditions(),
+            'privacyPolicy' => $paymentPageSettings->getUrls()->getPrivacyPolicy(),
+            'imprint' => $paymentPageSettings->getUrls()->getImprint(),
         ];
     }
 
@@ -320,7 +364,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
      * @return void
      * @throws InvalidTranslatableArrayException
      * @throws UnzerApiException
-     * @throws ConnectionSettingsNotFoundException|InvalidImageUrlException
+     * @throws ConnectionSettingsNotFoundException|InvalidUrlException
      */
     public function testIsCreatePreviewPageResponseSuccessful(): void
     {
@@ -333,6 +377,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'https://www.test.com/',
             null,
             'https://www.test.com/',
+            null,
+            'https://www.test2.com/',
             null,
             '#FFFFFF',
             '#666666',
@@ -353,7 +399,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
     /**
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
-     * @throws InvalidTranslatableArrayException|InvalidImageUrlException
+     * @throws InvalidTranslatableArrayException|InvalidUrlException
      */
     public function testPaymentPagePreviewResponseToArray(): void
     {
@@ -366,6 +412,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'https://www.test.com/',
             null,
             null,
+            null,
+            'https://www.test2.com/',
             null,
             '#FFFFFF',
             '#666666',

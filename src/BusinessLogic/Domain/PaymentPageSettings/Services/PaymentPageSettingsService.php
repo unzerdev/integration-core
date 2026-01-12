@@ -29,6 +29,8 @@ class PaymentPageSettingsService
 
     private const BACKGROUND_IMAGE_NAME = 'background.png';
     private const BACKGROUND_IMAGE_PREVIEW_NAME = 'background_preview.png';
+    private const FAVICON_IMAGE_NAME = 'favicon.png';
+    private const FAVICON_IMAGE_PREVIEW_NAME = 'favicon_preview.png';
 
     /**
      * @var PaymentPageSettings
@@ -79,6 +81,14 @@ class PaymentPageSettingsService
             $paymentPageSettings->getBackgroundFile()->setUrl($url);
         }
 
+        if ($paymentPageSettings->getFavicon()->hasFileInfo()) {
+            $url = $this->uploaderService->uploadImage(
+                $paymentPageSettings->getFavicon()->getFileInfo(),
+                self::FAVICON_IMAGE_NAME
+            );
+            $paymentPageSettings->getFavicon()->setUrl($url);
+        }
+
         $this->repository->setPaymentPageSettings($paymentPageSettings);
 
         return $paymentPageSettings;
@@ -119,6 +129,15 @@ class PaymentPageSettingsService
             );
 
             $paymentPageSettings->getBackgroundFile()->setUrl($url);
+        }
+
+        if ($paymentPageSettings->getFavicon()->hasFileInfo()) {
+            $url = $this->uploaderService->uploadImage(
+                $paymentPageSettings->getFavicon()->getFileInfo(),
+                self::FAVICON_IMAGE_PREVIEW_NAME
+            );
+
+            $paymentPageSettings->getFavicon()->setUrl($url);
         }
 
         $payPageRequest = $paymentPageSettings->inflate(

@@ -1,11 +1,12 @@
 <?php
 
-namespace BusinessLogic\Domain\PaymentPageSettings\Services;
+namespace Unzer\Core\Tests\BusinessLogic\Domain\PaymentPageSettings\Services;
 
 use Exception;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
@@ -97,7 +98,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']])
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -120,7 +131,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']])
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -145,7 +166,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
         // act
@@ -167,7 +198,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/', new \SplFileInfo('path')),
             new UploadedFile(null, new \SplFileInfo('path')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile('https://www.test.com/', new \SplFileInfo('path')),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
         $uploadedPath = 'https://www.test.com/';
@@ -177,7 +218,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile('https://www.test.com/'),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile('https://www.test.com/'),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
 
         // act
@@ -190,20 +241,30 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidImageUrlException
+     * @throws InvalidUrlException
      *
      * @throws \Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException
      */
     public function testInvalidFileUrl(): void
     {
-        $this->expectException(InvalidImageUrlException::class);
+        $this->expectException(InvalidUrlException::class);
         $this->expectExceptionMessage('Url is not valid');
 
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('www.test.com'),
             new UploadedFile(null, new \SplFileInfo('path')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, new \SplFileInfo('path')),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
     }
 
@@ -216,7 +277,18 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null, new \SplFileInfo('path')),
             new UploadedFile(null, new \SplFileInfo('path2')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, new \SplFileInfo('path')),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls(
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFFF',
             '#666666',
         );
@@ -228,7 +300,14 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null, null),
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -252,7 +331,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -263,7 +352,17 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile(null),
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -284,12 +383,22 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      * @return void
      * @throws Exception
      */
-    public function testCreateMockPaypageNoSettings() : void
+    public function testCreateMockPaypageNoSettings(): void
     {
         //arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile(null,null),
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null, null),
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
 
@@ -311,12 +420,19 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      * @return void
      * @throws Exception
      */
-    public function testCreateMockPaypageWithSettings() : void
+    public function testCreateMockPaypageWithSettings(): void
     {
         //arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile("https://www.test.com/",null),
+        $settings = new PaymentPageSettingsModel(new UploadedFile("https://www.test.com/", null),
             new UploadedFile(null, null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -328,7 +444,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $id = "123";
         $url = "url";
-        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
 
         //act
         $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
@@ -341,12 +457,22 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      * @return void
      * @throws Exception
      */
-    public function testCreateMockPaypageWithFile() : void
+    public function testCreateMockPaypageWithFile(): void
     {
         //arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null, new \SplFileInfo('path')),
             new UploadedFile(null, new \SplFileInfo('path2')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null, new \SplFileInfo('path3')),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -361,7 +487,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $id = "123";
         $url = "url";
-        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
 
         //act
         $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
@@ -374,12 +500,19 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      * @return void
      * @throws Exception
      */
-    public function testCreateMockPaypageWithNoDefaultLabel() : void
+    public function testCreateMockPaypageWithNoDefaultLabel(): void
     {
         //arrange
-        $settings = new PaymentPageSettingsModel(new UploadedFile(null,new \SplFileInfo('path')),
+        $settings = new PaymentPageSettingsModel(new UploadedFile(null, new \SplFileInfo('path')),
             new UploadedFile(null, new \SplFileInfo('path2')),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'']]),
+            new UploadedFile(null, new \SplFileInfo('path3')),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => '']]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -394,7 +527,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         $id = "123";
         $url = "url";
-        $this->unzerService->getMockUnzer()->setPayPageData(["id" =>$id, "redirectUrl" => $url]);
+        $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
 
         //act
         $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);

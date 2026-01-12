@@ -3,7 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
 use SplFileInfo;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 
 /**
@@ -27,7 +27,7 @@ class UploadedFile
      * @param string|null $url
      * @param SplFileInfo|null $fileInfo
      *
-     * @throws InvalidImageUrlException
+     * @throws InvalidUrlException
      */
     public function __construct(?string $url = null, ?SplFileInfo $fileInfo = null)
     {
@@ -74,7 +74,7 @@ class UploadedFile
      *
      * @return void
      *
-     * @throws InvalidImageUrlException
+     * @throws InvalidUrlException
      */
     private function validateUrl(?string $url): void
     {
@@ -83,7 +83,7 @@ class UploadedFile
         }
 
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new InvalidImageUrlException(
+            throw new InvalidUrlException(
                 new TranslatableLabel('Url is not valid.', 'designPage.invalidUrl')
             );
         }

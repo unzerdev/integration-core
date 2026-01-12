@@ -19,13 +19,13 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentStatusMap\Enums\PaymentStatus;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookData;
 use Unzer\Core\BusinessLogic\Domain\Webhook\Models\WebhookSettings;
@@ -238,7 +238,17 @@ class DisconnectServiceTest extends BaseTestCase
         $settings = new PaymentPageSettings(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -296,7 +306,7 @@ class DisconnectServiceTest extends BaseTestCase
      * @throws QueryFilterInvalidParamException
      * @throws EntityClassException
      */
-    public function testTransactionHistoryDataDeleted() : void
+    public function testTransactionHistoryDataDeleted(): void
     {
         $transactionHistory1 = new TransactionHistory(
             PaymentMethodTypes::APPLE_PAY,

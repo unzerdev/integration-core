@@ -11,7 +11,7 @@ use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
  *
  * @package Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions
  */
-class InvalidImageUrlException extends BaseTranslatableException
+class InvalidUrlException extends BaseTranslatableException
 {
     /**
      * @param TranslatableLabel $translatableLabel

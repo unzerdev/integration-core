@@ -5,10 +5,10 @@ namespace BusinessLogic\DataAccess\PaymentPageSettings\Repositories;
 use Exception;
 use Unzer\Core\BusinessLogic\DataAccess\PaymentPageSettings\Entities\PaymentPageSettings as PaymentPageSettingsEntity;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings as PaymentPageSettingsModel;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\Translation;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -70,7 +70,14 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile(null),
             new UploadedFile(null),
-            new TranslationCollection(new Translation('default',"shop")),
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('default', "shop")),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -93,7 +100,14 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            new TranslationCollection(new Translation('default',"shop"))
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('default', "shop")),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
         $settingsEntity = new PaymentPageSettingsEntity();
         $settingsEntity->setPaymentPageSetting($settings);
@@ -118,7 +132,14 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile('https://www.test.com/'),
-            new TranslationCollection(new Translation('default',"description")),
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('default', "description")),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
 
         // act
@@ -139,7 +160,17 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -149,7 +180,14 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([['locale' => 'default', 'value' => 'shop']]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -174,7 +212,17 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -185,7 +233,17 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $newSettings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
             '#FFFFFF',
             '#666666',
             '#111111',
@@ -193,7 +251,8 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         );
 
         // act
-        StoreContext::doWithStore('2', [$this->paymentPageSettingsRepository, 'setPaymentPageSettings'], [$newSettings]);
+        StoreContext::doWithStore('2', [$this->paymentPageSettingsRepository, 'setPaymentPageSettings'],
+            [$newSettings]);
 
 
         // assert
@@ -212,7 +271,17 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            TranslationCollection::fromArray([['locale'=>'default','value'=>'shop'], ['locale'=>'en_us','value'=>'shop']]),
+            new UploadedFile(null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -226,7 +295,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
 
         // assert
         $savedEntity = $this->repository->select();
-        self::assertCount(0,$savedEntity);
+        self::assertCount(0, $savedEntity);
     }
 
     /**
@@ -239,7 +308,7 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
 
         // assert
         $savedEntity = $this->repository->select();
-        self::assertCount(0,$savedEntity);
+        self::assertCount(0, $savedEntity);
     }
 
     /**
@@ -251,7 +320,14 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('https://www.test.com/'),
             new UploadedFile(null),
-            new TranslationCollection(new Translation('en_us',"description"))
+            new UploadedFile(null),
+            new TranslationCollection(new Translation('en_us', "description")),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            )
         );
 
         $settingsEntity = new PaymentPageSettingsEntity();
@@ -264,6 +340,6 @@ class PaymentPageSettingsRepositoryTest extends BaseTestCase
 
         // assert
         $savedEntity = $this->repository->select();
-        self::assertCount(1,$savedEntity);
+        self::assertCount(1, $savedEntity);
     }
 }

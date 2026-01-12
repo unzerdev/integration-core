@@ -3,6 +3,7 @@
 namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models;
 
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\V2\Paypage;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Style;
 
@@ -59,6 +60,16 @@ class PaymentPageSettings
     private UploadedFile $backgroundFile;
 
     /**
+     * @var UploadedFile
+     */
+    private UploadedFile $favicon;
+
+    /**
+     * @var DomainUrls
+     */
+    private DomainUrls $urls;
+
+    /**
      * @var null|string $font
      */
     private ?string $font;
@@ -91,7 +102,9 @@ class PaymentPageSettings
     /**
      * @param UploadedFile $logoFile
      * @param UploadedFile $backgroundFile
+     * @param UploadedFile $favicon
      * @param TranslationCollection $shopNames
+     * @param DomainUrls $urls
      * @param string|null $headerColor
      * @param string|null $brandColor
      * @param string|null $textColor
@@ -107,7 +120,9 @@ class PaymentPageSettings
     public function __construct(
         UploadedFile $logoFile,
         UploadedFile $backgroundFile,
+        UploadedFile $favicon,
         TranslationCollection $shopNames,
+        DomainUrls $urls,
         ?string $headerColor = null,
         ?string $brandColor = null,
         ?string $textColor = null,
@@ -123,6 +138,8 @@ class PaymentPageSettings
         $this->shopNames = $shopNames;
         $this->logoFile = $logoFile;
         $this->backgroundFile = $backgroundFile;
+        $this->favicon = $favicon;
+        $this->urls = $urls;
         $this->headerColor = $headerColor;
         $this->brandColor = $brandColor;
         $this->textColor = $textColor;
@@ -163,9 +180,18 @@ class PaymentPageSettings
             ->setCornerRadius($this->cornerRadius)
             ->setHideBasket($this->hideBasket)
             ->setLogoImage($this->logoFile->getUrl())
-            ->setBackgroundImage($this->backgroundFile->getUrl());
+            ->setBackgroundImage($this->backgroundFile->getUrl())
+            ->setFavicon($this->favicon->getUrl());
 
-        $this->paypage->setStyle($style);
+        $urls = new Urls();
+        $urls->setHelp($this->urls->getHelpUrl())
+            ->setContact($this->urls->getContactUrl())
+            ->setTermsAndCondition($this->urls->getTermsAndConditions())
+            ->setPrivacyPolicy($this->urls->getPrivacyPolicy())
+            ->setImprint($this->urls->getImprint());
+
+        $this->paypage->setStyle($style)
+            ->setUrls($urls);
 
         return $this->paypage;
     }
@@ -224,6 +250,22 @@ class PaymentPageSettings
     public function getBackgroundFile(): UploadedFile
     {
         return $this->backgroundFile;
+    }
+
+    /**
+     * @return UploadedFile
+     */
+    public function getFavicon(): UploadedFile
+    {
+        return $this->favicon;
+    }
+
+    /**
+     * @return DomainUrls
+     */
+    public function getUrls(): DomainUrls
+    {
+        return $this->urls;
     }
 
     /**
