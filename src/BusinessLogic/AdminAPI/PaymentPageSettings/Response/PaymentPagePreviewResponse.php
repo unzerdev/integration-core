@@ -29,6 +29,7 @@ class PaymentPagePreviewResponse extends Response
     {
         return [
             'paypageId' => $this->payPage->getId(),
+            'redirectUrl' => $this->payPage->getRedirectUrl()
         ];
     }
 }
