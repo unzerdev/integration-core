@@ -9,6 +9,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlExc
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -401,6 +402,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
             ),
         );
 
+        $type = PaymentPageType::EMBEDDED;
 
         $id = "123";
         $this->unzerService->getMockUnzer()->setPayPageData([
@@ -409,7 +411,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         ]);
 
         //act
-        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings, $type]);
 
 
         //assert
@@ -445,9 +447,10 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $id = "123";
         $url = "url";
         $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
+        $type = PaymentPageType::EMBEDDED;
 
         //act
-        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings, $type]);
 
         //assert
         self::assertEquals($id, $paypage->getId());
@@ -488,9 +491,10 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $id = "123";
         $url = "url";
         $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
+        $type = PaymentPageType::EMBEDDED;
 
         //act
-        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings, $type]);
 
         //assert
         self::assertEquals($id, $paypage->getId());
@@ -528,9 +532,10 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
         $id = "123";
         $url = "url";
         $this->unzerService->getMockUnzer()->setPayPageData(["id" => $id, "redirectUrl" => $url]);
+        $type = PaymentPageType::EMBEDDED;
 
         //act
-        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings]);
+        $paypage = StoreContext::doWithStore('1', [$this->service, 'createMockPaypage'], [$settings, $type]);
 
         //assert
         self::assertEquals($id, $paypage->getId());

@@ -19,7 +19,6 @@ use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreat
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use UnzerSDK\Exceptions\UnzerApiException;
-use UnzerSDK\Resources\TransactionTypes\Charge;
 
 /**
  * Class CheckoutPaymentPageController
@@ -63,7 +62,8 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
                 $request->getReturnUrl(),
                 new DataBag($request->getSessionData()),
                 $request->getLocale(),
-                $request->getBookingMethod()
+                $request->getBookingMethod(),
+                $request->getPaymentPageType(),
             )),
             $connectionData->getPublicKey()
 

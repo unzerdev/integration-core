@@ -18,9 +18,6 @@ use UnzerSDK\Resources\V2\Paypage;
  */
 class PaymentPageFactory
 {
-    const EMBEDDED_PAYPAGE_TYPE = "embedded";
-    const HOSTED_PAYPAGE_TYPE = "hosted";
-
     private PaymentPageSettingsService $paymentPageSettingsService;
 
     /**
@@ -81,7 +78,7 @@ class PaymentPageFactory
             ->setReturnCancel($url);
 
         $result->setUrls($urls);
-        $result->setType(self::EMBEDDED_PAYPAGE_TYPE);
+        $result->setType($context->getPaypageType());
         $result->setCheckoutType(PaypageCheckoutTypes::PAYMENT_ONLY);
 
         return $paymentPageSettings ? $paymentPageSettings->inflate($result, $context->getLocale()) : $result;

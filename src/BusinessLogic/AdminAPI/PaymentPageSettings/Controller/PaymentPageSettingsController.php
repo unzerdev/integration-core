@@ -68,7 +68,8 @@ class PaymentPageSettingsController
     public function getPaymentPagePreview(PaymentPageSettingsRequest $pageSettingsRequest): PaymentPagePreviewResponse
     {
         $paypage = $this->paymentPageSettingsService->createMockPaypage(
-            $pageSettingsRequest->transformToDomainModel()
+            $pageSettingsRequest->transformToDomainModel(),
+            $pageSettingsRequest->getPaypageType(),
         );
 
         return new PaymentPagePreviewResponse($paypage);

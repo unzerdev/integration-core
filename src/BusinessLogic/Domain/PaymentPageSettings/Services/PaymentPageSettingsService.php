@@ -22,7 +22,6 @@ class PaymentPageSettingsService
 {
     private const AMOUNT = "100.28";
     private const CURRENCY = 'EUR';
-    const EMBEDDED_PAYPAGE_TYPE = "embedded";
 
     private const LOGO_IMAGE_NAME = 'logo.png';
     private const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
@@ -104,13 +103,14 @@ class PaymentPageSettingsService
 
     /**
      * @param PaymentPageSettings $paymentPageSettings
+     * @param string $paypageType
      *
      * @return Paypage
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function createMockPaypage(PaymentPageSettings $paymentPageSettings): Paypage
+    public function createMockPaypage(PaymentPageSettings $paymentPageSettings, string $paypageType): Paypage
     {
         $unzerApi = $this->unzerFactory->makeUnzerAPI();
 
@@ -152,7 +152,7 @@ class PaymentPageSettingsService
 
         $payPageRequest->setResources(new Resources(null, $basket->getId()));
 
-        $payPageRequest->setType(self::EMBEDDED_PAYPAGE_TYPE);
+        $payPageRequest->setType($paypageType);
 
         return $unzerApi->createPaypage($payPageRequest);
     }

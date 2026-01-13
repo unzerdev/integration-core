@@ -60,10 +60,11 @@ class PaymentPageSettingsServiceMock extends PaymentPageSettingsService
 
     /**
      * @param PaymentPageSettings $paymentPageSettings
+     * @param string $paypageType
      *
      * @return Paypage
      */
-    public function createMockPaypage(PaymentPageSettings $paymentPageSettings): Paypage
+    public function createMockPaypage(PaymentPageSettings $paymentPageSettings, string $paypageType): Paypage
     {
         return $this->paypage;
     }

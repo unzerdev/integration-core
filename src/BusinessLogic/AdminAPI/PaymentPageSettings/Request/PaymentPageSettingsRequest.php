@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlExc
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 
 /**
@@ -131,6 +132,8 @@ class PaymentPageSettingsRequest
      */
     private ?string $imprint = null;
 
+    private string $paypageType;
+
     /**
      * @param TranslationCollection $shopNames
      * @param string|null $logoImageUrl
@@ -155,6 +158,7 @@ class PaymentPageSettingsRequest
      * @param string|null $termsAndConditions
      * @param string|null $privacyPolicy
      * @param string|null $imprint
+     * @param string|null $paypageType
      */
     public function __construct(
         TranslationCollection $shopNames,
@@ -179,7 +183,8 @@ class PaymentPageSettingsRequest
         ?string $contactUrl = null,
         ?string $termsAndConditions = null,
         ?string $privacyPolicy = null,
-        ?string $imprint = null
+        ?string $imprint = null,
+        ?string $paypageType = PaymentPageType::EMBEDDED
     ) {
         $this->shopNames = $shopNames;
         $this->logoImageUrl = $logoImageUrl;
@@ -204,6 +209,7 @@ class PaymentPageSettingsRequest
         $this->termsAndConditions = $termsAndConditions;
         $this->privacyPolicy = $privacyPolicy;
         $this->imprint = $imprint;
+        $this->paypageType = $paypageType;
     }
 
     /**
@@ -236,5 +242,13 @@ class PaymentPageSettingsRequest
             $this->hideBasket,
             $this->cornerRadius,
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaypageType(): string
+    {
+        return $this->paypageType;
     }
 }

@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request;
 use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
 
 /**
  * Class PaymentPageCreateRequest
@@ -20,6 +21,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     private array $sessionData;
     private string $locale;
     private ?BookingMethod $bookingMethod;
+    private ?string $paymentPageType;
 
     /**
      * @param string $paymentMethodType
@@ -29,6 +31,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
      * @param array $sessionData
      * @param string $locale
      * @param BookingMethod|null $bookingMethod
+     * @param string|null $paymentPageType
      */
     public function __construct(
         string $paymentMethodType,
@@ -37,7 +40,8 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         string $returnUrl,
         array $sessionData = [],
         string $locale = 'default',
-        ?BookingMethod $bookingMethod = null
+        ?BookingMethod $bookingMethod = null,
+        ?string $paymentPageType = PaymentPageType::EMBEDDED
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
@@ -46,6 +50,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         $this->sessionData = $sessionData;
         $this->locale = $locale;
         $this->bookingMethod = $bookingMethod;
+        $this->paymentPageType = $paymentPageType;
     }
 
     public function getPaymentMethodType(): string
@@ -81,5 +86,10 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     public function getBookingMethod(): ?BookingMethod
     {
         return $this->bookingMethod;
+    }
+
+    public function getPaymentPageType(): ?string
+    {
+        return $this->paymentPageType;
     }
 }
