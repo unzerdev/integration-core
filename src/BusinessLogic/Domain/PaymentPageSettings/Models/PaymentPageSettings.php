@@ -164,7 +164,9 @@ class PaymentPageSettings
 
         $shopName = $this->shopNames->getTranslationMessage($locale);
 
-        $this->paypage->setShopName($shopName);
+        if (!empty($shopName)) {
+            $this->paypage->setShopName($shopName);
+        }
 
         $style = new Style();
         $style
@@ -183,15 +185,18 @@ class PaymentPageSettings
             ->setBackgroundImage($this->backgroundFile->getUrl())
             ->setFavicon($this->favicon->getUrl());
 
-        $urls = new Urls();
-        $urls->setHelp($this->urls->getHelpUrl())
-            ->setContact($this->urls->getContactUrl())
-            ->setTermsAndCondition($this->urls->getTermsAndConditions())
-            ->setPrivacyPolicy($this->urls->getPrivacyPolicy())
-            ->setImprint($this->urls->getImprint());
+        if($this->urls->hasAny()) {
+            $urls = new Urls();
+            $urls->setHelp($this->urls->getHelpUrl())
+                ->setContact($this->urls->getContactUrl())
+                ->setTermsAndCondition($this->urls->getTermsAndConditions())
+                ->setPrivacyPolicy($this->urls->getPrivacyPolicy())
+                ->setImprint($this->urls->getImprint());
 
-        $this->paypage->setStyle($style)
-            ->setUrls($urls);
+            $this->paypage->setUrls($urls);
+        }
+
+        $this->paypage->setStyle($style);
 
         return $this->paypage;
     }

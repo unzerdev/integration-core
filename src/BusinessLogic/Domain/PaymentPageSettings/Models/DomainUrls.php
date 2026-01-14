@@ -33,6 +33,12 @@ class DomainUrls
     private ?string $imprint = null;
 
     /**
+     * @param string|null $helpUrl
+     * @param string|null $contactUrl
+     * @param string|null $termsAndConditions
+     * @param string|null $privacyPolicy
+     * @param string|null $imprint
+     *
      * @throws InvalidUrlException
      */
     public function __construct(
@@ -40,8 +46,8 @@ class DomainUrls
         ?string $contactUrl = null,
         ?string $termsAndConditions = null,
         ?string $privacyPolicy = null,
-        ?string $imprint = null)
-    {
+        ?string $imprint = null
+    ) {
         $this->validateUrl($helpUrl);
         $this->validateUrl($contactUrl);
         $this->validateUrl($termsAndConditions);
@@ -56,9 +62,61 @@ class DomainUrls
     }
 
     /**
+     * @return string|null
+     */
+    public function getHelpUrl(): ?string
+    {
+        return $this->helpUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getContactUrl(): ?string
+    {
+        return $this->contactUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTermsAndConditions(): ?string
+    {
+        return $this->termsAndConditions;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPrivacyPolicy(): ?string
+    {
+        return $this->privacyPolicy;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getImprint(): ?string
+    {
+        return $this->imprint;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAny(): bool
+    {
+        return !empty($this->helpUrl) || !empty($this->contactUrl)
+            || !empty($this->termsAndConditions) || !empty($this->privacyPolicy) || !empty($this->imprint);
+    }
+
+    /**
+     * @param ?string $url
+     * @return void
+     *
      * @throws InvalidUrlException
      */
-    private function validateUrl($url)
+    private function validateUrl(?string $url = null): void
     {
         if (!$url) {
             return;
@@ -69,30 +127,5 @@ class DomainUrls
                 new TranslatableLabel('Url is not valid.', 'designPage.invalidUrl')
             );
         }
-    }
-
-    public function getHelpUrl(): ?string
-    {
-        return $this->helpUrl;
-    }
-
-    public function getContactUrl(): ?string
-    {
-        return $this->contactUrl;
-    }
-
-    public function getTermsAndConditions(): ?string
-    {
-        return $this->termsAndConditions;
-    }
-
-    public function getPrivacyPolicy(): ?string
-    {
-        return $this->privacyPolicy;
-    }
-
-    public function getImprint(): ?string
-    {
-        return $this->imprint;
     }
 }
