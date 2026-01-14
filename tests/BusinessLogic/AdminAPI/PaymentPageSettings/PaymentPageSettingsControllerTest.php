@@ -143,7 +143,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 'https://www.test.com/',
                 'https://www.test.com/',
                 'https://www.test.com/'
-            ),            '#FFFFFF',
+            ), '#FFFFFF',
             '#666666',
             '#111111',
             '#555555',
@@ -424,14 +424,19 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
         );
 
         $id = "Id";
+        $redirectUrl = "https://www.redirectUrl.com";
         $paypage = new Paypage(100, "EUR", "return");
         $paypage->setId($id);
+        $paypage->setRedirectUrl($redirectUrl);
         $this->paymentPageSettingsService->setPaypage($paypage);
 
         // Act
         $response = AdminAPI::get()->paymentPageSettings('1')->getPaymentPagePreview($settingsRequest);
 
         // Assert
-        self::assertEquals(['paypageId' => $id], $response->toArray());
+        self::assertEquals([
+            'paypageId' => $id,
+            'redirectUrl' => $redirectUrl,
+        ], $response->toArray());
     }
 }
