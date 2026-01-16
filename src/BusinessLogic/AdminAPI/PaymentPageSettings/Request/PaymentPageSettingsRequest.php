@@ -218,7 +218,6 @@ class PaymentPageSettingsRequest
      * @return PaymentPageSettings
      *
      * @throws InvalidUrlException
-     * @throws InvalidUrlException
      */
 
     public function transformToDomainModel(): object

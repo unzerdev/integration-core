@@ -10,6 +10,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
+use Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslationCollection;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
@@ -242,9 +243,8 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
     /**
      * @return void
-     * @throws InvalidUrlException
      *
-     * @throws \Unzer\Core\BusinessLogic\Domain\Translations\Exceptions\InvalidTranslatableArrayException
+     * @throws InvalidTranslatableArrayException
      */
     public function testInvalidFileUrl(): void
     {
@@ -253,9 +253,9 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
 
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('www.test.com'),
-            new UploadedFile(null, new \SplFileInfo('path')),
-            new UploadedFile(null, new \SplFileInfo('path')),
+            new UploadedFile('test.com'),
+            new UploadedFile(null, null),
+            new UploadedFile(null, null),
             TranslationCollection::fromArray([
                 ['locale' => 'default', 'value' => 'shop'],
                 ['locale' => 'en_us', 'value' => 'shop']
@@ -266,6 +266,13 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
                 'https://www.test.com/',
                 'https://www.test.com/'
             ),
+        );
+
+        // act
+        StoreContext::doWithStore(
+            '1',
+            [$this->service, 'savePaymentPageSettings'],
+            [$settings]
         );
     }
 
