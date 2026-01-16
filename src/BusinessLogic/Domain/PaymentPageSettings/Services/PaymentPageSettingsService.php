@@ -22,15 +22,15 @@ use UnzerSDK\Resources\V2\Paypage;
  */
 class PaymentPageSettingsService
 {
-    private const AMOUNT = "100.28";
-    private const CURRENCY = 'EUR';
+    protected const AMOUNT = "100.28";
+    protected const CURRENCY = 'EUR';
 
     protected const LOGO_IMAGE_NAME = 'logo.png';
-    private const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
+    protected const LOGO_IMAGE_PREVIEW_NAME = 'logo_preview.png';
     protected const BACKGROUND_IMAGE_NAME = 'background.png';
-    private const BACKGROUND_IMAGE_PREVIEW_NAME = 'background_preview.png';
+    protected const BACKGROUND_IMAGE_PREVIEW_NAME = 'background_preview.png';
     protected const FAVICON_IMAGE_NAME = 'favicon.png';
-    private const FAVICON_IMAGE_PREVIEW_NAME = 'favicon_preview.png';
+    protected const FAVICON_IMAGE_PREVIEW_NAME = 'favicon_preview.png';
 
     /**
      * @var PaymentPageSettings
@@ -45,7 +45,7 @@ class PaymentPageSettingsService
     /**
      * @var UnzerFactory
      */
-    private UnzerFactory $unzerFactory;
+    protected UnzerFactory $unzerFactory;
 
     /**
      * @param PaymentPageSettingsRepositoryInterface $repository
