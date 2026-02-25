@@ -5,7 +5,7 @@ namespace Unzer\Core\Tests\BusinessLogic\Domain\PaymentPageSettings\Services;
 use Exception;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\DomainUrls;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\UploadedFile;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
@@ -166,7 +166,7 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
     {
         // arrange
         $settings = new PaymentPageSettingsModel(
-            new UploadedFile('https://www.test.com/'),
+            new UploadedFile('https://example.com/image.jpg'),
             new UploadedFile(null),
             new UploadedFile(null),
             TranslationCollection::fromArray([
@@ -246,14 +246,84 @@ class PaymentPageSettingsServiceTest extends BaseTestCase
      *
      * @throws InvalidTranslatableArrayException
      */
-    public function testInvalidFileUrl(): void
+    public function testInvalidImageUrl(): void
     {
-        $this->expectException(InvalidUrlException::class);
+        $this->expectException(InvalidImageUrlException::class);
         $this->expectExceptionMessage('Url is not valid');
 
         // arrange
         $settings = new PaymentPageSettingsModel(
             new UploadedFile('test.com'),
+            new UploadedFile(null, null),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
+        );
+
+        // act
+        StoreContext::doWithStore(
+            '1',
+            [$this->service, 'savePaymentPageSettings'],
+            [$settings]
+        );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     */
+    public function testInvalidScheme(): void
+    {
+        $this->expectException(InvalidImageUrlException::class);
+        $this->expectExceptionMessage('Only HTTP and HTTPS URLs are allowed.');
+
+        // arrange
+        $settings = new PaymentPageSettingsModel(
+            new UploadedFile('hps://example.com/image.jpg'),
+            new UploadedFile(null, null),
+            new UploadedFile(null, null),
+            TranslationCollection::fromArray([
+                ['locale' => 'default', 'value' => 'shop'],
+                ['locale' => 'en_us', 'value' => 'shop']
+            ]),
+            new DomainUrls('https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/',
+                'https://www.test.com/'
+            ),
+        );
+
+        // act
+        StoreContext::doWithStore(
+            '1',
+            [$this->service, 'savePaymentPageSettings'],
+            [$settings]
+        );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws InvalidTranslatableArrayException
+     */
+    public function testInvalidImageFormat(): void
+    {
+        $this->expectException(InvalidImageUrlException::class);
+        $this->expectExceptionMessage('The URL must point to a valid image file (JPG, PNG, WEBP, SVG or GIF).');
+
+        // arrange
+        $settings = new PaymentPageSettingsModel(
+            new UploadedFile('https://example.com/image'),
             new UploadedFile(null, null),
             new UploadedFile(null, null),
             TranslationCollection::fromArray([

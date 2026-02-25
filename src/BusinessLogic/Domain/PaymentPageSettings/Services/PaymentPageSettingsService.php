@@ -4,7 +4,7 @@ namespace Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\Uploader\UploaderService;
-use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidUrlException;
+use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Exceptions\InvalidImageUrlException;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Models\PaymentPageSettings;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
@@ -67,7 +67,7 @@ class PaymentPageSettingsService
      *
      * @return PaymentPageSettings
      *
-     * @throws InvalidUrlException
+     * @throws InvalidImageUrlException
      */
     public function savePaymentPageSettings(PaymentPageSettings $paymentPageSettings): PaymentPageSettings
     {
@@ -181,7 +181,7 @@ class PaymentPageSettingsService
      *
      * @return void
      *
-     * @throws InvalidUrlException
+     * @throws InvalidImageUrlException
      */
     protected function validateImageUrl(?string $url): void
     {
@@ -190,8 +190,33 @@ class PaymentPageSettingsService
         }
 
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new InvalidUrlException(
+            throw new InvalidImageUrlException(
                 new TranslatableLabel('Url is not valid.', 'designPage.invalidUrl')
+            );
+        }
+
+        $parsed = parse_url($url);
+
+        if (!in_array($parsed['scheme'] ?? '', ['http', 'https'], true)) {
+            throw new InvalidImageUrlException(
+                new TranslatableLabel(
+                    'Only HTTP and HTTPS URLs are allowed.',
+                    'designPage.invalidScheme'
+                )
+            );
+        }
+
+        $path = $parsed['path'] ?? '';
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif'];
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw new InvalidImageUrlException(
+                new TranslatableLabel(
+                    'The URL must point to a valid image file (JPG, PNG, WEBP, SVG or GIF).',
+                    'designPage.invalidImageFormat'
+                )
             );
         }
     }
@@ -205,7 +230,7 @@ class PaymentPageSettingsService
         $basket->setTotalValueGross(self::AMOUNT);
 
         $basket->addBasketItem($this->createMockBasketItem('Item 1', 'testItem1', self::AMOUNT - 40, 0));
-        $basket->addBasketItem($this->createMockBasketItem('Item 2', 'testItem2', 40 , 0));
+        $basket->addBasketItem($this->createMockBasketItem('Item 2', 'testItem2', 40, 0));
 
         return $basket;
     }
