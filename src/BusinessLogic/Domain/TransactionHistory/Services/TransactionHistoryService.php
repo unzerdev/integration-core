@@ -47,6 +47,7 @@ class TransactionHistoryService
 
     /**
      * @return string[]
+     * @throws \DateInvalidOperationException
      */
     public function getOrderIdsForSynchronization(): array
     {
