@@ -10,10 +10,11 @@
     "start-static": "webpack serve --mode development --config webpack.static.config.js --open"
   },
   "devDependencies": {
+    "compression": "^1.8.1",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "dotenv": "^16.0.3",
-    "eslint": "^8.39.0",
+    "eslint": "^9",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.1",
     "mini-css-extract-plugin": "^2.7.5",
@@ -24,8 +25,7 @@
     "style-loader": "^3.3.2",
     "webpack": "^5.81.0",
     "webpack-cli": "^5.0.2",
-    "webpack-dev-server": "^5.2.2",
-    "compression": "^1.8.1"
+    "webpack-dev-server": "^5.2.2"
   },
   "resolutions": {
     "node-forge": "^1.3.2",
