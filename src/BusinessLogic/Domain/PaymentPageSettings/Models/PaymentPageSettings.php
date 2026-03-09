@@ -186,7 +186,7 @@ class PaymentPageSettings
             ->setFavicon($this->favicon->getUrl());
 
         if($this->urls->hasAny()) {
-            $urls = new Urls();
+            $urls = $paypage->getUrls() ?? new Urls();
             $urls->setHelp($this->urls->getHelpUrl())
                 ->setContact($this->urls->getContactUrl())
                 ->setTermsAndCondition($this->urls->getTermsAndConditions())
