@@ -196,8 +196,9 @@ class PaymentPageService
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
+     * @throws InvalidAmountsException
      */
-    private function buildResources(PaymentPageCreateContext $context) : Resources
+    protected function buildResources(PaymentPageCreateContext $context) : Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
@@ -205,8 +206,12 @@ class PaymentPageService
         }
 
         $basket = $this->basketFactory->create($context);
-        if($basket !== null) {
-            $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
+        if ($basket !== null) {
+            try {
+                $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
+            } catch (UnzerApiException $e) {
+                $basket = null;
+            }
         }
 
         $metaData = $this->metadataProvider->get($context);

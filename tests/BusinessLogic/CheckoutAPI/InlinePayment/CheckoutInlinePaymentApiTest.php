@@ -27,6 +27,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorInterface;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorRegistry;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
@@ -104,6 +105,7 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
                 TestServiceRegister::getService(InlinePaymentFactory::class),
                 TestServiceRegister::getService(CustomerFactory::class),
                 TestServiceRegister::getService(MetadataProvider::class),
+                TestServiceRegister::getService(BasketFactory::class),
             );
         },
         );
@@ -301,6 +303,126 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
         self::assertTransactionHistory(
             new TransactionHistory(PaymentMethodTypes::IDEAL, 'test-order-123', 'EUR')
         );
+    }
+
+    public function testChargePaymentPassesBasket(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $request = new InlinePaymentCreateRequest(
+            PaymentMethodTypes::IDEAL,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($request);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        $chargeHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge');
+        self::assertNotEmpty($chargeHistory);
+        self::assertNotNull($chargeHistory[0]['basket']);
+
+        $basketHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createBasket');
+        self::assertNotEmpty($basketHistory);
+
+        $fetchBasketHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchBasket');
+        self::assertNotEmpty($fetchBasketHistory);
+    }
+
+    public function testAuthorizePaymentPassesBasket(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $this->paymentMethodService->setMockPaymentMethod(
+            new PaymentMethodConfig(
+                PaymentMethodTypes::EPS,
+                true,
+                BookingMethod::authorize(),
+                true
+            )
+        );
+
+        $request = new InlinePaymentCreateRequest(
+            PaymentMethodTypes::EPS,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($request);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        $authHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performAuthorization');
+        self::assertNotEmpty($authHistory);
+        self::assertNotNull($authHistory[0]['basket']);
+
+        $basketHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createBasket');
+        self::assertNotEmpty($basketHistory);
+
+        $fetchBasketHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchBasket');
+        self::assertNotEmpty($fetchBasketHistory);
+    }
+
+    public function testChargePaymentSkipsBasketWhenDisabled(): void
+    {
+        // Arrange — EPS has sendBasketData=false in setMockPaymentMethods
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+
+        $this->paymentMethodService->setMockPaymentMethod(
+            new PaymentMethodConfig(
+                PaymentMethodTypes::IDEAL,
+                true,
+                BookingMethod::charge(),
+                false
+            )
+        );
+
+        $request = new InlinePaymentCreateRequest(
+            PaymentMethodTypes::IDEAL,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($request);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        $chargeHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge');
+        self::assertNotEmpty($chargeHistory);
+        self::assertNull($chargeHistory[0]['basket']);
+
+        $basketHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createBasket');
+        self::assertEmpty($basketHistory);
     }
 
     private static function assertTransactionHistory(TransactionHistory $expected): void

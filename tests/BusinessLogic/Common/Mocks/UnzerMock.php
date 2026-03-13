@@ -36,6 +36,7 @@ class UnzerMock extends Unzer
      */
     private array $webhooks = [];
     private ?array $payPageData = [];
+    private bool $throwOnCreateBasket = false;
 
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
@@ -176,11 +177,29 @@ class UnzerMock extends Unzer
         return $customer;
     }
 
+    public function setThrowOnCreateBasket(bool $throw): void
+    {
+        $this->throwOnCreateBasket = $throw;
+    }
+
     public function createBasket(Basket $basket): Basket
     {
         $this->callHistory['createBasket'][] = ['basket' => $this->basket];
 
+        if ($this->throwOnCreateBasket) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Basket creation failed');
+        }
+
+        $basket->setId($basket->getId() ?? 's-bsk-mock');
+
         return $basket;
+    }
+
+    public function fetchBasket($basket): Basket
+    {
+        $this->callHistory['fetchBasket'][] = ['basketId' => $basket];
+
+        return $this->basket ?? new Basket();
     }
 
     public function createMetadata(Metadata $metadata): Metadata

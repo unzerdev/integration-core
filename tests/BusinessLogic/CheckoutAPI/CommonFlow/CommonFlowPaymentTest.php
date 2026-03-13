@@ -28,10 +28,10 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Processors\InlinePaymentProcessorInterface;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Services\InlinePaymentService;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -110,6 +110,7 @@ class CommonFlowPaymentTest extends BaseTestCase
                 TestServiceRegister::getService(InlinePaymentFactory::class),
                 TestServiceRegister::getService(CustomerFactory::class),
                 TestServiceRegister::getService(MetadataProvider::class),
+                TestServiceRegister::getService(BasketFactory::class),
             );
         },
         );

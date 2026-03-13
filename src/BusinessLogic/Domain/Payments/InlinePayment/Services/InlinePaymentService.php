@@ -13,6 +13,7 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Exceptions\BookingMethodNotSupportedException;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePaymentCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Strategy\InlinePaymentStrategyFactory;
@@ -37,6 +38,7 @@ class InlinePaymentService
     private InlinePaymentFactory $inlinePaymentFactory;
     private CustomerFactory $customerFactory;
     private MetadataProvider $metadataProvider;
+    private BasketFactory $basketFactory;
 
     /**
      * PaymentPageService constructor.
@@ -48,6 +50,7 @@ class InlinePaymentService
      * @param InlinePaymentFactory $inlinePaymentFactory
      * @param CustomerFactory $customerFactory
      * @param MetadataProvider $metadataProvider
+     * @param BasketFactory $basketFactory
      */
     public function __construct(
         UnzerFactory $unzerFactory,
@@ -56,7 +59,8 @@ class InlinePaymentService
         TransactionHistoryService $transactionHistoryService,
         InlinePaymentFactory $inlinePaymentFactory,
         CustomerFactory $customerFactory,
-        MetadataProvider $metadataProvider
+        MetadataProvider $metadataProvider,
+        BasketFactory $basketFactory
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->inlinePaymentStrategyFactory = $inlinePaymentStrategyFactory;
@@ -65,6 +69,7 @@ class InlinePaymentService
         $this->inlinePaymentFactory = $inlinePaymentFactory;
         $this->customerFactory = $customerFactory;
         $this->metadataProvider = $metadataProvider;
+        $this->basketFactory = $basketFactory;
     }
 
     /**
@@ -151,16 +156,31 @@ class InlinePaymentService
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
+     * @throws InvalidAmountsException
      */
-    private function buildResources(InlinePaymentCreateContext $context): Resources
+    protected function buildResources(InlinePaymentCreateContext $context): Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
             $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
         }
+
+        $basket = $this->basketFactory->create($context);
+        if ($basket !== null) {
+            try {
+                $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
+            } catch (UnzerApiException $e) {
+                $basket = null;
+            }
+        }
+
         $metadata = $this->metadataProvider->get($context);
         $metadata = $this->unzerFactory->makeUnzerAPI()->createMetadata($metadata);
 
-        return new Resources($customer !== null ? $customer->getId() : null, null, $metadata->getId());
+        return new Resources(
+            $customer !== null ? $customer->getId() : null,
+            $basket !== null ? $basket->getId() : null,
+            $metadata->getId()
+        );
     }
 }
