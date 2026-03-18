@@ -41,6 +41,8 @@ class PaymentPageSettingsPutResponse extends Response
             'linkColor' => $this->paymentPageSettings->getLinkColor(),
             'backgroundColor' => $this->paymentPageSettings->getBackgroundColor(),
             'footerColor' => $this->paymentPageSettings->getFooterColor(),
+            'paymentFormBackgroundColor' => $this->paymentPageSettings->getPaymentFormBackgroundColor(),
+            'basketBackgroundColor' => $this->paymentPageSettings->getBasketBackgroundColor(),
             'font' => $this->paymentPageSettings->getFont(),
             'shadows' => $this->paymentPageSettings->getShadows(),
             'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
@@ -51,6 +53,7 @@ class PaymentPageSettingsPutResponse extends Response
             'termsAndConditions' => $this->paymentPageSettings->getUrls()->getTermsAndConditions(),
             'privacyPolicy' => $this->paymentPageSettings->getUrls()->getPrivacyPolicy(),
             'imprint' => $this->paymentPageSettings->getUrls()->getImprint(),
+            'subscriptionAgreement' => $this->paymentPageSettings->getUrls()->getSubscriptionAgreement(),
         ];
     }
 }
