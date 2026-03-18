@@ -69,7 +69,8 @@ class PaymentPageSettings extends Entity
                 $paypageData['contactUrl'] ?? null,
                 $paypageData['termsAndConditions'] ?? null,
                 $paypageData['privacyPolicy'] ?? null,
-                $paypageData['imprint'] ?? null
+                $paypageData['imprint'] ?? null,
+                $paypageData['subscriptionAgreement'] ?? null
             ),
             $paypageData['headerColor'] ?? null,
             $paypageData['brandColor'] ?? null,
@@ -77,6 +78,8 @@ class PaymentPageSettings extends Entity
             $paypageData['linkColor'] ?? null,
             $paypageData['backgroundColor'] ?? null,
             $paypageData['footerColor'] ?? null,
+            $paypageData['paymentFormBackgroundColor'] ?? null,
+            $paypageData['basketBackgroundColor'] ?? null,
             $paypageData['font'] ?? null,
             $paypageData['shadows'] ?? null,
             $paypageData['hideUnzerLogo'] ?? null,
@@ -103,6 +106,8 @@ class PaymentPageSettings extends Entity
             'linkColor' => $this->paymentPageSettings->getLinkColor(),
             'backgroundColor' => $this->paymentPageSettings->getBackgroundColor(),
             'footerColor' => $this->paymentPageSettings->getFooterColor(),
+            'paymentFormBackgroundColor' => $this->paymentPageSettings->getPaymentFormBackgroundColor(),
+            'basketBackgroundColor' => $this->paymentPageSettings->getBasketBackgroundColor(),
             'font' => $this->paymentPageSettings->getFont(),
             'shadows' => $this->paymentPageSettings->getShadows(),
             'hideUnzerLogo' => $this->paymentPageSettings->getHideUnzerLogo(),
@@ -113,6 +118,7 @@ class PaymentPageSettings extends Entity
             'termsAndConditions' => $this->paymentPageSettings->getUrls()->getTermsAndConditions(),
             'privacyPolicy' => $this->paymentPageSettings->getUrls()->getPrivacyPolicy(),
             'imprint' => $this->paymentPageSettings->getUrls()->getImprint(),
+            'subscriptionAgreement' => $this->paymentPageSettings->getUrls()->getSubscriptionAgreement(),
         ];
 
         return $data;

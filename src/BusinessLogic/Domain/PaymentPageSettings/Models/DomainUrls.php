@@ -33,11 +33,17 @@ class DomainUrls
     private ?string $imprint = null;
 
     /**
+     * @var null|string
+     */
+    private ?string $subscriptionAgreement = null;
+
+    /**
      * @param string|null $helpUrl
      * @param string|null $contactUrl
      * @param string|null $termsAndConditions
      * @param string|null $privacyPolicy
      * @param string|null $imprint
+     * @param string|null $subscriptionAgreement
      *
      * @throws InvalidUrlException
      */
@@ -46,19 +52,22 @@ class DomainUrls
         ?string $contactUrl = null,
         ?string $termsAndConditions = null,
         ?string $privacyPolicy = null,
-        ?string $imprint = null
+        ?string $imprint = null,
+        ?string $subscriptionAgreement = null
     ) {
         $this->validateUrl($helpUrl);
         $this->validateUrl($contactUrl);
         $this->validateUrl($termsAndConditions);
         $this->validateUrl($privacyPolicy);
         $this->validateUrl($imprint);
+        $this->validateUrl($subscriptionAgreement);
 
         $this->helpUrl = $helpUrl;
         $this->contactUrl = $contactUrl;
         $this->termsAndConditions = $termsAndConditions;
         $this->privacyPolicy = $privacyPolicy;
         $this->imprint = $imprint;
+        $this->subscriptionAgreement = $subscriptionAgreement;
     }
 
     /**
@@ -102,12 +111,21 @@ class DomainUrls
     }
 
     /**
+     * @return string|null
+     */
+    public function getSubscriptionAgreement(): ?string
+    {
+        return $this->subscriptionAgreement;
+    }
+
+    /**
      * @return bool
      */
     public function hasAny(): bool
     {
         return !empty($this->helpUrl) || !empty($this->contactUrl)
-            || !empty($this->termsAndConditions) || !empty($this->privacyPolicy) || !empty($this->imprint);
+            || !empty($this->termsAndConditions) || !empty($this->privacyPolicy) || !empty($this->imprint)
+            || !empty($this->subscriptionAgreement);
     }
 
     /**

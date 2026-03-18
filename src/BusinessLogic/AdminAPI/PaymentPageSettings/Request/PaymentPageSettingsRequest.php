@@ -83,6 +83,16 @@ class PaymentPageSettingsRequest
     private ?string $footerColor;
 
     /**
+     * @var null|string $paymentFormBackgroundColor
+     */
+    private ?string $paymentFormBackgroundColor;
+
+    /**
+     * @var null|string $basketBackgroundColor
+     */
+    private ?string $basketBackgroundColor;
+
+    /**
      * @var null|string $font
      */
     private ?string $font;
@@ -132,6 +142,11 @@ class PaymentPageSettingsRequest
      */
     private ?string $imprint = null;
 
+    /**
+     * @var null|string
+     */
+    private ?string $subscriptionAgreement = null;
+
     private string $paypageType;
 
     /**
@@ -148,6 +163,8 @@ class PaymentPageSettingsRequest
      * @param string|null $linkColor
      * @param string|null $backgroundColor
      * @param string|null $footerColor
+     * @param string|null $paymentFormBackgroundColor
+     * @param string|null $basketBackgroundColor
      * @param string|null $font
      * @param bool|null $shadows
      * @param bool|null $hideUnzerLogo
@@ -158,6 +175,7 @@ class PaymentPageSettingsRequest
      * @param string|null $termsAndConditions
      * @param string|null $privacyPolicy
      * @param string|null $imprint
+     * @param string|null $subscriptionAgreement
      * @param string|null $paypageType
      */
     public function __construct(
@@ -174,6 +192,8 @@ class PaymentPageSettingsRequest
         ?string $linkColor = null,
         ?string $backgroundColor = null,
         ?string $footerColor = null,
+        ?string $paymentFormBackgroundColor = null,
+        ?string $basketBackgroundColor = null,
         ?string $font = null,
         ?bool $shadows = false,
         ?bool $hideUnzerLogo = false,
@@ -184,6 +204,7 @@ class PaymentPageSettingsRequest
         ?string $termsAndConditions = null,
         ?string $privacyPolicy = null,
         ?string $imprint = null,
+        ?string $subscriptionAgreement = null,
         ?string $paypageType = PaymentPageType::EMBEDDED
     ) {
         $this->shopNames = $shopNames;
@@ -199,6 +220,8 @@ class PaymentPageSettingsRequest
         $this->linkColor = $linkColor;
         $this->backgroundColor = $backgroundColor;
         $this->footerColor = $footerColor;
+        $this->paymentFormBackgroundColor = $paymentFormBackgroundColor;
+        $this->basketBackgroundColor = $basketBackgroundColor;
         $this->font = $font;
         $this->shadows = $shadows;
         $this->hideUnzerLogo = $hideUnzerLogo;
@@ -209,6 +232,7 @@ class PaymentPageSettingsRequest
         $this->termsAndConditions = $termsAndConditions;
         $this->privacyPolicy = $privacyPolicy;
         $this->imprint = $imprint;
+        $this->subscriptionAgreement = $subscriptionAgreement;
         $this->paypageType = $paypageType;
     }
 
@@ -228,13 +252,15 @@ class PaymentPageSettingsRequest
             new UploadedFile($this->faviconImageUrl, $this->faviconFile),
             $this->shopNames,
             new DomainUrls($this->helpUrl, $this->contactUrl, $this->termsAndConditions, $this->privacyPolicy,
-                $this->imprint),
+                $this->imprint, $this->subscriptionAgreement),
             $this->headerColor,
             $this->brandColor,
             $this->textColor,
             $this->linkColor,
             $this->backgroundColor,
             $this->footerColor,
+            $this->paymentFormBackgroundColor,
+            $this->basketBackgroundColor,
             $this->font,
             $this->shadows,
             $this->hideUnzerLogo,
