@@ -95,7 +95,7 @@ class OrderManagementService
             $amount = $transactionHistory->getTotalAmount();
         }
 
-        if (in_array($transactionHistory->getType() ,PaymentMethodTypes::UPL_TYPES)) {
+        if (in_array($transactionHistory->getType(), PaymentMethodTypes::UPL_TYPES)) {
             $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId);
 
             return;
@@ -164,11 +164,24 @@ class OrderManagementService
     }
 
     /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function refundOrderByPayment(TransactionHistory $transactionHistory, Amount $refundAmount)
+    {
+        $paymentId = $transactionHistory->collection()->last()->getPaymentId();
+        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
+            $paymentId,
+            new Cancellation($refundAmount->getPriceInCurrencyUnits())
+        );
+    }
+
+    /**
      * @param TransactionHistory $transactionHistory
      *
      * @return bool
      */
-    private function isTransactionHistoryValid(TransactionHistory $transactionHistory): bool
+    protected function isTransactionHistoryValid(TransactionHistory $transactionHistory): bool
     {
         return $transactionHistory->getChargedAmount() &&
             $transactionHistory->getCancelledAmount() &&
@@ -183,7 +196,7 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
+    protected function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
     {
         if ($amountToCharge === null) {
             return true;
@@ -203,7 +216,7 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
+    protected function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
     {
         if ($amount === null) {
             return true;
@@ -222,25 +235,12 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
+    protected function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
     {
         return $this->isTransactionHistoryValid($transactionHistory) &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
-    }
-
-    /**
-     * @throws UnzerApiException
-     * @throws ConnectionSettingsNotFoundException
-     */
-    public function refundOrderByPayment(TransactionHistory $transactionHistory, Amount $refundAmount)
-    {
-        $paymentId = $transactionHistory->collection()->last()->getPaymentId();
-        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
-            $paymentId,
-            new Cancellation($refundAmount->getPriceInCurrencyUnits())
-        );
     }
 }
