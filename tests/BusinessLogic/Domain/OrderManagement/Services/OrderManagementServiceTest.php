@@ -73,11 +73,12 @@ class OrderManagementServiceTest extends BaseTestCase
         // act
         StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
-                Amount::fromFloat(1.1, Currency::getDefault())
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                'test-reference'
             ]
         );
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -147,7 +148,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -244,7 +245,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -343,7 +344,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -439,7 +440,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -535,7 +536,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -567,7 +568,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -599,15 +600,19 @@ class OrderManagementServiceTest extends BaseTestCase
         // act
         StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
-                Amount::fromFloat(10, Currency::getDefault())
+                Amount::fromFloat(10, Currency::getDefault()),
+                'charge-ref-123'
             ]
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('chargeAuthorization');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
-        self::assertEquals(10.0, $methodCallHistory[0]['amount']);
+        /** @var \UnzerSDK\Resources\TransactionTypes\Charge $charge */
+        $charge = $methodCallHistory[0]['charge'];
+        self::assertEquals(10.0, $charge->getAmount());
+        self::assertEquals('charge-ref-123', $charge->getPaymentReference());
     }
 
     /**

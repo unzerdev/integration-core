@@ -15,10 +15,11 @@ class OrderManagementServiceMock extends OrderManagementService
     /**
      * @param string $orderId
      * @param ?Amount $chargeAmount
+     * @param string|null $reference
      *
      * @return void
      */
-    public function chargeOrder(string $orderId, ?Amount $chargeAmount): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
     {
     }
 

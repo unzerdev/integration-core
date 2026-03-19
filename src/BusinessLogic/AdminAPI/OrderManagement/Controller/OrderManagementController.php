@@ -61,7 +61,11 @@ class OrderManagementController
      */
     public function charge(ChargeRequest $chargeRequest): ChargeResponse
     {
-        $this->orderManagementService->chargeOrder($chargeRequest->getOrderId(), $chargeRequest->getAmount());
+        $this->orderManagementService->chargeOrder(
+            $chargeRequest->getOrderId(),
+            $chargeRequest->getAmount(),
+            $chargeRequest->getReference()
+        );
 
         return new ChargeResponse();
     }

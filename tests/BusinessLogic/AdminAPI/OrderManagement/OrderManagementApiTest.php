@@ -58,7 +58,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
     public function testChargeSuccess(): void
     {
@@ -66,9 +65,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->charge(
-            new ChargeRequest('orderId',
-                Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
 
@@ -81,7 +78,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
     public function testChargeToArray(): void
     {
@@ -89,8 +85,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->charge(
-            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -101,7 +96,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      * @throws CurrencyMismatchException
      * */
@@ -142,7 +136,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testCancellationSuccess(): void
@@ -163,7 +156,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testCancellationToArray(): void

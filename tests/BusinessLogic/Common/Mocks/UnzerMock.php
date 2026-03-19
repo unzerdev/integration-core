@@ -238,6 +238,22 @@ class UnzerMock extends Unzer
 
     /**
      * @param $payment
+     * @param Charge $charge
+     *
+     * @return Charge
+     */
+    public function performChargeOnPayment($payment, Charge $charge): Charge
+    {
+        $this->callHistory['performChargeOnPayment'][] = [
+            'payment' => $payment,
+            'charge' => $charge
+        ];
+
+        return $charge;
+    }
+
+    /**
+     * @param $payment
      * @param float|null $amount
      *
      * @return Cancellation

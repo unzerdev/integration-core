@@ -14,6 +14,7 @@ use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
+use UnzerSDK\Resources\TransactionTypes\Charge;
 
 /**
  * Class OrderManagementService.
@@ -41,13 +42,14 @@ class OrderManagementService
     /**
      * @param string $orderId
      * @param ?Amount $chargeAmount
+     * @param string|null $reference
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function chargeOrder(string $orderId, ?Amount $chargeAmount): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
@@ -67,10 +69,13 @@ class OrderManagementService
             return;
         }
 
-        $this->unzerFactory->makeUnzerAPI()->chargeAuthorization(
+        $charge = new Charge($chargeAmount->getPriceInCurrencyUnits(), $chargeAmount->getCurrency()->getIsoCode());
+        $charge->setOrderId($transactionHistory->getOrderId());
+        $charge->setPaymentReference($reference);
+
+        $this->unzerFactory->makeUnzerAPI()->performChargeOnPayment(
             $authorizedItem->getPaymentId(),
-            $chargeAmount->getPriceInCurrencyUnits(),
-            $transactionHistory->getOrderId()
+            $charge
         );
     }
 

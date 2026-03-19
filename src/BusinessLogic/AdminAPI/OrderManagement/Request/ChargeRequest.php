@@ -23,13 +23,20 @@ class ChargeRequest extends Request
     private ?Amount $amount;
 
     /**
+     * @var string|null $reference
+     */
+    private ?string $reference;
+
+    /**
      * @param string $orderId
      * @param ?Amount $amount
+     * @param string|null $reference
      */
-    public function __construct(string $orderId, ?Amount $amount = null)
+    public function __construct(string $orderId, ?Amount $amount = null, ?string $reference = null)
     {
         $this->orderId = $orderId;
         $this->amount = $amount;
+        $this->reference = $reference;
     }
 
     /**
@@ -46,5 +53,13 @@ class ChargeRequest extends Request
     public function getAmount(): ?Amount
     {
         return $this->amount;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReference(): ?string
+    {
+        return $this->reference;
     }
 }
