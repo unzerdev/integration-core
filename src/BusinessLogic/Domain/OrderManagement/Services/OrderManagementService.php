@@ -82,26 +82,32 @@ class OrderManagementService
     /**
      * @param string $orderId
      * @param Amount|null $amount
+     * @param string|null $reference
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function cancelOrder(string $orderId, ?Amount $amount = null): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
+
         if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
             return;
         }
+
         if ($amount === null) {
             $amount = $transactionHistory->getTotalAmount();
         }
 
         if (in_array($transactionHistory->getType(), PaymentMethodTypes::UPL_TYPES)) {
-            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId);
+            $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
+            $cancellation->setPaymentReference($reference);
+
+            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId, $cancellation);
 
             return;
         }
@@ -112,9 +118,12 @@ class OrderManagementService
             return;
         }
 
-        $this->unzerFactory->makeUnzerAPI()->cancelAuthorizationByPayment(
+        $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
+        $cancellation->setPaymentReference($reference);
+
+        $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment(
             $authorizedItem->getPaymentId(),
-            $amount->getPriceInCurrencyUnits()
+            $cancellation
         );
     }
 

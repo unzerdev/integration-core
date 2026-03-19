@@ -94,10 +94,10 @@ class OrderManagementServiceTest extends BaseTestCase
         StoreContext::doWithStore(
             '1',
             [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-reference']
         );
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -182,7 +182,7 @@ class OrderManagementServiceTest extends BaseTestCase
         ]);
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -280,7 +280,7 @@ class OrderManagementServiceTest extends BaseTestCase
         ]);
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -376,7 +376,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -408,7 +408,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -472,7 +472,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -643,7 +643,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -675,7 +675,7 @@ class OrderManagementServiceTest extends BaseTestCase
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -712,13 +712,15 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], ['orderId', null]);
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], ['orderId', null, null]);
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
-        self::assertEquals(100.0, $methodCallHistory[0]['amount']);
+        /** @var Cancellation $cancellation */
+        $cancellation = $methodCallHistory[0]['cancellation'];
+        self::assertEquals(100.0, $cancellation->getAmount());
     }
 
     public function testCancellationAmountNullNoAuthorizedItem(): void
@@ -740,7 +742,7 @@ class OrderManagementServiceTest extends BaseTestCase
         StoreContext::doWithStore('1', [$this->orderManagementService, 'cancelOrder'], ['orderId', null]);
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertEmpty($methodCallHistory);
     }
 
@@ -774,14 +776,17 @@ class OrderManagementServiceTest extends BaseTestCase
         StoreContext::doWithStore(
             '1',
             [$this->orderManagementService, 'cancelOrder'],
-            ['orderId', Amount::fromFloat(1.1, Currency::getDefault())]
+            ['orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'cancel-ref-123']
         );
 
         // assert
-        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizationByPayment');
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment');
         self::assertNotEmpty($methodCallHistory);
         self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
-        self::assertEquals(1.1, $methodCallHistory[0]['amount']);
+        /** @var Cancellation $cancellation */
+        $cancellation = $methodCallHistory[0]['cancellation'];
+        self::assertEquals(1.1, $cancellation->getAmount());
+        self::assertEquals('cancel-ref-123', $cancellation->getPaymentReference());
     }
 
     /**

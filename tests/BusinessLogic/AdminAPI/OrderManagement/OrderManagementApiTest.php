@@ -11,7 +11,6 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -144,8 +143,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->cancel(
-            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -164,8 +162,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->cancel(
-            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
