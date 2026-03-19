@@ -116,13 +116,14 @@ class OrderManagementService
     /**
      * @param string $orderId
      * @param Amount $refundAmount
+     * @param string|null $reference
      *
      * @return void
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
      * @throws UnzerApiException
      */
-    public function refundOrder(string $orderId, Amount $refundAmount): void
+    public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
@@ -133,7 +134,7 @@ class OrderManagementService
         }
 
         if (in_array($transactionHistory->getType(), RefundViaPayment::REFUND_VIA_PAYMENT, true)) {
-            $this->refundOrderByPayment($transactionHistory, $refundAmount);
+            $this->refundOrderByPayment($transactionHistory, $refundAmount, $reference);
 
             return;
         }
@@ -146,7 +147,9 @@ class OrderManagementService
                 $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                     $chargeItem->getPaymentId(),
                     $chargeItem->getId(),
-                    $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits()
+                    $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits(),
+                    null,
+                    $reference
                 );
                 $refundAmount = $refundAmount->minus($chargeItem->getRefundableAmount());
 
@@ -156,7 +159,9 @@ class OrderManagementService
             $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                 $chargeItem->getPaymentId(),
                 $chargeItem->getId(),
-                $refundAmount->getPriceInCurrencyUnits()
+                $refundAmount->getPriceInCurrencyUnits(),
+                null,
+                $reference
             );
 
             break;
@@ -167,12 +172,18 @@ class OrderManagementService
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
      */
-    public function refundOrderByPayment(TransactionHistory $transactionHistory, Amount $refundAmount)
-    {
+    public function refundOrderByPayment(
+        TransactionHistory $transactionHistory,
+        Amount $refundAmount,
+        ?string $reference = null
+    ) {
         $paymentId = $transactionHistory->collection()->last()->getPaymentId();
+        $cancellation = new Cancellation($refundAmount->getPriceInCurrencyUnits());
+        $cancellation->setPaymentReference($reference);
+
         $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
             $paymentId,
-            new Cancellation($refundAmount->getPriceInCurrencyUnits())
+            $cancellation
         );
     }
 

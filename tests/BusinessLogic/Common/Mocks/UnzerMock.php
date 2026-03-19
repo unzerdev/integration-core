@@ -309,7 +309,8 @@ class UnzerMock extends Unzer
         $this->callHistory['cancelChargeById'][] = [
             'payment' => $payment,
             'chargeId' => $chargeId,
-            'amount' => $amount
+            'amount' => $amount,
+            'referenceText' => $referenceText
         ];
 
         return new Cancellation();

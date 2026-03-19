@@ -42,7 +42,11 @@ class OrderManagementController
      */
     public function refund(RefundRequest $refundRequest): RefundResponse
     {
-        $this->orderManagementService->refundOrder($refundRequest->getOrderId(), $refundRequest->getAmount());
+        $this->orderManagementService->refundOrder(
+            $refundRequest->getOrderId(),
+            $refundRequest->getAmount(),
+            $refundRequest->getReference()
+        );
 
         return new RefundResponse();
     }

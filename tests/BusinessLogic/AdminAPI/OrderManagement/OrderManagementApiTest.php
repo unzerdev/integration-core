@@ -111,8 +111,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->refund(
-            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -124,7 +123,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testRefundToArray(): void
@@ -133,7 +131,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->refund(
-            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()))
+            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert

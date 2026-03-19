@@ -111,7 +111,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // act
         StoreContext::doWithStore('1', [$this->orderManagementService, 'refundOrder'], [
                 'orderId',
-                Amount::fromFloat(1.1, Currency::getDefault())
+                Amount::fromFloat(1.1, Currency::getDefault()),
+                'test-reference'
             ]
         );
         // assert
@@ -857,7 +858,8 @@ class OrderManagementServiceTest extends BaseTestCase
             [$this->orderManagementService, 'refundOrder'],
             [
                 'orderId',
-                Amount::fromFloat(30, Currency::getDefault())
+                Amount::fromFloat(30, Currency::getDefault()),
+                'refund-ref-123'
             ]
         );
 
@@ -867,6 +869,7 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertEquals('id', $methodCallHistory[0]['payment']);
         self::assertEquals('charge1', $methodCallHistory[0]['chargeId']);
         self::assertEquals(30, $methodCallHistory[0]['amount']);
+        self::assertEquals('refund-ref-123', $methodCallHistory[0]['referenceText']);
     }
 
     /**
@@ -903,7 +906,8 @@ class OrderManagementServiceTest extends BaseTestCase
             [$this->orderManagementService, 'refundOrder'],
             [
                 'orderId',
-                Amount::fromFloat(30, Currency::getDefault())
+                Amount::fromFloat(30, Currency::getDefault()),
+                'payment-ref-456'
             ]
         );
 
@@ -916,6 +920,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $cnl = $paymentCalls[0]['cancellation'];
         self::assertInstanceOf(Cancellation::class, $cnl);
         self::assertEquals(30.0, $cnl->getAmount());
+        self::assertEquals('payment-ref-456', $cnl->getPaymentReference());
     }
 
 
@@ -967,7 +972,8 @@ class OrderManagementServiceTest extends BaseTestCase
             [$this->orderManagementService, 'refundOrder'],
             [
                 'orderId',
-                Amount::fromFloat(30, Currency::getDefault())
+                Amount::fromFloat(30, Currency::getDefault()),
+                'multi-ref'
             ]
         );
 
@@ -977,18 +983,23 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertEquals('id', $methodCallHistory[0]['payment']);
         self::assertEquals('charge1', $methodCallHistory[0]['chargeId']);
         self::assertEquals(10, $methodCallHistory[0]['amount']);
+        self::assertEquals('multi-ref', $methodCallHistory[0]['referenceText']);
         self::assertEquals('id', $methodCallHistory[1]['payment']);
         self::assertEquals('charge2', $methodCallHistory[1]['chargeId']);
         self::assertEquals(5, $methodCallHistory[1]['amount']);
+        self::assertEquals('multi-ref', $methodCallHistory[1]['referenceText']);
         self::assertEquals('id', $methodCallHistory[2]['payment']);
         self::assertEquals('charge3', $methodCallHistory[2]['chargeId']);
         self::assertEquals(5, $methodCallHistory[2]['amount']);
+        self::assertEquals('multi-ref', $methodCallHistory[2]['referenceText']);
         self::assertEquals('id', $methodCallHistory[3]['payment']);
         self::assertEquals('charge4', $methodCallHistory[3]['chargeId']);
         self::assertEquals(7, $methodCallHistory[3]['amount']);
+        self::assertEquals('multi-ref', $methodCallHistory[3]['referenceText']);
         self::assertEquals('id', $methodCallHistory[4]['payment']);
         self::assertEquals('charge5', $methodCallHistory[4]['chargeId']);
         self::assertEquals(3, $methodCallHistory[4]['amount']);
+        self::assertEquals('multi-ref', $methodCallHistory[4]['referenceText']);
     }
 }
 
