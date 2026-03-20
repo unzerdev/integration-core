@@ -5,6 +5,8 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\OrderManagement;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\CancellationRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\ChargeRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\CustomerData;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\UpdateCustomerRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\RefundRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
@@ -163,6 +165,44 @@ class OrderManagementApiTest extends BaseTestCase
         // Act
         $response = AdminAPI::get()->order('1')->cancel(
             new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
+        );
+
+        // Assert
+        self::assertEquals([], $response->toArray());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function testUpdateCustomerSuccess(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->order('1')->updateCustomer(
+            new UpdateCustomerRequest('orderId', 's-cst-123', new CustomerData('John', 'Doe'))
+        );
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function testUpdateCustomerToArray(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->order('1')->updateCustomer(
+            new UpdateCustomerRequest('orderId', 's-cst-123', new CustomerData('John', 'Doe'))
         );
 
         // Assert

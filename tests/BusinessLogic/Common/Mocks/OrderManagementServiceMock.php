@@ -4,6 +4,7 @@ namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
+use UnzerSDK\Resources\Customer;
 
 /**
  * Class OrderManagementServiceMock.
@@ -42,6 +43,16 @@ class OrderManagementServiceMock extends OrderManagementService
      * @return void
      */
     public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): void
+    {
+    }
+
+    /**
+     * @param string $orderId
+     * @param Customer $customer
+     *
+     * @return void
+     */
+    public function updateCustomer(string $orderId, Customer $customer): void
     {
     }
 }

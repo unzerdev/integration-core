@@ -19,6 +19,8 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionHistoryServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
+use UnzerSDK\Resources\Customer;
+use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
 
 /**
@@ -1010,6 +1012,165 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertEquals('charge5', $methodCallHistory[4]['chargeId']);
         self::assertEquals(3, $methodCallHistory[4]['amount']);
         self::assertEquals('multi-ref', $methodCallHistory[4]['referenceText']);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testUpdateCustomerWithCustomerId(): void
+    {
+        // arrange
+        $customer = new Customer();
+        $customer->setId('s-cst-123');
+        $customer->setFirstname('John');
+        $customer->setLastname('Doe');
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'updateCustomer'], [
+            'orderId',
+            $customer
+        ]);
+
+        // assert
+        $updateHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('updateCustomer');
+        self::assertNotEmpty($updateHistory);
+        self::assertEquals('s-cst-123', $updateHistory[0]['customer']->getId());
+        self::assertEquals('John', $updateHistory[0]['customer']->getFirstname());
+        self::assertEquals('Doe', $updateHistory[0]['customer']->getLastname());
+
+        $fetchHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
+        self::assertEmpty($fetchHistory);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testUpdateCustomerTransactionHistoryNotFound(): void
+    {
+        // arrange
+        $customer = new Customer();
+        $customer->setFirstname('John');
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'updateCustomer'], [
+            'orderId',
+            $customer
+        ]);
+
+        // assert
+        $updateHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('updateCustomer');
+        self::assertEmpty($updateHistory);
+
+        $fetchHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
+        self::assertEmpty($fetchHistory);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testUpdateCustomerFromPayment(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault())
+        );
+
+        $authorizedItem = new AuthorizeHistoryItem(
+            'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
+            'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
+        $transactionHistory->collection()->add($authorizedItem);
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        $existingCustomer = new Customer();
+        $existingCustomer->setId('s-cst-existing');
+        $existingCustomer->setFirstname('OldFirst');
+        $existingCustomer->setLastname('OldLast');
+        $existingCustomer->setEmail('old@example.com');
+
+        $payment = new Payment();
+        $ref = new \ReflectionProperty(Payment::class, 'customer');
+        $ref->setAccessible(true);
+        $ref->setValue($payment, $existingCustomer);
+        $this->unzerFactory->getMockUnzer()->setPayment($payment);
+
+        $updateCustomer = new Customer();
+        $updateCustomer->setFirstname('NewFirst');
+        $updateCustomer->setEmail('new@example.com');
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'updateCustomer'], [
+            'orderId',
+            $updateCustomer
+        ]);
+
+        // assert
+        $fetchHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('fetchPayment');
+        self::assertNotEmpty($fetchHistory);
+        self::assertEquals('orderId', $fetchHistory[0]['paymentId']);
+
+        $updateHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('updateCustomer');
+        self::assertNotEmpty($updateHistory);
+        /** @var Customer $updatedCustomer */
+        $updatedCustomer = $updateHistory[0]['customer'];
+        self::assertEquals('s-cst-existing', $updatedCustomer->getId());
+        self::assertEquals('NewFirst', $updatedCustomer->getFirstname());
+        self::assertEquals('OldLast', $updatedCustomer->getLastname());
+        self::assertEquals('new@example.com', $updatedCustomer->getEmail());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testUpdateCustomerNoCustomerOnPayment(): void
+    {
+        // arrange
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault())
+        );
+
+        $authorizedItem = new AuthorizeHistoryItem(
+            'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
+            'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId');
+        $transactionHistory->collection()->add($authorizedItem);
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        $payment = new Payment();
+        $this->unzerFactory->getMockUnzer()->setPayment($payment);
+
+        $customer = new Customer();
+        $customer->setFirstname('John');
+
+        // act
+        StoreContext::doWithStore('1', [$this->orderManagementService, 'updateCustomer'], [
+            'orderId',
+            $customer
+        ]);
+
+        // assert
+        $updateHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('updateCustomer');
+        self::assertEmpty($updateHistory);
     }
 }
 

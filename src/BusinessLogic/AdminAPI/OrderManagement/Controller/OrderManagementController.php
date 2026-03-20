@@ -4,10 +4,12 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Controller;
 
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\CancellationRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\ChargeRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\UpdateCustomerRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\RefundRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\CancellationResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\RefundResponse;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\UpdateCustomerResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
@@ -87,5 +89,20 @@ class OrderManagementController
         );
 
         return new CancellationResponse();
+    }
+
+    /**
+     * @param UpdateCustomerRequest $request
+     *
+     * @return UpdateCustomerResponse
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function updateCustomer(UpdateCustomerRequest $request): UpdateCustomerResponse
+    {
+        $this->orderManagementService->updateCustomer($request->getOrderId(), $request->toUnzerCustomer());
+
+        return new UpdateCustomerResponse();
     }
 }

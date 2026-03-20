@@ -367,6 +367,18 @@ class UnzerMock extends Unzer
     }
 
     /**
+     * @param Customer $customer
+     *
+     * @return Customer
+     */
+    public function updateCustomer(Customer $customer): Customer
+    {
+        $this->callHistory['updateCustomer'][] = ['customer' => $customer];
+
+        return $customer;
+    }
+
+    /**
      * @param BasePaymentType $paymentType
      *
      * @return BasePaymentType

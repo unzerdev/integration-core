@@ -13,6 +13,9 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHisto
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\Customer;
+use UnzerSDK\Resources\EmbeddedResources\Address;
+use UnzerSDK\Resources\EmbeddedResources\CompanyInfo;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
 use UnzerSDK\Resources\TransactionTypes\Charge;
 
@@ -199,6 +202,129 @@ class OrderManagementService
             $paymentId,
             $cancellation
         );
+    }
+
+    /**
+     * @param string $orderId
+     * @param Customer $customer
+     *
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function updateCustomer(string $orderId, Customer $customer): void
+    {
+        $unzer = $this->unzerFactory->makeUnzerAPI();
+
+        if ($customer->getId() !== null) {
+            $unzer->updateCustomer($customer);
+
+            return;
+        }
+
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+        if (!$transactionHistory) {
+            return;
+        }
+
+        $payment = $unzer->fetchPayment($transactionHistory->getOrderId());
+        $existingCustomer = $payment->getCustomer();
+        if (!$existingCustomer) {
+            return;
+        }
+
+        $this->applyCustomerData($existingCustomer, $customer);
+        $unzer->updateCustomer($existingCustomer);
+    }
+
+    /**
+     * @param Customer $existing
+     * @param Customer $updates
+     *
+     * @return void
+     */
+    protected function applyCustomerData(Customer $existing, Customer $updates): void
+    {
+        $existing->setFirstname($updates->getFirstname() ?? $existing->getFirstname());
+        $existing->setLastname($updates->getLastname() ?? $existing->getLastname());
+        $existing->setBirthDate($updates->getBirthDate() ?? $existing->getBirthDate());
+        $existing->setCompany($updates->getCompany() ?? $existing->getCompany());
+        $existing->setEmail($updates->getEmail() ?? $existing->getEmail());
+        $existing->setPhone($updates->getPhone() ?? $existing->getPhone());
+        $existing->setMobile($updates->getMobile() ?? $existing->getMobile());
+
+        if ($updates->getSalutation() !== 'unknown') {
+            $existing->setSalutation($updates->getSalutation());
+        }
+
+        try {
+            $language = $updates->getLanguage();
+            if ($language !== '') {
+                $existing->setLanguage($language);
+            }
+        } catch (\TypeError $e) {
+        }
+
+        $this->applyAddressData($existing->getBillingAddress(), $updates->getBillingAddress());
+        $this->applyAddressData($existing->getShippingAddress(), $updates->getShippingAddress());
+        $this->applyCompanyInfoData($existing, $updates);
+    }
+
+    /**
+     * @param Address $existing
+     * @param Address $updates
+     *
+     * @return void
+     */
+    protected function applyAddressData(Address $existing, Address $updates): void
+    {
+        $existing->setName($updates->getName() ?? $existing->getName());
+        $existing->setStreet($updates->getStreet() ?? $existing->getStreet());
+        $existing->setState($updates->getState() ?? $existing->getState());
+        $existing->setZip($updates->getZip() ?? $existing->getZip());
+        $existing->setCity($updates->getCity() ?? $existing->getCity());
+        $existing->setCountry($updates->getCountry() ?? $existing->getCountry());
+        $existing->setShippingType($updates->getShippingType() ?? $existing->getShippingType());
+    }
+
+    /**
+     * @param Customer $existing
+     * @param Customer $updates
+     *
+     * @return void
+     */
+    protected function applyCompanyInfoData(Customer $existing, Customer $updates): void
+    {
+        if ($updates->getCompanyInfo() === null) {
+            return;
+        }
+
+        $existingInfo = $existing->getCompanyInfo() ?? new CompanyInfo();
+        $updatesInfo = $updates->getCompanyInfo();
+
+        $existingInfo->setRegistrationType($updatesInfo->getRegistrationType() ?? $existingInfo->getRegistrationType());
+        $existingInfo->setCommercialRegisterNumber($updatesInfo->getCommercialRegisterNumber() ?? $existingInfo->getCommercialRegisterNumber());
+        $existingInfo->setFunction($updatesInfo->getFunction() ?? $existingInfo->getFunction());
+        $existingInfo->setCompanyType($updatesInfo->getCompanyType() ?? $existingInfo->getCompanyType());
+
+        if ($updatesInfo->getCommercialSector() !== 'OTHER') {
+            $existingInfo->setCommercialSector($updatesInfo->getCommercialSector());
+        }
+
+        if ($updatesInfo->getOwner() !== null) {
+            $existingOwner = $existingInfo->getOwner();
+
+            if ($existingOwner === null) {
+                $existingInfo->setOwner($updatesInfo->getOwner());
+            } else {
+                $existingOwner->setFirstname($updatesInfo->getOwner()->getFirstname() ?? $existingOwner->getFirstname());
+                $existingOwner->setLastname($updatesInfo->getOwner()->getLastname() ?? $existingOwner->getLastname());
+                $existingOwner->setBirthdate($updatesInfo->getOwner()->getBirthdate() ?? $existingOwner->getBirthdate());
+            }
+        }
+
+        $existing->setCompanyInfo($existingInfo);
     }
 
     /**
