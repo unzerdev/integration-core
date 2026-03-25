@@ -9,7 +9,7 @@ Unzer Integrations Core
 - [Cards and Click to Pay](https://docs.unzer.com/payment-methods/card/?_gl=1*1dhyjxo*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk2MDckajAkbDAkaDA)
 - [EPS](https://docs.unzer.com/payment-methods/eps/?_gl=1*1339lsb*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk2MzIkajAkbDAkaDA)
 - [Google Pay](https://docs.unzer.com/payment-methods/googlepay/?_gl=1*1mabbb4*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk2NjAkajAkbDAkaDA)
-- [iDEAL](https://docs.unzer.com/payment-methods/ideal/?_gl=1*rgi9qr*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk2NjkkajAkbDAkaDA)
+- [iDEAL | Wero](https://docs.unzer.com/payment-methods/ideal/?_gl=1*rgi9qr*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk2NjkkajAkbDAkaDA)
 - [Klarna](https://docs.unzer.com/payment-methods/klarna/?_gl=1*1u23iy*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk3OTckajAkbDAkaDA)
 - [PayPal](https://docs.unzer.com/payment-methods/paypal/?_gl=1*1qzwg1p*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk4NjQkajAkbDAkaDA)
 - [PayU](https://docs.unzer.com/payment-methods/payu/?_gl=1*rwllvq*_up*MQ..*_ga*NDE3NjA2ODguMTc0NzcyOTUyOA..*_ga_KQLTE7404W*czE3NDc3Mjk1MjgkbzEkZzEkdDE3NDc3Mjk4ODMkajAkbDAkaDA)
