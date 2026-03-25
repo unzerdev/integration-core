@@ -18,7 +18,7 @@ interface PaymentMethodNames
         PaymentMethodTypes::EPS => 'EPS',
         PaymentMethodTypes::GIROPAY => 'Giropay',
         PaymentMethodTypes::GOOGLE_PAY => 'Google Pay',
-        PaymentMethodTypes::IDEAL => 'iDEAL',
+        PaymentMethodTypes::IDEAL => 'iDEAL | Wero',
         PaymentMethodTypes::KLARNA => 'Klarna',
         PaymentMethodTypes::PAYPAL => 'PayPal',
         PaymentMethodTypes::PAYU => 'PayU',
