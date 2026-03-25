@@ -30,8 +30,12 @@ const createElement = (type, className, innerHTMLKey, properties, children) => {
     const child = document.createElement(type);
     className && child.classList.add(...className.trim().split(' '));
     if (innerHTMLKey) {
-        let params = innerHTMLKey.split('|');
-        child.innerHTML = translationService.translate(params[0], params.slice(1));
+        if(innerHTMLKey.indexOf('.') !== -1) {
+            let params = innerHTMLKey.split('|');
+            child.innerHTML = translationService.translate(params[0], params.slice(1));
+        } else {
+            child.innerHTML = innerHTMLKey;
+        }
     }
 
     if (properties) {
