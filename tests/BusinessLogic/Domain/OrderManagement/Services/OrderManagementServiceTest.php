@@ -1019,6 +1019,55 @@ class OrderManagementServiceTest extends BaseTestCase
      *
      * @throws Exception
      */
+    public function testRefundSkipsAlreadyCanceledCharges(): void
+    {
+        // arrange - charge1 is fully canceled (cancelledAmount == chargeAmount)
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(3, 'complete'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(50, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            [
+                new ChargeHistoryItem(
+                    'charge1', 'date1', Amount::fromFloat(50, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(50, Currency::getDefault()), 'type', 'id'
+                ),
+                new ChargeHistoryItem(
+                    'charge2', 'date1', Amount::fromFloat(50, Currency::getDefault()), 'status1',
+                    Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
+                ),
+            ]
+        );
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        // act
+        StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'refundOrder'],
+            [
+                'orderId',
+                Amount::fromFloat(30, Currency::getDefault()),
+                'ref-text'
+            ]
+        );
+
+        // assert - only charge2 should be refunded, charge1 should be skipped
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById');
+        self::assertCount(1, $methodCallHistory);
+        self::assertEquals('charge2', $methodCallHistory[0]['chargeId']);
+        self::assertEquals(30, $methodCallHistory[0]['amount']);
+        self::assertEquals('ref-text', $methodCallHistory[0]['referenceText']);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
     public function testUpdateCustomerWithCustomerId(): void
     {
         // arrange

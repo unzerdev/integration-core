@@ -160,6 +160,10 @@ class OrderManagementService
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
 
         foreach ($chargeItems as $chargeItem) {
+            if ($chargeItem->getRefundableAmount()->getValue() <= 0) {
+                continue;
+            }
+
             if ($refundAmount->getValue() > $chargeItem->getRefundableAmount()->getValue()) {
                 $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                     $chargeItem->getPaymentId(),
