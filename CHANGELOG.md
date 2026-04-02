@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.1.1](https://github.com/unzerdev/integration-core/releases/tag/2.1.1) - 2026-03-23
+- Enrich PayPage with:
+  - subscriptionAgreement
+  - paymentFormBackgroundColor 
+  - basketBackgroundColor
+- Updated Unzer SDK version to 3.15.0
+
 ## [2.1.0](https://github.com/unzerdev/integration-core/releases/tag/2.1.0) - 2026-03-09
 - Add additional links on Payment page 
 - Add Favicon image on Payment page

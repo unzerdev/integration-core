@@ -105,12 +105,15 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                     'https://www.test.com/',
                     'https://www.test.com/',
                     'https://www.test.com/',
-                    'https://www.test.com/'
+                    'https://www.test.com/',
+                    'https://www.test.com/',
                 ),
                 '#FFFFFF',
                 '#666666',
                 '#111111',
                 '#555555',
+                '#333333',
+                '#222222',
                 '#333333',
                 '#222222',
             )
@@ -181,6 +184,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 'https://www.test.com/',
                 'https://www.test.com/',
                 'https://www.test.com/',
+                'https://www.test.com/',
                 'https://www.test.com/'
             ),
             '#FFFFFF',
@@ -189,6 +193,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#555555',
             '#333333',
             '#222222',
+            '#333333',
+            '#222222'
         );
 
         $this->paymentPageSettingsService->setPaymentPageSettings($settings);
@@ -205,6 +211,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
                 'https://www.test.com/',
                 'https://www.test.com/',
                 'https://www.test.com/',
+                'https://www.test.com/',
                 'https://www.test.com/'
             ),
             '#FFFFFF',
@@ -213,6 +220,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#555555',
             '#333333',
             '#222222',
+            '#333333',
+            '#222222'
         );
 
         // Act
@@ -241,6 +250,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'linkColor' => null,
             'backgroundColor' => null,
             'footerColor' => null,
+            'paymentFormBackgroundColor' => null,
+            'basketBackgroundColor' => null,
             'font' => null,
             'shadows' => null,
             'hideUnzerLogo' => null,
@@ -251,6 +262,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'termsAndConditions' => null,
             'privacyPolicy' => null,
             'imprint' => null,
+            'subscriptionAgreement' => null,
         ];
         // Assert
         self::assertEquals($response->toArray(), $expectedResponse);
@@ -313,7 +325,9 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             '#111111',
             '#555555',
             '#333333',
-            '#222222'
+            '#222222',
+            '#333333',
+            '#222222',
         );
 
         $this->uploaderService->setPath('path');
@@ -347,6 +361,8 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'linkColor' => $paymentPageSettings->getLinkColor(),
             'backgroundColor' => $paymentPageSettings->getBackgroundColor(),
             'footerColor' => $paymentPageSettings->getFooterColor(),
+            'paymentFormBackgroundColor' => $paymentPageSettings->getPaymentFormBackgroundColor(),
+            'basketBackgroundColor' => $paymentPageSettings->getBasketBackgroundColor(),
             'font' => $paymentPageSettings->getFont(),
             'shadows' => $paymentPageSettings->getShadows(),
             'hideUnzerLogo' => $paymentPageSettings->getHideUnzerLogo(),
@@ -357,6 +373,7 @@ class PaymentPageSettingsControllerTest extends BaseTestCase
             'termsAndConditions' => $paymentPageSettings->getUrls()->getTermsAndConditions(),
             'privacyPolicy' => $paymentPageSettings->getUrls()->getPrivacyPolicy(),
             'imprint' => $paymentPageSettings->getUrls()->getImprint(),
+            'subscriptionAgreement' => $paymentPageSettings->getUrls()->getSubscriptionAgreement(),
         ];
     }
 

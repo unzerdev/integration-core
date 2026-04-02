@@ -50,6 +50,16 @@ class PaymentPageSettings
     private ?string $footerColor;
 
     /**
+     * @var null|string $footerColor
+     */
+    private ?string $paymentFormBackgroundColor;
+
+    /**
+     * @var null|string $footerColor
+     */
+    private ?string $basketBackgroundColor;
+
+    /**
      * @var UploadedFile
      */
     private UploadedFile $logoFile;
@@ -111,6 +121,8 @@ class PaymentPageSettings
      * @param string|null $linkColor
      * @param string|null $backgroundColor
      * @param string|null $footerColor
+     * @param string|null $paymentFormBackgroundColor
+     * @param string|null $basketBackgroundColor
      * @param string|null $font
      * @param bool|null $shadows
      * @param bool|null $hideUnzerLogo
@@ -129,6 +141,8 @@ class PaymentPageSettings
         ?string $linkColor = null,
         ?string $backgroundColor = null,
         ?string $footerColor = null,
+        ?string $paymentFormBackgroundColor = null,
+        ?string $basketBackgroundColor = null,
         ?string $font = null,
         ?bool $shadows = false,
         ?bool $hideUnzerLogo = false,
@@ -146,6 +160,8 @@ class PaymentPageSettings
         $this->linkColor = $linkColor;
         $this->backgroundColor = $backgroundColor;
         $this->footerColor = $footerColor;
+        $this->paymentFormBackgroundColor = $paymentFormBackgroundColor;
+        $this->basketBackgroundColor = $basketBackgroundColor;
         $this->font = $font;
         $this->shadows = $shadows;
         $this->hideUnzerLogo = $hideUnzerLogo;
@@ -176,6 +192,8 @@ class PaymentPageSettings
             ->setLinkColor($this->linkColor)
             ->setBackgroundColor($this->backgroundColor)
             ->setFooterColor($this->footerColor)
+            ->setPaymentFormBackgroundColor($this->paymentFormBackgroundColor)
+            ->setBasketBackgroundColor($this->basketBackgroundColor)
             ->setFont($this->font)
             ->setShadows($this->shadows)
             ->setHideUnzerLogo($this->hideUnzerLogo)
@@ -191,7 +209,8 @@ class PaymentPageSettings
                 ->setContact($this->urls->getContactUrl())
                 ->setTermsAndCondition($this->urls->getTermsAndConditions())
                 ->setPrivacyPolicy($this->urls->getPrivacyPolicy())
-                ->setImprint($this->urls->getImprint());
+                ->setImprint($this->urls->getImprint())
+                ->setSubscriptionAgreement($this->urls->getSubscriptionAgreement());
 
             $this->paypage->setUrls($urls);
         }
@@ -335,5 +354,21 @@ class PaymentPageSettings
     public function getTextColor(): ?string
     {
         return $this->textColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPaymentFormBackgroundColor(): ?string
+    {
+        return $this->paymentFormBackgroundColor;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBasketBackgroundColor(): ?string
+    {
+        return $this->basketBackgroundColor;
     }
 }
