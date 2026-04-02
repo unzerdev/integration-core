@@ -57,6 +57,7 @@ use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodConfig as EmbeddedPaymentMethodConfig;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\PaymentMethodsConfigs;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
+use UnzerSDK\Resources\EmbeddedResources\Paypage\Style;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Urls;
 use UnzerSDK\Resources\Payment;
 use UnzerSDK\Resources\PaymentTypes\Card;
@@ -193,6 +194,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest->setUrls($urls);
 
         $expectedPayPageRequest->setResources(new Resources());
+        $expectedPayPageRequest->setStyle((new Style())->setHideBasket(true));
 
         $this->unzerFactory->getMockUnzer()->setPayPageData(
             ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
@@ -259,6 +261,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest->setUrls($urls);
 
         $expectedPayPageRequest->setResources(new Resources());
+        $expectedPayPageRequest->setStyle((new Style())->setHideBasket(true));
 
         $this->unzerFactory->getMockUnzer()->setPayPageData(
             ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
@@ -332,6 +335,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         $expectedPayPageRequest->setUrls($urls);
 
         $expectedPayPageRequest->setResources(new Resources(null, 's-bsk-mock'));
+        $expectedPayPageRequest->setStyle((new Style())->setHideBasket(true));
 
         $this->unzerFactory->getMockUnzer()->setPayPageData(
             ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
@@ -570,9 +574,9 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
             )
         );
 
-        $mockPayment = $this->createMock(Payment::class);
-        $mockPayment->method('getCharges')->willReturn([]);
-        $mockPayment->method('getId')->willReturn('s-pay-999');
+        $mockPayment = new PaymentSDK();
+        $mockPayment->setParentResource(new UnzerMock('s-priv-test'));
+        $mockPayment->setId('s-pay-999');
 
         $mockUnzer = $this->unzerFactory->getMockUnzer();
         $mockUnzer->setPayment($mockPayment);
