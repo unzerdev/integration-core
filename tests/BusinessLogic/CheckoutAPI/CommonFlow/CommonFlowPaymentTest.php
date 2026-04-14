@@ -197,7 +197,7 @@ class CommonFlowPaymentTest extends BaseTestCase
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
         self::assertNotEmpty($methodCallHistory);
         self::assertTrue($response->isSuccessful());
-        self::assertEquals('test.unzer.api.com', $response->getRedirectUrl());
+        self::assertEquals('test.unzer.api.com&locale=auto', $response->getRedirectUrl());
 
         self::assertTransactionHistory(
             new TransactionHistory(PaymentMethodTypes::CARDS, 'test-order-123', 'EUR')

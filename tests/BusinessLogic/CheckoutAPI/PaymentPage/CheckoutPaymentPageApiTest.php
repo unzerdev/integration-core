@@ -215,7 +215,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertTrue($response->isSuccessful());
         self::assertNotEmpty($response->toArray());
         self::assertEquals(
-            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'publicKey' => 'publicKeyTest'],
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com&locale=auto', 'publicKey' => 'publicKeyTest'],
             $response->toArray()
         );
         self::assertTransactionHistory(
@@ -354,7 +354,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertTrue($response->isSuccessful());
         self::assertNotEmpty($response->toArray());
         self::assertEquals(
-            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'publicKey' => 'publicKeyTest'],
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com&locale=auto', 'publicKey' => 'publicKeyTest'],
             $response->toArray()
         );
         self::assertTransactionHistory(
