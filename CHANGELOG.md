@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.1.2](https://github.com/unzerdev/integration-core/releases/tag/2.1.2) - 2026-04-17
+- Add locale to PayPage redirect URL to support translations
+
 ## [2.1.1](https://github.com/unzerdev/integration-core/releases/tag/2.1.1) - 2026-03-23
 - Enrich PayPage with:
   - subscriptionAgreement
