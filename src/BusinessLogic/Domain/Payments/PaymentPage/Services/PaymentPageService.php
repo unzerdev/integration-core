@@ -88,6 +88,9 @@ class PaymentPageService
             ),
         );
 
+        $locale = $context->getLocale() === 'default' ? 'auto' : $context->getLocale();
+        $payPageResponse->setRedirectUrl($payPageResponse->getRedirectUrl() . '&locale=' . $locale);
+
         $this->updateTransactionHistory($context);
 
         return $payPageResponse;
@@ -155,7 +158,7 @@ class PaymentPageService
      *
      * @return void
      */
-    protected function updateTransactionHistory(PaymentPageCreateContext $context) : void
+    protected function updateTransactionHistory(PaymentPageCreateContext $context): void
     {
         $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($context->getOrderId())
             ?? new TransactionHistory(
@@ -177,7 +180,8 @@ class PaymentPageService
      */
     private function getEnabledPaymentMethodSettings(PaymentPageCreateContext $context): PaymentMethodConfig
     {
-        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType(), $context->getSystemBookingMethod());
+        $settings = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType(),
+            $context->getSystemBookingMethod());
         if (!$settings || !$settings->isEnabled()) {
             throw new PaymentConfigNotFoundException(
                 new TranslatableLabel(
@@ -198,7 +202,7 @@ class PaymentPageService
      * @throws UnzerApiException
      * @throws InvalidAmountsException
      */
-    protected function buildResources(PaymentPageCreateContext $context) : Resources
+    private function buildResources(PaymentPageCreateContext $context): Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
