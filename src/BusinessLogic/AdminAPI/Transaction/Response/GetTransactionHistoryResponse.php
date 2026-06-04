@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\ApiFacades\Response\Response;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodNames;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 
 /**
@@ -41,6 +42,7 @@ class GetTransactionHistoryResponse extends Response
         }
 
         $returnArray['type'] = $this->transactionHistory->getType();
+        $returnArray['typeLabel'] = PaymentMethodNames::PAYMENT_METHOD_NAMES[$this->transactionHistory->getType()];
         $returnArray['orderId'] = $this->transactionHistory->getOrderId();
         $returnArray['amounts'] =
             [
@@ -60,7 +62,8 @@ class GetTransactionHistoryResponse extends Response
                 'amount' => $this->amountToArray($historyItem->getAmount()),
                 'status' => $historyItem->getStatus(),
                 'paymentType' => $historyItem->getPaymentType(),
-                'paymentId' => $historyItem->getPaymentId()
+                'paymentId' => $historyItem->getPaymentId(),
+                'paymentTypeLabel' => PaymentMethodNames::PAYMENT_METHOD_NAMES[$historyItem->getPaymentType()],
             ];
         }
 
