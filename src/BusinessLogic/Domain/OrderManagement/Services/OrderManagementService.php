@@ -13,7 +13,11 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHisto
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use UnzerSDK\Constants\PaymentState;
 use UnzerSDK\Exceptions\UnzerApiException;
+use UnzerSDK\Resources\Customer;
+use UnzerSDK\Resources\EmbeddedResources\Address;
+use UnzerSDK\Resources\EmbeddedResources\CompanyInfo;
 use UnzerSDK\Resources\TransactionTypes\Cancellation;
+use UnzerSDK\Resources\TransactionTypes\Charge;
 
 /**
  * Class OrderManagementService.
@@ -41,13 +45,14 @@ class OrderManagementService
     /**
      * @param string $orderId
      * @param ?Amount $chargeAmount
+     * @param string|null $reference
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function chargeOrder(string $orderId, ?Amount $chargeAmount): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
@@ -67,36 +72,45 @@ class OrderManagementService
             return;
         }
 
-        $this->unzerFactory->makeUnzerAPI()->chargeAuthorization(
+        $charge = new Charge($chargeAmount->getPriceInCurrencyUnits(), $chargeAmount->getCurrency()->getIsoCode());
+        $charge->setOrderId($transactionHistory->getOrderId());
+        $charge->setPaymentReference($reference);
+
+        $this->unzerFactory->makeUnzerAPI()->performChargeOnPayment(
             $authorizedItem->getPaymentId(),
-            $chargeAmount->getPriceInCurrencyUnits(),
-            $transactionHistory->getOrderId()
+            $charge
         );
     }
 
     /**
      * @param string $orderId
      * @param Amount|null $amount
+     * @param string|null $reference
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
      */
-    public function cancelOrder(string $orderId, ?Amount $amount = null): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
         }
+
         if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
             return;
         }
+
         if ($amount === null) {
             $amount = $transactionHistory->getTotalAmount();
         }
 
-        if (in_array($transactionHistory->getType() ,PaymentMethodTypes::UPL_TYPES)) {
-            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId);
+        if (in_array($transactionHistory->getType(), PaymentMethodTypes::UPL_TYPES)) {
+            $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
+            $cancellation->setPaymentReference($reference);
+
+            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId, $cancellation);
 
             return;
         }
@@ -107,22 +121,26 @@ class OrderManagementService
             return;
         }
 
-        $this->unzerFactory->makeUnzerAPI()->cancelAuthorizationByPayment(
+        $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
+        $cancellation->setPaymentReference($reference);
+
+        $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment(
             $authorizedItem->getPaymentId(),
-            $amount->getPriceInCurrencyUnits()
+            $cancellation
         );
     }
 
     /**
      * @param string $orderId
      * @param Amount $refundAmount
+     * @param string|null $reference
      *
      * @return void
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
      * @throws UnzerApiException
      */
-    public function refundOrder(string $orderId, Amount $refundAmount): void
+    public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): void
     {
         if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
             return;
@@ -133,7 +151,7 @@ class OrderManagementService
         }
 
         if (in_array($transactionHistory->getType(), RefundViaPayment::REFUND_VIA_PAYMENT, true)) {
-            $this->refundOrderByPayment($transactionHistory, $refundAmount);
+            $this->refundOrderByPayment($transactionHistory, $refundAmount, $reference);
 
             return;
         }
@@ -142,11 +160,17 @@ class OrderManagementService
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
 
         foreach ($chargeItems as $chargeItem) {
+            if ($chargeItem->getRefundableAmount()->getValue() <= 0) {
+                continue;
+            }
+
             if ($refundAmount->getValue() > $chargeItem->getRefundableAmount()->getValue()) {
                 $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                     $chargeItem->getPaymentId(),
                     $chargeItem->getId(),
-                    $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits()
+                    $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits(),
+                    null,
+                    $reference
                 );
                 $refundAmount = $refundAmount->minus($chargeItem->getRefundableAmount());
 
@@ -156,7 +180,9 @@ class OrderManagementService
             $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                 $chargeItem->getPaymentId(),
                 $chargeItem->getId(),
-                $refundAmount->getPriceInCurrencyUnits()
+                $refundAmount->getPriceInCurrencyUnits(),
+                null,
+                $reference
             );
 
             break;
@@ -164,11 +190,153 @@ class OrderManagementService
     }
 
     /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function refundOrderByPayment(
+        TransactionHistory $transactionHistory,
+        Amount $refundAmount,
+        ?string $reference = null
+    ) {
+        $paymentId = $transactionHistory->collection()->last()->getPaymentId();
+        $cancellation = new Cancellation($refundAmount->getPriceInCurrencyUnits());
+        $cancellation->setPaymentReference($reference);
+
+        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
+            $paymentId,
+            $cancellation
+        );
+    }
+
+    /**
+     * @param string $orderId
+     * @param Customer $customer
+     *
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function updateCustomer(string $orderId, Customer $customer): void
+    {
+        $unzer = $this->unzerFactory->makeUnzerAPI();
+
+        if ($customer->getId() !== null) {
+            $unzer->updateCustomer($customer);
+
+            return;
+        }
+
+        $transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+        if (!$transactionHistory) {
+            return;
+        }
+
+        $payment = $unzer->fetchPayment($transactionHistory->getOrderId());
+        $existingCustomer = $payment->getCustomer();
+        if (!$existingCustomer) {
+            return;
+        }
+
+        $this->applyCustomerData($existingCustomer, $customer);
+        $unzer->updateCustomer($existingCustomer);
+    }
+
+    /**
+     * @param Customer $existing
+     * @param Customer $updates
+     *
+     * @return void
+     */
+    protected function applyCustomerData(Customer $existing, Customer $updates): void
+    {
+        $existing->setFirstname($updates->getFirstname() ?? $existing->getFirstname());
+        $existing->setLastname($updates->getLastname() ?? $existing->getLastname());
+        $existing->setBirthDate($updates->getBirthDate() ?? $existing->getBirthDate());
+        $existing->setCompany($updates->getCompany() ?? $existing->getCompany());
+        $existing->setEmail($updates->getEmail() ?? $existing->getEmail());
+        $existing->setPhone($updates->getPhone() ?? $existing->getPhone());
+        $existing->setMobile($updates->getMobile() ?? $existing->getMobile());
+
+        if ($updates->getSalutation() !== 'unknown') {
+            $existing->setSalutation($updates->getSalutation());
+        }
+
+        try {
+            $language = $updates->getLanguage();
+            if ($language !== '') {
+                $existing->setLanguage($language);
+            }
+        } catch (\TypeError $e) {
+        }
+
+        $this->applyAddressData($existing->getBillingAddress(), $updates->getBillingAddress());
+        $this->applyAddressData($existing->getShippingAddress(), $updates->getShippingAddress());
+        $this->applyCompanyInfoData($existing, $updates);
+    }
+
+    /**
+     * @param Address $existing
+     * @param Address $updates
+     *
+     * @return void
+     */
+    protected function applyAddressData(Address $existing, Address $updates): void
+    {
+        $existing->setName($updates->getName() ?? $existing->getName());
+        $existing->setStreet($updates->getStreet() ?? $existing->getStreet());
+        $existing->setState($updates->getState() ?? $existing->getState());
+        $existing->setZip($updates->getZip() ?? $existing->getZip());
+        $existing->setCity($updates->getCity() ?? $existing->getCity());
+        $existing->setCountry($updates->getCountry() ?? $existing->getCountry());
+        $existing->setShippingType($updates->getShippingType() ?? $existing->getShippingType());
+    }
+
+    /**
+     * @param Customer $existing
+     * @param Customer $updates
+     *
+     * @return void
+     */
+    protected function applyCompanyInfoData(Customer $existing, Customer $updates): void
+    {
+        if ($updates->getCompanyInfo() === null) {
+            return;
+        }
+
+        $existingInfo = $existing->getCompanyInfo() ?? new CompanyInfo();
+        $updatesInfo = $updates->getCompanyInfo();
+
+        $existingInfo->setRegistrationType($updatesInfo->getRegistrationType() ?? $existingInfo->getRegistrationType());
+        $existingInfo->setCommercialRegisterNumber($updatesInfo->getCommercialRegisterNumber() ?? $existingInfo->getCommercialRegisterNumber());
+        $existingInfo->setFunction($updatesInfo->getFunction() ?? $existingInfo->getFunction());
+        $existingInfo->setCompanyType($updatesInfo->getCompanyType() ?? $existingInfo->getCompanyType());
+
+        if ($updatesInfo->getCommercialSector() !== 'OTHER') {
+            $existingInfo->setCommercialSector($updatesInfo->getCommercialSector());
+        }
+
+        if ($updatesInfo->getOwner() !== null) {
+            $existingOwner = $existingInfo->getOwner();
+
+            if ($existingOwner === null) {
+                $existingInfo->setOwner($updatesInfo->getOwner());
+            } else {
+                $existingOwner->setFirstname($updatesInfo->getOwner()->getFirstname() ?? $existingOwner->getFirstname());
+                $existingOwner->setLastname($updatesInfo->getOwner()->getLastname() ?? $existingOwner->getLastname());
+                $existingOwner->setBirthdate($updatesInfo->getOwner()->getBirthdate() ?? $existingOwner->getBirthdate());
+            }
+        }
+
+        $existing->setCompanyInfo($existingInfo);
+    }
+
+    /**
      * @param TransactionHistory $transactionHistory
      *
      * @return bool
      */
-    private function isTransactionHistoryValid(TransactionHistory $transactionHistory): bool
+    protected function isTransactionHistoryValid(TransactionHistory $transactionHistory): bool
     {
         return $transactionHistory->getChargedAmount() &&
             $transactionHistory->getCancelledAmount() &&
@@ -183,7 +351,7 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
+    protected function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
     {
         if ($amountToCharge === null) {
             return true;
@@ -203,7 +371,7 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
+    protected function isCancellationNecessary(TransactionHistory $transactionHistory, ?Amount $amount = null): bool
     {
         if ($amount === null) {
             return true;
@@ -222,25 +390,12 @@ class OrderManagementService
      *
      * @return bool
      */
-    private function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
+    protected function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
     {
         return $this->isTransactionHistoryValid($transactionHistory) &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_PENDING &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CANCELED &&
             $transactionHistory->getPaymentState()->getId() !== PaymentState::STATE_CREATE &&
             $amountToRefund->getValue() <= $transactionHistory->getChargedAmount()->getValue();
-    }
-
-    /**
-     * @throws UnzerApiException
-     * @throws ConnectionSettingsNotFoundException
-     */
-    public function refundOrderByPayment(TransactionHistory $transactionHistory, Amount $refundAmount)
-    {
-        $paymentId = $transactionHistory->collection()->last()->getPaymentId();
-        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
-            $paymentId,
-            new Cancellation($refundAmount->getPriceInCurrencyUnits())
-        );
     }
 }

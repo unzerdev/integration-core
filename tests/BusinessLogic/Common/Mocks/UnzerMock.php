@@ -36,6 +36,7 @@ class UnzerMock extends Unzer
      */
     private array $webhooks = [];
     private ?array $payPageData = [];
+    private bool $throwOnCreateBasket = false;
 
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
@@ -176,11 +177,29 @@ class UnzerMock extends Unzer
         return $customer;
     }
 
+    public function setThrowOnCreateBasket(bool $throw): void
+    {
+        $this->throwOnCreateBasket = $throw;
+    }
+
     public function createBasket(Basket $basket): Basket
     {
         $this->callHistory['createBasket'][] = ['basket' => $this->basket];
 
+        if ($this->throwOnCreateBasket) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Basket creation failed');
+        }
+
+        $basket->setId($basket->getId() ?? 's-bsk-mock');
+
         return $basket;
+    }
+
+    public function fetchBasket($basket): Basket
+    {
+        $this->callHistory['fetchBasket'][] = ['basketId' => $basket];
+
+        return $this->basket ?? new Basket();
     }
 
     public function createMetadata(Metadata $metadata): Metadata
@@ -219,6 +238,22 @@ class UnzerMock extends Unzer
 
     /**
      * @param $payment
+     * @param Charge $charge
+     *
+     * @return Charge
+     */
+    public function performChargeOnPayment($payment, Charge $charge): Charge
+    {
+        $this->callHistory['performChargeOnPayment'][] = [
+            'payment' => $payment,
+            'charge' => $charge
+        ];
+
+        return $charge;
+    }
+
+    /**
+     * @param $payment
      * @param float|null $amount
      *
      * @return Cancellation
@@ -228,6 +263,22 @@ class UnzerMock extends Unzer
         $this->callHistory['cancelAuthorizationByPayment'][] = ['payment' => $payment, 'amount' => $amount];
 
         return new Cancellation();
+    }
+
+    /**
+     * @param $payment
+     * @param Cancellation|null $cancellation
+     *
+     * @return Cancellation
+     */
+    public function cancelAuthorizedPayment($payment, ?Cancellation $cancellation = null): Cancellation
+    {
+        $this->callHistory['cancelAuthorizedPayment'][] = [
+            'payment' => $payment,
+            'cancellation' => $cancellation
+        ];
+
+        return $cancellation ?? new Cancellation();
     }
 
 
@@ -290,7 +341,8 @@ class UnzerMock extends Unzer
         $this->callHistory['cancelChargeById'][] = [
             'payment' => $payment,
             'chargeId' => $chargeId,
-            'amount' => $amount
+            'amount' => $amount,
+            'referenceText' => $referenceText
         ];
 
         return new Cancellation();
@@ -312,6 +364,18 @@ class UnzerMock extends Unzer
         ];
 
         return new Cancellation();
+    }
+
+    /**
+     * @param Customer $customer
+     *
+     * @return Customer
+     */
+    public function updateCustomer(Customer $customer): Customer
+    {
+        $this->callHistory['updateCustomer'][] = ['customer' => $customer];
+
+        return $customer;
     }
 
     /**

@@ -184,7 +184,7 @@ class PaymentPageSettings
             $this->paypage->setShopName($shopName);
         }
 
-        $style = new Style();
+        $style = $paypage->getStyle() ?? new Style();
         $style
             ->setHeaderColor($this->headerColor)
             ->setBrandColor($this->brandColor)

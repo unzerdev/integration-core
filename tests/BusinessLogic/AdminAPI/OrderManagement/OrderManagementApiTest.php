@@ -5,13 +5,14 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\OrderManagement;
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\CancellationRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\ChargeRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\CustomerData;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\UpdateCustomerRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\RefundRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
-use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\TransactionHistoryNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
@@ -58,7 +59,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
     public function testChargeSuccess(): void
     {
@@ -66,9 +66,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->charge(
-            new ChargeRequest('orderId',
-                Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
 
@@ -81,7 +79,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws UnzerApiException
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      */
     public function testChargeToArray(): void
     {
@@ -89,8 +86,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->charge(
-            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -101,7 +97,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      * @throws CurrencyMismatchException
      * */
@@ -111,8 +106,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->refund(
-            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -124,7 +118,6 @@ class OrderManagementApiTest extends BaseTestCase
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testRefundToArray(): void
@@ -133,7 +126,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->refund(
-            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()))
+            new RefundRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -144,7 +137,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testCancellationSuccess(): void
@@ -153,8 +145,7 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->cancel(
-            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
         );
 
         // Assert
@@ -165,7 +156,6 @@ class OrderManagementApiTest extends BaseTestCase
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
      */
     public function testCancellationToArray(): void
@@ -174,8 +164,45 @@ class OrderManagementApiTest extends BaseTestCase
 
         // Act
         $response = AdminAPI::get()->order('1')->cancel(
-            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault())
-            )
+            new CancellationRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
+        );
+
+        // Assert
+        self::assertEquals([], $response->toArray());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function testUpdateCustomerSuccess(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->order('1')->updateCustomer(
+            new UpdateCustomerRequest('orderId', 's-cst-123', new CustomerData('John', 'Doe'))
+        );
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function testUpdateCustomerToArray(): void
+    {
+        // Arrange
+
+        // Act
+        $response = AdminAPI::get()->order('1')->updateCustomer(
+            new UpdateCustomerRequest('orderId', 's-cst-123', new CustomerData('John', 'Doe'))
         );
 
         // Assert

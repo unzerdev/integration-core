@@ -5,6 +5,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.2.0](https://github.com/unzerdev/integration-core/releases/tag/2.2.0) - 2026-05-04
+- Add a reference field in cancel, charge and refund requests
+- Create Basket resource for inline payments
+- Add support for updating existing customer on Unzer
+
+## [2.1.2](https://github.com/unzerdev/integration-core/releases/tag/2.1.2) - 2026-04-17
+- Add locale to PayPage redirect URL to support translations
+
+## [2.1.1](https://github.com/unzerdev/integration-core/releases/tag/2.1.1) - 2026-03-23
+- Enrich PayPage with:
+  - subscriptionAgreement
+  - paymentFormBackgroundColor 
+  - basketBackgroundColor
+- Updated Unzer SDK version to 3.15.0
+
+## [2.1.0](https://github.com/unzerdev/integration-core/releases/tag/2.1.0) - 2026-03-09
+- Add additional links on Payment page 
+- Add Favicon image on Payment page
+- Enhance URL validation logic
+
 ## [2.0.1](https://github.com/unzerdev/integration-core/releases/tag/2.0.1) - 2026-02-27
 - Enhance creating Paypage logic
 - Resolve Dependabot alerts

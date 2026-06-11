@@ -2,8 +2,9 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory;
 
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Models\PaymentContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\BasketProcessorsRegistry;
 use UnzerSDK\Resources\Basket;
 
@@ -25,7 +26,10 @@ class BasketFactory
         $this->paymentMethodService = $paymentMethodService;
     }
 
-    public function create(PaymentPageCreateContext $context): ?Basket
+    /**
+     * @throws InvalidAmountsException
+     */
+    public function create(PaymentContext $context): ?Basket
     {
         $methodConfig = $this->paymentMethodService->getPaymentMethodConfigByType($context->getPaymentMethodType());
         if (!$methodConfig || !$methodConfig->isEnabled() || !$methodConfig->isSendBasketData()) {
@@ -40,7 +44,12 @@ class BasketFactory
         return $basket;
     }
 
-    protected function initializeBasket(PaymentPageCreateContext $context): Basket
+    /**
+     * @param PaymentContext $context
+     *
+     * @return Basket
+     */
+    protected function initializeBasket(PaymentContext $context): Basket
     {
         $basket = new Basket(
             $context->getOrderId(),

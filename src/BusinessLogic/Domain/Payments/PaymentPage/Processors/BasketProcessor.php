@@ -2,8 +2,8 @@
 
 namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors;
 
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Models\PaymentContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\Common\Processors\RequestProcessor;
-use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use UnzerSDK\Resources\Basket;
 
 /**
@@ -13,5 +13,5 @@ use UnzerSDK\Resources\Basket;
  */
 interface BasketProcessor extends RequestProcessor
 {
-    public function process(Basket $basket, PaymentPageCreateContext $context): void;
+    public function process(Basket $basket, PaymentContext $context): void;
 }

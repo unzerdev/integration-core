@@ -4,10 +4,12 @@ namespace Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Controller;
 
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\CancellationRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\ChargeRequest;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\Customer\UpdateCustomerRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Request\RefundRequest;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\CancellationResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\RefundResponse;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\UpdateCustomerResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
@@ -42,7 +44,11 @@ class OrderManagementController
      */
     public function refund(RefundRequest $refundRequest): RefundResponse
     {
-        $this->orderManagementService->refundOrder($refundRequest->getOrderId(), $refundRequest->getAmount());
+        $this->orderManagementService->refundOrder(
+            $refundRequest->getOrderId(),
+            $refundRequest->getAmount(),
+            $refundRequest->getReference()
+        );
 
         return new RefundResponse();
     }
@@ -57,7 +63,11 @@ class OrderManagementController
      */
     public function charge(ChargeRequest $chargeRequest): ChargeResponse
     {
-        $this->orderManagementService->chargeOrder($chargeRequest->getOrderId(), $chargeRequest->getAmount());
+        $this->orderManagementService->chargeOrder(
+            $chargeRequest->getOrderId(),
+            $chargeRequest->getAmount(),
+            $chargeRequest->getReference()
+        );
 
         return new ChargeResponse();
     }
@@ -72,8 +82,27 @@ class OrderManagementController
      */
     public function cancel(CancellationRequest $cancellationRequest): CancellationResponse
     {
-        $this->orderManagementService->cancelOrder($cancellationRequest->getOrderId(), $cancellationRequest->getAmount());
+        $this->orderManagementService->cancelOrder(
+            $cancellationRequest->getOrderId(),
+            $cancellationRequest->getAmount(),
+            $cancellationRequest->getReference()
+        );
 
         return new CancellationResponse();
+    }
+
+    /**
+     * @param UpdateCustomerRequest $request
+     *
+     * @return UpdateCustomerResponse
+     *
+     * @throws ConnectionSettingsNotFoundException
+     * @throws UnzerApiException
+     */
+    public function updateCustomer(UpdateCustomerRequest $request): UpdateCustomerResponse
+    {
+        $this->orderManagementService->updateCustomer($request->getOrderId(), $request->toUnzerCustomer());
+
+        return new UpdateCustomerResponse();
     }
 }

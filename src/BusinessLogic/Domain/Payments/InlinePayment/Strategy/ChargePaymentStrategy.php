@@ -17,6 +17,10 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
     private UnzerFactory $unzerFactory;
     private InlinePaymentFactory $inlinePaymentFactory;
 
+    /**
+     * @param UnzerFactory $unzerFactory
+     * @param InlinePaymentFactory $inlinePaymentFactory
+     */
     public function __construct(UnzerFactory $unzerFactory, InlinePaymentFactory $inlinePaymentFactory)
     {
         $this->unzerFactory = $unzerFactory;
@@ -39,12 +43,22 @@ class ChargePaymentStrategy implements InlinePaymentStrategyInterface
         Resources $resources
     ): InlinePayment {
         $chargeRequest = $this->inlinePaymentFactory->create($context, $config);
-        $charge = new Charge($chargeRequest->getAmount()->getPriceInCurrencyUnits(),
-            $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl());
+        $charge = new Charge(
+            $chargeRequest->getAmount()->getPriceInCurrencyUnits(),
+            $chargeRequest->getAmount()->getCurrency(), $chargeRequest->getReturnUrl()
+        );
         $charge->setOrderId($context->getOrderId());
         $metadata = $this->unzerFactory->makeUnzerAPI()->fetchMetadata($resources->getMetadataId());
-        $chargeResponse = $this->unzerFactory->makeUnzerAPI()->performCharge($charge, $chargeRequest->getPaymentType(),
-            $resources->getCustomerId(), $metadata);
+        $basket = $resources->getBasketId()
+            ? $this->unzerFactory->makeUnzerAPI()->fetchBasket($resources->getBasketId())
+            : null;
+        $chargeResponse = $this->unzerFactory->makeUnzerAPI()->performCharge(
+            $charge,
+            $chargeRequest->getPaymentType(),
+            $resources->getCustomerId(),
+            $metadata,
+            $basket
+        );
 
         return new InlinePayment($chargeResponse);
     }
