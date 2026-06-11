@@ -4,29 +4,29 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11b3672c98ee38dd7ffaa6bd6e4338f8",
+    "content-hash": "e1b10c372d8030e198b49ad9df8e18e7",
     "packages": [
         {
             "name": "unzerdev/php-sdk",
-            "version": "3.15.0",
+            "version": "4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/unzerdev/php-sdk.git",
-                "reference": "731eca042046ecf6e3754577b48c2f839caa622e"
+                "reference": "a9344b823fbf5374cd49e07ab6352d385578299e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/unzerdev/php-sdk/zipball/731eca042046ecf6e3754577b48c2f839caa622e",
-                "reference": "731eca042046ecf6e3754577b48c2f839caa622e",
+                "url": "https://api.github.com/repos/unzerdev/php-sdk/zipball/a9344b823fbf5374cd49e07ab6352d385578299e",
+                "reference": "a9344b823fbf5374cd49e07ab6352d385578299e",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "~7.4.0|~8.0.0|~8.1.0|~8.2.0|~8.3.0|~8.4.0"
+                "php": "~8.1.0|~8.2.0|~8.3.0|~8.4.0|~8.5.0"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.0",
-                "phpunit/phpunit": ">6.5 <10.0"
+                "phpunit/phpunit": "^9.6"
             },
             "suggest": {
                 "ext-curl": "*"
@@ -45,9 +45,9 @@
             "description": "This is the php sdk to connect to the Unzer rest API.",
             "support": {
                 "email": "support@unzer.com",
-                "source": "https://github.com/unzerdev/php-sdk/tree/3.15.0"
+                "source": "https://github.com/unzerdev/php-sdk/tree/4.0.1"
             },
-            "time": "2026-02-12T12:39:43+00:00"
+            "time": "2026-05-15T13:48:06+00:00"
         }
     ],
     "packages-dev": [
@@ -1851,7 +1851,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -1859,6 +1859,6 @@
         "ext-json": "*",
         "ext-mbstring": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }

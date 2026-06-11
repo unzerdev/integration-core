@@ -5,7 +5,7 @@
   "license": "proprietary",
   "require": {
     "php": ">=7.4",
-    "unzerdev/php-sdk": "^3.15.0",
+    "unzerdev/php-sdk": "^4.0.1",
     "ext-json": "*",
     "ext-mbstring": "*"
   },
