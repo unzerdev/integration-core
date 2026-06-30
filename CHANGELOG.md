@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.2.1](https://github.com/unzerdev/integration-core/releases/tag/2.2.1) - 2026-06-30
+- Drop support for PHP 7.4 and 8.0
+- Add support for PHP 8.5
+- Update Unzer SDK version to [4.0.1](https://github.com/unzerdev/php-sdk/releases/tag/4.0.1)
+
 ## [2.2.0](https://github.com/unzerdev/integration-core/releases/tag/2.2.0) - 2026-05-04
 - Add a reference field in cancel, charge and refund requests
 - Create Basket resource for inline payments
