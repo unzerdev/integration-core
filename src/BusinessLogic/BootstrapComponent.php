@@ -34,6 +34,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectIntegrationServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
@@ -137,6 +138,7 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     ServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
                     ServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
+                    ServiceRegister::getService(DisconnectIntegrationServiceInterface::class),
                 );
             })
         );

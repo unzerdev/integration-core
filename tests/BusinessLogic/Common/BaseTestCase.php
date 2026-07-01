@@ -34,6 +34,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Country\CountryService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Currency\CurrencyServiceInterface;
+use Unzer\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectIntegrationServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\CustomerProcessor;
@@ -90,6 +91,7 @@ use Unzer\Core\Infrastructure\Utility\Events\EventBus;
 use Unzer\Core\Infrastructure\Utility\GuidProvider;
 use Unzer\Core\Infrastructure\Utility\TimeProvider;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\DisconnectIntegrationServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\PaymentStatusMapServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\UploaderServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\WebhookUrlServiceMock;
@@ -188,6 +190,7 @@ class BaseTestCase extends TestCase
                     TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
                     TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
                     TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
+                    TestServiceRegister::getService(DisconnectIntegrationServiceInterface::class),
                 );
             },
             ConnectionController::class => function () {
@@ -454,6 +457,13 @@ class BaseTestCase extends TestCase
             WebhookUrlServiceInterface::class,
             function () {
                 return new WebhookUrlServiceMock();
+            }
+        );
+
+        TestServiceRegister::registerService(
+            DisconnectIntegrationServiceInterface::class,
+            function () {
+                return new DisconnectIntegrationServiceMock();
             }
         );
 
