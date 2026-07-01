@@ -4,6 +4,7 @@ namespace Unzer\Core\Tests\BusinessLogic\AdminAPI\Disconnect;
 
 use Unzer\Core\BusinessLogic\AdminAPI\AdminAPI;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectIntegrationServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfigRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Repositories\PaymentPageSettingsRepositoryInterface;
@@ -41,7 +42,8 @@ class DisconnectControllerTest extends BaseTestCase
             TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
             TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
             TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
-            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
+            TestServiceRegister::getService(DisconnectIntegrationServiceInterface::class)
         );
 
         TestServiceRegister::registerService(

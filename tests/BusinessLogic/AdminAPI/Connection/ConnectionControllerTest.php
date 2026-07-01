@@ -18,6 +18,7 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Repositories\ConnectionSettingsRepositoryInterface;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectIntegrationServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Disconnect\Services\DisconnectService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Utility\EncryptorInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\Webhook\WebhookUrlServiceInterface;
@@ -81,7 +82,8 @@ class ConnectionControllerTest extends BaseTestCase
             TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
             TestServiceRegister::getService(PaymentPageSettingsRepositoryInterface::class),
             TestServiceRegister::getService(PaymentStatusMapRepositoryInterface::class),
-            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class)
+            TestServiceRegister::getService(TransactionHistoryRepositoryInterface::class),
+            TestServiceRegister::getService(DisconnectIntegrationServiceInterface::class)
         );
 
         TestServiceRegister::registerService(
