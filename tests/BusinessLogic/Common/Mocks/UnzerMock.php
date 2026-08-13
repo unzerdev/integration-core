@@ -37,6 +37,7 @@ class UnzerMock extends Unzer
     private array $webhooks = [];
     private ?array $payPageData = [];
     private bool $throwOnCreateBasket = false;
+    private bool $throwOnDeletePaypage = false;
 
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
@@ -484,5 +485,34 @@ class UnzerMock extends Unzer
         $mockPaypage->setRedirectUrl($this->payPageData['redirectUrl']);
 
         return $mockPaypage;
+    }
+
+    /**
+     * @param bool $throw
+     *
+     * @return void
+     */
+    public function setThrowOnDeletePaypage(bool $throw): void
+    {
+        $this->throwOnDeletePaypage = $throw;
+    }
+
+    /**
+     * Unzer::deletePaypageById() builds a Paypage resource and delegates here, so overriding this
+     * single method records both entry points.
+     *
+     * @param \UnzerSDK\Resources\V2\Paypage $paypage
+     *
+     * @return void
+     *
+     * @throws \UnzerSDK\Exceptions\UnzerApiException
+     */
+    public function deletePaypage(\UnzerSDK\Resources\V2\Paypage $paypage): void
+    {
+        $this->callHistory['deletePaypage'][] = ['paypageId' => $paypage->getId()];
+
+        if ($this->throwOnDeletePaypage) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Paypage not found');
+        }
     }
 }
