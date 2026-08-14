@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.2.2](https://github.com/unzerdev/integration-core/releases/tag/2.2.2) - 2026-08-14
+- Add Payment page v2 deletion logic
+
 ## [2.2.1](https://github.com/unzerdev/integration-core/releases/tag/2.2.1) - 2026-06-30
 - Drop support for PHP 7.4 and 8.0
 - Add support for PHP 8.5
