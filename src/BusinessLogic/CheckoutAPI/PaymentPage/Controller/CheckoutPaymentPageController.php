@@ -10,10 +10,12 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentPageResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentStateResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaypageDeleteResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\DataBag;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Services\ConnectionService;
+use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
@@ -45,10 +47,12 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
 
     /**
      * @param PaymentPageCreateRequest $request
+     *
      * @return CommonFlowResponse
      * @throws ConnectionSettingsNotFoundException
      * @throws PaymentConfigNotFoundException
      * @throws UnzerApiException
+     * @throws InvalidAmountsException
      */
     public function create(CommonFlowRequest $request): CommonFlowResponse
     {
@@ -103,5 +107,19 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
     public function fetchChargeByOrderId(string $orderId): ChargeResponse
     {
         return new ChargeResponse($this->paymentPageService->fetchChargeByOrderId($orderId));
+    }
+
+    /**
+     * @param string $paypageId
+     *
+     * @return PaypageDeleteResponse
+     *
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function deletePaypage(string $paypageId): PaypageDeleteResponse
+    {
+        $this->paymentPageService->deletePaypage($paypageId);
+
+        return new PaypageDeleteResponse($paypageId);
     }
 }

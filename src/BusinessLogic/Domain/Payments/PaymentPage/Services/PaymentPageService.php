@@ -100,6 +100,7 @@ class PaymentPageService
      * @param string $orderId
      *
      * @return PaymentState
+     *
      * @throws ConnectionSettingsNotFoundException
      * @throws TransactionHistoryNotFoundException
      * @throws UnzerApiException
@@ -151,6 +152,20 @@ class PaymentPageService
         $chargeId = $lastCharge->getId();
 
         return $this->unzerFactory->makeUnzerAPI()->fetchChargeById($payment->getId(), $chargeId);
+    }
+
+    /**
+     * Deletes a paypage so that it can no longer accept payments.
+     *
+     * @param string $paypageId
+     *
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function deletePaypage(string $paypageId): void
+    {
+        $this->unzerFactory->makeUnzerAPI()->deletePaypageById($paypageId);
     }
 
     /**

@@ -8,6 +8,7 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CheckoutAPI;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Request\PaymentPageCreateRequest;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\ChargeResponse;
 use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaymentResponse;
+use Unzer\Core\BusinessLogic\CheckoutAPI\PaymentPage\Response\PaypageDeleteResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
@@ -599,6 +600,74 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertEmpty($methodCallHistory);
     }
 
+
+    public function testDeletePaypage(): void
+    {
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->deletePaypage('test-paypage-123');
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deletePaypage');
+        self::assertCount(1, $methodCallHistory);
+        self::assertEquals('test-paypage-123', $methodCallHistory[0]['paypageId']);
+        self::assertInstanceOf(PaypageDeleteResponse::class, $response);
+        self::assertTrue($response->isSuccessful());
+        self::assertEquals('test-paypage-123', $response->getPaypageId());
+        self::assertEquals(['id' => 'test-paypage-123'], $response->toArray());
+    }
+
+    public function testDeletePaypageWhenUnzerFails(): void
+    {
+        // Arrange
+        $this->unzerFactory->getMockUnzer()->setThrowOnDeletePaypage(true);
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->deletePaypage('test-paypage-123');
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deletePaypage');
+        self::assertCount(1, $methodCallHistory);
+        self::assertInstanceOf(ErrorResponse::class, $response);
+        self::assertFalse($response->isSuccessful());
+    }
+
+    /**
+     * @throws UnzerApiException
+     * @throws ConnectionSettingsNotFoundException
+     * @throws PaymentConfigNotFoundException
+     */
+    public function testDeletePaypageCreatedThroughApi(): void
+    {
+        // Arrange
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+        $this->unzerFactory->getMockUnzer()->setPayPageData(
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
+        );
+
+        $createResponse = CheckoutAPI::get()->paymentPage('1')->create(
+            new PaymentPageCreateRequest(
+                PaymentMethodTypes::EPS,
+                'test-order-123',
+                Amount::fromFloat(123.23, Currency::getDefault()),
+                'test.my.shop.com'
+            )
+        );
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->deletePaypage($createResponse->toArray()['id']);
+
+        // Assert
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deletePaypage');
+        self::assertCount(1, $methodCallHistory);
+        self::assertEquals('test-paypage-123', $methodCallHistory[0]['paypageId']);
+        self::assertTrue($response->isSuccessful());
+    }
 
     private static function assertTransactionHistory(TransactionHistory $expected): void
     {
