@@ -1,0 +1,14 @@
+# JS build manifests are excluded from the composer dist archive
+# that integrations vendor into their container images. Container
+# scanners read them as package manifests and report JS advisories against
+# every integration image, even though no node_modules and no Node runtime
+# are present there, so none of that code is executable.
+/Resources/admin-ui/package.json  export-ignore
+/Resources/admin-ui/yarn.lock     export-ignore
+
+# Test suite and local tooling, not used by consumers of this library.
+/tests                  export-ignore
+/phpunit.xml            export-ignore
+/run-tests.sh           export-ignore
+/.phpunit.result.cache  export-ignore
+/.idea                  export-ignore
