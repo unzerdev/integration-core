@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.2.3](https://github.com/unzerdev/integration-core/releases/tag/2.2.3) - 2026-09-01
+- Update admin-ui package
+
 ## [2.2.2](https://github.com/unzerdev/integration-core/releases/tag/2.2.2) - 2026-08-14
 - Add Payment page v2 deletion logic
 
