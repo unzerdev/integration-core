@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
 
+## [2.2.4](https://github.com/unzerdev/integration-core/releases/tag/2.2.4) - 2026-09-17
+- Set Wero to inline flow 
+- Add integration specific data clean up on disconnect
+
 ## [2.2.3](https://github.com/unzerdev/integration-core/releases/tag/2.2.3) - 2026-09-01
 - Update admin-ui package
 
