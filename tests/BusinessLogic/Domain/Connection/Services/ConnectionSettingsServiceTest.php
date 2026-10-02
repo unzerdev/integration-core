@@ -7,6 +7,7 @@ use Unzer\Core\BusinessLogic\DataAccess\Connection\Entities\ConnectionSettings a
 use Unzer\Core\BusinessLogic\DataAccess\Webhook\Entities\WebhookSettings as WebhookSettingsEntity;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
@@ -27,6 +28,7 @@ use Unzer\Core\Infrastructure\ORM\Exceptions\QueryFilterInvalidParamException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryNotRegisteredException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
+use Unzer\Core\Tests\BusinessLogic\Common\IntegrationMocks\EncryptorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
@@ -1001,6 +1003,155 @@ class ConnectionSettingsServiceTest extends BaseTestCase
 
         // assert
         self::assertEquals([], $storeIds);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testInvalidPrivateKeyIsNotExposedInExceptionMessageOrTrace(): void
+    {
+        // arrange
+        $privateKey = 'p-priv-secret-value';
+        $settings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            null,
+            new ConnectionData('s-pub-test', $privateKey)
+        );
+        $thrown = null;
+
+        // act
+        try {
+            StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+        } catch (PrivateKeyInvalidException $exception) {
+            $thrown = $exception;
+        }
+
+        // assert
+        self::assertNotNull($thrown);
+        self::assertStringNotContainsString($privateKey, $thrown->getMessage());
+        self::assertStringNotContainsString($privateKey, $thrown->getTraceAsString());
+        self::assertStringNotContainsString($privateKey, (string)$thrown);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testInitializeConnectionEncryptionFailureDoesNotExposeKey(): void
+    {
+        // arrange
+        $privateKey = 'p-priv-live-test';
+        $settings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', $privateKey),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $this->mockData('p-pub-live-test', $privateKey);
+        $encryptor = new EncryptorMock();
+        $encryptor->setThrowOnEncrypt(true);
+        $service = $this->createServiceWithEncryptor($encryptor);
+        $thrown = null;
+
+        // act
+        try {
+            StoreContext::doWithStore('1', [$service, 'initializeConnection'], [$settings]);
+        } catch (EncryptionFailedException $exception) {
+            $thrown = $exception;
+        }
+
+        // assert
+        self::assertNotNull($thrown);
+        self::assertNull($thrown->getPrevious());
+        self::assertEquals('connection.encryptionFailed', $thrown->getTranslatableLabel()->getCode());
+        self::assertStringNotContainsString($privateKey, $thrown->getMessage());
+        self::assertStringNotContainsString($privateKey, $thrown->getTraceAsString());
+        self::assertStringNotContainsString($privateKey, (string)$thrown);
+        self::assertNull($this->repository->selectOne());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetConnectionSettingsDecryptionFailureDoesNotExposeKey(): void
+    {
+        // arrange
+        $privateKey = 'p-priv-live-test';
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', $privateKey),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+        $encryptor = new EncryptorMock();
+        $encryptor->setThrowOnDecrypt(true);
+        $service = $this->createServiceWithEncryptor($encryptor);
+        $thrown = null;
+
+        // act
+        try {
+            StoreContext::doWithStore('1', [$service, 'getConnectionSettings']);
+        } catch (EncryptionFailedException $exception) {
+            $thrown = $exception;
+        }
+
+        // assert
+        self::assertNotNull($thrown);
+        self::assertNull($thrown->getPrevious());
+        self::assertEquals('connection.decryptionFailed', $thrown->getTranslatableLabel()->getCode());
+        self::assertStringNotContainsString($privateKey, $thrown->getMessage());
+        self::assertStringNotContainsString($privateKey, $thrown->getTraceAsString());
+        self::assertStringNotContainsString($privateKey, (string)$thrown);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetActiveConnectionDataDecryptionFailure(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+        $encryptor = new EncryptorMock();
+        $encryptor->setThrowOnDecrypt(true);
+        $service = $this->createServiceWithEncryptor($encryptor);
+        $this->expectException(EncryptionFailedException::class);
+
+        // act
+        StoreContext::doWithStore('1', [$service, 'getActiveConnectionData']);
+
+        // assert
+    }
+
+    /**
+     * @param EncryptorInterface $encryptor
+     *
+     * @return ConnectionService
+     */
+    private function createServiceWithEncryptor(EncryptorInterface $encryptor): ConnectionService
+    {
+        return new ConnectionService(
+            $this->unzerFactory,
+            TestServiceRegister::getService(ConnectionSettingsRepositoryInterface::class),
+            TestServiceRegister::getService(WebhookSettingsRepositoryInterface::class),
+            $encryptor,
+            TestServiceRegister::getService(WebhookUrlServiceInterface::class)
+        );
     }
 
     /**

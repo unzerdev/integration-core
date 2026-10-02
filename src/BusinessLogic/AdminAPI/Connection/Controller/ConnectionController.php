@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\GetCredentialsResponse
 use Unzer\Core\BusinessLogic\AdminAPI\Connection\Response\ReRegisterWebhooksResponse;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidModeException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
@@ -62,6 +63,7 @@ class ConnectionController
      * @throws InvalidModeException
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
+     * @throws EncryptionFailedException
      */
     public function connect(ConnectionRequest $connectionRequest): ConnectionResponse
     {
@@ -80,7 +82,9 @@ class ConnectionController
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      * @throws UnzerApiException
-     * @throws InvalidModeException|QueryFilterInvalidParamException
+     * @throws InvalidModeException
+     * @throws QueryFilterInvalidParamException
+     * @throws EncryptionFailedException
      */
     public function reconnect(ReconnectRequest $reconnectRequest): GetCredentialsResponse
     {
@@ -117,9 +121,11 @@ class ConnectionController
      *
      * @return ReRegisterWebhooksResponse
      *
+     * @throws ConnectionDataNotFound
      * @throws ConnectionSettingsNotFoundException
      * @throws InvalidModeException
-     * @throws ConnectionDataNotFound
+     * @throws PrivateKeyInvalidException
+     * @throws EncryptionFailedException
      */
     public function reRegisterWebhooks(ReRegisterWebhookRequest $request): ReRegisterWebhooksResponse
     {
@@ -130,6 +136,8 @@ class ConnectionController
 
     /**
      * @return GetCredentialsResponse
+     *
+     * @throws EncryptionFailedException
      */
     public function getCredentials(): GetCredentialsResponse
     {

@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Connection\Services;
 use Unzer\Core\BusinessLogic\Domain\Connection\Enums\SupportedWebhookEvents;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionDataNotFound;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\InvalidKeypairException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PublicKeyInvalidException;
@@ -23,6 +24,7 @@ use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Unzer;
 use UnzerSDK\Validators\PrivateKeyValidator;
 use UnzerSDK\Validators\PublicKeyValidator;
+use Throwable;
 
 /**
  * Class ConnectionService.
@@ -77,6 +79,7 @@ class ConnectionService
      * @throws PrivateKeyInvalidException
      * @throws PublicKeyInvalidException
      * @throws UnzerApiException
+     * @throws EncryptionFailedException
      */
     public function initializeConnection(ConnectionSettings $connectionSettings): void
     {
@@ -97,6 +100,8 @@ class ConnectionService
 
     /**
      * @return ConnectionSettings|null
+     *
+     * @throws EncryptionFailedException
      */
     public function getConnectionSettings(): ?ConnectionSettings
     {
@@ -107,6 +112,8 @@ class ConnectionService
 
     /**
      * @return ConnectionData|null
+     *
+     * @throws EncryptionFailedException
      */
     public function getActiveConnectionData(): ?ConnectionData
     {
@@ -150,6 +157,8 @@ class ConnectionService
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws ConnectionDataNotFound
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      */
     public function reRegisterWebhooks(Mode $mode): ?WebhookSettings
     {
@@ -188,6 +197,8 @@ class ConnectionService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      */
     public function deleteWebhooks(): void
     {
@@ -259,6 +270,8 @@ class ConnectionService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      */
     protected function deleteWebhooksForMode(Mode $mode): void
     {
@@ -449,6 +462,8 @@ class ConnectionService
      * @param ConnectionSettings $connectionSettings
      *
      * @return void
+     *
+     * @throws EncryptionFailedException
      */
     protected function saveConnectionSettings(ConnectionSettings $connectionSettings): void
     {
@@ -474,29 +489,37 @@ class ConnectionService
     }
 
     /**
-     * Encrypts private and public key
+     * Encrypts private and public key.
      *
      * @param ConnectionSettings $connectionSettings
      *
      * @return ConnectionSettings
+     *
+     * @throws EncryptionFailedException
      */
     protected function encryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
     {
-        if ($connectionSettings->getSandboxConnectionData()) {
-            $connectionSettings->setSandboxConnectionData(
-                new ConnectionData(
-                    $this->encryptor->encrypt($connectionSettings->getSandboxConnectionData()->getPublicKey()),
-                    $this->encryptor->encrypt($connectionSettings->getSandboxConnectionData()->getPrivateKey())
-                )
-            );
-        }
+        try {
+            if ($connectionSettings->getSandboxConnectionData()) {
+                $connectionSettings->setSandboxConnectionData(
+                    new ConnectionData(
+                        $this->encryptor->encrypt($connectionSettings->getSandboxConnectionData()->getPublicKey()),
+                        $this->encryptor->encrypt($connectionSettings->getSandboxConnectionData()->getPrivateKey())
+                    )
+                );
+            }
 
-        if ($connectionSettings->getLiveConnectionData()) {
-            $connectionSettings->setLiveConnectionData(
-                new ConnectionData(
-                    $this->encryptor->encrypt($connectionSettings->getLiveConnectionData()->getPublicKey()),
-                    $this->encryptor->encrypt($connectionSettings->getLiveConnectionData()->getPrivateKey())
-                )
+            if ($connectionSettings->getLiveConnectionData()) {
+                $connectionSettings->setLiveConnectionData(
+                    new ConnectionData(
+                        $this->encryptor->encrypt($connectionSettings->getLiveConnectionData()->getPublicKey()),
+                        $this->encryptor->encrypt($connectionSettings->getLiveConnectionData()->getPrivateKey())
+                    )
+                );
+            }
+        } catch (Throwable $e) {
+            throw new EncryptionFailedException(
+                new TranslatableLabel('Failed to encrypt connection settings.', 'connection.encryptionFailed')
             );
         }
 
@@ -504,29 +527,37 @@ class ConnectionService
     }
 
     /**
-     * Decrypts private and public key
+     * Decrypts private and public key. See encryptConnectionSettings() for why failures are wrapped.
      *
      * @param ConnectionSettings $connectionSettings
      *
      * @return ConnectionSettings
+     *
+     * @throws EncryptionFailedException
      */
     protected function decryptConnectionSettings(ConnectionSettings $connectionSettings): ConnectionSettings
     {
-        if ($connectionSettings->getSandboxConnectionData()) {
-            $connectionSettings->setSandboxConnectionData(
-                new ConnectionData(
-                    $this->encryptor->decrypt($connectionSettings->getSandboxConnectionData()->getPublicKey()),
-                    $this->encryptor->decrypt($connectionSettings->getSandboxConnectionData()->getPrivateKey())
-                )
-            );
-        }
+        try {
+            if ($connectionSettings->getSandboxConnectionData()) {
+                $connectionSettings->setSandboxConnectionData(
+                    new ConnectionData(
+                        $this->encryptor->decrypt($connectionSettings->getSandboxConnectionData()->getPublicKey()),
+                        $this->encryptor->decrypt($connectionSettings->getSandboxConnectionData()->getPrivateKey())
+                    )
+                );
+            }
 
-        if ($connectionSettings->getLiveConnectionData()) {
-            $connectionSettings->setLiveConnectionData(
-                new ConnectionData(
-                    $this->encryptor->decrypt($connectionSettings->getLiveConnectionData()->getPublicKey()),
-                    $this->encryptor->decrypt($connectionSettings->getLiveConnectionData()->getPrivateKey())
-                )
+            if ($connectionSettings->getLiveConnectionData()) {
+                $connectionSettings->setLiveConnectionData(
+                    new ConnectionData(
+                        $this->encryptor->decrypt($connectionSettings->getLiveConnectionData()->getPublicKey()),
+                        $this->encryptor->decrypt($connectionSettings->getLiveConnectionData()->getPrivateKey())
+                    )
+                );
+            }
+        } catch (Throwable $e) {
+            throw new EncryptionFailedException(
+                new TranslatableLabel('Failed to decrypt connection settings.', 'connection.decryptionFailed')
             );
         }
 

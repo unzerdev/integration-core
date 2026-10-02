@@ -3,6 +3,7 @@
 namespace Unzer\Core\Tests\BusinessLogic\UnzerAPI;
 
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionData;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\ConnectionSettings;
 use Unzer\Core\BusinessLogic\Domain\Connection\Models\Mode;
@@ -131,5 +132,65 @@ class UnzerFactoryTest extends BaseTestCase
         $unzer = (new UnzerFactory())->makeUnzerAPI();
         // assert
         self::assertEquals($expectedUnzer, $unzer);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function testMakeUnzerWithInvalidPrivateKeyDoesNotExposeKey(): void
+    {
+        // arrange
+        $privateKey = 'this-is-not-a-valid-key';
+        $connectionData = new ConnectionData('s-pub-live-test', $privateKey);
+        $thrown = null;
+
+        // act
+        try {
+            (new UnzerFactory())->makeUnzerAPI($connectionData);
+        } catch (PrivateKeyInvalidException $exception) {
+            $thrown = $exception;
+        }
+
+        // assert
+        self::assertNotNull($thrown);
+        self::assertNull($thrown->getPrevious());
+        self::assertEquals('connection.invalidPrivateKey', $thrown->getTranslatableLabel()->getCode());
+        self::assertStringNotContainsString($privateKey, $thrown->getMessage());
+        self::assertStringNotContainsString($privateKey, $thrown->getTraceAsString());
+        self::assertStringNotContainsString($privateKey, (string)$thrown);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws ConnectionSettingsNotFoundException
+     */
+    public function testMakeUnzerFromConnectionServiceWithInvalidPrivateKeyDoesNotExposeKey(): void
+    {
+        // arrange
+        $privateKey = 'this-is-not-a-valid-key';
+        $this->connectionServiceMock->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('s-pub-live-test', $privateKey)
+            )
+        );
+        $thrown = null;
+
+        // act
+        try {
+            (new UnzerFactory())->makeUnzerAPI();
+        } catch (PrivateKeyInvalidException $exception) {
+            $thrown = $exception;
+        }
+
+        // assert
+        self::assertNotNull($thrown);
+        self::assertNull($thrown->getPrevious());
+        self::assertStringNotContainsString($privateKey, $thrown->getMessage());
+        self::assertStringNotContainsString($privateKey, $thrown->getTraceAsString());
+        self::assertStringNotContainsString($privateKey, (string)$thrown);
     }
 }
