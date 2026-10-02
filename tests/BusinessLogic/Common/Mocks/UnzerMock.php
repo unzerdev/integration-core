@@ -38,6 +38,8 @@ class UnzerMock extends Unzer
     private ?array $payPageData = [];
     private bool $throwOnCreateBasket = false;
     private bool $throwOnDeletePaypage = false;
+    private bool $throwOnDeleteWebhook = false;
+    private bool $throwOnRegisterWebhooks = false;
 
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
@@ -95,7 +97,23 @@ class UnzerMock extends Unzer
      */
     public function registerMultipleWebhooks(string $url, array $events): array
     {
+        $this->callHistory['registerMultipleWebhooks'][] = ['url' => $url, 'events' => $events];
+
+        if ($this->throwOnRegisterWebhooks) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Webhook registration failed');
+        }
+
         return $this->webhooks;
+    }
+
+    /**
+     * @param bool $throw
+     *
+     * @return void
+     */
+    public function setThrowOnRegisterWebhooks(bool $throw): void
+    {
+        $this->throwOnRegisterWebhooks = $throw;
     }
 
     /**
@@ -112,6 +130,21 @@ class UnzerMock extends Unzer
      */
     public function deleteWebhook($webhook)
     {
+        $this->callHistory['deleteWebhook'][] = ['webhookId' => $webhook];
+
+        if ($this->throwOnDeleteWebhook) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Webhook not found');
+        }
+    }
+
+    /**
+     * @param bool $throw
+     *
+     * @return void
+     */
+    public function setThrowOnDeleteWebhook(bool $throw): void
+    {
+        $this->throwOnDeleteWebhook = $throw;
     }
 
     /**

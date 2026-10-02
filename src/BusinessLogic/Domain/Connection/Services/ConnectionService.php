@@ -233,6 +233,11 @@ class ConnectionService
         }
     }
 
+    /**
+     * @param Mode $mode
+     *
+     * @return bool
+     */
     protected function isWebhookRegistrationNecessary(Mode $mode): bool
     {
         $webhookSettings = $this->webhookDataRepository->getWebhookSettings();
@@ -344,70 +349,75 @@ class ConnectionService
      */
     protected function validateKeys(ConnectionSettings $connectionSettings): void
     {
-        $mode = $connectionSettings->getMode();
-        $this->validatePrivateKey($connectionSettings->getActiveConnectionData()->getPrivateKey(), $mode);
-        $this->validatePublicKey($connectionSettings->getActiveConnectionData()->getPublicKey(), $mode);
+        $this->validatePrivateKey($connectionSettings);
+        $this->validatePublicKey($connectionSettings);
     }
 
     /**
-     * @param string $privateKey
-     * @param Mode $mode
+     * Key values must never appear in exception messages, and must not be passed
+     * as scalar method arguments on the throwing call stack, because the stack
+     * trace (including arguments) is logged by the error handling aspect.
+     *
+     * @param ConnectionSettings $connectionSettings
      *
      * @return void
      *
      * @throws PrivateKeyInvalidException
      */
-    protected function validatePrivateKey(string $privateKey, Mode $mode): void
+    protected function validatePrivateKey(ConnectionSettings $connectionSettings): void
     {
+        $mode = $connectionSettings->getMode();
+        $privateKey = $connectionSettings->getActiveConnectionData()->getPrivateKey();
+
         if (!PrivateKeyValidator::validate($privateKey)) {
             throw new PrivateKeyInvalidException(
-                new TranslatableLabel("Private key: {$privateKey} is invalid.",
-                    'connection.invalidPrivateKey')
+                new TranslatableLabel('Private key is invalid.', 'connection.invalidPrivateKey')
             );
         }
 
         if ($mode->equal(Mode::live()) && !$this->isLiveKey($privateKey)) {
             throw new PrivateKeyInvalidException(
-                new TranslatableLabel("The private key: {$privateKey} does not match live mode.",
+                new TranslatableLabel('The private key does not match live mode.',
                     'connection.invalidPrivateKeyForMode')
             );
         }
 
         if ($mode->equal(Mode::sandbox()) && !$this->isSandboxKey($privateKey)) {
             throw new PrivateKeyInvalidException(
-                new TranslatableLabel("The public key: {$privateKey} does not match sandbox mode.",
+                new TranslatableLabel('The private key does not match sandbox mode.',
                     'connection.invalidPrivateKeyForMode')
             );
         }
     }
 
     /**
-     * @param string $publicKey
-     * @param Mode $mode
+     * @param ConnectionSettings $connectionSettings
      *
      * @return void
      *
      * @throws PublicKeyInvalidException
      */
-    protected function validatePublicKey(string $publicKey, Mode $mode): void
+    protected function validatePublicKey(ConnectionSettings $connectionSettings): void
     {
+        $mode = $connectionSettings->getMode();
+        $publicKey = $connectionSettings->getActiveConnectionData()->getPublicKey();
+
         if (!PublicKeyValidator::validate($publicKey)) {
             throw new PublicKeyInvalidException(
-                new TranslatableLabel("Public key: {$publicKey} is invalid.",
-                    'connection.invalidPublicKey')
+                new TranslatableLabel('Public key is invalid.', 'connection.invalidPublicKey')
             );
         }
 
         if ($mode->equal(Mode::live()) && !$this->isLiveKey($publicKey)) {
             throw new PublicKeyInvalidException(
-                new TranslatableLabel("The private key: {$publicKey} does not match live mode.",
+                new TranslatableLabel('The public key does not match live mode.',
                     'connection.invalidPublicKeyForMode')
             );
         }
 
         if ($mode->equal(Mode::sandbox()) && !$this->isSandboxKey($publicKey)) {
             throw new PublicKeyInvalidException(
-                new TranslatableLabel("The public key: {$publicKey} does not match sandbox mode.",
+                new TranslatableLabel('The public key does not match sandbox mode.',
                     'connection.invalidPublicKeyForMode')
             );
         }
@@ -420,7 +430,7 @@ class ConnectionService
      */
     private function isLiveKey(string $key): bool
     {
-        return strpos($key, 'p') === 0;
+        return str_starts_with($key, 'p');
     }
 
     /**
@@ -430,7 +440,7 @@ class ConnectionService
      */
     private function isSandboxKey(string $key): bool
     {
-        return strpos($key, 's') === 0;
+        return str_starts_with($key, 's');
     }
 
     /**

@@ -672,6 +672,339 @@ class ConnectionSettingsServiceTest extends BaseTestCase
 
     /**
      * @return void
+     *
+     * @throws Exception
+     */
+    public function testInitializeConnectionSkipsWebhookRegistrationWhenLiveWebhooksExist(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $existingWebhookData = new WebhookData('https://old.com', ['1', '2'], ['payment', 'charge'], 'test');
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings(new WebhookSettings(Mode::live(), $existingWebhookData));
+        $entity->setStoreId('1');
+        $this->webhookDataRepository->save($entity);
+        $webhook = new Webhook();
+        $webhook->setUrl('https://test.com');
+        $webhook->setEvent(WebhookEvents::PAYMENT);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test', [$webhook]);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+
+        // assert
+        /** @var WebhookSettings $webhookSettings */
+        $webhookSettings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
+
+        self::assertEquals($existingWebhookData, $webhookSettings->getLiveWebhookData());
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('registerMultipleWebhooks'));
+        self::assertNotNull($this->repository->selectOne());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testInitializeConnectionSkipsWebhookRegistrationWhenSandboxWebhooksExist(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $existingWebhookData = new WebhookData('https://old.com', ['1', '2'], ['payment', 'charge'], 'test');
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings(new WebhookSettings(Mode::sandbox(), null, $existingWebhookData));
+        $entity->setStoreId('1');
+        $this->webhookDataRepository->save($entity);
+        $webhook = new Webhook();
+        $webhook->setUrl('https://test.com');
+        $webhook->setEvent(WebhookEvents::PAYMENT);
+        $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test', [$webhook]);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+
+        // assert
+        /** @var WebhookSettings $webhookSettings */
+        $webhookSettings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
+
+        self::assertEquals($existingWebhookData, $webhookSettings->getSandboxWebhookData());
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('registerMultipleWebhooks'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testInitializeConnectionRegistersWebhooksWhenOnlyOtherModeIsRegistered(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $existingWebhookData = new WebhookData('https://old.com', ['1', '2'], ['payment', 'charge'], 'test');
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings(new WebhookSettings(Mode::live(), $existingWebhookData));
+        $entity->setStoreId('1');
+        $this->webhookDataRepository->save($entity);
+        $webhook = new Webhook();
+        $webhook->setId('3');
+        $webhook->setUrl('https://test.com');
+        $webhook->setEvent(WebhookEvents::PAYMENT);
+        $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test', [$webhook]);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+
+        // assert
+        /** @var WebhookSettings $webhookSettings */
+        $webhookSettings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
+
+        self::assertEquals($existingWebhookData, $webhookSettings->getLiveWebhookData());
+        self::assertNotNull($webhookSettings->getSandboxWebhookData());
+        self::assertEquals('https://test.com', $webhookSettings->getSandboxWebhookData()->getUrl());
+        self::assertEquals(['3'], $webhookSettings->getSandboxWebhookData()->getIds());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testInitializeConnectionWebhookRegistrationFailureIsIgnored(): void
+    {
+        // arrange
+        $settings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
+        $this->unzerFactory->getMockUnzer()->setThrowOnRegisterWebhooks(true);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'initializeConnection'], [$settings]);
+
+        // assert
+        self::assertNull($this->webhookDataRepository->selectOne());
+        self::assertNotNull($this->repository->selectOne());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testReRegistringWebhooksSandboxModeUpdatesExistingSettings(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('sandbox'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        $liveWebhookData = new WebhookData('https://live.com', ['1', '2'], ['payment', 'charge'], 'test');
+        $sandboxWebhookData = new WebhookData('https://old-sandbox.com', ['3'], ['payment'], 'test');
+        $oldData = new WebhookSettingsEntity();
+        $oldData->setWebhookSettings(new WebhookSettings(Mode::sandbox(), $liveWebhookData, $sandboxWebhookData));
+        $oldData->setStoreId('1');
+        $this->webhookDataRepository->save($oldData);
+
+        $webhook = new Webhook();
+        $webhook->setId('4');
+        $webhook->setUrl('https://test.com');
+        $webhook->setEvent(WebhookEvents::CHARGE);
+        $this->mockData('s-pub-sandbox-test', 's-priv-sandbox-test', [$webhook]);
+
+        // act
+        $webhookSettingsSaved = StoreContext::doWithStore('1', [$this->service, 'reRegisterWebhooks'], [Mode::sandbox()]);
+
+        // assert
+        /** @var WebhookSettings $webhookSettings */
+        $webhookSettings = $this->webhookDataRepository->selectOne()->getWebhookSettings();
+
+        self::assertCount(1, $this->webhookDataRepository->select());
+        self::assertEquals($liveWebhookData, $webhookSettings->getLiveWebhookData());
+        self::assertEquals('https://test.com', $webhookSettings->getSandboxWebhookData()->getUrl());
+        self::assertEquals(['4'], $webhookSettings->getSandboxWebhookData()->getIds());
+        self::assertEquals($webhookSettings, $webhookSettingsSaved);
+        $deleteCalls = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deleteWebhook');
+        self::assertCount(1, $deleteCalls);
+        self::assertEquals('3', $deleteCalls[0]['webhookId']);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeleteWebhooks(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        $liveWebhookData = new WebhookData('https://live.com', ['1', '2'], ['payment', 'charge'], 'test');
+        $sandboxWebhookData = new WebhookData('https://sandbox.com', ['3'], ['payment'], 'test');
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings(new WebhookSettings(Mode::live(), $liveWebhookData, $sandboxWebhookData));
+        $entity->setStoreId('1');
+        $this->webhookDataRepository->save($entity);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'deleteWebhooks']);
+
+        // assert
+        self::assertEmpty($this->webhookDataRepository->select());
+        $deleteCalls = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deleteWebhook');
+        self::assertCount(3, $deleteCalls);
+        self::assertEquals(['1', '2', '3'], array_column($deleteCalls, 'webhookId'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeleteWebhooksApiErrorIsIgnored(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        $liveWebhookData = new WebhookData('https://live.com', ['1'], ['payment'], 'test');
+        $sandboxWebhookData = new WebhookData('https://sandbox.com', ['2'], ['payment'], 'test');
+        $entity = new WebhookSettingsEntity();
+        $entity->setWebhookSettings(new WebhookSettings(Mode::live(), $liveWebhookData, $sandboxWebhookData));
+        $entity->setStoreId('1');
+        $this->webhookDataRepository->save($entity);
+        $this->mockData('p-pub-live-test', 'p-priv-live-test');
+        $this->unzerFactory->getMockUnzer()->setThrowOnDeleteWebhook(true);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'deleteWebhooks']);
+
+        // assert
+        self::assertEmpty($this->webhookDataRepository->select());
+        self::assertCount(2, $this->unzerFactory->getMockUnzer()->getMethodCallHistory('deleteWebhook'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeleteWebhooksNoData(): void
+    {
+        // arrange
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'deleteWebhooks']);
+
+        // assert
+        self::assertEmpty($this->webhookDataRepository->select());
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('deleteWebhook'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testDeleteConnectionSettings(): void
+    {
+        // arrange
+        $connectionSettings = new ConnectionSettings(
+            Mode::parse('live'),
+            new ConnectionData('p-pub-live-test', 'p-priv-live-test'),
+            new ConnectionData('s-pub-sandbox-test', 's-priv-sandbox-test')
+        );
+        $settings = new ConnectionSettingsEntity();
+        $settings->setConnectionSettings($connectionSettings);
+        $settings->setStoreId('1');
+        $this->repository->save($settings);
+
+        // act
+        StoreContext::doWithStore('1', [$this->service, 'deleteConnectionSettings']);
+
+        // assert
+        self::assertEmpty($this->repository->select());
+        self::assertNull(StoreContext::doWithStore('1', [$this->service, 'getConnectionSettings']));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetConnectedStoreIds(): void
+    {
+        // arrange
+        foreach (['1', '2'] as $storeId) {
+            $settings = new ConnectionSettingsEntity();
+            $settings->setConnectionSettings(new ConnectionSettings(
+                Mode::parse('live'),
+                new ConnectionData('p-pub-live-test', 'p-priv-live-test')
+            ));
+            $settings->setStoreId($storeId);
+            $this->repository->save($settings);
+        }
+
+        // act
+        $storeIds = StoreContext::doWithStore('1', [$this->service, 'getConnectedStoreIds']);
+
+        // assert
+        self::assertEquals(['1', '2'], $storeIds);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testGetConnectedStoreIdsNoConnections(): void
+    {
+        // arrange
+
+        // act
+        $storeIds = StoreContext::doWithStore('1', [$this->service, 'getConnectedStoreIds']);
+
+        // assert
+        self::assertEquals([], $storeIds);
+    }
+
+    /**
+     * @return void
      */
     private function mockData(string $publicKey, string $privateKey, array $webhooks = [])
     {
