@@ -3,7 +3,6 @@
 namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Exceptions\AuthorizedItemNotFoundException;
-use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use UnzerSDK\Constants\TransactionTypes;
 
 /**
@@ -61,7 +60,7 @@ class HistoryItemCollection
     }
 
     /**
-     * @return AuthorizeHistoryItem
+     * @return ?AuthorizeHistoryItem
      */
     public function authorizedItem(): ?HistoryItem
     {

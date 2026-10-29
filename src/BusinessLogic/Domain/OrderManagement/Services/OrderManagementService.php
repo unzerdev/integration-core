@@ -5,6 +5,8 @@ namespace Unzer\Core\BusinessLogic\Domain\OrderManagement\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
+use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\RefundViaPayment;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
@@ -44,12 +46,14 @@ class OrderManagementService
 
     /**
      * @param string $orderId
-     * @param ?Amount $chargeAmount
+     * @param Amount|null $chargeAmount
      * @param string|null $reference
      *
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
      */
     public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
@@ -90,6 +94,8 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
      */
     public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): void
@@ -139,6 +145,8 @@ class OrderManagementService
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
      * @throws UnzerApiException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      */
     public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): void
     {
@@ -160,7 +168,7 @@ class OrderManagementService
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
 
         foreach ($chargeItems as $chargeItem) {
-            if ($chargeItem->getRefundableAmount()->getValue() <= 0) {
+            if (!$chargeItem->isSuccessful() || $chargeItem->getRefundableAmount()->getValue() <= 0) {
                 continue;
             }
 
@@ -190,14 +198,21 @@ class OrderManagementService
     }
 
     /**
-     * @throws UnzerApiException
+     * @param TransactionHistory $transactionHistory
+     * @param Amount $refundAmount
+     * @param string|null $reference
+     *
      * @throws ConnectionSettingsNotFoundException
+     *
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
+     * @throws UnzerApiException
      */
     public function refundOrderByPayment(
         TransactionHistory $transactionHistory,
         Amount $refundAmount,
         ?string $reference = null
-    ) {
+    ): void {
         $paymentId = $transactionHistory->collection()->last()->getPaymentId();
         $cancellation = new Cancellation($refundAmount->getPriceInCurrencyUnits());
         $cancellation->setPaymentReference($reference);
@@ -215,6 +230,8 @@ class OrderManagementService
      * @return void
      *
      * @throws ConnectionSettingsNotFoundException
+     * @throws EncryptionFailedException
+     * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
      */
     public function updateCustomer(string $orderId, Customer $customer): void

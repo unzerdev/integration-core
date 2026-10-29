@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use UnzerSDK\Constants\TransactionStatus;
 use UnzerSDK\Constants\TransactionTypes;
 
 /**
@@ -56,6 +57,16 @@ class ChargeHistoryItem extends HistoryItem
     public function getRefundableAmount(): Amount
     {
         return $this->getAmount()->minus($this->cancelledAmount);
+    }
+
+    /**
+     * Only a successful charge moved money and can be refunded.
+     *
+     * @return bool
+     */
+    public function isSuccessful(): bool
+    {
+        return strtolower($this->getStatus()) === TransactionStatus::STATUS_SUCCESS;
     }
 
     /**
