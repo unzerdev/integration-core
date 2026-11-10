@@ -6,6 +6,7 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\CommonFlow\Request\CommonFlowRequest;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\ReturnUrls;
 
 /**
  * Class PaymentPageCreateRequest
@@ -22,6 +23,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     private string $locale;
     private ?BookingMethod $bookingMethod;
     private ?string $paymentPageType;
+    private ?ReturnUrls $returnUrls;
 
     /**
      * @param string $paymentMethodType
@@ -41,7 +43,8 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         array $sessionData = [],
         string $locale = 'default',
         ?BookingMethod $bookingMethod = null,
-        ?string $paymentPageType = PaymentPageType::EMBEDDED
+        ?string $paymentPageType = PaymentPageType::EMBEDDED,
+        ?ReturnUrls $returnUrls = null
     ) {
         $this->paymentMethodType = $paymentMethodType;
         $this->orderId = $orderId;
@@ -51,6 +54,7 @@ class PaymentPageCreateRequest extends CommonFlowRequest
         $this->locale = $locale;
         $this->bookingMethod = $bookingMethod;
         $this->paymentPageType = $paymentPageType;
+        $this->returnUrls = $returnUrls;
     }
 
     public function getPaymentMethodType(): string
@@ -91,5 +95,13 @@ class PaymentPageCreateRequest extends CommonFlowRequest
     public function getPaymentPageType(): ?string
     {
         return $this->paymentPageType;
+    }
+
+    /**
+     * @return ReturnUrls|null
+     */
+    public function getReturnUrls(): ?ReturnUrls
+    {
+        return $this->returnUrls;
     }
 }

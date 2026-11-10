@@ -18,6 +18,9 @@ class PaymentPageCreateContext extends PaymentContext
     /** @var string $paypageType */
     private string $paypageType;
 
+    /** @var ReturnUrls|null $returnUrls */
+    private ?ReturnUrls $returnUrls;
+
     /**
      * @param string $paymentMethodType
      * @param string $orderId
@@ -27,6 +30,7 @@ class PaymentPageCreateContext extends PaymentContext
      * @param string $locale
      * @param BookingMethod|null $systemBookingMethod
      * @param string $paypageType
+     * @param ReturnUrls|null $returnUrls Separate URL per outcome; null sends every outcome to $returnUrl
      */
     public function __construct(
         string $paymentMethodType,
@@ -36,7 +40,8 @@ class PaymentPageCreateContext extends PaymentContext
         DataBag $checkoutSession,
         string $locale = 'default',
         ?BookingMethod $systemBookingMethod = null,
-        string $paypageType = PaymentPageType::EMBEDDED
+        string $paypageType = PaymentPageType::EMBEDDED,
+        ?ReturnUrls $returnUrls = null
     ) {
         parent::__construct(
             $paymentMethodType,
@@ -49,6 +54,7 @@ class PaymentPageCreateContext extends PaymentContext
         );
 
         $this->paypageType = $paypageType;
+        $this->returnUrls = $returnUrls;
     }
 
     /**
@@ -57,5 +63,13 @@ class PaymentPageCreateContext extends PaymentContext
     public function getPaypageType(): string
     {
         return $this->paypageType;
+    }
+
+    /**
+     * @return ReturnUrls|null
+     */
+    public function getReturnUrls(): ?ReturnUrls
+    {
+        return $this->returnUrls;
     }
 }

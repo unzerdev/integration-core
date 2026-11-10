@@ -5,6 +5,7 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentPageSettings\Services\PaymentPageSettingsService;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\PaymentPageCreateContext;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\ReturnUrls;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Processors\PaymentPageProcessorsRegistry;
 use UnzerSDK\Constants\PaypageCheckoutTypes;
 use UnzerSDK\Resources\EmbeddedResources\Paypage\Resources;
@@ -70,13 +71,13 @@ class PaymentPageFactory
         ))->setOrderId($context->getOrderId())
             ->setResources($resources);
 
-        $url = $context->getReturnUrl();
+        $returnUrls = $context->getReturnUrls() ?? ReturnUrls::fromSingle($context->getReturnUrl());
 
         $urls = new Urls();
-        $urls->setReturnSuccess($url)
-            ->setReturnFailure($url)
-            ->setReturnPending($url)
-            ->setReturnCancel($url);
+        $urls->setReturnSuccess($returnUrls->getSuccess())
+            ->setReturnFailure($returnUrls->getFailure())
+            ->setReturnPending($returnUrls->getPending())
+            ->setReturnCancel($returnUrls->getCancel());
 
         $style = new Style();
         $style->setHideBasket(true);

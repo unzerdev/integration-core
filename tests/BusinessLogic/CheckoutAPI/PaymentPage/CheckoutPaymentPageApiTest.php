@@ -29,9 +29,15 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfig
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\CustomerCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\MetadataCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaymentResourceCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaypageCreationException;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Enums\PaymentPageType;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
+use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Models\ReturnUrls;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services\PaymentPageService;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState as DomainPaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
@@ -46,6 +52,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\ConnectionServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentResourceListenerMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentSDK;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\SdkAmount;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
@@ -79,6 +86,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
 {
     private ?UnzerFactoryMock $unzerFactory;
     private PaymentMethodServiceMock $paymentMethodService;
+    private PaymentResourceListenerMock $paymentResourceListener;
 
     /**
      * @var ConnectionServiceMock
@@ -90,6 +98,7 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         parent::setUp();
 
         $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
+        $this->paymentResourceListener = new PaymentResourceListenerMock();
         $this->paymentMethodService = new PaymentMethodServiceMock(
             $this->unzerFactory,
             TestServiceRegister::getService(PaymentMethodConfigRepositoryInterface::class),
@@ -110,7 +119,8 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
                 TestServiceRegister::getService(PaymentPageFactory::class),
                 TestServiceRegister::getService(CustomerFactory::class),
                 ServiceRegister::getService(BasketFactory::class),
-                ServiceRegister::getService(MetadataProvider::class)
+                ServiceRegister::getService(MetadataProvider::class),
+                $this->paymentResourceListener
             );
         });
 
@@ -398,6 +408,110 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
         self::assertTrue($response->isSuccessful());
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
         self::assertNotEmpty($methodCallHistory);
+        self::assertCount(1, $this->paymentResourceListener->basketFailures);
+        self::assertEquals('test-order-123', $this->paymentResourceListener->basketFailures[0]['context']->getOrderId());
+        self::assertEquals(
+            'Basket creation failed',
+            $this->paymentResourceListener->basketFailures[0]['exception']->getMerchantMessage()
+        );
+    }
+
+    public function testPaymentPageDoesNotNotifyListenerWhenBasketIsCreated(): void
+    {
+        // Arrange
+        $this->arrangeConnectedCardsPaymentPage();
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($this->cardsPaymentPageRequest());
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        self::assertEmpty($this->paymentResourceListener->basketFailures);
+    }
+
+    public function testPaymentPageUsesSeparateReturnUrls(): void
+    {
+        // Arrange
+        $this->arrangeConnectedCardsPaymentPage();
+        $request = $this->cardsPaymentPageRequest(new ReturnUrls(
+            'shop.com/success',
+            'shop.com/failure',
+            'shop.com/pending',
+            'shop.com/cancel'
+        ));
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($request);
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage');
+        /** @var Urls $urls */
+        $urls = $methodCallHistory[0]['paypage']->getUrls();
+        self::assertEquals('shop.com/success', $urls->getReturnSuccess());
+        self::assertEquals('shop.com/failure', $urls->getReturnFailure());
+        self::assertEquals('shop.com/pending', $urls->getReturnPending());
+        self::assertEquals('shop.com/cancel', $urls->getReturnCancel());
+    }
+
+    public function testPaymentPageReturnsCustomerCreationErrorWhenUnzerRefusesCustomer(): void
+    {
+        // Arrange
+        $this->arrangeConnectedCardsPaymentPage();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreateCustomer(true);
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($this->cardsPaymentPageRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            CustomerCreationException::class,
+            'payment.customerCreationFailed',
+            'API.410.200.100',
+            'Customer creation failed'
+        );
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('createMetadata'));
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage'));
+    }
+
+    public function testPaymentPageReturnsMetadataCreationErrorWhenUnzerRefusesMetadata(): void
+    {
+        // Arrange
+        $this->arrangeConnectedCardsPaymentPage();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreateMetadata(true);
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($this->cardsPaymentPageRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            MetadataCreationException::class,
+            'payment.metadataCreationFailed',
+            'API.320.200.100',
+            'Metadata creation failed'
+        );
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('createPaypage'));
+    }
+
+    public function testPaymentPageReturnsPaypageCreationErrorWhenUnzerRefusesPaypage(): void
+    {
+        // Arrange
+        $this->arrangeConnectedCardsPaymentPage();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreatePaypage(true);
+
+        // Act
+        $response = CheckoutAPI::get()->paymentPage('1')->create($this->cardsPaymentPageRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            PaypageCreationException::class,
+            'payment.paypageCreationFailed',
+            'API.900.100.100',
+            'Paypage creation failed'
+        );
     }
 
     public function testCheckForUnknownPaymentStatus(): void
@@ -687,6 +801,54 @@ class CheckoutPaymentPageApiTest extends BaseTestCase
      * @throws InvalidAmountsException
      * @throws InvalidTranslatableArrayException
      */
+    private function arrangeConnectedCardsPaymentPage(): void
+    {
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'card', 'test']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+        $this->unzerFactory->getMockUnzer()->setPayPageData(
+            ['id' => 'test-paypage-123', 'redirectUrl' => 'test.unzer.api.com', 'paymentId' => 'test-payment-123']
+        );
+    }
+
+    private function cardsPaymentPageRequest(?ReturnUrls $returnUrls = null): PaymentPageCreateRequest
+    {
+        return new PaymentPageCreateRequest(
+            PaymentMethodTypes::CARDS,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com',
+            [],
+            'default',
+            null,
+            PaymentPageType::EMBEDDED,
+            $returnUrls
+        );
+    }
+
+    private function assertStepFailure(
+        $response,
+        string $exceptionClass,
+        string $errorCode,
+        string $unzerCode,
+        string $merchantMessage
+    ): void {
+        self::assertFalse($response->isSuccessful());
+        self::assertInstanceOf(ErrorResponse::class, $response);
+        self::assertInstanceOf($exceptionClass, $response->getError());
+        self::assertEquals($errorCode, $response->toArray()['errorCode']);
+
+        /** @var PaymentResourceCreationException $error */
+        $error = $response->getError();
+        self::assertEquals($unzerCode, $error->getUnzerException()->getCode());
+        self::assertEquals($merchantMessage, $error->getUnzerException()->getMerchantMessage());
+        self::assertEquals($unzerCode, $error->getTranslatableLabel()->getParams()['unzerCode']);
+    }
+
     private function setMockPaymentMethods(): void
     {
         $nameEps = TranslationCollection::fromArray([

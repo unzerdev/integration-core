@@ -38,6 +38,8 @@ use Unzer\Core\BusinessLogic\Domain\Integration\Disconnect\DisconnectIntegration
 use Unzer\Core\BusinessLogic\Domain\Integration\Language\LanguageService;
 use Unzer\Core\BusinessLogic\Domain\Integration\Order\OrderServiceInterface;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\NullPaymentResourceListener;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\PaymentResourceListener;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\CustomerProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\Processors\LineItemsProcessor;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentStatusMap\PaymentStatusMapServiceInterface;
@@ -78,6 +80,7 @@ use Unzer\Core\BusinessLogic\Domain\Webhook\Services\WebhookService;
 use Unzer\Core\BusinessLogic\UnzerAPI\UnzerFactory;
 use Unzer\Core\BusinessLogic\WebhookAPI\Handler\Controller\WebhookHandlerController;
 use Unzer\Core\Infrastructure\BootstrapComponent as BaseBootstrapComponent;
+use Unzer\Core\Infrastructure\Exceptions\ServiceNotRegisteredException;
 use Unzer\Core\Infrastructure\ORM\RepositoryRegistry;
 use Unzer\Core\Infrastructure\ServiceRegister;
 use Unzer\Core\Infrastructure\TaskExecution\TaskEvents\TickEvent;
@@ -184,7 +187,8 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(PaymentPageFactory::class),
                     ServiceRegister::getService(CustomerFactory::class),
                     ServiceRegister::getService(BasketFactory::class),
-                    ServiceRegister::getService(MetadataProvider::class)
+                    ServiceRegister::getService(MetadataProvider::class),
+                    static::getPaymentResourceListener()
                 );
             })
         );
@@ -200,7 +204,8 @@ class BootstrapComponent extends BaseBootstrapComponent
                     ServiceRegister::getService(InlinePaymentFactory::class),
                     ServiceRegister::getService(CustomerFactory::class),
                     ServiceRegister::getService(MetadataProvider::class),
-                    ServiceRegister::getService(BasketFactory::class)
+                    ServiceRegister::getService(BasketFactory::class),
+                    static::getPaymentResourceListener()
                 );
             })
         );
@@ -539,5 +544,19 @@ class BootstrapComponent extends BaseBootstrapComponent
                 (new TransactionSyncListener())->handle();
             }
         );
+    }
+
+    /**
+     * The listener is optional: integrations that do not register one get the no-op implementation.
+     *
+     * @return PaymentResourceListener
+     */
+    protected static function getPaymentResourceListener(): PaymentResourceListener
+    {
+        try {
+            return ServiceRegister::getService(PaymentResourceListener::class);
+        } catch (ServiceNotRegisteredException $e) {
+            return new NullPaymentResourceListener();
+        }
     }
 }

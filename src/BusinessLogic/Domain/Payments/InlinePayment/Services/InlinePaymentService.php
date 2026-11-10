@@ -6,10 +6,15 @@ use Unzer\Core\BusinessLogic\CheckoutAPI\InlinePayment\Response\InlinePaymentRes
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\NullPaymentResourceListener;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\PaymentResourceListener;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\CustomerCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\MetadataCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaymentCreationException;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Exceptions\BookingMethodNotSupportedException;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
@@ -39,6 +44,7 @@ class InlinePaymentService
     private CustomerFactory $customerFactory;
     private MetadataProvider $metadataProvider;
     private BasketFactory $basketFactory;
+    private PaymentResourceListener $paymentResourceListener;
 
     /**
      * PaymentPageService constructor.
@@ -51,6 +57,7 @@ class InlinePaymentService
      * @param CustomerFactory $customerFactory
      * @param MetadataProvider $metadataProvider
      * @param BasketFactory $basketFactory
+     * @param PaymentResourceListener|null $paymentResourceListener
      */
     public function __construct(
         UnzerFactory $unzerFactory,
@@ -60,7 +67,8 @@ class InlinePaymentService
         InlinePaymentFactory $inlinePaymentFactory,
         CustomerFactory $customerFactory,
         MetadataProvider $metadataProvider,
-        BasketFactory $basketFactory
+        BasketFactory $basketFactory,
+        ?PaymentResourceListener $paymentResourceListener = null
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->inlinePaymentStrategyFactory = $inlinePaymentStrategyFactory;
@@ -70,6 +78,7 @@ class InlinePaymentService
         $this->customerFactory = $customerFactory;
         $this->metadataProvider = $metadataProvider;
         $this->basketFactory = $basketFactory;
+        $this->paymentResourceListener = $paymentResourceListener ?? new NullPaymentResourceListener();
     }
 
     /**
@@ -83,6 +92,9 @@ class InlinePaymentService
      * @throws PaymentConfigNotFoundException
      * @throws UnzerApiException
      * @throws BookingMethodNotSupportedException
+     * @throws CustomerCreationException
+     * @throws MetadataCreationException
+     * @throws PaymentCreationException
      */
     public function create(InlinePaymentCreateContext $context): InlinePaymentResponse
     {
@@ -91,9 +103,14 @@ class InlinePaymentService
 
         $method = $paymentMethodSettings->getBookingMethod();
 
-        $inlinePayment = $this->inlinePaymentStrategyFactory
-            ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory)
-            ->execute($context, $paymentMethodSettings, $resources);
+        $strategy = $this->inlinePaymentStrategyFactory
+            ->makeStrategy($method, $this->unzerFactory, $this->inlinePaymentFactory);
+
+        try {
+            $inlinePayment = $strategy->execute($context, $paymentMethodSettings, $resources);
+        } catch (UnzerApiException $e) {
+            throw new PaymentCreationException($e);
+        }
 
         $this->updateTransactionHistory($context, $inlinePayment);
 
@@ -155,14 +172,19 @@ class InlinePaymentService
      * @return Resources
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      * @throws InvalidAmountsException
+     * @throws CustomerCreationException
+     * @throws MetadataCreationException
      */
     protected function buildResources(InlinePaymentCreateContext $context): Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
-            $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+            try {
+                $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+            } catch (UnzerApiException $e) {
+                throw new CustomerCreationException($e);
+            }
         }
 
         $basket = $this->basketFactory->create($context);
@@ -171,11 +193,16 @@ class InlinePaymentService
                 $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
             } catch (UnzerApiException $e) {
                 $basket = null;
+                $this->paymentResourceListener->onBasketCreationFailed($context, $e);
             }
         }
 
         $metadata = $this->metadataProvider->get($context);
-        $metadata = $this->unzerFactory->makeUnzerAPI()->createMetadata($metadata);
+        try {
+            $metadata = $this->unzerFactory->makeUnzerAPI()->createMetadata($metadata);
+        } catch (UnzerApiException $e) {
+            throw new MetadataCreationException($e);
+        }
 
         return new Resources(
             $customer !== null ? $customer->getId() : null,

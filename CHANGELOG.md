@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased](https://github.com/unzerdev/integration-core/compare/master...dev)
+- Add separate success, failure, pending and cancel return URLs for the payment page (`ReturnUrls`, optional on `PaymentPageCreateRequest`; a single return URL is still used for every outcome when omitted)
+- Report which step failed while starting a payment: `CustomerCreationException`, `MetadataCreationException`, `PaypageCreationException` and `PaymentCreationException` (original Unzer error kept as the previous exception). These failures were reported as `general.unhandled` before
+- Add optional `PaymentResourceListener` integration hook, notified when Unzer refuses the basket (the payment continues without it)
 
 ## [2.2.6](https://github.com/unzerdev/integration-core/releases/tag/2.2.6) - 2026-10-29
 - Fix refund logic when one of charge item failed

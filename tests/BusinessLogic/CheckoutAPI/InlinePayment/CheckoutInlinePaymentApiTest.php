@@ -24,6 +24,10 @@ use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Interfaces\PaymentMethodConfig
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\BookingMethod;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\CustomerCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\MetadataCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaymentCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaymentResourceCreationException;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Factory\InlinePaymentFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\InlinePayment\Models\InlinePayment;
@@ -44,6 +48,7 @@ use Unzer\Core\Tests\BusinessLogic\Common\Mocks\CurrencyServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\InlinePaymentProcessorMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\KeypairMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentMethodServiceMock;
+use Unzer\Core\Tests\BusinessLogic\Common\Mocks\PaymentResourceListenerMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TestBookingMethod;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
@@ -58,12 +63,14 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
     private PaymentMethodServiceMock $paymentMethodService;
     private ConnectionServiceMock $connectionService;
     private InlinePaymentProcessorInterface $mockInlineProcessor;
+    private PaymentResourceListenerMock $paymentResourceListener;
 
     public function setUp(): void
     {
         parent::setUp();
 
         $this->mockInlineProcessor = new InlinePaymentProcessorMock();
+        $this->paymentResourceListener = new PaymentResourceListenerMock();
         $this->unzerFactory = (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test'));
         $this->paymentMethodService = new PaymentMethodServiceMock(
             $this->unzerFactory,
@@ -106,6 +113,7 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
                 TestServiceRegister::getService(CustomerFactory::class),
                 TestServiceRegister::getService(MetadataProvider::class),
                 TestServiceRegister::getService(BasketFactory::class),
+                $this->paymentResourceListener
             );
         },
         );
@@ -340,6 +348,80 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
         self::assertNotEmpty($fetchBasketHistory);
     }
 
+    public function testChargePaymentContinuesAndNotifiesListenerWhenBasketCreationFails(): void
+    {
+        // Arrange
+        $this->arrangeConnectedIdeal();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreateBasket(true);
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($this->idealRequest());
+
+        // Assert
+        self::assertTrue($response->isSuccessful());
+        $chargeHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge');
+        self::assertNotEmpty($chargeHistory);
+        self::assertNull($chargeHistory[0]['basket']);
+        self::assertCount(1, $this->paymentResourceListener->basketFailures);
+        self::assertEquals('test-order-123', $this->paymentResourceListener->basketFailures[0]['context']->getOrderId());
+    }
+
+    public function testInlinePaymentReturnsCustomerCreationErrorWhenUnzerRefusesCustomer(): void
+    {
+        // Arrange
+        $this->arrangeConnectedIdeal();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreateCustomer(true);
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($this->idealRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            CustomerCreationException::class,
+            'payment.customerCreationFailed',
+            'API.410.200.100'
+        );
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge'));
+    }
+
+    public function testInlinePaymentReturnsMetadataCreationErrorWhenUnzerRefusesMetadata(): void
+    {
+        // Arrange
+        $this->arrangeConnectedIdeal();
+        $this->unzerFactory->getMockUnzer()->setThrowOnCreateMetadata(true);
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($this->idealRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            MetadataCreationException::class,
+            'payment.metadataCreationFailed',
+            'API.320.200.100'
+        );
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performCharge'));
+    }
+
+    public function testInlinePaymentReturnsPaymentCreationErrorWhenUnzerRefusesCharge(): void
+    {
+        // Arrange
+        $this->arrangeConnectedIdeal();
+        $this->unzerFactory->getMockUnzer()->setThrowOnPerformCharge(true);
+
+        // Act
+        $response = CheckoutAPI::get()->inlinePayment('1')->create($this->idealRequest());
+
+        // Assert
+        $this->assertStepFailure(
+            $response,
+            PaymentCreationException::class,
+            'payment.paymentCreationFailed',
+            'COR.800.100.153'
+        );
+    }
+
     public function testAuthorizePaymentPassesBasket(): void
     {
         // Arrange
@@ -443,6 +525,39 @@ class CheckoutInlinePaymentApiTest extends BaseTestCase
      * @throws InvalidAmountsException
      * @throws InvalidTranslatableArrayException
      */
+    private function arrangeConnectedIdeal(): void
+    {
+        $this->mockData('s-pub-test', 's-priv-test', ['EPS', 'googlepay', 'ideal', 'card', 'test']);
+        $this->connectionService->setConnectionSettings(
+            new ConnectionSettings(
+                Mode::live(),
+                new ConnectionData('publicKeyTest', 'privateKeyTest')
+            )
+        );
+    }
+
+    private function idealRequest(): InlinePaymentCreateRequest
+    {
+        return new InlinePaymentCreateRequest(
+            PaymentMethodTypes::IDEAL,
+            'test-order-123',
+            Amount::fromFloat(123.23, Currency::getDefault()),
+            'test.my.shop.com'
+        );
+    }
+
+    private function assertStepFailure($response, string $exceptionClass, string $errorCode, string $unzerCode): void
+    {
+        self::assertFalse($response->isSuccessful());
+        self::assertInstanceOf(ErrorResponse::class, $response);
+        self::assertInstanceOf($exceptionClass, $response->getError());
+        self::assertEquals($errorCode, $response->toArray()['errorCode']);
+
+        /** @var PaymentResourceCreationException $error */
+        $error = $response->getError();
+        self::assertEquals($unzerCode, $error->getUnzerException()->getCode());
+    }
+
     private function setMockPaymentMethods(): void
     {
         $nameEps = TranslationCollection::fromArray([

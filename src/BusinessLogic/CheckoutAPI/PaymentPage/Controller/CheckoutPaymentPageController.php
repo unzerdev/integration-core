@@ -68,6 +68,7 @@ class CheckoutPaymentPageController implements CommonFlowControllerInterface
                 $request->getLocale(),
                 $request->getBookingMethod(),
                 $request->getPaymentPageType(),
+                $request->getReturnUrls(),
             )),
             $connectionData->getPublicKey()
 

@@ -5,10 +5,15 @@ namespace Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Services;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\InvalidCurrencyCode;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\MetadataProvider;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\NullPaymentResourceListener;
+use Unzer\Core\BusinessLogic\Domain\Integration\PaymentPage\PaymentResourceListener;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\InvalidAmountsException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Exceptions\PaymentConfigNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Models\PaymentMethodConfig;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Services\PaymentMethodService;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\CustomerCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\MetadataCreationException;
+use Unzer\Core\BusinessLogic\Domain\Payments\Common\Exceptions\PaypageCreationException;
 use Unzer\Core\BusinessLogic\Domain\Payments\Customer\Factory\CustomerFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\BasketFactory;
 use Unzer\Core\BusinessLogic\Domain\Payments\PaymentPage\Factory\PaymentPageFactory;
@@ -39,6 +44,7 @@ class PaymentPageService
     private CustomerFactory $customerFactory;
     private BasketFactory $basketFactory;
     private MetadataProvider $metadataProvider;
+    private PaymentResourceListener $paymentResourceListener;
 
     /**
      * PaymentPageService constructor.
@@ -50,6 +56,7 @@ class PaymentPageService
      * @param CustomerFactory $customerFactory
      * @param BasketFactory $basketFactory
      * @param MetadataProvider $metadataProvider
+     * @param PaymentResourceListener|null $paymentResourceListener
      */
     public function __construct(
         UnzerFactory $unzerFactory,
@@ -58,7 +65,8 @@ class PaymentPageService
         PaymentPageFactory $paymentPageFactory,
         CustomerFactory $customerFactory,
         BasketFactory $basketFactory,
-        MetadataProvider $metadataProvider
+        MetadataProvider $metadataProvider,
+        ?PaymentResourceListener $paymentResourceListener = null
     ) {
         $this->unzerFactory = $unzerFactory;
         $this->paymentMethodService = $paymentMethodService;
@@ -67,26 +75,28 @@ class PaymentPageService
         $this->customerFactory = $customerFactory;
         $this->basketFactory = $basketFactory;
         $this->metadataProvider = $metadataProvider;
+        $this->paymentResourceListener = $paymentResourceListener ?? new NullPaymentResourceListener();
     }
 
     /**
      * @throws ConnectionSettingsNotFoundException
      * @throws PaymentConfigNotFoundException
      * @throws InvalidAmountsException
-     * @throws UnzerApiException
+     * @throws CustomerCreationException
+     * @throws MetadataCreationException
+     * @throws PaypageCreationException
      */
     public function create(PaymentPageCreateContext $context): Paypage
     {
         $paymentMethodSettings = $this->getEnabledPaymentMethodSettings($context);
         $resources = $this->buildResources($context);
+        $paypage = $this->paymentPageFactory->create($context, $paymentMethodSettings, $resources);
 
-        $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage(
-            $this->paymentPageFactory->create(
-                $context,
-                $paymentMethodSettings,
-                $resources
-            ),
-        );
+        try {
+            $payPageResponse = $this->unzerFactory->makeUnzerAPI()->createPaypage($paypage);
+        } catch (UnzerApiException $e) {
+            throw new PaypageCreationException($e);
+        }
 
         $locale = $context->getLocale() === 'default' ? 'auto' : $context->getLocale();
         $payPageResponse->setRedirectUrl($payPageResponse->getRedirectUrl() . '&locale=' . $locale);
@@ -214,14 +224,19 @@ class PaymentPageService
      * @return Resources
      *
      * @throws ConnectionSettingsNotFoundException
-     * @throws UnzerApiException
      * @throws InvalidAmountsException
+     * @throws CustomerCreationException
+     * @throws MetadataCreationException
      */
     private function buildResources(PaymentPageCreateContext $context): Resources
     {
         $customer = $this->customerFactory->create($context);
         if ($customer !== null) {
-            $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+            try {
+                $customer = $this->unzerFactory->makeUnzerAPI()->createOrUpdateCustomer($customer);
+            } catch (UnzerApiException $e) {
+                throw new CustomerCreationException($e);
+            }
         }
 
         $basket = $this->basketFactory->create($context);
@@ -230,11 +245,16 @@ class PaymentPageService
                 $basket = $this->unzerFactory->makeUnzerAPI()->createBasket($basket);
             } catch (UnzerApiException $e) {
                 $basket = null;
+                $this->paymentResourceListener->onBasketCreationFailed($context, $e);
             }
         }
 
         $metaData = $this->metadataProvider->get($context);
-        $metaData = $this->unzerFactory->makeUnzerAPI()->createMetadata($metaData);
+        try {
+            $metaData = $this->unzerFactory->makeUnzerAPI()->createMetadata($metaData);
+        } catch (UnzerApiException $e) {
+            throw new MetadataCreationException($e);
+        }
 
         return new Resources(
             $customer !== null ? $customer->getId() : null,

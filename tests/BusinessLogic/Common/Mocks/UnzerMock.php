@@ -37,6 +37,10 @@ class UnzerMock extends Unzer
     private array $webhooks = [];
     private ?array $payPageData = [];
     private bool $throwOnCreateBasket = false;
+    private bool $throwOnCreateCustomer = false;
+    private bool $throwOnCreateMetadata = false;
+    private bool $throwOnCreatePaypage = false;
+    private bool $throwOnPerformCharge = false;
     private bool $throwOnDeletePaypage = false;
     private bool $throwOnDeleteWebhook = false;
     private bool $throwOnRegisterWebhooks = false;
@@ -204,9 +208,35 @@ class UnzerMock extends Unzer
         return $result;
     }
 
+    public function setThrowOnCreateCustomer(bool $throw): void
+    {
+        $this->throwOnCreateCustomer = $throw;
+    }
+
+    public function setThrowOnCreateMetadata(bool $throw): void
+    {
+        $this->throwOnCreateMetadata = $throw;
+    }
+
+    public function setThrowOnCreatePaypage(bool $throw): void
+    {
+        $this->throwOnCreatePaypage = $throw;
+    }
+
+    public function setThrowOnPerformCharge(bool $throw): void
+    {
+        $this->throwOnPerformCharge = $throw;
+    }
+
     public function createOrUpdateCustomer(Customer $customer): Customer
     {
         $this->callHistory['createOrUpdateCustomer'][] = ['customer' => $customer];
+
+        if ($this->throwOnCreateCustomer) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException(
+                'Customer creation failed', 'Customer client message', 'API.410.200.100'
+            );
+        }
 
         return $customer;
     }
@@ -240,6 +270,12 @@ class UnzerMock extends Unzer
     {
         $this->metadata = $metadata;
         $this->callHistory['createMetadata'][] = ['metadata' => $metadata];
+
+        if ($this->throwOnCreateMetadata) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException(
+                'Metadata creation failed', 'Metadata client message', 'API.320.200.100'
+            );
+        }
 
         return $metadata;
     }
@@ -330,6 +366,12 @@ class UnzerMock extends Unzer
             'metadata' => $metadata,
             'basket' => $basket
         ];
+
+        if ($this->throwOnPerformCharge) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException(
+                'Charge failed', 'Charge client message', 'COR.800.100.153'
+            );
+        }
 
         return $charge;
     }
@@ -508,6 +550,12 @@ class UnzerMock extends Unzer
     public function createPaypage(\UnzerSDK\Resources\V2\Paypage $paypage): \UnzerSDK\Resources\V2\Paypage
     {
         $this->callHistory['createPaypage'][] = ['paypage' => $paypage];
+
+        if ($this->throwOnCreatePaypage) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException(
+                'Paypage creation failed', 'Paypage client message', 'API.900.100.100'
+            );
+        }
 
         $mockPaypage = new \UnzerSDK\Resources\V2\Paypage(
             $paypage->getAmount(),
