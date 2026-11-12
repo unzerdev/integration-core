@@ -3,6 +3,8 @@
 namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use UnzerSDK\Resources\Customer;
 
@@ -13,15 +15,29 @@ use UnzerSDK\Resources\Customer;
  */
 class OrderManagementServiceMock extends OrderManagementService
 {
+    /** @var ChargeResult|null */
+    private ?ChargeResult $chargeResult = null;
+
+    /**
+     * @param ChargeResult $chargeResult The result chargeOrder() returns.
+     *
+     * @return void
+     */
+    public function setChargeResult(ChargeResult $chargeResult): void
+    {
+        $this->chargeResult = $chargeResult;
+    }
+
     /**
      * @param string $orderId
      * @param ?Amount $chargeAmount
      * @param string|null $reference
      *
-     * @return void
+     * @return ChargeResult
      */
-    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): ChargeResult
     {
+        return $this->chargeResult ?? ChargeResult::skipped(ChargeSkipReason::PAYMENT_NOT_FOUND, null);
     }
 
     /**

@@ -12,6 +12,7 @@ use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\RefundResponse;
 use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\UpdateCustomerResponse;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use UnzerSDK\Exceptions\UnzerApiException;
 
@@ -60,16 +61,15 @@ class OrderManagementController
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws UnzerApiException
+     * @throws ChargePaymentNotReadableException
      */
     public function charge(ChargeRequest $chargeRequest): ChargeResponse
     {
-        $this->orderManagementService->chargeOrder(
+        return new ChargeResponse($this->orderManagementService->chargeOrder(
             $chargeRequest->getOrderId(),
             $chargeRequest->getAmount(),
             $chargeRequest->getReference()
-        );
-
-        return new ChargeResponse();
+        ));
     }
 
     /**

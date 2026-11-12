@@ -6,6 +6,9 @@ use Exception;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
@@ -14,12 +17,15 @@ use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\PaymentState;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\TransactionHistoryServiceMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerFactoryMock;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\UnzerMock;
 use Unzer\Core\Tests\Infrastructure\Common\TestServiceRegister;
+use UnzerSDK\Constants\PaymentState as UnzerPaymentState;
+use UnzerSDK\Exceptions\UnzerApiException;
 use UnzerSDK\Resources\Customer;
 use UnzerSDK\Resources\EmbeddedResources\CompanyInfo;
 use UnzerSDK\Resources\EmbeddedResources\CompanyOwner;
@@ -76,7 +82,7 @@ class OrderManagementServiceTest extends BaseTestCase
         // arrange
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault()),
                 'test-reference'
@@ -85,6 +91,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::PAYMENT_NOT_FOUND, $result->getSkipReason());
     }
 
     /**
@@ -146,7 +154,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
@@ -155,6 +163,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -243,7 +253,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
@@ -252,6 +262,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -342,7 +354,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
@@ -351,6 +363,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -438,7 +452,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
@@ -447,6 +461,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -534,7 +550,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(1.1, Currency::getDefault())
             ]
@@ -543,6 +559,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -566,7 +584,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(30, Currency::getDefault())
             ]
@@ -575,6 +593,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::INVALID_HISTORY, $result->getSkipReason());
     }
 
     /**
@@ -603,7 +623,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
                 'orderId',
                 Amount::fromFloat(10, Currency::getDefault()),
                 'charge-ref-123'
@@ -618,6 +638,9 @@ class OrderManagementServiceTest extends BaseTestCase
         $charge = $methodCallHistory[0]['charge'];
         self::assertEquals(10.0, $charge->getAmount());
         self::assertEquals('charge-ref-123', $charge->getPaymentReference());
+        self::assertTrue($result->isCharged());
+        self::assertSame($methodCallHistory[0]['charge'], $result->getCharge());
+        self::assertEquals('orderId', $result->getTransactionHistory()->getOrderId());
     }
 
     /**
@@ -1339,7 +1362,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], ['orderId', null]);
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], ['orderId', null]);
 
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
@@ -1347,6 +1370,9 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertEquals('paymentId', $methodCallHistory[0]['payment']);
         self::assertEquals(100.0, $methodCallHistory[0]['charge']->getAmount());
         self::assertEquals('orderId', $methodCallHistory[0]['charge']->getOrderId());
+        self::assertTrue($result->isCharged());
+        self::assertSame($methodCallHistory[0]['charge'], $result->getCharge());
+        self::assertEquals('orderId', $result->getTransactionHistory()->getOrderId());
     }
 
     /**
@@ -1370,7 +1396,7 @@ class OrderManagementServiceTest extends BaseTestCase
         $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
 
         // act
-        StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
             'orderId',
             Amount::fromFloat(10, Currency::getDefault()),
         ]);
@@ -1378,6 +1404,8 @@ class OrderManagementServiceTest extends BaseTestCase
         // assert
         $methodCallHistory = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment');
         self::assertEmpty($methodCallHistory);
+        self::assertEquals(ChargeResult::SKIPPED, $result->getStatus());
+        self::assertEquals(ChargeSkipReason::NO_AUTHORIZATION, $result->getSkipReason());
     }
 
     /**
@@ -1564,5 +1592,229 @@ class OrderManagementServiceTest extends BaseTestCase
         self::assertCount(1, $updateHistory);
 
         return $updateHistory[0]['customer'];
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedPaymentCanceled(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_CANCELED, 'canceled', 100)
+        );
+
+        // act
+        $result = $this->charge(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::PAYMENT_CANCELED, $result->getSkipReason());
+        self::assertEquals('orderId', $result->getTransactionHistory()->getOrderId());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedPaymentNotCreated(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_CREATE, 'create', 100)
+        );
+
+        // act
+        $result = $this->charge(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::PAYMENT_NOT_CREATED, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedNothingRemaining(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_COMPLETED, 'completed', 0)
+        );
+
+        // act
+        $result = $this->charge(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::NOTHING_REMAINING, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedAmountExceedsRemaining(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_PARTLY, 'partly', 20)
+        );
+
+        // act
+        $result = $this->charge(30);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::AMOUNT_EXCEEDS_REMAINING, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedNotNecessaryWhenIntegrationOverridesIsChargeNecessary(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_PENDING, 'pending', 100)
+        );
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
+            {
+                return false;
+            }
+        };
+
+        // act
+        $result = $this->charge(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::NOT_NECESSARY, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeSkippedReasonFromOverriddenGetChargeSkipReason(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_PENDING, 'pending', 100)
+        );
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function getChargeSkipReason(TransactionHistory $transactionHistory, ?Amount $amountToCharge): ?string
+            {
+                return parent::getChargeSkipReason($transactionHistory, $amountToCharge)
+                    ?? ChargeSkipReason::ALREADY_CHARGED;
+            }
+        };
+
+        // act
+        $result = $this->charge(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::ALREADY_CHARGED, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeFetchHookExceptionPropagates(): void
+    {
+        // arrange
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function fetchTransactionHistoryForCharge(string $orderId): ?TransactionHistory
+            {
+                throw new ChargePaymentNotReadableException(
+                    new TranslatableLabel('Unzer payment could not be read.', 'orderManagement.chargePaymentNotReadable')
+                );
+            }
+        };
+
+        // assert
+        $this->expectException(ChargePaymentNotReadableException::class);
+
+        // act
+        $this->charge(10);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testChargeUnzerExceptionPropagates(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->chargeableHistory(UnzerPaymentState::STATE_PENDING, 'pending', 100)
+        );
+        $this->unzerFactory->getMockUnzer()->setThrowOnPerformChargeOnPayment(true);
+
+        // assert
+        $this->expectException(UnzerApiException::class);
+
+        // act
+        $this->charge(10);
+    }
+
+    /**
+     * @param float $amount
+     *
+     * @return ChargeResult
+     *
+     * @throws Exception
+     */
+    private function charge(float $amount): ChargeResult
+    {
+        return StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], [
+            'orderId',
+            Amount::fromFloat($amount, Currency::getDefault()),
+            'charge-ref'
+        ]);
+    }
+
+    /**
+     * @param int $stateId
+     * @param string $stateName
+     * @param float $remaining
+     *
+     * @return TransactionHistory A valid history with an authorization of 100.
+     */
+    private function chargeableHistory(int $stateId, string $stateName, float $remaining): TransactionHistory
+    {
+        $transactionHistory = new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState($stateId, $stateName),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(100 - $remaining, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat($remaining, Currency::getDefault())
+        );
+        $transactionHistory->collection()->add(new AuthorizeHistoryItem(
+            'paymentId', '11.11.2011.', Amount::fromFloat(100, Currency::getDefault()),
+            'authorized', Amount::fromFloat(0, Currency::getDefault()), 'card', 'paymentId'
+        ));
+
+        return $transactionHistory;
     }
 }

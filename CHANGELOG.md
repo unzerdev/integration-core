@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add separate success, failure, pending and cancel return URLs for the payment page (`ReturnUrls`, optional on `PaymentPageCreateRequest`; a single return URL is still used for every outcome when omitted)
 - Report which step failed while starting a payment: `CustomerCreationException`, `MetadataCreationException`, `PaypageCreationException` and `PaymentCreationException` (original Unzer error kept as the previous exception). These failures were reported as `general.unhandled` before
 - Add optional `PaymentResourceListener` integration hook, notified when Unzer refuses the basket (the payment continues without it)
+- `OrderManagementService::chargeOrder()` returns a `ChargeResult`: the charge sent to Unzer, or the reason nothing was sent (`ChargeSkipReason`). `ChargeResponse::getResult()` exposes it to the Admin API caller
+- Add integration hooks `fetchTransactionHistoryForCharge()` (e.g. throw `ChargePaymentNotReadableException` instead of returning no history on an Unzer error) and `getChargeSkipReason()`; overrides of `isChargeNecessary()` keep working
 
 ## [2.2.6](https://github.com/unzerdev/integration-core/releases/tag/2.2.6) - 2026-10-29
 - Fix refund logic when one of charge item failed

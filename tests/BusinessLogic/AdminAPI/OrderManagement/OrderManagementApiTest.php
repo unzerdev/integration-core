@@ -12,8 +12,16 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Exceptions\CurrencyMismatchExceptio
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
+use Unzer\Core\BusinessLogic\AdminAPI\OrderManagement\Response\ChargeResponse;
+use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
+use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\TransactionHistory;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Services\TransactionHistoryService;
+use Unzer\Core\BusinessLogic\Domain\Translations\Model\TranslatableLabel;
+use UnzerSDK\Resources\TransactionTypes\Charge;
 use Unzer\Core\Infrastructure\ORM\Exceptions\RepositoryClassException;
 use Unzer\Core\Tests\BusinessLogic\Common\BaseTestCase;
 use Unzer\Core\Tests\BusinessLogic\Common\Mocks\OrderManagementServiceMock;
@@ -30,9 +38,9 @@ use UnzerSDK\Exceptions\UnzerApiException;
 class OrderManagementApiTest extends BaseTestCase
 {
     /**
-     * @var OrderManagementService
+     * @var OrderManagementServiceMock
      */
-    private OrderManagementService $orderManagementService;
+    private OrderManagementServiceMock $orderManagementService;
 
     /**
      * @return void
@@ -90,7 +98,75 @@ class OrderManagementApiTest extends BaseTestCase
         );
 
         // Assert
-        self::assertEquals([], $response->toArray());
+        self::assertEquals(
+            ['status' => ChargeResult::SKIPPED, 'skipReason' => ChargeSkipReason::PAYMENT_NOT_FOUND, 'chargeId' => null],
+            $response->toArray()
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testChargeResponseCarriesTheChargeResult(): void
+    {
+        // Arrange
+        $charge = (new Charge(1.1, 'EUR'))->setId('s-chg-1');
+        $result = ChargeResult::charged($charge, new TransactionHistory('card', 'orderId', 'EUR'));
+        $this->orderManagementService->setChargeResult($result);
+
+        // Act
+        $response = AdminAPI::get()->order('1')->charge(
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
+        );
+
+        // Assert
+        self::assertInstanceOf(ChargeResponse::class, $response);
+        self::assertSame($result, $response->getResult());
+        self::assertEquals(
+            ['status' => ChargeResult::CHARGED, 'skipReason' => null, 'chargeId' => 's-chg-1'],
+            $response->toArray()
+        );
+    }
+
+    /**
+     * @return void
+     */
+    public function testChargePaymentNotReadableBecomesAnErrorResponse(): void
+    {
+        // Arrange
+        $unzerError = new UnzerApiException('Payment not found', 'Payment not found', 'API.310.100.003');
+        $this->orderManagementService = new class(
+            (new UnzerFactoryMock())->setMockUnzer(new UnzerMock('s-priv-test')),
+            TestServiceRegister::getService(TransactionHistoryService::class),
+            $unzerError
+        ) extends OrderManagementServiceMock {
+            private UnzerApiException $error;
+
+            public function __construct($unzerFactory, $transactionHistoryService, UnzerApiException $error)
+            {
+                parent::__construct($unzerFactory, $transactionHistoryService);
+                $this->error = $error;
+            }
+
+            public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): ChargeResult
+            {
+                throw new ChargePaymentNotReadableException(
+                    new TranslatableLabel('Unzer payment could not be read.', 'orderManagement.chargePaymentNotReadable'),
+                    $this->error
+                );
+            }
+        };
+
+        // Act
+        $response = AdminAPI::get()->order('1')->charge(
+            new ChargeRequest('orderId', Amount::fromFloat(1.1, Currency::getDefault()), 'test-ref')
+        );
+
+        // Assert
+        self::assertFalse($response->isSuccessful());
+        self::assertInstanceOf(ErrorResponse::class, $response);
+        self::assertInstanceOf(ChargePaymentNotReadableException::class, $response->getError());
+        self::assertSame($unzerError, $response->getError()->getPrevious());
     }
 
     /**

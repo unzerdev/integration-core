@@ -7,6 +7,9 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotFoundException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\RefundViaPayment;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
@@ -29,10 +32,10 @@ use UnzerSDK\Resources\TransactionTypes\Charge;
 class OrderManagementService
 {
     /** @var UnzerFactory $unzerFactory */
-    private UnzerFactory $unzerFactory;
+    protected UnzerFactory $unzerFactory;
 
     /** @var TransactionHistoryService $transactionHistoryService */
-    private TransactionHistoryService $transactionHistoryService;
+    protected TransactionHistoryService $transactionHistoryService;
 
     /**
      * @param UnzerFactory $unzerFactory
@@ -49,21 +52,24 @@ class OrderManagementService
      * @param Amount|null $chargeAmount
      * @param string|null $reference
      *
-     * @return void
+     * @return ChargeResult The charge sent to Unzer, or the reason nothing was sent.
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws EncryptionFailedException
      * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
+     * @throws ChargePaymentNotReadableException When an integration's fetch hook cannot read the payment.
      */
-    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): void
+    public function chargeOrder(string $orderId, ?Amount $chargeAmount, ?string $reference = null): ChargeResult
     {
-        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
-            return;
+        if (!($transactionHistory = $this->fetchTransactionHistoryForCharge($orderId))) {
+            return ChargeResult::skipped(ChargeSkipReason::PAYMENT_NOT_FOUND, null);
         }
 
-        if (!$this->isChargeNecessary($transactionHistory, $chargeAmount)) {
-            return;
+        $skipReason = $this->getChargeSkipReason($transactionHistory, $chargeAmount);
+
+        if ($skipReason !== null) {
+            return ChargeResult::skipped($skipReason, $transactionHistory);
         }
 
         if ($chargeAmount === null) {
@@ -73,17 +79,79 @@ class OrderManagementService
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
 
         if (!$authorizedItem) {
-            return;
+            return ChargeResult::skipped(ChargeSkipReason::NO_AUTHORIZATION, $transactionHistory);
         }
 
         $charge = new Charge($chargeAmount->getPriceInCurrencyUnits(), $chargeAmount->getCurrency()->getIsoCode());
         $charge->setOrderId($transactionHistory->getOrderId());
         $charge->setPaymentReference($reference);
 
-        $this->unzerFactory->makeUnzerAPI()->performChargeOnPayment(
+        $charge = $this->unzerFactory->makeUnzerAPI()->performChargeOnPayment(
             $authorizedItem->getPaymentId(),
             $charge
         );
+
+        return ChargeResult::charged($charge, $transactionHistory);
+    }
+
+    /**
+     * Reads the transaction history a charge decides on. Integrations override it to read the payment
+     * differently, e.g. to throw ChargePaymentNotReadableException instead of returning null on an Unzer error.
+     *
+     * @param string $orderId
+     *
+     * @return TransactionHistory|null
+     *
+     * @throws ChargePaymentNotReadableException
+     */
+    protected function fetchTransactionHistoryForCharge(string $orderId): ?TransactionHistory
+    {
+        return $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+    }
+
+    /**
+     * Decides whether a charge is sent to Unzer. Null means charge; otherwise one of the ChargeSkipReason
+     * constants. The checks are the ones of isChargeNecessary(), each with its own reason; an integration
+     * override of isChargeNecessary() still applies and maps to NOT_NECESSARY.
+     *
+     * @param TransactionHistory $transactionHistory
+     * @param Amount|null $amountToCharge Null charges the total amount.
+     *
+     * @return string|null
+     */
+    protected function getChargeSkipReason(TransactionHistory $transactionHistory, ?Amount $amountToCharge): ?string
+    {
+        if ($amountToCharge === null) {
+            return null;
+        }
+
+        if (!$this->isTransactionHistoryValid($transactionHistory)) {
+            return ChargeSkipReason::INVALID_HISTORY;
+        }
+
+        $stateId = $transactionHistory->getPaymentState()->getId();
+
+        if ($stateId === PaymentState::STATE_CANCELED) {
+            return ChargeSkipReason::PAYMENT_CANCELED;
+        }
+
+        if ($stateId === PaymentState::STATE_CREATE) {
+            return ChargeSkipReason::PAYMENT_NOT_CREATED;
+        }
+
+        $remainingAmount = $transactionHistory->getRemainingAmount();
+
+        if (!$remainingAmount || !$remainingAmount->getValue()) {
+            return ChargeSkipReason::NOTHING_REMAINING;
+        }
+
+        if ($amountToCharge->getValue() > $remainingAmount->getValue()) {
+            return ChargeSkipReason::AMOUNT_EXCEEDS_REMAINING;
+        }
+
+        return $this->isChargeNecessary($transactionHistory, $amountToCharge)
+            ? null
+            : ChargeSkipReason::NOT_NECESSARY;
     }
 
     /**

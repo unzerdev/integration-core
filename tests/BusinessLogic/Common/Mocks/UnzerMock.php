@@ -41,6 +41,7 @@ class UnzerMock extends Unzer
     private bool $throwOnCreateMetadata = false;
     private bool $throwOnCreatePaypage = false;
     private bool $throwOnPerformCharge = false;
+    private bool $throwOnPerformChargeOnPayment = false;
     private bool $throwOnDeletePaypage = false;
     private bool $throwOnDeleteWebhook = false;
     private bool $throwOnRegisterWebhooks = false;
@@ -228,6 +229,11 @@ class UnzerMock extends Unzer
         $this->throwOnPerformCharge = $throw;
     }
 
+    public function setThrowOnPerformChargeOnPayment(bool $throw): void
+    {
+        $this->throwOnPerformChargeOnPayment = $throw;
+    }
+
     public function createOrUpdateCustomer(Customer $customer): Customer
     {
         $this->callHistory['createOrUpdateCustomer'][] = ['customer' => $customer];
@@ -318,6 +324,12 @@ class UnzerMock extends Unzer
             'payment' => $payment,
             'charge' => $charge
         ];
+
+        if ($this->throwOnPerformChargeOnPayment) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException(
+                'Authorization expired', 'Authorization expired', 'COR.700.400.800'
+            );
+        }
 
         return $charge;
     }
