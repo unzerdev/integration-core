@@ -1707,6 +1707,31 @@ class OrderManagementServiceTest extends BaseTestCase
      *
      * @throws Exception
      */
+    public function testFullChargeStillAsksAnIntegrationOverrideOfIsChargeNecessary(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->authorizedTransactionHistory('card'));
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function isChargeNecessary(TransactionHistory $transactionHistory, ?Amount $amountToCharge): bool
+            {
+                return false;
+            }
+        };
+
+        // act
+        $result = StoreContext::doWithStore('1', [$this->orderManagementService, 'chargeOrder'], ['orderId', null]);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('performChargeOnPayment'));
+        self::assertEquals(ChargeSkipReason::NOT_NECESSARY, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
     public function testChargeSkippedReasonFromOverriddenGetChargeSkipReason(): void
     {
         // arrange

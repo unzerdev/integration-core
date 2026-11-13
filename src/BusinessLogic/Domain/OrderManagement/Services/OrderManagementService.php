@@ -122,7 +122,8 @@ class OrderManagementService
     protected function getChargeSkipReason(TransactionHistory $transactionHistory, ?Amount $amountToCharge): ?string
     {
         if ($amountToCharge === null) {
-            return null;
+            // A full charge has no amount checks of its own; an integration override may still decline it.
+            return $this->isChargeNecessary($transactionHistory, null) ? null : ChargeSkipReason::NOT_NECESSARY;
         }
 
         if (!$this->isTransactionHistoryValid($transactionHistory)) {
