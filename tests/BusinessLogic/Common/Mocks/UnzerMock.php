@@ -46,6 +46,9 @@ class UnzerMock extends Unzer
     private bool $throwOnDeleteWebhook = false;
     private bool $throwOnRegisterWebhooks = false;
 
+    /** @var int|null The cancelChargeById call (1-based) that throws an UnzerApiException. */
+    private ?int $throwOnCancelChargeCall = null;
+
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
 
@@ -433,7 +436,21 @@ class UnzerMock extends Unzer
             'referenceText' => $referenceText
         ];
 
-        return new Cancellation();
+        if ($this->throwOnCancelChargeCall === count($this->callHistory['cancelChargeById'])) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Refund refused', 'Refund refused', 'API.340.100.015');
+        }
+
+        return (new Cancellation($amount))->setId('s-cnl-' . count($this->callHistory['cancelChargeById']));
+    }
+
+    /**
+     * @param int|null $call The cancelChargeById call (1-based) that throws; null never throws.
+     *
+     * @return void
+     */
+    public function setThrowOnCancelChargeCall(?int $call): void
+    {
+        $this->throwOnCancelChargeCall = $call;
     }
 
     /**
@@ -451,7 +468,7 @@ class UnzerMock extends Unzer
             'cancellation' => $cancellation
         ];
 
-        return new Cancellation();
+        return (new Cancellation($cancellation ? $cancellation->getAmount() : null))->setId('s-cnl-1');
     }
 
     /**

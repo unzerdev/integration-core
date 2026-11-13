@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Add optional `PaymentResourceListener` integration hook, notified when Unzer refuses the basket (the payment continues without it)
 - `OrderManagementService::chargeOrder()` returns a `ChargeResult`: the charge sent to Unzer, or the reason nothing was sent (`ChargeSkipReason`). `ChargeResponse::getResult()` exposes it to the Admin API caller
 - Add integration hooks `fetchTransactionHistoryForCharge()` (e.g. throw `ChargePaymentNotReadableException` instead of returning no history on an Unzer error) and `getChargeSkipReason()`; overrides of `isChargeNecessary()` keep working
+- `OrderManagementService::refundOrder()` returns a `RefundResult`: the cancellations sent to Unzer, the reason nothing was sent (`RefundSkipReason`), or a partial refund (some charges refunded, then Unzer failed). `refundOrderByPayment()` returns the `Cancellation`. `RefundResponse::getResult()` exposes the result. Subclasses overriding either method with a `void` return type must be updated
+- Refunds above what is still refundable on the charges are no longer sent (`AMOUNT_EXCEEDS_REFUNDABLE`); before, only the remaining part was refunded and the call returned as if the full amount had been
+- Add integration hooks `fetchTransactionHistoryForRefund()` and `getRefundSkipReason()`; overrides of `isRefundNecessary()` keep working
 
 ## [2.2.6](https://github.com/unzerdev/integration-core/releases/tag/2.2.6) - 2026-10-29
 - Fix refund logic when one of charge item failed

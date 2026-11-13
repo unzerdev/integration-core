@@ -10,6 +10,8 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidExcep
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundSkipReason;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\RefundViaPayment;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Models\ChargeHistoryItem;
@@ -206,64 +208,156 @@ class OrderManagementService
     }
 
     /**
+     * Refunds an amount of the order at Unzer: through the payment for the refund-via-payment methods, otherwise
+     * charge by charge.
+     *
      * @param string $orderId
      * @param Amount $refundAmount
      * @param string|null $reference
      *
-     * @return void
+     * @return RefundResult The cancellations sent to Unzer, the reason nothing was sent, or the cancellations made
+     *                      before Unzer failed on a later charge.
+     *
      * @throws ConnectionSettingsNotFoundException
      * @throws CurrencyMismatchException
-     * @throws UnzerApiException
+     * @throws UnzerApiException When the first cancellation fails: nothing was refunded.
      * @throws EncryptionFailedException
      * @throws PrivateKeyInvalidException
      */
-    public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): void
+    public function refundOrder(string $orderId, Amount $refundAmount, ?string $reference = null): RefundResult
     {
-        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
-            return;
+        if (!($transactionHistory = $this->fetchTransactionHistoryForRefund($orderId))) {
+            return RefundResult::skipped(RefundSkipReason::PAYMENT_NOT_FOUND, null);
         }
 
-        if (!$this->isRefundNecessary($transactionHistory, $refundAmount)) {
-            return;
+        $skipReason = $this->getRefundSkipReason($transactionHistory, $refundAmount);
+
+        if ($skipReason !== null) {
+            return RefundResult::skipped($skipReason, $transactionHistory);
         }
 
         if (in_array($transactionHistory->getType(), RefundViaPayment::REFUND_VIA_PAYMENT, true)) {
-            $this->refundOrderByPayment($transactionHistory, $refundAmount, $reference);
-
-            return;
+            return RefundResult::refunded(
+                [$this->refundOrderByPayment($transactionHistory, $refundAmount, $reference)],
+                $transactionHistory
+            );
         }
 
         /** @var ChargeHistoryItem[] $chargeItems */
         $chargeItems = $transactionHistory->collection()->chargeItems()->getAll();
+        $cancellations = [];
 
         foreach ($chargeItems as $chargeItem) {
             if (!$chargeItem->isSuccessful() || $chargeItem->getRefundableAmount()->getValue() <= 0) {
                 continue;
             }
 
-            if ($refundAmount->getValue() > $chargeItem->getRefundableAmount()->getValue()) {
-                $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
+            $amountOnThisCharge = $refundAmount->getValue() > $chargeItem->getRefundableAmount()->getValue()
+                ? $chargeItem->getRefundableAmount()
+                : $refundAmount;
+
+            try {
+                $cancellations[] = $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
                     $chargeItem->getPaymentId(),
                     $chargeItem->getId(),
-                    $chargeItem->getRefundableAmount()->getPriceInCurrencyUnits(),
+                    $amountOnThisCharge->getPriceInCurrencyUnits(),
                     null,
                     $reference
                 );
-                $refundAmount = $refundAmount->minus($chargeItem->getRefundableAmount());
+            } catch (UnzerApiException $exception) {
+                if ($cancellations === []) {
+                    // Nothing was refunded: the caller sees the Unzer error, as before.
+                    throw $exception;
+                }
 
-                continue;
+                return RefundResult::partial($cancellations, $exception, $transactionHistory);
             }
 
-            $this->unzerFactory->makeUnzerAPI()->cancelChargeById(
-                $chargeItem->getPaymentId(),
-                $chargeItem->getId(),
-                $refundAmount->getPriceInCurrencyUnits(),
-                null,
-                $reference
-            );
+            if ($amountOnThisCharge === $refundAmount) {
+                break;
+            }
 
-            break;
+            $refundAmount = $refundAmount->minus($amountOnThisCharge);
         }
+
+        return RefundResult::refunded($cancellations, $transactionHistory);
+    }
+
+    /**
+     * Reads the transaction history a refund decides on. Integrations override it to read the payment differently,
+     * e.g. to keep the payment for their own checks.
+     *
+     * @param string $orderId
+     *
+     * @return TransactionHistory|null
+     */
+    protected function fetchTransactionHistoryForRefund(string $orderId): ?TransactionHistory
+    {
+        return $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+    }
+
+    /**
+     * Decides whether a refund is sent to Unzer. Null means refund; otherwise one of the RefundSkipReason
+     * constants. An integration override of isRefundNecessary() still applies and maps to NOT_NECESSARY.
+     *
+     * @param TransactionHistory $transactionHistory
+     * @param Amount $amountToRefund
+     *
+     * @return string|null
+     *
+     * @throws CurrencyMismatchException
+     */
+    protected function getRefundSkipReason(TransactionHistory $transactionHistory, Amount $amountToRefund): ?string
+    {
+        if (!$this->isTransactionHistoryValid($transactionHistory)) {
+            return RefundSkipReason::INVALID_HISTORY;
+        }
+
+        $stateId = $transactionHistory->getPaymentState()->getId();
+
+        if ($stateId === PaymentState::STATE_PENDING) {
+            return RefundSkipReason::PAYMENT_PENDING;
+        }
+
+        if ($stateId === PaymentState::STATE_CANCELED) {
+            return RefundSkipReason::PAYMENT_CANCELED;
+        }
+
+        if ($stateId === PaymentState::STATE_CREATE) {
+            return RefundSkipReason::PAYMENT_NOT_CREATED;
+        }
+
+        if ($amountToRefund->getValue() > $this->getRefundableAmount($transactionHistory)->getValue()) {
+            return RefundSkipReason::AMOUNT_EXCEEDS_REFUNDABLE;
+        }
+
+        return $this->isRefundNecessary($transactionHistory, $amountToRefund)
+            ? null
+            : RefundSkipReason::NOT_NECESSARY;
+    }
+
+    /**
+     * What is still refundable: the successful charges minus what was already refunded on them.
+     * Expects a history that passed isTransactionHistoryValid() (it takes the currency from the total amount).
+     *
+     * @param TransactionHistory $transactionHistory
+     *
+     * @return Amount
+     *
+     * @throws CurrencyMismatchException
+     */
+    protected function getRefundableAmount(TransactionHistory $transactionHistory): Amount
+    {
+        $refundable = Amount::fromInt(0, $transactionHistory->getTotalAmount()->getCurrency());
+
+        /** @var ChargeHistoryItem $chargeItem */
+        foreach ($transactionHistory->collection()->chargeItems()->getAll() as $chargeItem) {
+            if ($chargeItem->isSuccessful() && $chargeItem->getRefundableAmount()->getValue() > 0) {
+                $refundable = $refundable->plus($chargeItem->getRefundableAmount());
+            }
+        }
+
+        return $refundable;
     }
 
     /**
@@ -271,8 +365,9 @@ class OrderManagementService
      * @param Amount $refundAmount
      * @param string|null $reference
      *
-     * @throws ConnectionSettingsNotFoundException
+     * @return Cancellation The cancellation Unzer created.
      *
+     * @throws ConnectionSettingsNotFoundException
      * @throws EncryptionFailedException
      * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
@@ -281,12 +376,12 @@ class OrderManagementService
         TransactionHistory $transactionHistory,
         Amount $refundAmount,
         ?string $reference = null
-    ): void {
+    ): Cancellation {
         $paymentId = $transactionHistory->collection()->last()->getPaymentId();
         $cancellation = new Cancellation($refundAmount->getPriceInCurrencyUnits());
         $cancellation->setPaymentReference($reference);
 
-        $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
+        return $this->unzerFactory->makeUnzerAPI()->cancelChargedPayment(
             $paymentId,
             $cancellation
         );

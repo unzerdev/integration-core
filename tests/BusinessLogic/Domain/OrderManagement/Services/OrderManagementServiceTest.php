@@ -9,6 +9,8 @@ use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
 use Unzer\Core\BusinessLogic\Domain\PaymentMethod\Enums\PaymentMethodTypes;
 use Unzer\Core\BusinessLogic\Domain\TransactionHistory\Interfaces\TransactionHistoryRepositoryInterface;
@@ -930,8 +932,9 @@ class OrderManagementServiceTest extends BaseTestCase
                     'authorize1', 'date1', Amount::fromFloat(100, Currency::getDefault()),
                     'status1', Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
                 ),
+                // A refund is decided on the successful charges (what is still refundable on them).
                 new ChargeHistoryItem(
-                    'charge1', 'date2', Amount::fromFloat(100, Currency::getDefault()), 'status2',
+                    'charge1', 'date2', Amount::fromFloat(100, Currency::getDefault()), 'success',
                     Amount::fromFloat(0, Currency::getDefault()), 'type', 'id'
                 )
             ]
@@ -1841,5 +1844,313 @@ class OrderManagementServiceTest extends BaseTestCase
         ));
 
         return $transactionHistory;
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundReturnsTheCancellationOfOneCharge(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[100, 0]]));
+
+        // act
+        $result = $this->refund(30);
+
+        // assert
+        self::assertEquals(RefundResult::REFUNDED, $result->getStatus());
+        self::assertTrue($result->isRefunded());
+        self::assertCount(1, $result->getCancellations());
+        self::assertEquals(30.0, $result->getRefundedAmount());
+        self::assertEquals(['s-cnl-1'], $result->toArray()['cancellationIds']);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundOverTwoChargesReturnsBothCancellations(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[20, 0], [50, 0]]));
+
+        // act
+        $result = $this->refund(40);
+
+        // assert
+        $calls = $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById');
+        self::assertCount(2, $calls);
+        self::assertEquals(20, $calls[0]['amount']);
+        self::assertEquals(20, $calls[1]['amount']);
+        self::assertEquals(RefundResult::REFUNDED, $result->getStatus());
+        self::assertCount(2, $result->getCancellations());
+        self::assertEquals(40.0, $result->getRefundedAmount());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundByPaymentReturnsTheCancellation(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->refundableHistory(PaymentMethodTypes::UNZER_INVOICE, [[100, 0]])
+        );
+
+        // act
+        $result = $this->refund(30);
+
+        // assert
+        self::assertCount(1, $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargedPayment'));
+        self::assertEquals(RefundResult::REFUNDED, $result->getStatus());
+        self::assertEquals(30.0, $result->getRefundedAmount());
+    }
+
+    /**
+     * Refunded 80 of 100 earlier, a refund of 50: only 20 is left. Before, the 20 was refunded and the call
+     * returned as if 50 had been.
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundAboveTheRefundableAmountIsNotSent(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[100, 80]]));
+
+        // act
+        $result = $this->refund(50);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById'));
+        self::assertEquals(RefundSkipReason::AMOUNT_EXCEEDS_REFUNDABLE, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundOfTheWholeRefundableAmountIsSent(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[100, 80]]));
+
+        // act
+        $result = $this->refund(20);
+
+        // assert
+        self::assertEquals(RefundResult::REFUNDED, $result->getStatus());
+        self::assertEquals(20.0, $result->getRefundedAmount());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundSkipReasonPerPaymentState(): void
+    {
+        $cases = [
+            [UnzerPaymentState::STATE_PENDING, 'pending', RefundSkipReason::PAYMENT_PENDING],
+            [UnzerPaymentState::STATE_CANCELED, 'canceled', RefundSkipReason::PAYMENT_CANCELED],
+            [UnzerPaymentState::STATE_CREATE, 'create', RefundSkipReason::PAYMENT_NOT_CREATED],
+        ];
+
+        foreach ($cases as [$stateId, $stateName, $reason]) {
+            // arrange
+            $this->transactionHistoryService->saveTransactionHistory(
+                $this->refundableHistory('card', [[100, 0]], $stateId, $stateName)
+            );
+
+            // act
+            $result = $this->refund(10);
+
+            // assert
+            self::assertEquals($reason, $result->getSkipReason(), $stateName);
+        }
+
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundSkippedWhenThePaymentIsNotFound(): void
+    {
+        // act
+        $result = $this->refund(10);
+
+        // assert
+        self::assertEquals(RefundSkipReason::PAYMENT_NOT_FOUND, $result->getSkipReason());
+        self::assertNull($result->getTransactionHistory());
+    }
+
+    /**
+     * The first charge is refunded, the second refuses: the refunded part is reported, not lost.
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testPartialRefundWhenALaterChargeFails(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[20, 0], [50, 0]]));
+        $this->unzerFactory->getMockUnzer()->setThrowOnCancelChargeCall(2);
+
+        // act
+        $result = $this->refund(40);
+
+        // assert
+        self::assertEquals(RefundResult::PARTIAL, $result->getStatus());
+        self::assertFalse($result->isRefunded());
+        self::assertCount(1, $result->getCancellations());
+        self::assertEquals(20.0, $result->getRefundedAmount());
+        self::assertInstanceOf(UnzerApiException::class, $result->getError());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testFirstCancellationFailureEscapes(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[20, 0], [50, 0]]));
+        $this->unzerFactory->getMockUnzer()->setThrowOnCancelChargeCall(1);
+
+        // assert
+        $this->expectException(UnzerApiException::class);
+
+        // act
+        $this->refund(40);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundStillAsksAnIntegrationOverrideOfIsRefundNecessary(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->refundableHistory('card', [[100, 0]]));
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function isRefundNecessary(TransactionHistory $transactionHistory, Amount $amountToRefund): bool
+            {
+                return false;
+            }
+        };
+
+        // act
+        $result = $this->refund(10);
+
+        // assert
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelChargeById'));
+        self::assertEquals(RefundSkipReason::NOT_NECESSARY, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testRefundUsesTheIntegrationFetchHook(): void
+    {
+        // arrange
+        $history = $this->refundableHistory('card', [[100, 0]]);
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService, $history)
+            extends OrderManagementService {
+            private TransactionHistory $history;
+
+            public function __construct($unzerFactory, $transactionHistoryService, TransactionHistory $history)
+            {
+                parent::__construct($unzerFactory, $transactionHistoryService);
+                $this->history = $history;
+            }
+
+            protected function fetchTransactionHistoryForRefund(string $orderId): ?TransactionHistory
+            {
+                return $this->history;
+            }
+        };
+
+        // act
+        $result = $this->refund(10);
+
+        // assert
+        self::assertEquals(RefundResult::REFUNDED, $result->getStatus());
+    }
+
+    /**
+     * @param float $amount
+     *
+     * @return RefundResult
+     *
+     * @throws Exception
+     */
+    private function refund(float $amount): RefundResult
+    {
+        return StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'refundOrder'],
+            ['orderId', Amount::fromFloat($amount, Currency::getDefault()), 'refund-ref']
+        );
+    }
+
+    /**
+     * @param string $type Payment method type.
+     * @param array<array{0: float, 1: float}> $charges Charged and already refunded amount per successful charge.
+     * @param int $stateId
+     * @param string $stateName
+     *
+     * @return TransactionHistory
+     */
+    private function refundableHistory(
+        string $type,
+        array $charges,
+        int $stateId = UnzerPaymentState::STATE_COMPLETED,
+        string $stateName = 'completed'
+    ): TransactionHistory {
+        $items = [];
+        $charged = 0.0;
+        $cancelled = 0.0;
+
+        foreach ($charges as $index => [$amount, $refunded]) {
+            $items[] = new ChargeHistoryItem(
+                'charge' . ($index + 1),
+                'date',
+                Amount::fromFloat($amount, Currency::getDefault()),
+                'success',
+                Amount::fromFloat($refunded, Currency::getDefault()),
+                'charge',
+                's-pay-1'
+            );
+            $charged += $amount;
+            $cancelled += $refunded;
+        }
+
+        return new TransactionHistory(
+            $type,
+            'orderId',
+            'EUR',
+            new PaymentState($stateId, $stateName),
+            Amount::fromFloat($charged, Currency::getDefault()),
+            Amount::fromFloat($charged, Currency::getDefault()),
+            Amount::fromFloat($cancelled, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            $items
+        );
     }
 }
