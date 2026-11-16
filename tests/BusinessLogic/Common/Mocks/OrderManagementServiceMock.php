@@ -5,6 +5,8 @@ namespace Unzer\Core\Tests\BusinessLogic\Common\Mocks;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
@@ -47,10 +49,11 @@ class OrderManagementServiceMock extends OrderManagementService
      * @param Amount|null $amount
      * @param string|null $reference
      *
-     * @return void
+     * @return CancelResult
      */
-    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): CancelResult
     {
+        return CancelResult::skipped(CancelSkipReason::NOT_NECESSARY, null);
     }
 
     /**

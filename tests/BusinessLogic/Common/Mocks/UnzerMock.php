@@ -49,6 +49,9 @@ class UnzerMock extends Unzer
     /** @var int|null The cancelChargeById call (1-based) that throws an UnzerApiException. */
     private ?int $throwOnCancelChargeCall = null;
 
+    /** @var bool Whether cancelAuthorizedPayment throws an UnzerApiException. */
+    private bool $throwOnCancelAuthorization = false;
+
     /** @var AbstractUnzerResource|null */
     private ?AbstractUnzerResource $resource = null;
 
@@ -363,7 +366,21 @@ class UnzerMock extends Unzer
             'cancellation' => $cancellation
         ];
 
-        return $cancellation ?? new Cancellation();
+        if ($this->throwOnCancelAuthorization) {
+            throw new \UnzerSDK\Exceptions\UnzerApiException('Void refused', 'Void refused', 'API.340.100.016');
+        }
+
+        return ($cancellation ?? new Cancellation())->setId('s-cnl-1');
+    }
+
+    /**
+     * @param bool $throw Whether cancelAuthorizedPayment throws an UnzerApiException.
+     *
+     * @return void
+     */
+    public function setThrowOnCancelAuthorization(bool $throw): void
+    {
+        $this->throwOnCancelAuthorization = $throw;
     }
 
 

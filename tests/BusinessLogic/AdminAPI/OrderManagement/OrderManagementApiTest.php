@@ -17,6 +17,8 @@ use Unzer\Core\BusinessLogic\ApiFacades\Response\ErrorResponse;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Services\OrderManagementService;
@@ -254,7 +256,15 @@ class OrderManagementApiTest extends BaseTestCase
         );
 
         // Assert
-        self::assertEquals([], $response->toArray());
+        self::assertEquals(
+            [
+                'status' => CancelResult::SKIPPED,
+                'skipReason' => CancelSkipReason::NOT_NECESSARY,
+                'cancellationId' => null,
+                'canceledAmount' => 0.0,
+            ],
+            $response->toArray()
+        );
     }
 
     /**

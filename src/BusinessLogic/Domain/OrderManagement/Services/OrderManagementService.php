@@ -8,6 +8,8 @@ use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\ConnectionSettingsNotF
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\EncryptionFailedException;
 use Unzer\Core\BusinessLogic\Domain\Connection\Exceptions\PrivateKeyInvalidException;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
@@ -158,25 +160,27 @@ class OrderManagementService
     }
 
     /**
+     * Cancels the authorization of the order at Unzer.
+     *
      * @param string $orderId
-     * @param Amount|null $amount
+     * @param Amount|null $amount Null cancels the total amount.
      * @param string|null $reference
      *
-     * @return void
+     * @return CancelResult The cancellation sent to Unzer, or the reason nothing was sent.
      *
      * @throws ConnectionSettingsNotFoundException
      * @throws EncryptionFailedException
      * @throws PrivateKeyInvalidException
      * @throws UnzerApiException
      */
-    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): void
+    public function cancelOrder(string $orderId, ?Amount $amount = null, ?string $reference = null): CancelResult
     {
-        if (!($transactionHistory = $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId))) {
-            return;
+        if (!($transactionHistory = $this->fetchTransactionHistoryForCancel($orderId))) {
+            return CancelResult::skipped(CancelSkipReason::PAYMENT_NOT_FOUND, null);
         }
 
-        if (!$this->isCancellationNecessary($transactionHistory, $amount)) {
-            return;
+        if (($reason = $this->getCancelSkipReason($transactionHistory, $amount)) !== null) {
+            return CancelResult::skipped($reason, $transactionHistory);
         }
 
         if ($amount === null) {
@@ -187,24 +191,77 @@ class OrderManagementService
             $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
             $cancellation->setPaymentReference($reference);
 
-            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId, $cancellation);
-
-            return;
+            return CancelResult::canceled(
+                $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment($orderId, $cancellation),
+                $transactionHistory
+            );
         }
 
         $authorizedItem = $transactionHistory->collection()->authorizedItem();
 
         if (!$authorizedItem) {
-            return;
+            return CancelResult::skipped(CancelSkipReason::NO_AUTHORIZATION, $transactionHistory);
         }
 
         $cancellation = new Cancellation($amount->getPriceInCurrencyUnits());
         $cancellation->setPaymentReference($reference);
 
-        $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment(
-            $authorizedItem->getPaymentId(),
-            $cancellation
+        return CancelResult::canceled(
+            $this->unzerFactory->makeUnzerAPI()->cancelAuthorizedPayment(
+                $authorizedItem->getPaymentId(),
+                $cancellation
+            ),
+            $transactionHistory
         );
+    }
+
+    /**
+     * Reads the transaction history a cancellation is decided on. Integrations may override it, e.g. to read the
+     * payment live.
+     *
+     * @param string $orderId
+     *
+     * @return TransactionHistory|null Null when the payment is not found.
+     */
+    protected function fetchTransactionHistoryForCancel(string $orderId): ?TransactionHistory
+    {
+        return $this->transactionHistoryService->getTransactionHistoryByOrderId($orderId);
+    }
+
+    /**
+     * Why the cancellation is not sent, or null when it is. Without an amount (cancel the whole authorization) only
+     * isCancellationNecessary() is asked, as before; with an amount the history, the state and the remaining amount
+     * are checked first.
+     *
+     * @param TransactionHistory $transactionHistory
+     * @param Amount|null $amount
+     *
+     * @return string|null One of the CancelSkipReason constants, or null.
+     */
+    protected function getCancelSkipReason(TransactionHistory $transactionHistory, ?Amount $amount): ?string
+    {
+        if ($amount !== null) {
+            if (!$this->isTransactionHistoryValid($transactionHistory)) {
+                return CancelSkipReason::INVALID_HISTORY;
+            }
+
+            $state = $transactionHistory->getPaymentState()->getId();
+
+            if ($state === PaymentState::STATE_CANCELED) {
+                return CancelSkipReason::PAYMENT_CANCELED;
+            }
+
+            if ($state === PaymentState::STATE_CREATE) {
+                return CancelSkipReason::PAYMENT_NOT_CREATED;
+            }
+
+            $remaining = $transactionHistory->getRemainingAmount()->getValue();
+            if (!$remaining || $amount->getValue() > $remaining) {
+                return CancelSkipReason::AMOUNT_EXCEEDS_REMAINING;
+            }
+        }
+
+        return $this->isCancellationNecessary($transactionHistory, $amount) ? null : CancelSkipReason::NOT_NECESSARY;
     }
 
     /**

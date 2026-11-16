@@ -7,6 +7,8 @@ use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Amount;
 use Unzer\Core\BusinessLogic\Domain\Checkout\Models\Currency;
 use Unzer\Core\BusinessLogic\Domain\Multistore\StoreContext;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Exceptions\ChargePaymentNotReadableException;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelResult;
+use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\CancelSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeResult;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\ChargeSkipReason;
 use Unzer\Core\BusinessLogic\Domain\OrderManagement\Models\RefundResult;
@@ -2151,6 +2153,267 @@ class OrderManagementServiceTest extends BaseTestCase
             Amount::fromFloat($cancelled, Currency::getDefault()),
             Amount::fromFloat(0, Currency::getDefault()),
             $items
+        );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelReturnsTheCancellation(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->authorizedTransactionHistory('card'));
+
+        // act
+        $result = $this->cancel(null, 'void-ref');
+
+        // assert
+        self::assertEquals(CancelResult::CANCELED, $result->getStatus());
+        self::assertTrue($result->isCanceled());
+        self::assertEquals('s-cnl-1', $result->getCancellation()->getId());
+        self::assertEquals('void-ref', $result->getCancellation()->getPaymentReference());
+        self::assertEquals(100.0, $result->getCanceledAmount());
+        self::assertEquals(
+            ['status' => 'canceled', 'skipReason' => null, 'cancellationId' => 's-cnl-1', 'canceledAmount' => 100.0],
+            $result->toArray()
+        );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelUplReturnsTheCancellation(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(
+            $this->authorizedTransactionHistory(PaymentMethodTypes::UNZER_INVOICE)
+        );
+
+        // act
+        $result = $this->cancel(null, 'void-ref');
+
+        // assert
+        self::assertTrue($result->isCanceled());
+        self::assertEquals(
+            'orderId',
+            $this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment')[0]['payment']
+        );
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelSkippedPaymentNotFound(): void
+    {
+        // act
+        $result = $this->cancel(null);
+
+        // assert
+        self::assertEquals(CancelResult::SKIPPED, $result->getStatus());
+        self::assertEquals(CancelSkipReason::PAYMENT_NOT_FOUND, $result->getSkipReason());
+        self::assertNull($result->getTransactionHistory());
+        self::assertEquals(0.0, $result->getCanceledAmount());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelSkippedNoAuthorization(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            new PaymentState(UnzerPaymentState::STATE_COMPLETED, 'completed'),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault())
+        ));
+
+        // act
+        $result = $this->cancel(null);
+
+        // assert
+        self::assertEquals(CancelSkipReason::NO_AUTHORIZATION, $result->getSkipReason());
+        self::assertNotNull($result->getTransactionHistory());
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelWithoutAmountSkipsTheStateChecks(): void
+    {
+        // arrange
+        $transactionHistory = $this->authorizedTransactionHistory('card');
+        $transactionHistory->setPaymentState(new PaymentState(UnzerPaymentState::STATE_CANCELED, 'canceled'));
+        $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+        // act
+        $result = $this->cancel(null);
+
+        // assert
+        self::assertTrue($result->isCanceled());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelWithAmountSkipReasons(): void
+    {
+        $cases = [
+            CancelSkipReason::PAYMENT_CANCELED => [UnzerPaymentState::STATE_CANCELED, 10.0],
+            CancelSkipReason::PAYMENT_NOT_CREATED => [UnzerPaymentState::STATE_CREATE, 10.0],
+            CancelSkipReason::AMOUNT_EXCEEDS_REMAINING => [UnzerPaymentState::STATE_PENDING, 150.0],
+        ];
+
+        foreach ($cases as $reason => [$stateId, $amount]) {
+            // arrange
+            $transactionHistory = $this->authorizedTransactionHistory('card');
+            $transactionHistory->setPaymentState(new PaymentState($stateId, 'state'));
+            $this->transactionHistoryService->saveTransactionHistory($transactionHistory);
+
+            // act
+            $result = $this->cancel($amount);
+
+            // assert
+            self::assertEquals($reason, $result->getSkipReason());
+        }
+
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelWithAmountSkippedInvalidHistory(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory(new TransactionHistory(
+            'card',
+            'orderId',
+            'EUR',
+            null,
+            Amount::fromFloat(100, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(0, Currency::getDefault()),
+            Amount::fromFloat(100, Currency::getDefault())
+        ));
+
+        // act
+        $result = $this->cancel(10);
+
+        // assert
+        self::assertEquals(CancelSkipReason::INVALID_HISTORY, $result->getSkipReason());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelStillAsksAnIntegrationOverrideOfIsCancellationNecessary(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->authorizedTransactionHistory('card'));
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService)
+            extends OrderManagementService {
+            protected function isCancellationNecessary(
+                TransactionHistory $transactionHistory,
+                ?Amount $amount = null
+            ): bool {
+                return false;
+            }
+        };
+
+        // act
+        $result = $this->cancel(null);
+
+        // assert
+        self::assertEquals(CancelSkipReason::NOT_NECESSARY, $result->getSkipReason());
+        self::assertEmpty($this->unzerFactory->getMockUnzer()->getMethodCallHistory('cancelAuthorizedPayment'));
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelUsesTheFetchHook(): void
+    {
+        // arrange
+        $history = $this->authorizedTransactionHistory('card');
+        $this->orderManagementService = new class ($this->unzerFactory, $this->transactionHistoryService, $history)
+            extends OrderManagementService {
+            private TransactionHistory $history;
+
+            public function __construct($unzerFactory, $transactionHistoryService, TransactionHistory $history)
+            {
+                parent::__construct($unzerFactory, $transactionHistoryService);
+                $this->history = $history;
+            }
+
+            protected function fetchTransactionHistoryForCancel(string $orderId): ?TransactionHistory
+            {
+                return $this->history;
+            }
+        };
+
+        // act
+        $result = $this->cancel(null);
+
+        // assert
+        self::assertTrue($result->isCanceled());
+    }
+
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function testCancelUnzerErrorEscapes(): void
+    {
+        // arrange
+        $this->transactionHistoryService->saveTransactionHistory($this->authorizedTransactionHistory('card'));
+        $this->unzerFactory->getMockUnzer()->setThrowOnCancelAuthorization(true);
+
+        // assert
+        $this->expectException(UnzerApiException::class);
+
+        // act
+        $this->cancel(null);
+    }
+
+    /**
+     * @param float|null $amount
+     * @param string|null $reference
+     *
+     * @return CancelResult
+     *
+     * @throws Exception
+     */
+    private function cancel(?float $amount, ?string $reference = 'void-ref'): CancelResult
+    {
+        return StoreContext::doWithStore(
+            '1',
+            [$this->orderManagementService, 'cancelOrder'],
+            ['orderId', $amount === null ? null : Amount::fromFloat($amount, Currency::getDefault()), $reference]
         );
     }
 }

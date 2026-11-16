@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - `OrderManagementService::refundOrder()` returns a `RefundResult`: the cancellations sent to Unzer, the reason nothing was sent (`RefundSkipReason`), or a partial refund (some charges refunded, then Unzer failed). `refundOrderByPayment()` returns the `Cancellation`. `RefundResponse::getResult()` exposes the result. Subclasses overriding either method with a `void` return type must be updated
 - Refunds above what is still refundable on the charges are no longer sent (`AMOUNT_EXCEEDS_REFUNDABLE`); before, only the remaining part was refunded and the call returned as if the full amount had been
 - Add integration hooks `fetchTransactionHistoryForRefund()` and `getRefundSkipReason()`; overrides of `isRefundNecessary()` keep working
+- `OrderManagementService::cancelOrder()` returns a `CancelResult`: the cancellation of the authorization sent to Unzer, or the reason nothing was sent (`CancelSkipReason`). `CancellationResponse::getResult()` exposes it. Subclasses overriding `cancelOrder()` with a `void` return type must be updated
+- Add integration hooks `fetchTransactionHistoryForCancel()` and `getCancelSkipReason()`; overrides of `isCancellationNecessary()` keep working
 
 ## [2.2.6](https://github.com/unzerdev/integration-core/releases/tag/2.2.6) - 2026-10-29
 - Fix refund logic when one of charge item failed

@@ -80,13 +80,11 @@ class OrderManagementController
      */
     public function cancel(CancellationRequest $cancellationRequest): CancellationResponse
     {
-        $this->orderManagementService->cancelOrder(
+        return new CancellationResponse($this->orderManagementService->cancelOrder(
             $cancellationRequest->getOrderId(),
             $cancellationRequest->getAmount(),
             $cancellationRequest->getReference()
-        );
-
-        return new CancellationResponse();
+        ));
     }
 
     /**
